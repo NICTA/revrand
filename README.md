@@ -3,7 +3,9 @@ pyalacarte
 **A python implementation of the A la Carte large scale GP**
 
 **Authors**: Daniel Steinberg, Alistair Reid, Lachlan McCalman
+
 **Institute**: NICTA
+
 **Date**: 26 June 2015
 
 Have a look at `demos/alacarte_demo.py` for how this compares to a normal GP.
