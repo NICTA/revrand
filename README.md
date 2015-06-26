@@ -1,5 +1,6 @@
-pyalacarte -- A python implementation of the A la Carte large scale GP
-======================================================================
+pyalacarte 
+==========
+**A python implementation of the A la Carte large scale GP**
 
 **Authors**: Daniel Steinberg, Alistair Reid, Lachlan McCalman
 **Institute**: NICTA
