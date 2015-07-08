@@ -1,10 +1,4 @@
-""" Various linear algebra utilities.
-
-    Authors:    Daniel Steinberg
-    Date:       23 Mar 2015
-    Institue:   NICTA
-
-"""
+""" Various linear algebra utilities. """
 
 import numpy as np
 import scipy.linalg as la

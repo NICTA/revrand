@@ -1,9 +1,4 @@
-""" Some validation functions.
-
-    Author:     Daniel Steinberg
-    Date:       26 Jun 2015
-    Institute:  NICTA
-"""
+""" Some validation functions. """
 
 import numpy as np
 

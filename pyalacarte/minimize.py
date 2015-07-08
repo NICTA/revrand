@@ -1,10 +1,5 @@
 """ This module wraps NLopt methods with an interface based on
     scipy.optimize.minimize.
-
-    Author:     Daniel Steinberg
-    Date:       1 Jun 2015
-    Institute:  NICTA
-
 """
 
 import nlopt

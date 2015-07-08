@@ -1,10 +1,5 @@
 #! /usr/bin/env python3
-""" A La Carte GP and basis function demo.
-
-    Author:     Daniel Steinberg
-    Date:       15 May 2015
-    Institute:  NICTA
-"""
+""" A La Carte GP and basis function demo. """
 
 import logging
 import numpy as np
@@ -43,12 +38,12 @@ def main():
     lenscale_true = 0.7  # For the gpdraw dataset
     noise = 0.1
 
-    basis = 'RKS'
-    #basis = 'FF'
-    #basis = 'RBF'
-    #basis = 'Linear'
-    #basis = 'Poly'
-    #basis = 'Combo'
+    # basis = 'RKS'
+    # basis = 'FF'
+    # basis = 'RBF'
+    # basis = 'Linear'
+    # basis = 'Poly'
+    basis = 'Combo'
 
     #
     # Make Data

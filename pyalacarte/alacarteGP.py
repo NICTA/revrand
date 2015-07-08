@@ -1,14 +1,10 @@
 """ A simple implementation of the "A la Carte" GP [1].
 
-    Authors:    Daniel Steinberg, Lachlan McCalman
-    Date:       8 May 2015
-    Institute:  NICTA
-
     References:
-    [1] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
-        Learning Fast Kernels". Proceedings of the Eighteenth International
-        Conference on Artificial Intelligence and Statistics, pp. 1098–1106,
-        2015.
+        - Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
+          Learning Fast Kernels". Proceedings of the Eighteenth International
+          Conference on Artificial Intelligence and Statistics, pp. 1098–1106,
+          2015.
 """
 
 import numpy as np
@@ -16,37 +12,41 @@ import logging
 from scipy.linalg import cho_solve
 from pyalacarte.linalg import jitchol, logdet
 from pyalacarte.minimize import minimize as nmin
+from pyalacarte.bases import params_to_list, list_to_params
 
 
 # Set up logging
 log = logging.getLogger(__name__)
 
 
-def alacarte_learn(X, y, basis, hypers, noise=1, regulariser=1e-3, ftol=1e-5,
-                   maxit=1000, verbose=True, noiseLB=1e-7, regulariserLB=1e-7,
-                   usegradients=True):
-    """ Learn the parameters and hyperparameters of an "A la Carte" [1]
-        Gaussian Process.
+def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
+                   maxit=1000, verbose=True, noise_bounds=(1e-7, None),
+                   regulariser_bounds=(1e-7, None), usegradients=True):
+    """ Learn the parameters and hyperparameters of an "A la Carte" Gaussian
+        Process.
 
         Arguments:
             X: NxD array input dataset (N samples, D dimensions)
             y: N array targets (N samples)
             basis: A basis object, see bases.py
-            hypers: A sequence of hyperparameters of the basis object
+            bparams: A sequence of parameters of the basis object
             noise: observation noise initial guess
             regulariser: weight regulariser (variance) initial guess
             verbose: log learning status
             ftol: optimiser function tolerance convergence criterion
             maxit: maximum number of iterations for the optimiser
-            noiseLB: lower bound on the noise parameter
-            regulariserLB: lower bound on the regulariser
+            noise_bounds: tuple of (lower bound, upper bound) on the noise
+                parameter, None for unbounded (though it cannot be <= 0)
+            regulariser_bounds: tuple of (lower bound, upper bound) on the
+                regulariser parameter, None for unbounded (though it cannot be
+                <= 0)
             usegradients: True for using gradients to optimize the parameters,
                 otherwize false uses BOBYQA (from nlopt)
 
         Returns:
-            hypers: learned sequence of basis object hyperparameters
-            noise: learned observation noise
-            regulariser: learned weight regluariser
+            list: learned sequence of basis object hyperparameters
+            float: learned observation noise
+            float: learned weight regluariser
     """
 
     N, d = X.shape
@@ -60,7 +60,7 @@ def alacarte_learn(X, y, basis, hypers, noise=1, regulariser=1e-3, ftol=1e-5,
         grad = np.empty(len(params))
 
         # Common computations
-        Phi = basis.get_basis(X, *_theta)                       # N x D
+        Phi = basis.from_vector(X, _theta)                      # N x D
         PhiPhi = Phi.T.dot(Phi)                                 # D x D
         D = Phi.shape[1]
         LC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
@@ -71,7 +71,7 @@ def alacarte_learn(X, y, basis, hypers, noise=1, regulariser=1e-3, ftol=1e-5,
                        + logdet(LC[0]) + yiK.dot(y))
 
         if verbose:
-            log.info("LML = {}, noise = {}, reg = {}, hypers = {}."
+            log.info("LML = {}, noise = {}, reg = {}, bparams = {}."
                      .format(LML, np.sqrt(_var), _lambda, _theta))
 
         if not usegradients:
@@ -87,18 +87,18 @@ def alacarte_learn(X, y, basis, hypers, noise=1, regulariser=1e-3, ftol=1e-5,
                          + (yiK.dot(Phi)**2).sum())
 
         # Loop through basis param grads
-        dPhis = basis.get_grad(X, *_theta)  # if one of these is empty, skip
+        dPhis = basis.grad_from_vector(X, _theta)  # skip if empty
         for i, (t, dPhi) in enumerate(zip(_theta, dPhis)):
             dPhiPhi = dPhi.T.dot(Phi)  # D x D
-            gt = - (np.trace(dPhiPhi) / _var
-                    - (dPhiPhi * (iCPhi.dot(Phi))).sum() / _var**2  # expensive
-                    + (yiK.dot(dPhi)).dot(Phi.T).dot(yiK.T)) * _lambda
-            grad[2+i] = gt
+            grad[2+i] = - (np.trace(dPhiPhi) / _var
+                           - (dPhiPhi * (iCPhi.dot(Phi))).sum() / _var**2  # !
+                           + (yiK.dot(dPhi)).dot(Phi.T).dot(yiK.T)) * _lambda
 
         return -LML, -grad
 
-    params = [var, regulariser] + list(hypers)
-    bounds = [(noiseLB**2, None), (regulariserLB, None)] + basis.get_bounds()
+    params = [var, regulariser] + params_to_list(bparams)
+    bounds = [(noise_bounds[0]**2, noise_bounds[1]), regulariser_bounds] \
+        + basis.bounds
 
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
     res = nmin(LML, params, bounds=bounds, method=method, ftol=ftol, xtol=1e-8,
@@ -106,18 +106,18 @@ def alacarte_learn(X, y, basis, hypers, noise=1, regulariser=1e-3, ftol=1e-5,
 
     noise = np.sqrt(res['x'][0])
     regulariser = res['x'][1]
-    hypers = np.atleast_1d(res['x'][2:])
+    bparams = list_to_params(bparams, np.atleast_1d(res['x'][2:]))
 
     if verbose:
-        log.info("Done! LML = {}, noise = {}, reg = {}, hypers = {}."
-                 .format(-res['fun'], noise, regulariser, hypers))
+        log.info("Done! LML = {}, noise = {}, reg = {}, bparams = {}."
+                 .format(-res['fun'], noise, regulariser, bparams))
         if not res['success']:
             log.info('Terminated unsuccessfully: {}.'.format(res['message']))
 
-    return hypers, noise, regulariser
+    return bparams, noise, regulariser
 
 
-def alacarte_predict(X_star, X, y, basis, hypers, noise, regulariser):
+def alacarte_predict(X_star, X, y, basis, bparams, noise, regulariser):
     """ Predict using an "A la Carte" Gaussian process [1].
 
         Arguments:
@@ -126,20 +126,22 @@ def alacarte_predict(X_star, X, y, basis, hypers, noise, regulariser):
             X: NxD array training input dataset (N samples, D dimensions)
             y: N array training targets (N samples)
             basis: A basis object, see bases.py
-            hypers: A sequence of hyperparameters of the basis object
+            bparams: A sequence of hyperparameters of the basis object
             noise: observation noise initial guess
             regulariser: weight regulariser (variance) initial guess
 
         Returns:
-            Two N_star lenght arrays,
-            Ey: The expected value of y_star for the query inputs, X_star
-            Vf: The expected variance of f_star for the query inputs, X_star
-            Vy: The expected variance of y_star for the query inputs, X_star
+            array: The expected value of y_star for the query inputs, X_star
+               of shape (N_star,)
+            array: The expected variance of f_star for the query inputs, X_star
+               of shape (N_star,)
+            array: The expected variance of y_star for the query inputs, X_star
+               of shape (N_star,)
     """
 
     var = noise**2
-    Phi = basis.get_basis(X, *hypers)
-    Phi_s = basis.get_basis(X_star, *hypers)
+    Phi = basis(X, *bparams)
+    Phi_s = basis(X_star, *bparams)
     N, D = Phi.shape
 
     LC = jitchol(np.diag(np.ones(D) / regulariser) + Phi.T.dot(Phi) / var)
