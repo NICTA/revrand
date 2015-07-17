@@ -2,9 +2,7 @@
 pyalacarte 
 ==========
 
-----------------------------------------------------------
-A Python 3 implementation of the A la Carte large scale GP
-----------------------------------------------------------
+*A Python 3 implementation of the A la Carte large scale GP*
 
 :Authors: Daniel Steinberg; Alistair Reid; Lachlan McCalman; Louis Tiao
 :organization: NICTA
@@ -18,15 +16,15 @@ package*. Otherwise, from the root directory of this package, run
 ``demos/alacarte_demo.py``.
 
 Requirements
-============
+------------
 
 - Numpy
 - Scipy
 - NLopt
 - bdkd-external (https://github.com/NICTA/bdkd-external) for the demo
 
-References:
-============
+References
+----------
 
 .. [#] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte -- Learning 
        Fast Kernels". Proceedings of the Eighteenth International Conference on
