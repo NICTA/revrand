@@ -1,7 +1,7 @@
 pyalacarte 
 ==========
 
-***A python 3 implementation of the A la Carte large scale GP***
+*A Python 3 implementation of the A la Carte large scale GP*
 
 - **Authors**: Daniel Steinberg, Alistair Reid, Lachlan McCalman, Louis Tiao
 - **Institute**: NICTA
@@ -26,6 +26,6 @@ Requirements:
 References:
 -----------
 
-.. [1] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte -- Learning 
+.. [#] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte -- Learning 
        Fast Kernels". Proceedings of the Eighteenth International Conference on
        Artificial Intelligence and Statistics, pp. 1098–1106, 2015.
