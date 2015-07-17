@@ -18,7 +18,7 @@ package*. Otherwise, from the root directory of this package, run
 ``demos/alacarte_demo.py``.
 
 Requirements
-------------
+============
 
 - Numpy
 - Scipy
@@ -26,7 +26,7 @@ Requirements
 - bdkd-external (https://github.com/NICTA/bdkd-external) for the demo
 
 References
-----------
+==========
 
 .. [#] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte -- Learning 
        Fast Kernels". Proceedings of the Eighteenth International Conference on
