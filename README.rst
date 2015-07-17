@@ -2,13 +2,13 @@
 pyalacarte 
 ==========
 
+----------------------------------------------------------
+A Python 3 implementation of the A la Carte large scale GP
+----------------------------------------------------------
+
 :Authors: Daniel Steinberg; Alistair Reid; Lachlan McCalman; Louis Tiao
 :organization: NICTA
 :date: 26 June 2015
-
-*A Python 3 implementation of the A la Carte large scale GP*
-
-
 
 Have a look at ``demos/alacarte_demo.py`` for how this compares to a normal GP.
 Have a go at tweaking the parameters of this script too.
