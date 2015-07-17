@@ -2,7 +2,7 @@ pyalacarte
 ==========
 **_A python 3 implementation of the A la Carte large scale GP_**
 
-- **Authors**: Daniel Steinberg, Alistair Reid, Lachlan McCalman
+- **Authors**: Daniel Steinberg, Alistair Reid, Lachlan McCalman, Louis Tiao
 - **Institute**: NICTA
 - **Date**: 26 June 2015
 
