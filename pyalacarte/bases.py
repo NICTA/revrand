@@ -22,16 +22,17 @@ from pyalacarte.hadamard import hadamard
 #
 
 def params_to_list(params):
-    """ This will take a list of parameters of scalars or arrays, and return a
-        flattened array which is a concatenation of all of these parameters.
+    """
+    This will take a list of parameters of scalars or arrays, and return a
+    flattened array which is a concatenation of all of these parameters.
 
-        This could be useful for using with an optimiser!
+    This could be useful for using with an optimiser!
 
-        Arguments:
-            params: a list of scalars of arrays.
+    Arguments:
+        params: a list of scalars of arrays.
 
-        Returns:
-            list: a list or 1D array of scalars which is a flattened
+    Returns:
+        list:   a list or 1D array of scalars which is a flattened
                 concatenation of params.
     """
 
@@ -43,18 +44,20 @@ def params_to_list(params):
 
 
 def list_to_params(params, flatlist):
-    """ This will turn a flattened list of parameters into the original
-        parameter argument list, given a template.
+    """
+    This will turn a flattened list of parameters into the original
+    parameter argument list, given a template.
 
-        This could be useful for using after an optimiser!
+    This could be useful for using after an optimiser!
 
-        Argument:
-            params: the template list of parameters.
-            flatlist: the flattened list of parameters to turn into the
-                original parameter list.
+    Argument:
+        params: the template list of parameters.
 
-        Returns:
-            list: A list of the same form as params, but with the values from
+        flatlist:   the flattened list of parameters to turn into the
+                    original parameter list.
+
+    Returns:
+        list:   A list of the same form as params, but with the values from
                 flatlist.
     """
 
@@ -91,23 +94,27 @@ class Basis(object):
     _bounds = []
 
     def __init__(self):
-        """ Construct this an instance of this class. This is also a good place
-            to set non-learnable properties, and bounds on the parameters. An
-            example Basis class with parameters may be,
+        """
+        Construct this an instance of this class. This is also a good place
+        to set non-learnable properties, and bounds on the parameters. An
+        example Basis class with parameters may be,
+        
+        Example:
 
-            Example:
-                def __init__(self, property, param_bounds=(1e-7, None)):
+        .. code-block:: python
 
-                    self.property = property
-                    self.bounds = [params_bounds]
+            def __init__(self, property, param_bounds=(1e-7, None)):
 
-            All basis class objects MUST have a bounds property, which is
-            either:
-                - an empty list
-                - a list of pairs of upper and lower bounds for each parameter.
-                  This is a concatenated list over all parameters, including
-                  vector parameters! See the minimize module for a guide on how
-                  these bounds work.
+                self.property = property
+                self.bounds = [params_bounds]
+
+        All basis class objects MUST have a bounds property, which is either:
+
+        -   an empty list
+        -   a list of pairs of upper and lower bounds for each parameter.
+            This is a concatenated list over all parameters, including
+            vector parameters! See the minimize module for a guide on how
+            these bounds work.
         """
         pass
 
@@ -307,19 +314,23 @@ class PolynomialBasis(Basis):
 
 
 class RadialBasis(Basis):
-    """ Radial basis class.
+    """
+    Radial basis class.
 
-        NOTE: This will have relevance vector machine-like behaviour with
+    Note: 
+        This will have relevance vector machine-like behaviour with
         uncertainty and for deaggregation tasks!
     """
 
     def __init__(self, centres, lenscale_bounds=(1e-7, None)):
-        """ Construct a radial basis function (RBF) object.
+        """
+        Construct a radial basis function (RBF) object.
 
-            Arguments:
-                centres: array of shape (Dxd) where D is the number of centres
-                    for the radial bases, and d is the dimensionality of X.
-                lenscale_bounds: a tuple of bounds for the RBFs' length scales.
+        Arguments:
+            centres:    array of shape (Dxd) where D is the number of centres
+                        for the radial bases, and d is the dimensionality of X.
+
+            lenscale_bounds: a tuple of bounds for the RBFs' length scales.
         """
 
         self.M, self.D = centres.shape
@@ -327,15 +338,17 @@ class RadialBasis(Basis):
         self.bounds = [lenscale_bounds]
 
     def __call__(self, X, lenscale):
-        """ Apply the RBF to X.
+        """
+        Apply the RBF to X.
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the RBFs to apply to X.
+        Arguments:
+            X:  (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
 
-            Returns:
-                array: of shape (N, D) where D is number of RBF centres.
+            lenscale: the length scale (scalar) of the RBFs to apply to X.
+
+        Returns:
+            array:  of shape (N, D) where D is number of RBF centres.
         """
 
         N, D = X.shape
@@ -345,15 +358,17 @@ class RadialBasis(Basis):
         return np.exp(- cdist(X, self.C, 'sqeuclidean') / (2 * lenscale**2))
 
     def grad(self, X, lenscale):
-        """ Get the gradients of this basis w.r.t. the length scale.
+        """
+        Get the gradients of this basis w.r.t. the length scale.
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the RBFs to apply to X.
+        Arguments:
+            X:  (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
 
-            Returns:
-                list: with one element of shape (N, D) where D is number of RBF
+            lenscale: the length scale (scalar) of the RBFs to apply to X.
+
+        Returns:
+            list:   with one element of shape (N, D) where D is number of RBF
                     centres. This is d Phi(X) / d lenscale.
         """
 
@@ -376,16 +391,16 @@ class RadialBasis(Basis):
 # that require locations and scales
 
 class SigmoidalBasis(Basis):
-    """ Sigmoidal Basis
-    """
+    """Sigmoidal Basis"""
 
     def __init__(self, centres, lenscale_bounds=(1e-7, None)):
-        """ Construct a sigmoidal basis function object.
+        """Construct a sigmoidal basis function object.
 
-            Arguments:
-                centres: array of shape (Dxd) where D is the number of centres
-                    for the bases, and d is the dimensionality of X.
-                lenscale_bounds: a tuple of bounds for the basis function length scales.
+        Arguments:
+            centres: array of shape (Dxd) where D is the number of centres
+                for the bases, and d is the dimensionality of X.
+
+            lenscale_bounds: a tuple of bounds for the basis function length scales.
         """
 
         self.M, self.D = centres.shape
@@ -393,26 +408,26 @@ class SigmoidalBasis(Basis):
         self.bounds = [lenscale_bounds]
 
     def __call__(self, X, lenscale):
-        """ Apply the sigmoid basis function to X.
+        r"""Apply the sigmoid basis function to X.
 
-            .. math::
+        .. math::
 
-               \phi_j (x) = \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
+            \phi_j (x) = \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
+        
+        where :math:`\sigma` is the logistic sigmoid function defined by
 
-            where :math:`\sigma` is the logistic sigmoid function defined by
+        .. math::
 
-            .. math::
+            \sigma(a) = \frac{1}{1+e^{-a}}
 
-               \sigma(a) = \frac{1}{1+e^{-a}}
+        Arguments:
+            X: (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
+            lenscale: the length scale (scalar) of the basis functions to 
+                apply to X.
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the basis functions to 
-                    apply to X.
-
-            Returns:
-                array: of shape (N, D) where D is number of centres.
+        Returns:
+            array: of shape (N, D) where D is number of centres.
         """
 
         N, D = X.shape
@@ -423,24 +438,25 @@ class SigmoidalBasis(Basis):
         return expit(cdist(X, self.C, 'seuclidean')/lenscale)
 
     def grad(self, X, lenscale):
-        """ Get the gradients of this basis w.r.t. the length scale.
+        r"""Get the gradients of this basis w.r.t. the length scale.
 
-            .. math::
+        .. math::
 
-               \frac{\partial}{\partial s} \phi_j(x) = 
-               - \frac{\| x - \mu_j \|_2}{s^2} 
-               \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
-               \left ( 1 - \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
-                \right )
+            \frac{\partial}{\partial s} \phi_j(x) = 
+            - \frac{\| x - \mu_j \|_2}{s^2} 
+            \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
+            \left ( 1 - \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
+            \right )
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the  to apply to X.
+        Arguments:
+            X: (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
 
-            Returns:
-                list: with one element of shape (N, D) where D is number of
-                    centres. This is d Phi(X) / d lenscale.
+            lenscale: the length scale (scalar) of the  to apply to X.
+
+        Returns:
+            list: with one element of shape (N, D) where D is number of
+                centres. This is d Phi(X) / d lenscale.
         """
 
         N, D = X.shape
@@ -458,19 +474,23 @@ class SigmoidalBasis(Basis):
     
 
 class RandomRBF(RadialBasis):
-    """ Random RBF Basis, otherwise known as Random Kitchen Sinks.
+    """
+    Random RBF Basis, otherwise known as Random Kitchen Sinks.
 
-        This will make a linear regression model approximate a GP with an RBF
-        covariance function.
+    This will make a linear regression model approximate a GP with an RBF
+    covariance function.
     """
 
     def __init__(self, nbases, Xdim, lenscale_bounds=(1e-7, None)):
-        """ Construct a random radial basis function (RBF) object.
+        """
+        Construct a random radial basis function (RBF) object.
 
-            Arguments:
-                nbases: a scalar for how many random bases to create.
-                Xdim: the dimension (d) of the observations.
-                lenscale_bounds: a tuple of bounds for the RBFs' length scales.
+        Arguments:
+            nbases: a scalar for how many random bases to create.
+
+            Xdim: the dimension (d) of the observations.
+
+            lenscale_bounds: a tuple of bounds for the RBFs' length scales.
         """
         self.d = Xdim
         self.n = nbases
@@ -478,15 +498,17 @@ class RandomRBF(RadialBasis):
         self.bounds = [lenscale_bounds]
 
     def __call__(self, X, lenscale):
-        """ Apply the random RBF to X.
+        """
+        Apply the random RBF to X.
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the RBFs to apply to X.
+        Arguments:
+            X:  (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
+            
+            lenscale: the length scale (scalar) of the RBFs to apply to X.
 
-            Returns:
-                array: of shape (N, 2*nbases) where nbases is number of random
+        Returns:
+            array:  of shape (N, 2*nbases) where nbases is number of random
                     bases to use, given in the constructor.
         """
 
@@ -499,15 +521,17 @@ class RandomRBF(RadialBasis):
         return np.sqrt(2/self.n) * np.hstack((np.cos(WX), np.sin(WX)))
 
     def grad(self, X, lenscale):
-        """ Get the gradients of this basis w.r.t. the length scale.
+        """
+        Get the gradients of this basis w.r.t. the length scale.
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the RBFs to apply to X.
+        Arguments:
+            X:  (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
+            
+            lenscale: the length scale (scalar) of the RBFs to apply to X.
 
-            Returns:
-                list: with one element of shape (N, 2*nbases) where nbases is
+        Returns:
+            list:   with one element of shape (N, 2*nbases) where nbases is
                     number of random RBF bases. This is d Phi(X) / d lenscale.
         """
 
@@ -614,22 +638,25 @@ class RandomRBF_ARD(RandomRBF):
 
 
 class FastFood(RandomRBF):
-    """ Fast Food basis function, which is an approximation of the random
-        radial basis function for a large number of bases.
+    """
+    Fast Food basis function, which is an approximation of the random
+    radial basis function for a large number of bases.
 
-        This will make a linear regression model approximate a GP with an RBF
-        covariance function.
+    This will make a linear regression model approximate a GP with an RBF
+    covariance function.
     """
 
     def __init__(self, nbases, Xdim, lenscale_bounds=(1e-7, None)):
-        """ Construct a random radial basis function (RBF) object.
+        """
+        Construct a random radial basis function (RBF) object.
 
-            Arguments:
-                nbases: a scalar for how many random bases to create
+        Arguments:
+            nbases: a scalar for how many random bases to create
                     approximately, this actually will be to the neareset larger
                     two power.
-                Xdim: the dimension (d) of the observations.
-                lenscale_bounds: a tuple of bounds for the RBFs' length scales.
+            
+            Xdim:   the dimension (d) of the observations.
+                    lenscale_bounds: a tuple of bounds for the RBFs' length scales.
         """
 
         self.bounds = [lenscale_bounds]
@@ -647,15 +674,17 @@ class FastFood(RandomRBF):
         self.B, self.G, self.PI, self.S = tuple(zip(*results))
 
     def __call__(self, X, lenscale):
-        """ Apply the Fast Food RBF basis to X.
+        """
+        Apply the Fast Food RBF basis to X.
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the RBFs to apply to X.
+        Arguments:
+            X:  (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
+            
+            lenscale: the length scale (scalar) of the RBFs to apply to X.
 
-            Returns:
-                array: of shape (N, 2*nbases) where nbases is number of random
+        Returns:
+            array:  of shape (N, 2*nbases) where nbases is number of random
                     bases to use, given in the constructor (to nearest larger
                     two power).
         """
@@ -667,17 +696,19 @@ class FastFood(RandomRBF):
         return Phi
 
     def grad(self, X, lenscale):
-        """ Get the gradients of this basis w.r.t. the length scale.
+        """
+        Get the gradients of this basis w.r.t. the length scale.
 
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                lenscale: the length scale (scalar) of the RBFs to apply to X.
+        Arguments:
+            X:  (N, d) array of observations where N is the number of
+                samples, and d is the dimensionality of X.
+            
+            lenscale: the length scale (scalar) of the RBFs to apply to X.
 
-            Returns:
-                list: with one element of shape (N, 2*nbases) where nbases is
-                    number of random RBF bases, again to the nearest larger two
-                    power. This is d Phi(X) / d lenscale.
+        Returns:
+            list:   with one element of shape (N, 2*nbases) where nbases is
+                    number of random RBF bases, again to the nearest larger 
+                    two power. This is d Phi(X) / d lenscale.
         """
 
         self._checkD(X.shape[1])

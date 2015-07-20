@@ -64,3 +64,4 @@ target/
 # Temporary data
 .ipynb_checkpoints/
 
+.DS_Store
