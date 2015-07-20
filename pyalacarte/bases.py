@@ -5,7 +5,7 @@
 
 import numpy as np
 from scipy.linalg import norm
-from scipy.special import gammaincinv
+from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 from pyalacarte.hadamard import hadamard
 
@@ -169,7 +169,7 @@ class Basis(object):
 
     def from_vector(self, X, vec):
         """ Apply this basis function to X like __call__(), but instead of
-            being given parameter aguments, this function is given a flat list
+            being given parameter arguments, this function is given a flat list
             of all of the parameters. The parameters must be constructed from
             this list/vector in this function.
 
@@ -190,7 +190,7 @@ class Basis(object):
     def grad_from_vector(self, X, vec):
         """ Return the gradient of the basis function w.r.t. each of the
             parameters, but like from_vector, instead of being given parameter
-            aguments, this function is given a flat list of all of the
+            arguments, this function is given a flat list of all of the
             parameters.
 
             Arguments:
@@ -255,18 +255,23 @@ class PolynomialBasis(Basis):
         Phi = [X^0, X^1, ..., X^p] where p is specified in the constructor.
     """
 
-    def __init__(self, order):
+    def __init__(self, order, include_bias=True):
         """ Construct a polynomial basis object.
 
             Arguments:
-                order: the order of the polynomail to create, i.e. the last
+                order: the order of the polynomial to create, i.e. the last
                     power to raise X to in the concatenation Phi = [X^0, X^1,
                     ..., X^order].
+                include_bias: If True (default), include the bias column
+                    (column of ones which acts as the intercept term in a 
+                    linear model)
         """
 
         if order < 0:
             raise ValueError("Polynomial order must be positive")
         self.order = order
+
+        self.include_bias = include_bias
 
     def __call__(self, X):
         """ Return this basis applied to X.
@@ -276,12 +281,29 @@ class PolynomialBasis(Basis):
                     samples, and d is the dimensionality of X.
 
             Returns:
-                array: of shape (N, d*order).
+                array: of shape (N, d*order+1), the extra 1 is from a
+                    prepended ones column.
         """
 
         N, D = X.shape
-        powarr = np.tile(np.arange(self.order+1), (D, 1))
-        return (X[:, :, np.newaxis] ** powarr).reshape((N, D*(self.order+1)))
+
+        pow_arr = np.arange(self.order) + 1
+
+        # Polynomial terms
+        Phi = X[:, :, np.newaxis] ** pow_arr
+
+        # Flatten along last axes
+        Phi = Phi.reshape(N, D*self.order)
+
+        # Prepend intercept
+        if self.include_bias:
+            Phi = np.hstack((np.ones((N, 1)), Phi))
+
+        # TODO: Using np.hstack is about 4x slower than initializing, say, 
+        # an N by d*order+1 ndarray of ones and assigning the remaining 
+        # N by d*order values. May want to revisit this implementation.
+
+        return Phi
 
 
 class RadialBasis(Basis):
@@ -350,6 +372,90 @@ class RadialBasis(Basis):
     def grad_from_vector(self, X, vec):
         return self.grad(X, vec[0])
 
+# TODO: Might be worth creating a mixin or base class for basis functions 
+# that require locations and scales
+
+class SigmoidalBasis(Basis):
+    """ Sigmoidal Basis
+    """
+
+    def __init__(self, centres, lenscale_bounds=(1e-7, None)):
+        """ Construct a sigmoidal basis function object.
+
+            Arguments:
+                centres: array of shape (Dxd) where D is the number of centres
+                    for the bases, and d is the dimensionality of X.
+                lenscale_bounds: a tuple of bounds for the basis function length scales.
+        """
+
+        self.M, self.D = centres.shape
+        self.C = centres
+        self.bounds = [lenscale_bounds]
+
+    def __call__(self, X, lenscale):
+        """ Apply the sigmoid basis function to X.
+
+            .. math::
+
+               \phi_j (x) = \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
+
+            where :math:`\sigma` is the logistic sigmoid function defined by
+
+            .. math::
+
+               \sigma(a) = \frac{1}{1+e^{-a}}
+
+            Arguments:
+                X: (N, d) array of observations where N is the number of
+                    samples, and d is the dimensionality of X.
+                lenscale: the length scale (scalar) of the basis functions to 
+                    apply to X.
+
+            Returns:
+                array: of shape (N, D) where D is number of centres.
+        """
+
+        N, D = X.shape
+        if self.D != D:
+            raise ValueError("Expected X of dimensionality {0}, got {1}" \
+                .format(self.D, D))
+
+        return expit(cdist(X, self.C, 'seuclidean')/lenscale)
+
+    def grad(self, X, lenscale):
+        """ Get the gradients of this basis w.r.t. the length scale.
+
+            .. math::
+
+               \frac{\partial}{\partial s} \phi_j(x) = 
+               - \frac{\| x - \mu_j \|_2}{s^2} 
+               \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
+               \left ( 1 - \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
+                \right )
+
+            Arguments:
+                X: (N, d) array of observations where N is the number of
+                    samples, and d is the dimensionality of X.
+                lenscale: the length scale (scalar) of the  to apply to X.
+
+            Returns:
+                list: with one element of shape (N, D) where D is number of
+                    centres. This is d Phi(X) / d lenscale.
+        """
+
+        N, D = X.shape
+        if self.D != D:
+            raise ValueError("Expected X of dimensionality {0}, got {1}" \
+                .format(self.D, D))
+
+        dist = cdist(X, self.C, 'seuclidean')
+
+        sigma = expit(dist/lenscale)
+
+        dPhi = - dist * sigma * (1 - sigma) / lenscale**2
+
+        return [dPhi]
+    
 
 class RandomRBF(RadialBasis):
     """ Random RBF Basis, otherwise known as Random Kitchen Sinks.

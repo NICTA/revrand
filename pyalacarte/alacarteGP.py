@@ -3,7 +3,7 @@
     References:
         - Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
           Learning Fast Kernels". Proceedings of the Eighteenth International
-          Conference on Artificial Intelligence and Statistics, pp. 1098–1106,
+          Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
           2015.
 """
 

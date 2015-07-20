@@ -106,7 +106,7 @@ def main():
     kfunc = gp.compose(kdef)
 
     # Set up optimisation
-    learning_params = gp.LearningParams()
+    learning_params = gp.OptConfig()
     learning_params.sigma = gp.auto_range(kdef)
     learning_params.noise = gp.Range([1e-5], [1e5], [1])
     learning_params.walltime = 60
