@@ -80,7 +80,7 @@ def list_to_params(params, flatlist):
 # Basis objects
 #
 
-class Basis(object):
+class Basis:
     """ The base Basis class. To make other basis classes, make sure they are
         subclasses of this class to enable concatenation and operation with the
         machine learning algorithms.
