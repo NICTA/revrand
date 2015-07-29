@@ -98,7 +98,7 @@ class Basis:
         Construct this an instance of this class. This is also a good place
         to set non-learnable properties, and bounds on the parameters. An
         example Basis class with parameters may be,
-        
+
         Example:
 
         .. code-block:: python
@@ -270,7 +270,7 @@ class PolynomialBasis(Basis):
                     power to raise X to in the concatenation Phi = [X^0, X^1,
                     ..., X^order].
                 include_bias: If True (default), include the bias column
-                    (column of ones which acts as the intercept term in a 
+                    (column of ones which acts as the intercept term in a
                     linear model)
         """
 
@@ -306,8 +306,8 @@ class PolynomialBasis(Basis):
         if self.include_bias:
             Phi = np.hstack((np.ones((N, 1)), Phi))
 
-        # TODO: Using np.hstack is about 4x slower than initializing, say, 
-        # an N by d*order+1 ndarray of ones and assigning the remaining 
+        # TODO: Using np.hstack is about 4x slower than initializing, say,
+        # an N by d*order+1 ndarray of ones and assigning the remaining
         # N by d*order values. May want to revisit this implementation.
 
         return Phi
@@ -317,7 +317,7 @@ class RadialBasis(Basis):
     """
     Radial basis class.
 
-    Note: 
+    Note:
         This will have relevance vector machine-like behaviour with
         uncertainty and for deaggregation tasks!
     """
@@ -387,8 +387,9 @@ class RadialBasis(Basis):
     def grad_from_vector(self, X, vec):
         return self.grad(X, vec[0])
 
-# TODO: Might be worth creating a mixin or base class for basis functions 
+# TODO: Might be worth creating a mixin or base class for basis functions
 # that require locations and scales
+
 
 class SigmoidalBasis(Basis):
     """Sigmoidal Basis"""
@@ -400,7 +401,8 @@ class SigmoidalBasis(Basis):
             centres: array of shape (Dxd) where D is the number of centres
                 for the bases, and d is the dimensionality of X.
 
-            lenscale_bounds: a tuple of bounds for the basis function length scales.
+            lenscale_bounds: a tuple of bounds for the basis function length
+            scales.
         """
 
         self.M, self.D = centres.shape
@@ -413,7 +415,7 @@ class SigmoidalBasis(Basis):
         .. math::
 
             \phi_j (x) = \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
-        
+
         where :math:`\sigma` is the logistic sigmoid function defined by
 
         .. math::
@@ -423,7 +425,7 @@ class SigmoidalBasis(Basis):
         Arguments:
             X: (N, d) array of observations where N is the number of
                 samples, and d is the dimensionality of X.
-            lenscale: the length scale (scalar) of the basis functions to 
+            lenscale: the length scale (scalar) of the basis functions to
                 apply to X.
 
         Returns:
@@ -432,8 +434,8 @@ class SigmoidalBasis(Basis):
 
         N, D = X.shape
         if self.D != D:
-            raise ValueError("Expected X of dimensionality {0}, got {1}" \
-                .format(self.D, D))
+            raise ValueError("Expected X of dimensionality {0}, got {1}"
+                             .format(self.D, D))
 
         return expit(cdist(X, self.C, 'seuclidean')/lenscale)
 
@@ -442,10 +444,10 @@ class SigmoidalBasis(Basis):
 
         .. math::
 
-            \frac{\partial}{\partial s} \phi_j(x) = 
-            - \frac{\| x - \mu_j \|_2}{s^2} 
-            \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
-            \left ( 1 - \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right ) 
+            \frac{\partial}{\partial s} \phi_j(x) =
+            - \frac{\| x - \mu_j \|_2}{s^2}
+            \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
+            \left ( 1 - \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
             \right )
 
         Arguments:
@@ -461,8 +463,8 @@ class SigmoidalBasis(Basis):
 
         N, D = X.shape
         if self.D != D:
-            raise ValueError("Expected X of dimensionality {0}, got {1}" \
-                .format(self.D, D))
+            raise ValueError("Expected X of dimensionality {0}, got {1}"
+                             .format(self.D, D))
 
         dist = cdist(X, self.C, 'seuclidean')
 
@@ -471,7 +473,7 @@ class SigmoidalBasis(Basis):
         dPhi = - dist * sigma * (1 - sigma) / lenscale**2
 
         return [dPhi]
-    
+
 
 class RandomRBF(RadialBasis):
     """
@@ -504,7 +506,7 @@ class RandomRBF(RadialBasis):
         Arguments:
             X:  (N, d) array of observations where N is the number of
                 samples, and d is the dimensionality of X.
-            
+
             lenscale: the length scale (scalar) of the RBFs to apply to X.
 
         Returns:
@@ -527,7 +529,7 @@ class RandomRBF(RadialBasis):
         Arguments:
             X:  (N, d) array of observations where N is the number of
                 samples, and d is the dimensionality of X.
-            
+
             lenscale: the length scale (scalar) of the RBFs to apply to X.
 
         Returns:
@@ -654,9 +656,10 @@ class FastFood(RandomRBF):
             nbases: a scalar for how many random bases to create
                     approximately, this actually will be to the neareset larger
                     two power.
-            
+
             Xdim:   the dimension (d) of the observations.
-                    lenscale_bounds: a tuple of bounds for the RBFs' length scales.
+                    lenscale_bounds: a tuple of bounds for the RBFs' length
+                    scales.
         """
 
         self.bounds = [lenscale_bounds]
@@ -680,7 +683,7 @@ class FastFood(RandomRBF):
         Arguments:
             X:  (N, d) array of observations where N is the number of
                 samples, and d is the dimensionality of X.
-            
+
             lenscale: the length scale (scalar) of the RBFs to apply to X.
 
         Returns:
@@ -702,12 +705,12 @@ class FastFood(RandomRBF):
         Arguments:
             X:  (N, d) array of observations where N is the number of
                 samples, and d is the dimensionality of X.
-            
+
             lenscale: the length scale (scalar) of the RBFs to apply to X.
 
         Returns:
             list:   with one element of shape (N, 2*nbases) where nbases is
-                    number of random RBF bases, again to the nearest larger 
+                    number of random RBF bases, again to the nearest larger
                     two power. This is d Phi(X) / d lenscale.
         """
 
