@@ -56,8 +56,7 @@ def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
 
         _var = params[0]
         _lambda = params[1]
-        _theta = np.atleast_1d(params[2:])
-        grad = np.empty(len(params))
+        _theta = np.atleast_1d(params[2:]).tolist()
 
         # Common computations
         Phi = basis.from_vector(X, _theta)                      # N x D
@@ -67,6 +66,7 @@ def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
         iCPhi = cho_solve(LC, Phi.T)                            # D x N
         yiK = y.T / _var - (y.T.dot(Phi)).dot(iCPhi) / _var**2  # 1 x N
 
+        # Objective
         LML = - 0.5 * (N * np.log(2*np.pi*_var**2) + D * np.log(_lambda)
                        + logdet(LC[0]) + yiK.dot(y))
 
@@ -76,6 +76,9 @@ def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
 
         if not usegradients:
             return -LML
+
+        # Gradients
+        grad = np.empty(len(params))
 
         # Grad var
         grad[0] = - N / _var + (Phi * iCPhi.T).sum() / (2 * _var**2) \
@@ -87,8 +90,8 @@ def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
                          + (yiK.dot(Phi)**2).sum())
 
         # Loop through basis param grads
-        dPhis = basis.grad_from_vector(X, _theta)  # skip if empty
-        for i, (t, dPhi) in enumerate(zip(_theta, dPhis)):
+        dPhis = basis.grad_from_vector(X, _theta) if _theta else []
+        for i,  dPhi in enumerate(dPhis):
             dPhiPhi = dPhi.T.dot(Phi)  # D x D
             grad[2+i] = - (np.trace(dPhiPhi) / _var
                            - (dPhiPhi * (iCPhi.dot(Phi))).sum() / _var**2  # !
