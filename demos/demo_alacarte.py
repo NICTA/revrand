@@ -38,12 +38,12 @@ def main():
     lenscale_true = 0.7  # For the gpdraw dataset
     noise = 0.1
 
-    basis = 'RKS'
+    # basis = 'RKS'
     # basis = 'FF'
     # basis = 'RBF'
     # basis = 'Linear'
     # basis = 'Poly'
-    # basis = 'Combo'
+    basis = 'Combo'
 
     #
     # Make Data
@@ -85,7 +85,7 @@ def main():
     elif basis == 'RKS':
         base = bases.RandomRBF(nbases, Xtrain.shape[1])
     elif basis == 'RBF':
-        base = bases.RadialBasis(Xtrain, onescol=False)
+        base = bases.RadialBasis(Xtrain)
     elif basis == 'Linear':
         base = bases.LinearBasis(onescol=True)
     elif basis == 'Poly':
@@ -124,8 +124,10 @@ def main():
     else:
         raise ValueError('Invalid basis!')
 
-    params = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
-                                     usegradients=usegradients)
+    params = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
+                                      usegradients=usegradients)
+    # params = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
+    #                                  usegradients=usegradients)
     Ey, Vf, Vy = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
                                              *params)
     Sy = np.sqrt(Vy)

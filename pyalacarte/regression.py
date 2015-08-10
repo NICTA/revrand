@@ -156,7 +156,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
 
     N, d = X.shape
 
-    def LML(params):
+    def ELBO(params):
 
         _var = params[0]
         _lambda = params[1]
@@ -173,9 +173,39 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         Cdd = (_lambda * _var) / (_lambda + _var)
 
         # Calculate ELBO
+        ELBO = -0.5 * (N * np.log(2*np.pi*_var)
+                       + D * Cdd * (1./_var + 1./_lambda)
+                       + ((y - Phi.dot(m))**2).sum() / _var
+                       + (m**2).sum() / _lambda
+                       - D * np.log(Cdd)
+                       + D * np.log(_lambda)
+                       - D)
 
+        if verbose:
+            log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
+                     .format(ELBO, _var, _lambda, _theta))
 
-    return 0
+        return -ELBO
+
+    params = [var, regulariser] + params_to_list(bparams)
+    bounds = [var_bounds, regulariser_bounds] + basis.bounds
+
+    # method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
+    method = None
+    res = nmin(ELBO, params, bounds=bounds, method=method, ftol=ftol,
+               xtol=1e-8, maxiter=maxit)
+
+    var = res['x'][0]
+    regulariser = res['x'][1]
+    bparams = list_to_params(bparams, np.atleast_1d(res['x'][2:]))
+
+    if verbose:
+        log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
+                 .format(-res['fun'], var, regulariser, bparams))
+        if not res['success']:
+            log.info('Terminated unsuccessfully: {}.'.format(res['message']))
+
+    return bparams, var, regulariser
 
 
 def bayesreg_predict(X_star, X, y, basis, bparams, var, regulariser):
