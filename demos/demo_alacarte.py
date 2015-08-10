@@ -4,7 +4,7 @@
 import logging
 import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte import bases, alacarteGP
+from pyalacarte import bases, regression
 from pyalacarte.validation import mll
 from scipy.spatial.distance import cdist
 import computers.gp as gp
@@ -124,9 +124,9 @@ def main():
     else:
         raise ValueError('Invalid basis!')
 
-    params = alacarteGP.alacarte_learn(Xtrain, ytrain, base, hypers,
-                                       usegradients=usegradients)
-    Ey, Vf, Vy = alacarteGP.alacarte_predict(Xtest, Xtrain, ytrain, base,
+    params = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
+                                     usegradients=usegradients)
+    Ey, Vf, Vy = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
                                              *params)
     Sy = np.sqrt(Vy)
 
@@ -151,7 +151,7 @@ def main():
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
 
     log.info("A la Carte LL: {}, noise: {}, hypers: {}"
-             .format(LL_ala, params[1], params[0]))
+             .format(LL_ala, np.sqrt(params[1]), params[0]))
     log.info("GP LL: {}, noise: {}, hypers: {}"
              .format(LL_gp, hyper_params[1], hyper_params[0]))
 

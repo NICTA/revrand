@@ -1,4 +1,7 @@
-""" A simple implementation of the "A la Carte" GP [1].
+""" Various Bayesian linear regression learning and prediction functions.
+
+    By using the appropriate bases, this will also yeild a simple
+    implementation of the "A la Carte" GP [1].
 
     References:
         - Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
@@ -19,29 +22,29 @@ from pyalacarte.bases import params_to_list, list_to_params
 log = logging.getLogger(__name__)
 
 
-def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
-                   maxit=1000, verbose=True, noise_bounds=(1e-7, None),
-                   regulariser_bounds=(1e-7, None), usegradients=True):
-    """ Learn the parameters and hyperparameters of an "A la Carte" Gaussian
-        Process.
+def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
+                 maxit=1000, verbose=True, var_bounds=(1e-7, None),
+                 regulariser_bounds=(1e-7, None), usegradients=True):
+    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
+        using log-marginal likelihood.
 
         Arguments:
             X: NxD array input dataset (N samples, D dimensions)
             y: N array targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of parameters of the basis object
-            noise: observation noise initial guess
+            var: observation variance initial guess
             regulariser: weight regulariser (variance) initial guess
             verbose: log learning status
             ftol: optimiser function tolerance convergence criterion
             maxit: maximum number of iterations for the optimiser
-            noise_bounds: tuple of (lower bound, upper bound) on the noise
+            var_bounds: tuple of (lower bound, upper bound) on the variance
                 parameter, None for unbounded (though it cannot be <= 0)
             regulariser_bounds: tuple of (lower bound, upper bound) on the
                 regulariser parameter, None for unbounded (though it cannot be
                 <= 0)
             usegradients: True for using gradients to optimize the parameters,
-                otherwize false uses BOBYQA (from nlopt)
+                otherwise false uses BOBYQA (from nlopt)
 
         Returns:
             list: learned sequence of basis object hyperparameters
@@ -50,7 +53,6 @@ def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
     """
 
     N, d = X.shape
-    var = noise**2
 
     def LML(params):
 
@@ -71,8 +73,8 @@ def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
                        + logdet(LC[0]) + yiK.dot(y))
 
         if verbose:
-            log.info("LML = {}, noise = {}, reg = {}, bparams = {}."
-                     .format(LML, np.sqrt(_var), _lambda, _theta))
+            log.info("LML = {}, var = {}, reg = {}, bparams = {}."
+                     .format(LML, _var, _lambda, _theta))
 
         if not usegradients:
             return -LML
@@ -100,28 +102,84 @@ def alacarte_learn(X, y, basis, bparams, noise=1, regulariser=1e-3, ftol=1e-5,
         return -LML, -grad
 
     params = [var, regulariser] + params_to_list(bparams)
-    bounds = [(noise_bounds[0]**2, noise_bounds[1]), regulariser_bounds] \
-        + basis.bounds
+    bounds = [var_bounds, regulariser_bounds] + basis.bounds
 
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
     res = nmin(LML, params, bounds=bounds, method=method, ftol=ftol, xtol=1e-8,
                maxiter=maxit)
 
-    noise = np.sqrt(res['x'][0])
+    var = res['x'][0]
     regulariser = res['x'][1]
     bparams = list_to_params(bparams, np.atleast_1d(res['x'][2:]))
 
     if verbose:
-        log.info("Done! LML = {}, noise = {}, reg = {}, bparams = {}."
-                 .format(-res['fun'], noise, regulariser, bparams))
+        log.info("Done! LML = {}, var = {}, reg = {}, bparams = {}."
+                 .format(-res['fun'], var, regulariser, bparams))
         if not res['success']:
             log.info('Terminated unsuccessfully: {}.'.format(res['message']))
 
-    return bparams, noise, regulariser
+    return bparams, var, regulariser
 
 
-def alacarte_predict(X_star, X, y, basis, bparams, noise, regulariser):
-    """ Predict using an "A la Carte" Gaussian process [1].
+def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
+                  maxit=1000, verbose=True, var_bounds=(1e-7, None),
+                  regulariser_bounds=(1e-7, None), usegradients=True):
+    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
+        using the evidence lower bound (ELBO) on log-marginal likelihood.
+
+        Arguments:
+            X: NxD array input dataset (N samples, D dimensions)
+            y: N array targets (N samples)
+            basis: A basis object, see bases.py
+            bparams: A sequence of parameters of the basis object
+            var: observation variance initial guess
+            regulariser: weight regulariser (variance) initial guess
+            verbose: log learning status
+            ftol: optimiser function tolerance convergence criterion
+            maxit: maximum number of iterations for the optimiser
+            var_bounds: tuple of (lower bound, upper bound) on the variance
+                parameter, None for unbounded (though it cannot be <= 0)
+            regulariser_bounds: tuple of (lower bound, upper bound) on the
+                regulariser parameter, None for unbounded (though it cannot be
+                <= 0)
+            usegradients: True for using gradients to optimize the parameters,
+                otherwise false uses BOBYQA (from nlopt)
+
+        Returns:
+            list: learned sequence of basis object hyperparameters
+            float: learned observation noise
+            float: learned weight regluariser
+    """
+
+    # First off, lets to analytic updates to the posterior weights, and
+    # numerical gradients of the ELBO w.r.t. the hyperparameters.
+
+    N, d = X.shape
+
+    def LML(params):
+
+        _var = params[0]
+        _lambda = params[1]
+        _theta = np.atleast_1d(params[2:]).tolist()
+
+        # Common computations
+        Phi = basis.from_vector(X, _theta)                      # N x D
+        PhiPhi = Phi.T.dot(Phi)                                 # D x D
+        D = Phi.shape[1]
+
+        # Posterior Parameters
+        LC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
+        m = cho_solve(LC, Phi.T.dot(y)) / _var
+        Cdd = (_lambda * _var) / (_lambda + _var)
+
+        # Calculate ELBO
+
+
+    return 0
+
+
+def bayesreg_predict(X_star, X, y, basis, bparams, var, regulariser):
+    """ Predict using Bayesian linear regression.
 
         Arguments:
             X_star: N_starxD array query input dataset (N_star samples,
@@ -130,8 +188,8 @@ def alacarte_predict(X_star, X, y, basis, bparams, noise, regulariser):
             y: N array training targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of hyperparameters of the basis object
-            noise: observation noise initial guess
-            regulariser: weight regulariser (variance) initial guess
+            var: observation variance
+            regulariser: weight regulariser (variance)
 
         Returns:
             array: The expected value of y_star for the query inputs, X_star
@@ -142,7 +200,6 @@ def alacarte_predict(X_star, X, y, basis, bparams, noise, regulariser):
                of shape (N_star,)
     """
 
-    var = noise**2
     Phi = basis(X, *bparams)
     Phi_s = basis(X_star, *bparams)
     N, D = Phi.shape
