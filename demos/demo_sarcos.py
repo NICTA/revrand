@@ -3,7 +3,7 @@
 
 import logging
 import numpy as np
-from yavanna.supervised import alacarteGP, bases
+from yavanna.supervised import regression, bases
 from yavanna.validate import smse, msll
 from yavanna.unsupervised.transforms import whiten, whiten_apply
 import computers.gp as gp
@@ -76,12 +76,12 @@ regressor = gp.condition(X_train_sub, y_train_sub, kfunc, hyper_params)
 
 base = bases.RandomRBF_ARD(nbases, D) + bases.RandomRBF(nbases, D)
 lenARD = lenscale * np.ones(D + 1)
-params = alacarteGP.alacarte_learn(X_train, y_train, base, lenARD, noise=noise,
-                                   usegradients=False)
+params = regression.alacarte_learn(X_train, y_train, base, lenARD,
+                                   var=noise**2, usegradients=False)
 
 # base = bases.RandomRBF(nbases, D)
-# params = alacarteGP.alacarte_learn(X_train, y_train, base, (lenscale,),
-#                                    noise=noise)
+# params = regression.alacarte_learn(X_train, y_train, base, (lenscale,),
+#                                    var=noise**2)
 
 
 #
@@ -99,7 +99,7 @@ Sy_gp = np.sqrt(Vy_gp)
 # Predict A la Carte
 #
 
-Ey, Vf, Vy = alacarteGP.alacarte_predict(X_test, X_train, y_train, base,
+Ey, Vf, Vy = regression.alacarte_predict(X_test, X_train, y_train, base,
                                          *params)
 Sy = np.sqrt(Vy)
 
@@ -113,4 +113,4 @@ log.info("Subset GP smse = {}, msll = {},\n\thypers = {}, noise = {}."
                  hyper_params[0], hyper_params[1]))
 log.info("A la Carte smse = {}, msll = {},\n\thypers = {}, noise = {}."
          .format(smse(y_test, Ey), msll(y_test, Ey, Vy, y_train),
-                 params[0], params[1]))
+                 params[0], np.sqrt(params[1])))

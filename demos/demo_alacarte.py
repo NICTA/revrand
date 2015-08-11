@@ -124,13 +124,19 @@ def main():
     else:
         raise ValueError('Invalid basis!')
 
-    params = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
-                                      usegradients=usegradients)
-    # params = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
-    #                                  usegradients=usegradients)
-    Ey, Vf, Vy = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
-                                             *params)
-    Sy = np.sqrt(Vy)
+    # Log marginal likelihood A La Carte learning
+    params_lml = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
+                                         usegradients=usegradients)
+    Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
+                                                   *params_lml)
+    Sy_l = np.sqrt(Vy_l)
+
+    # Evidence lower-bound A la Carte learning
+    params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
+                                           usegradients=usegradients)
+    Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
+                                                   *params_elbo)
+    Sy_e = np.sqrt(Vy_e)
 
     #
     # Learn GP and predict
@@ -149,12 +155,15 @@ def main():
     # Evaluate LL
     #
 
-    LL_ala = mll(ftest, Ey, Vf)
+    LL_lml = mll(ftest, Ey_l, Vf_l)
+    LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
 
-    log.info("A la Carte LL: {}, noise: {}, hypers: {}"
-             .format(LL_ala, np.sqrt(params[1]), params[0]))
-    log.info("GP LL: {}, noise: {}, hypers: {}"
+    log.info("A la Carte LML: {}, noise: {}, hypers: {}"
+             .format(LL_lml, np.sqrt(params_lml[1]), params_lml[0]))
+    log.info("A la Carte ELBO: {}, noise: {}, hypers: {}"
+             .format(LL_elbo, np.sqrt(params_elbo[1]), params_elbo[0]))
+    log.info("GP: {}, noise: {}, hypers: {}"
              .format(LL_gp, hyper_params[1], hyper_params[0]))
 
     #
@@ -164,17 +173,26 @@ def main():
     Xpl_t = Xtrain.flatten()
     Xpl_s = Xtest.flatten()
 
-    # Regressor
-    pl.plot(Xpl_t, ytrain, 'k.', Xpl_s, ftest, 'g-', Xpl_s, Ey, 'r-')
-    pl.fill_between(Xpl_s, Ey - 2*Sy, Ey + 2*Sy, facecolor='r', alpha=0.3,
-                    edgecolor='none', label=None)
+    # Training/Truth
+    pl.plot(Xpl_t, ytrain, 'k.', Xpl_s, ftest, 'k-')
+
+    # LML Regressor
+    pl.plot(Xpl_s, Ey_l, 'r-')
+    pl.fill_between(Xpl_s, Ey_l - 2*Sy_l, Ey_l + 2*Sy_l, facecolor='none',
+                    edgecolor='r', linestyle='--', label=None)
+
+    # ELBO Regressor
+    pl.plot(Xpl_s, Ey_e, 'g-')
+    pl.fill_between(Xpl_s, Ey_e - 2*Sy_e, Ey_e + 2*Sy_e, facecolor='none',
+                    edgecolor='g', linestyle='--', label=None)
 
     # GP
     pl.plot(Xpl_s, Ey_gp, 'b-')
-    pl.fill_between(Xpl_s, Ey_gp - 2*Sy_gp, Ey_gp + 2*Sy_gp, facecolor='b',
-                    alpha=0.3, edgecolor='none', label=None)
+    pl.fill_between(Xpl_s, Ey_gp - 2*Sy_gp, Ey_gp + 2*Sy_gp, facecolor='none',
+                    edgecolor='b', linestyle='--', label=None)
 
-    pl.legend(['Training', 'Test', 'A la Carte', 'GP'])
+    pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
+               'GP'])
     pl.show()
 
 
