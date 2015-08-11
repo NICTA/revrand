@@ -38,12 +38,12 @@ def main():
     lenscale_true = 0.7  # For the gpdraw dataset
     noise = 0.1
 
-    # basis = 'RKS'
+    basis = 'RKS'
     # basis = 'FF'
     # basis = 'RBF'
     # basis = 'Linear'
     # basis = 'Poly'
-    basis = 'Combo'
+    # basis = 'Combo'
 
     #
     # Make Data

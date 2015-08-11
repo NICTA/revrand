@@ -48,7 +48,7 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
 
         Returns:
             list: learned sequence of basis object hyperparameters
-            float: learned observation noise
+            float: learned observation variance
             float: learned weight regluariser
     """
 
@@ -69,8 +69,10 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         yiK = y.T / _var - (y.T.dot(Phi)).dot(iCPhi) / _var**2  # 1 x N
 
         # Objective
-        LML = - 0.5 * (N * np.log(2*np.pi*_var**2) + D * np.log(_lambda)
-                       + logdet(LC[0]) + yiK.dot(y))
+        LML = -0.5 * (N * np.log(2*np.pi*_var**2)
+                      + D * np.log(_lambda)
+                      + logdet(LC[0])
+                      + yiK.dot(y))
 
         if verbose:
             log.info("LML = {}, var = {}, reg = {}, bparams = {}."
@@ -147,14 +149,15 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
 
         Returns:
             list: learned sequence of basis object hyperparameters
-            float: learned observation noise
+            float: learned observation variance
             float: learned weight regluariser
     """
 
-    # First off, lets to analytic updates to the posterior weights, and
-    # numerical gradients of the ELBO w.r.t. the hyperparameters.
-
     N, d = X.shape
+
+    # Caches for correcting the true variance
+    sqErrcache = [0]
+    ELBOcache = [-np.inf]
 
     def ELBO(params):
 
@@ -162,40 +165,65 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         _lambda = params[1]
         _theta = np.atleast_1d(params[2:]).tolist()
 
-        # Common computations
+        # Get Basis
         Phi = basis.from_vector(X, _theta)                      # N x D
-        PhiPhi = Phi.T.dot(Phi)                                 # D x D
         D = Phi.shape[1]
 
         # Posterior Parameters
-        LC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
-        m = cho_solve(LC, Phi.T.dot(y)) / _var
+        LrealC = jitchol(np.diag(np.ones(D) / _lambda) + Phi.T.dot(Phi) / _var)
+        m = cho_solve(LrealC, Phi.T.dot(y)) / _var
         Cdd = (_lambda * _var) / (_lambda + _var)
 
+        # Common computations
+        Err = y - Phi.dot(m)
+        sqErr = (Err**2).sum()
+        TrC = D * Cdd
+        mm = (m**2).sum()
+
         # Calculate ELBO
-        ELBO = -0.5 * (N * np.log(2*np.pi*_var)
-                       + D * Cdd * (1./_var + 1./_lambda)
-                       + ((y - Phi.dot(m))**2).sum() / _var
-                       + (m**2).sum() / _lambda
+        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
+                       + TrC * (1./_var + 1./_lambda)
+                       + sqErr / _var
+                       + mm / _lambda
                        - D * np.log(Cdd)
                        + D * np.log(_lambda)
                        - D)
+
+        # Cache square error to compute corrected variance
+        if ELBO > ELBOcache[0]:
+            sqErrcache[0] = sqErr
 
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
 
-        return -ELBO
+        if not usegradients:
+            return -ELBO
+
+        # Gradients
+        grad = np.empty(len(params))
+
+        # Grad var
+        grad[0] = 0.5 * (-N / _var + (sqErr + TrC) / _var**2)
+
+        # Grad reg
+        grad[1] = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
+
+        # Loop through basis param grads
+        dPhis = basis.grad_from_vector(X, _theta) if _theta else []
+        for i,  dPhi in enumerate(dPhis):
+            grad[2+i] = m.T.dot((dPhi * Err[:, np.newaxis]).sum(axis=0)) / _var
+
+        return -ELBO, -grad
 
     params = [var, regulariser] + params_to_list(bparams)
     bounds = [var_bounds, regulariser_bounds] + basis.bounds
 
-    # method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    method = None
+    method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
     res = nmin(ELBO, params, bounds=bounds, method=method, ftol=ftol,
                xtol=1e-8, maxiter=maxit)
 
-    var = res['x'][0]
+    var = sqErrcache[0] / (N - 1)  # for corrected, otherwise res['x'][0]
     regulariser = res['x'][1]
     bparams = list_to_params(bparams, np.atleast_1d(res['x'][2:]))
 
