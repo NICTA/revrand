@@ -15,7 +15,9 @@ import logging
 from scipy.linalg import cho_solve
 from pyalacarte.linalg import jitchol, logdet
 from pyalacarte.minimize import minimize as nmin
-from pyalacarte.bases import params_to_list, list_to_params
+# from pyalacarte.bases import params_to_list, list_to_params
+from pyalacarte.bases import params_to_list as p2l
+from pyalacarte.bases import list_to_params as l2p
 
 
 # Set up logging
@@ -53,12 +55,11 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     """
 
     N, d = X.shape
+    vparams = [var, regulariser, p2l(bparams)]
 
     def LML(params):
 
-        _var = params[0]
-        _lambda = params[1]
-        _theta = np.atleast_1d(params[2:]).tolist()
+        _var, _lambda, _theta = l2p(vparams, params)
 
         # Common computations
         Phi = basis.from_vector(X, _theta)                      # N x D
@@ -103,16 +104,13 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
 
         return -LML, -grad
 
-    params = [var, regulariser] + params_to_list(bparams)
     bounds = [var_bounds, regulariser_bounds] + basis.bounds
 
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = nmin(LML, params, bounds=bounds, method=method, ftol=ftol, xtol=1e-8,
-               maxiter=maxit)
+    res = nmin(LML, p2l(vparams), bounds=bounds, method=method, ftol=ftol,
+               xtol=1e-8, maxiter=maxit)
 
-    var = res['x'][0]
-    regulariser = res['x'][1]
-    bparams = list_to_params(bparams, np.atleast_1d(res['x'][2:]))
+    var, regulariser, bparams = l2p(vparams, res['x'])
 
     if verbose:
         log.info("Done! LML = {}, var = {}, reg = {}, bparams = {}."
@@ -158,12 +156,11 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     # Caches for correcting the true variance
     sqErrcache = [0]
     ELBOcache = [-np.inf]
+    vparams = [var, regulariser, p2l(bparams)]
 
     def ELBO(params):
 
-        _var = params[0]
-        _lambda = params[1]
-        _theta = np.atleast_1d(params[2:]).tolist()
+        _var, _lambda, _theta = l2p(vparams, params)
 
         # Get Basis
         Phi = basis.from_vector(X, _theta)                      # N x D
@@ -214,22 +211,19 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         # Loop through basis param grads
         dPhis = basis.grad_from_vector(X, _theta) if _theta else []
         for i,  dPhi in enumerate(dPhis):
-            grad[2+i] = 0
-            # grad[2+i] = (m.T.dot(Err.dot(dPhi)) - (dPhi * PhiC).sum()) / _var
+            dPhiPhidiag = (dPhi * Phi).sum(axis=0)
+            grad[2+i] = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag*C).sum()) / _var
 
         return -ELBO, -grad
 
-    params = [var, regulariser] + params_to_list(bparams)
     bounds = [var_bounds, regulariser_bounds] + basis.bounds
 
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = nmin(ELBO, params, bounds=bounds, method=method, ftol=ftol,
+    res = nmin(ELBO, p2l(vparams), bounds=bounds, method=method, ftol=ftol,
                xtol=1e-8, maxiter=maxit)
 
-    var = sqErrcache[0] / (N - 1)  # for corrected, otherwise res['x'][0]
-    # var = res['x'][0]
-    regulariser = res['x'][1]
-    bparams = list_to_params(bparams, np.atleast_1d(res['x'][2:]))
+    _, regulariser, bparams = l2p(vparams, res['x'])
+    var = sqErrcache[0] / (N - 1)  # for corrected
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."

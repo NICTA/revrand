@@ -133,10 +133,10 @@ def main():
 
     # Evidence lower-bound A la Carte learning
     # hypers = (lenscale_true,)
-    # params_elbo = regressionSGD.bayesreg_sgd(Xtrain, ytrain, base, hypers,
-    #                                          var=noise**2, regulariser=0.013)
-    params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
-                                           usegradients=usegradients)
+    params_elbo = regressionSGD.bayesreg_sgd(Xtrain, ytrain, base, hypers)
+                                             # var=noise**2, regulariser=0.013)
+    # params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
+    #                                        usegradients=usegradients)
     Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
                                                    *params_elbo)
     Sy_e = np.sqrt(Vy_e)
@@ -163,7 +163,7 @@ def main():
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
 
     # log.info("A la Carte LML: {}, noise: {}, hypers: {}"
-    #          .format(LL_lml, np.sqrt(params_lml[1]), params_lml[0]))
+             # .format(LL_lml, np.sqrt(params_lml[1]), params_lml[0]))
     log.info("A la Carte ELBO: {}, noise: {}, hypers: {}"
              .format(LL_elbo, np.sqrt(params_elbo[1]), params_elbo[0]))
     log.info("GP: {}, noise: {}, hypers: {}"
@@ -196,7 +196,7 @@ def main():
 
     pl.legend(['Training', 'Truth', 'A la Carte (ELBO)', 'GP'])
     # pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
-    #            'GP'])
+               # 'GP'])
     pl.show()
 
 
