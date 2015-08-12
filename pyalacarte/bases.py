@@ -68,6 +68,7 @@ def list_to_params(params, flatlist):
             rparams.append(flatlist[listind])
             listind += 1
         else:
+            p = np.asarray(p)
             nelems = np.product(p.shape)
             rparams.append(np.reshape(flatlist[listind:(listind+nelems)],
                                       p.shape))

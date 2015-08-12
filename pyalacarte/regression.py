@@ -167,25 +167,27 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
 
         # Get Basis
         Phi = basis.from_vector(X, _theta)                      # N x D
+        PhiPhi = Phi.T.dot(Phi)
         D = Phi.shape[1]
 
         # Posterior Parameters
-        LrealC = jitchol(np.diag(np.ones(D) / _lambda) + Phi.T.dot(Phi) / _var)
-        m = cho_solve(LrealC, Phi.T.dot(y)) / _var
-        Cdd = (_lambda * _var) / (_lambda + _var)
+        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
+        m = cho_solve(LfullC, Phi.T.dot(y)) / _var
+        C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
 
         # Common computations
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
-        TrC = D * Cdd
         mm = (m**2).sum()
 
         # Calculate ELBO
+        TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
-                       + TrC * (1./_var + 1./_lambda)
                        + sqErr / _var
+                       + TrPhiPhiC / _var
+                       + C.sum() / _lambda
+                       - np.log(C).sum()
                        + mm / _lambda
-                       - D * np.log(Cdd)
                        + D * np.log(_lambda)
                        - D)
 
@@ -204,15 +206,16 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         grad = np.empty(len(params))
 
         # Grad var
-        grad[0] = 0.5 * (-N / _var + (sqErr + TrC) / _var**2)
+        grad[0] = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
 
         # Grad reg
-        grad[1] = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
+        grad[1] = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dPhis = basis.grad_from_vector(X, _theta) if _theta else []
         for i,  dPhi in enumerate(dPhis):
-            grad[2+i] = m.T.dot((dPhi * Err[:, np.newaxis]).sum(axis=0)) / _var
+            grad[2+i] = 0
+            # grad[2+i] = (m.T.dot(Err.dot(dPhi)) - (dPhi * PhiC).sum()) / _var
 
         return -ELBO, -grad
 
@@ -224,6 +227,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
                xtol=1e-8, maxiter=maxit)
 
     var = sqErrcache[0] / (N - 1)  # for corrected, otherwise res['x'][0]
+    # var = res['x'][0]
     regulariser = res['x'][1]
     bparams = list_to_params(bparams, np.atleast_1d(res['x'][2:]))
 
