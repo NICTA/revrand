@@ -10,12 +10,13 @@
           2015.
 """
 
+from __future__ import division
+
 import numpy as np
 import logging
 from scipy.linalg import cho_solve
 from pyalacarte.linalg import jitchol, logdet
 from pyalacarte.minimize import minimize as nmin
-# from pyalacarte.bases import params_to_list, list_to_params
 from pyalacarte.bases import params_to_list as p2l
 from pyalacarte.bases import list_to_params as l2p
 

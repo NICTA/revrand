@@ -3,6 +3,8 @@
     To make a new basis object, see the documentation of the Basis class.
 """
 
+from __future__ import division
+
 import numpy as np
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit

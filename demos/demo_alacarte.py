@@ -24,19 +24,21 @@ def main():
     nbases = 500
     lenscale = 0.1  # For all basis functions that take lengthscales
     lenscale2 = 0.2  # For the Combo basis
+    noise = 0.2
     order = 5  # For polynomial basis
     usegradients = True
+    useSGD = True
 
     N = 5e2
     Ns = 1e3
 
     # Dataset selection
-    #dataset = 'sinusoid'
+    # dataset = 'sinusoid'
     dataset = 'gp1D'
 
     # Dataset properties
     lenscale_true = 0.7  # For the gpdraw dataset
-    noise = 0.1
+    noise_true = 0.1
 
     basis = 'RKS'
     # basis = 'FF'
@@ -70,7 +72,7 @@ def main():
         L = U.dot(np.diag(np.sqrt(S))).dot(V)
         f = np.random.randn(N + Ns).dot(L)
 
-        ytrain = f[0:N] + np.random.randn(N) * noise
+        ytrain = f[0:N] + np.random.randn(N) * noise_true
         ftest = f[N:]
 
     else:
@@ -125,18 +127,18 @@ def main():
         raise ValueError('Invalid basis!')
 
     # Log marginal likelihood A La Carte learning
-    # params_lml = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
-    #                                      usegradients=usegradients)
-    # Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
-    #                                                *params_lml)
-    # Sy_l = np.sqrt(Vy_l)
+    params_lml = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
+                                         usegradients=usegradients)
+    Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
+                                                   *params_lml)
+    Sy_l = np.sqrt(Vy_l)
 
     # Evidence lower-bound A la Carte learning
-    # hypers = (lenscale_true,)
-    params_elbo = regressionSGD.bayesreg_sgd(Xtrain, ytrain, base, hypers)
-                                             # var=noise**2, regulariser=0.013)
-    # params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
-    #                                        usegradients=usegradients)
+    if useSGD:
+        params_elbo = regressionSGD.bayesreg_sgd(Xtrain, ytrain, base, hypers)
+    else:
+        params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
+                                               usegradients=usegradients)
     Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
                                                    *params_elbo)
     Sy_e = np.sqrt(Vy_e)
@@ -158,12 +160,12 @@ def main():
     # Evaluate LL
     #
 
-    # LL_lml = mll(ftest, Ey_l, Vf_l)
+    LL_lml = mll(ftest, Ey_l, Vf_l)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
 
-    # log.info("A la Carte LML: {}, noise: {}, hypers: {}"
-             # .format(LL_lml, np.sqrt(params_lml[1]), params_lml[0]))
+    log.info("A la Carte LML: {}, noise: {}, hypers: {}"
+             .format(LL_lml, np.sqrt(params_lml[1]), params_lml[0]))
     log.info("A la Carte ELBO: {}, noise: {}, hypers: {}"
              .format(LL_elbo, np.sqrt(params_elbo[1]), params_elbo[0]))
     log.info("GP: {}, noise: {}, hypers: {}"
@@ -180,9 +182,9 @@ def main():
     pl.plot(Xpl_t, ytrain, 'k.', Xpl_s, ftest, 'k-')
 
     # LML Regressor
-    # pl.plot(Xpl_s, Ey_l, 'r-')
-    # pl.fill_between(Xpl_s, Ey_l - 2*Sy_l, Ey_l + 2*Sy_l, facecolor='none',
-    #                 edgecolor='r', linestyle='--', label=None)
+    pl.plot(Xpl_s, Ey_l, 'r-')
+    pl.fill_between(Xpl_s, Ey_l - 2*Sy_l, Ey_l + 2*Sy_l, facecolor='none',
+                    edgecolor='r', linestyle='--', label=None)
 
     # ELBO Regressor
     pl.plot(Xpl_s, Ey_e, 'g-')
@@ -194,9 +196,8 @@ def main():
     pl.fill_between(Xpl_s, Ey_gp - 2*Sy_gp, Ey_gp + 2*Sy_gp, facecolor='none',
                     edgecolor='b', linestyle='--', label=None)
 
-    pl.legend(['Training', 'Truth', 'A la Carte (ELBO)', 'GP'])
-    # pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
-               # 'GP'])
+    pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
+               'GP'])
     pl.show()
 
 
