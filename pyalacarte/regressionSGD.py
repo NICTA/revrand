@@ -61,7 +61,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
     # Initialise parameters
     Phi = basis(X, *bparams)
     D = Phi.shape[1]
-    minit = np.linalg.solve(np.eye(D) / regulariser + Phi.T.dot(Phi) / var,
+    minit = np.linalg.solve(np.diag(np.ones(D)/regulariser)+Phi.T.dot(Phi)/var,
                             Phi.T.dot(y) / var)
     Cinit = gamma.rvs(0.1, regulariser/0.1, size=D)
     vparams = [minit, Cinit, var, regulariser, p2l(bparams)]
