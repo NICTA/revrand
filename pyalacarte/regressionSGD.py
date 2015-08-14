@@ -64,14 +64,14 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
     minit = np.linalg.solve(np.diag(np.ones(D)/regulariser)+Phi.T.dot(Phi)/var,
                             Phi.T.dot(y) / var)
     Cinit = gamma.rvs(0.1, regulariser/0.1, size=D)
-    vparams = [minit, Cinit, var, regulariser, p2l(bparams)]
+    vparams = [minit, Cinit, var, regulariser, bparams]
 
     def ELBO(params):
 
         m, C, _var, _lambda, _theta = l2p(vparams, params)
 
         # Get Basis
-        Phi = basis.from_vector(X, _theta)                      # N x D
+        Phi = basis(X, *_theta)                      # N x D
         PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
@@ -112,7 +112,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
 
         # Loop through basis param grads
         gtheta = []
-        dPhis = basis.grad_from_vector(X, _theta) if _theta else []
+        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for i,  dPhi in enumerate(dPhis):
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
             gt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag*C).sum()) / _var

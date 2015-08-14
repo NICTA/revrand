@@ -56,15 +56,15 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     """
 
     N, d = X.shape
-    vparams = [var, regulariser, p2l(bparams)]
+    vparams = [var, regulariser, bparams]
 
     def LML(params):
 
         _var, _lambda, _theta = l2p(vparams, params)
 
         # Common computations
-        Phi = basis.from_vector(X, _theta)                      # N x D
-        PhiPhi = Phi.T.dot(Phi)                                 # D x D
+        Phi = basis(X, *_theta)                      # N x D
+        PhiPhi = Phi.T.dot(Phi)                       # D x D
         D = Phi.shape[1]
         LC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
         iCPhi = cho_solve(LC, Phi.T)                            # D x N
@@ -96,7 +96,7 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
                          + (yiK.dot(Phi)**2).sum())
 
         # Loop through basis param grads
-        dPhis = basis.grad_from_vector(X, _theta) if _theta else []
+        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for i,  dPhi in enumerate(dPhis):
             dPhiPhi = dPhi.T.dot(Phi)  # D x D
             grad[2+i] = - (np.trace(dPhiPhi) / _var
@@ -157,14 +157,14 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     # Caches for correcting the true variance
     sqErrcache = [0]
     ELBOcache = [-np.inf]
-    vparams = [var, regulariser, p2l(bparams)]
+    vparams = [var, regulariser, bparams]
 
     def ELBO(params):
 
         _var, _lambda, _theta = l2p(vparams, params)
 
         # Get Basis
-        Phi = basis.from_vector(X, _theta)                      # N x D
+        Phi = basis(X, *_theta)                      # N x D
         PhiPhi = Phi.T.dot(Phi)
         D = Phi.shape[1]
 
@@ -210,7 +210,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         grad[1] = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
-        dPhis = basis.grad_from_vector(X, _theta) if _theta else []
+        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for i,  dPhi in enumerate(dPhis):
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
             grad[2+i] = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag*C).sum()) / _var
