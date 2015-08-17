@@ -27,7 +27,7 @@ def main():
     noise = 0.2
     order = 5  # For polynomial basis
     usegradients = True
-    useSGD = False
+    useSGD = True
 
     N = 5e2
     Ns = 1e3

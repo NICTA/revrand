@@ -51,8 +51,10 @@ Ys_grad = Phi_s.dot(w_grad)
 
 # SGD for learning w
 w0 = np.random.randn(Phi.shape[1])
-w_sgd, gnorms, costs = sgd(f, w0, train_dat, maxiter=1e3, batchsize=100,
-                           rate=1, eval_obj=True)
+results = sgd(f, w0, train_dat, maxiter=1e3, batchsize=100, rate=1,
+              eval_obj=True)
+w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
+
 Ys_sgd = Phi_s.dot(w_sgd)
 
 # Visualise results

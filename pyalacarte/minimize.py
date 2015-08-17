@@ -55,12 +55,13 @@ def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
                          " str.")
 
 
-def sgd(fun, w0, Data, bounds=None, batchsize=100, rate=1.0, gtol=1e-2,
+def sgd(fun, x0, Data, bounds=None, batchsize=100, rate=1.0, gtol=1e-2,
         maxiter=1e6, eval_obj=False):
 
     # Make sure we have a valid batch size
     N = Data.shape[0]
-    D = w0.shape[0]
+    x0 = np.asarray(x0)
+    D = x0.shape[0]
 
     if N < batchsize:
         batchsize = N
@@ -70,13 +71,15 @@ def sgd(fun, w0, Data, bounds=None, batchsize=100, rate=1.0, gtol=1e-2,
         lower = np.array([-np.inf if b[0] is None else b[0] for b in bounds])
         upper = np.array([np.inf if b[1] is None else b[1] for b in bounds])
 
+        print(lower, upper)
+
         if len(lower) != D:
-            raise ValueError("The dimension of the bounds does not match w0!")
+            raise ValueError("The dimension of the bounds does not match x0!")
 
     # Initialise
     gnorm = np.inf
-    Gsums = np.zeros_like(w0)
-    w = w0.copy()
+    Gsums = np.zeros_like(x0)
+    x = x0.copy()
     it = 0
 
     if eval_obj:
@@ -87,15 +90,15 @@ def sgd(fun, w0, Data, bounds=None, batchsize=100, rate=1.0, gtol=1e-2,
 
         b_ind = np.random.choice(N, batchsize, replace=False)
         if not eval_obj:
-            grad = fun(w, Data[b_ind])
+            grad = fun(x, Data[b_ind])
         else:
-            obj, grad = fun(w, Data[b_ind])
+            obj, grad = fun(x, Data[b_ind])
 
         Gsums += grad**2
         gnorm = np.linalg.norm(grad)
-        w -= rate * grad / np.sqrt(Gsums)
+        x -= rate * grad / np.sqrt(Gsums)
         if bounds is not None:
-            w = np.minimum(np.maximum(w, lower), upper)
+            x = np.minimum(np.maximum(x, lower), upper)
 
         norms.append(gnorm)
         if eval_obj:
@@ -103,7 +106,16 @@ def sgd(fun, w0, Data, bounds=None, batchsize=100, rate=1.0, gtol=1e-2,
 
         it += 1
 
-    return (w, norms) if not eval_obj else (w, norms, objs)
+    res = {'x': x,
+           'norms': norms,
+           'message': 'converge' if it < maxiter else 'maxiter'
+           }
+
+    if eval_obj:
+        res['objs'] = objs
+        res['fun'] = obj
+
+    return res
 
 
 def _scipy_wrap(fun, x0, args, method, bounds, ftol, maxiter, jac):

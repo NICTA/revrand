@@ -16,7 +16,8 @@ from __future__ import division
 import numpy as np
 import logging
 from scipy.stats.distributions import gamma
-from pyalacarte.minimize import minimize as nmin
+# from pyalacarte.minimize import minimize as nmin
+from pyalacarte.minimize import sgd
 from pyalacarte.bases import params_to_list as p2l
 from pyalacarte.bases import list_to_params as l2p
 
@@ -24,9 +25,9 @@ from pyalacarte.bases import list_to_params as l2p
 log = logging.getLogger(__name__)
 
 
-def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
-                 maxit=1000, verbose=True, var_bounds=(1e-7, None),
-                 regulariser_bounds=(1e-7, None)):
+def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
+                 maxit=1e3, rate=0.5, batchsize=100, verbose=True,
+                 var_bounds=(1e-7, None), regulariser_bounds=(1e-7, None)):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
@@ -37,9 +38,11 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
             bparams: A sequence of parameters of the basis object
             var: observation variance initial guess
             regulariser: weight regulariser (variance) initial guess
+            gtol: SGD tolerance convergence criterion
+            maxit: maximum number of iterations for SGD
+            rate: SGD learing rate.
+            batchsize: integer, number of observations to use per SGD batch.
             verbose: log learning status
-            ftol: optimiser function tolerance convergence criterion
-            maxit: maximum number of iterations for the optimiser
             var_bounds: tuple of (lower bound, upper bound) on the variance
                 parameter, None for unbounded (though it cannot be <= 0)
             regulariser_bounds: tuple of (lower bound, upper bound) on the
@@ -66,8 +69,9 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
     Cinit = gamma.rvs(0.1, regulariser/0.1, size=D)
     vparams = [minit, Cinit, var, regulariser, bparams]
 
-    def ELBO(params):
+    def ELBO(params, data):
 
+        y, X = data[:, 0], data[:, 1:]
         m, C, _var, _lambda, _theta = l2p(vparams, params)
 
         # Get Basis
@@ -122,9 +126,9 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
 
     bounds = [(None, None)]*D + [(1e-7, None)]*D + \
         [var_bounds, regulariser_bounds] + basis.bounds
-
-    res = nmin(ELBO, p2l(vparams), bounds=bounds, method='L-BFGS-B', ftol=ftol,
-               xtol=1e-8, maxiter=maxit)
+    data = np.hstack((y[:, np.newaxis], X))
+    res = sgd(ELBO, p2l(vparams), data, rate=rate, bounds=bounds, gtol=gtol,
+              maxiter=maxit, batchsize=batchsize, eval_obj=True)
 
     _, _, _, regulariser, bparams = l2p(vparams, res['x'])
     var = sqErrcache[0] / (N - 1)  # for corrected, otherwise res['x'][2]
@@ -132,7 +136,6 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-7,
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
                  .format(-res['fun'], var, regulariser, bparams))
-        if not res['success']:
-            log.info('Terminated unsuccessfully: {}.'.format(res['message']))
+        log.info('Termination condition: {}.'.format(res['message']))
 
     return bparams, var, regulariser
