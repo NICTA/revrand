@@ -79,7 +79,8 @@ params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD],
 # Train GP
 #
 
-kdef = lambda h, k: h(1e-5, 1e5, sigma) * k('gaussian', h(1e-5, 1e5, lenscale))
+kdef = lambda h, k: h(1e-5, 1e5, sigma) \
+    * k('gaussian', h(np.ones(D) * 1e-5, np.ones(D) * 1e5, lenARD))
 kfunc = gp.compose(kdef)
 
 # Set up optimisation

@@ -341,8 +341,8 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
               bounds=bounds, gtol=gtol, maxiter=maxit, batchsize=batchsize,
               eval_obj=True)
 
-    _, _, _, regulariser, bparams = l2p(vparams, res['x'])
-    var = sqErrcache[0] / (N - 1)  # for corrected, otherwise res['x'][2]
+    _, _, var, regulariser, bparams = l2p(vparams, res['x'])
+    # var = sqErrcache[0] / (N - 1)  # for corrected, otherwise res['x'][2]
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
