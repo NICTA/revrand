@@ -7,31 +7,6 @@ import matplotlib.pyplot as pl
 from pyalacarte.minimize import minimize, sgd
 from pyalacarte.bases import RadialBasis
 
-# Settings
-
-nBatches = 10
-data_fraction = 0.1
-var = 0.05
-nPoints = 1000
-nQueries = 500
-nBatches = 10
-maxIterations = 1000
-learn_rate = 1.0
-min_grad_norm = 0.01
-
-# Create dataset
-X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
-Y = np.sin(2*np.pi*X.flatten()) + np.random.randn(nPoints)*var
-centres = np.linspace(0.0, 1.0, 20)[:, np.newaxis]
-Phi = RadialBasis(centres)(X, 0.1)
-train_dat = np.hstack((Y[:, np.newaxis], Phi))
-
-Xs = np.linspace(0.0, 1.0, nQueries)[:, np.newaxis]
-Yt = np.sin(2*np.pi*Xs.flatten())
-Phi_s = RadialBasis(centres)(Xs, 0.1)
-w = np.linalg.solve(Phi.T.dot(Phi), Phi.T.dot(Y))
-Ys = Phi_s.dot(w)
-
 
 # Objective function
 def f(w, Data, sigma=1.0):
@@ -43,43 +18,72 @@ def f(w, Data, sigma=1.0):
 
     return -logp, -d
 
-# L-BFGS approach to test objective
-w0 = np.random.randn(Phi.shape[1])
-results = minimize(f, w0, args=(train_dat,), jac=True, method='L-BFGS-B')
-w_grad = results['x']
-Ys_grad = Phi_s.dot(w_grad)
 
-# SGD for learning w
-w0 = np.random.randn(Phi.shape[1])
-results = sgd(f, w0, train_dat, maxiter=1e3, batchsize=100, rate=1,
-              eval_obj=True)
-w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
+def sgd_demo():
+    # Settings
 
-Ys_sgd = Phi_s.dot(w_sgd)
+    batchsize = 10
+    var = 0.05
+    nPoints = 1000
+    nQueries = 500
+    maxIterations = 1000
+    learn_rate = 1.0
+    min_grad_norm = 0.01
 
-# Visualise results
-fig = pl.figure()
-ax = fig.add_subplot(121)
-# truth
-pl.plot(X, Y, 'r.', Xs, Yt, 'k-')
-# exact weights
-pl.plot(Xs, Ys, 'g-')
-pl.plot(Xs, Ys_grad, 'b-')
-pl.plot(Xs, Ys_sgd, 'm-')
-pl.xlabel('x')
-pl.ylabel('y')
-pl.legend(['Training', 'Truth', 'Analytic', 'LBFGS', 'SGD'])
+    # Create dataset
+    X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
+    Y = np.sin(2*np.pi*X.flatten()) + np.random.randn(nPoints)*var
+    centres = np.linspace(0.0, 1.0, 20)[:, np.newaxis]
+    Phi = RadialBasis(centres)(X, 0.1)
+    train_dat = np.hstack((Y[:, np.newaxis], Phi))
 
-ax = fig.add_subplot(122)
-pl.xlabel('iteration')
-ax.plot(range(len(costs)), costs, 'b')
-ax.set_ylabel('cost', color='b')
-for t in ax.get_yticklabels():
-    t.set_color('b')
-ax2 = ax.twinx()
-ax2.plot(range(len(gnorms)), gnorms, 'r')
-ax2.set_ylabel('gradient norms', color='r')
-for t in ax2.get_yticklabels():
-    t.set_color('r')
+    Xs = np.linspace(0.0, 1.0, nQueries)[:, np.newaxis]
+    Yt = np.sin(2*np.pi*Xs.flatten())
+    Phi_s = RadialBasis(centres)(Xs, 0.1)
+    w = np.linalg.solve(Phi.T.dot(Phi), Phi.T.dot(Y))
+    Ys = Phi_s.dot(w)
 
-pl.show()
+    # L-BFGS approach to test objective
+    w0 = np.random.randn(Phi.shape[1])
+    results = minimize(f, w0, args=(train_dat,), jac=True, method='L-BFGS-B')
+    w_grad = results['x']
+    Ys_grad = Phi_s.dot(w_grad)
+
+    # SGD for learning w
+    w0 = np.random.randn(Phi.shape[1])
+    results = sgd(f, w0, train_dat, maxiter=maxIterations, batchsize=batchsize,
+                  rate=learn_rate, eval_obj=True, gtol=min_grad_norm)
+    w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
+
+    Ys_sgd = Phi_s.dot(w_sgd)
+
+    # Visualise results
+    fig = pl.figure()
+    ax = fig.add_subplot(121)
+    # truth
+    pl.plot(X, Y, 'r.', Xs, Yt, 'k-')
+    # exact weights
+    pl.plot(Xs, Ys, 'g-')
+    pl.plot(Xs, Ys_grad, 'b-')
+    pl.plot(Xs, Ys_sgd, 'm-')
+    pl.xlabel('x')
+    pl.ylabel('y')
+    pl.legend(['Training', 'Truth', 'Analytic', 'LBFGS', 'SGD'])
+
+    ax = fig.add_subplot(122)
+    pl.xlabel('iteration')
+    ax.plot(range(len(costs)), costs, 'b')
+    ax.set_ylabel('cost', color='b')
+    for t in ax.get_yticklabels():
+        t.set_color('b')
+    ax2 = ax.twinx()
+    ax2.plot(range(len(gnorms)), gnorms, 'r')
+    ax2.set_ylabel('gradient norms', color='r')
+    for t in ax2.get_yticklabels():
+        t.set_color('r')
+
+    pl.show()
+
+
+if __name__ == "__main__":
+    sgd_demo()

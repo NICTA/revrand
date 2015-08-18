@@ -4,7 +4,7 @@
 import logging
 import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte import bases, regression, regressionSGD
+from pyalacarte import bases, regression
 from pyalacarte.validation import mll
 from scipy.spatial.distance import cdist
 import computers.gp as gp
@@ -135,7 +135,7 @@ def main():
 
     # Evidence lower-bound A la Carte learning
     if useSGD:
-        params_elbo = regressionSGD.bayesreg_sgd(Xtrain, ytrain, base, hypers)
+        params_elbo = regression.bayesreg_sgd(Xtrain, ytrain, base, hypers)
     else:
         params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
                                                usegradients=usegradients)

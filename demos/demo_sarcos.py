@@ -1,12 +1,14 @@
 #! /usr/bin/env python3
 """ A La Carte GP Application to SARCOS dataset. """
 
+import os
+import wget
 import logging
 import numpy as np
-from yavanna.supervised import regression, bases
-from yavanna.validate import smse, msll
-from yavanna.unsupervised.transforms import whiten, whiten_apply
 import computers.gp as gp
+from scipy.io import loadmat
+from pyalacarte import regression, bases
+from pyalacarte.validation import smse, msll
 
 
 #
@@ -18,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 
 lenscale = 10
 sigma = 100
-noise = 1
+noise = 2
 nbases = 400
 gp_Ntrain = 1024
 
@@ -27,7 +29,19 @@ gp_Ntrain = 1024
 # Load data
 #
 
-# TODO: Put it into mithlond when ready
+# Pull this down and process if not present
+if not os.path.exists('sarcos_test.npy') or \
+        not os.path.exists('sarcos_train.npy'):
+
+    wget.download('http://www.gaussianprocess.org/gpml/data/sarcos_inv.mat')
+    wget.download('http://www.gaussianprocess.org/gpml/data/sarcos_inv_test'
+                  '.mat')
+    sarcostrain = loadmat('sarcos_inv.mat')['sarcos_inv']
+    sarcostest = loadmat('sarcos_inv_test.mat')['sarcos_inv_test']
+    np.save('sarcos_train.npy', sarcostrain)
+    np.save('sarcos_test.npy', sarcostest)
+    del sarcostest, sarcostrain
+
 sarcos_train = np.load('sarcos_train.npy')
 sarcos_test = np.load('sarcos_test.npy')
 
@@ -40,11 +54,25 @@ Ntrain, D = X_train.shape
 
 
 #
-# Whitening (as opposed to ARD kernel)
+# Whitening
 #
 
-X_train, U, l, Xmean = whiten(X_train)
-X_test = whiten_apply(X_test, U, l, Xmean)
+# X_train, U, l, Xmean = whiten(X_train)
+# X_test = whiten_apply(X_test, U, l, Xmean)
+
+
+#
+# Train A la Carte
+#
+
+base = bases.RandomRBF_ARD(nbases, D)
+lenARD = lenscale * np.ones(D)
+params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD],
+                                 var=noise**2, maxit=5e3)
+
+# base = bases.RandomRBF(nbases, D)
+# params = regression.alacarte_learn(X_train, y_train, base, (lenscale,),
+#                                    var=noise**2)
 
 
 #
@@ -55,7 +83,7 @@ kdef = lambda h, k: h(1e-5, 1e5, sigma) * k('gaussian', h(1e-5, 1e5, lenscale))
 kfunc = gp.compose(kdef)
 
 # Set up optimisation
-learning_params = gp.LearningParams()
+learning_params = gp.OptConfig()
 learning_params.sigma = gp.auto_range(kdef)
 learning_params.noise = gp.Range([1e-5], [1e5], [noise])
 learning_params.walltime = 60
@@ -68,20 +96,6 @@ y_train_sub = y_train[train_ind]
 # Learn hyperparameters
 hyper_params = gp.learn(X_train_sub, y_train_sub, kfunc, learning_params)
 regressor = gp.condition(X_train_sub, y_train_sub, kfunc, hyper_params)
-
-
-#
-# Train A la Carte
-#
-
-base = bases.RandomRBF_ARD(nbases, D) + bases.RandomRBF(nbases, D)
-lenARD = lenscale * np.ones(D + 1)
-params = regression.alacarte_learn(X_train, y_train, base, lenARD,
-                                   var=noise**2, usegradients=False)
-
-# base = bases.RandomRBF(nbases, D)
-# params = regression.alacarte_learn(X_train, y_train, base, (lenscale,),
-#                                    var=noise**2)
 
 
 #
@@ -99,7 +113,7 @@ Sy_gp = np.sqrt(Vy_gp)
 # Predict A la Carte
 #
 
-Ey, Vf, Vy = regression.alacarte_predict(X_test, X_train, y_train, base,
+Ey, Vf, Vy = regression.bayesreg_predict(X_test, X_train, y_train, base,
                                          *params)
 Sy = np.sqrt(Vy)
 

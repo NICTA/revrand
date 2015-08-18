@@ -15,6 +15,7 @@ setup(
     install_requires=[
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',
+        'wget >= 2.2',
         # NLopt >= 2.4.2
     ]
 )
