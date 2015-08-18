@@ -520,10 +520,9 @@ class RandomRBF(RadialBasis):
         N, D = X.shape
         self._checkD(D)
 
-        sig = 4 / (np.pi * lenscale)
-        WX = np.dot(X, self.W * sig)
+        WX = np.dot(X, self.W / lenscale)
 
-        return np.sqrt(2/self.n) * np.hstack((np.cos(WX), np.sin(WX)))
+        return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
     def grad(self, X, lenscale):
         """
@@ -543,14 +542,11 @@ class RandomRBF(RadialBasis):
         N, D = X.shape
         self._checkD(D)
 
-        sig = 4 / (np.pi * lenscale)
-        dsig = - 4 / (np.pi * lenscale**2)
-        WX = np.dot(X, self.W)
-        dWX = WX * dsig
-        WX *= sig
+        WX = np.dot(X, self.W / lenscale)
+        dWX = - WX / lenscale
 
         return [np.hstack((-dWX * np.sin(WX), dWX * np.cos(WX)))
-                * np.sqrt(2/self.n)]
+                / np.sqrt(self.n)]
 
     def _checkD(self, D):
         if D != self.d:
@@ -594,10 +590,9 @@ class RandomRBF_ARD(RandomRBF):
         N, D = X.shape
         self._checkD(D, len(lenscales))
 
-        sig = 4 / (np.pi * np.asarray(lenscales))[:, np.newaxis]
-        WX = np.dot(X, sig * self.W)
+        WX = np.dot(X, self.W / lenscales[:, np.newaxis])
 
-        return np.sqrt(2/self.n) * np.hstack((np.cos(WX), np.sin(WX)))
+        return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
     def grad(self, X, lenscales):
         """ Get the gradients of this basis w.r.t. the length scales.
@@ -617,15 +612,14 @@ class RandomRBF_ARD(RandomRBF):
         N, D = X.shape
         self._checkD(D, len(lenscales))
 
-        sig = 4 / (np.pi * np.asarray(lenscales))[:, np.newaxis]
-        WX = np.dot(X, sig * self.W)
+        WX = np.dot(X, self.W / lenscales[:, np.newaxis])
         sinWX = - np.sin(WX)
         cosWX = np.cos(WX)
 
         dPhi = []
         for i, l in enumerate(lenscales):
-            dWX = np.outer(X[:, i], - 4 / (np.pi * l**2) * self.W[i, :])
-            dPhi.append(np.hstack((dWX*sinWX, dWX*cosWX)) * np.sqrt(2/self.n))
+            dWX = np.outer(X[:, i], - 1. / l**2 * self.W[i, :])
+            dPhi.append(np.hstack((dWX*sinWX, dWX*cosWX)) / np.sqrt(self.n))
 
         return dPhi
 
@@ -719,9 +713,8 @@ class FastFood(RandomRBF):
 
         self._checkD(X.shape[1])
 
-        VX = self.__makeVX(X)
-        dVX = - VX / lenscale**2
-        VX /= lenscale
+        VX = self.__makeVX(X) / lenscale
+        dVX = - VX / lenscale
 
         return [np.hstack((-dVX * np.sin(VX), dVX * np.cos(VX)))
                 / np.sqrt(self.n)]
