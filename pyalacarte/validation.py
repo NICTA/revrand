@@ -50,3 +50,11 @@ def normll(y_true, y_predict, y_var):
     """
 
     return -0.5 * (np.log(2 * np.pi * y_var) + (y_true - y_predict)**2 / y_var)
+
+
+def logloss(ys, pys):
+    return -(ys * np.log(pys) + (1 - ys) * np.log(1 - pys)).mean()
+
+
+def errrate(ys, pys):
+    return float((ys != (pys >= 0.5)).sum()) / ys.shape[0]
