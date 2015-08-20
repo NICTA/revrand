@@ -4,11 +4,7 @@ from __future__ import division
 
 import numpy as np
 import logging
-from scipy.stats.distributions import gamma
-from pyalacarte.linalg import jitchol, logdet
 from pyalacarte.minimize import minimize, sgd
-# from pyalacarte.bases import params_to_list as p2l
-# from pyalacarte.bases import list_to_params as l2p
 
 
 # Set up logging

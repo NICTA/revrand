@@ -23,9 +23,10 @@ dig1 = 3
 dig2 = 5
 
 # A la Carte classifier setting
-nbases = 1000
+nbases = 2000
 lenscale = 5
 reg = 1e3
+doSGD = False
 
 
 #
@@ -58,10 +59,12 @@ Ys = np.concatenate((np.ones(ind1.sum()), np.zeros(ind2.sum())))
 
 # Phi = bases.LinearBasis(True)  # + bases.RandomRBF(nbases, X.shape[1])
 Phi = bases.RandomRBF(nbases, X.shape[1])
-# weights = classification.logistic_map(X, Y, Phi, (lenscale,), regulariser=reg)
-# weights = classification.logistic_map(X, Y, Phi, (), regulariser=reg)
-# weights = classification.logistic_sgd(X, Y, Phi, (), regulariser=reg)
-weights = classification.logistic_sgd(X, Y, Phi, (lenscale,), regulariser=reg)
+if doSGD:
+    weights = classification.logistic_sgd(X, Y, Phi, (lenscale,),
+                                          regulariser=reg)
+else:
+    weights = classification.logistic_map(X, Y, Phi, (lenscale,),
+                                          regulariser=reg)
 
 lreg = LogisticRegression(penalty='l2')
 lreg.fit(X, Y)
