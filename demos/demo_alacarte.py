@@ -21,16 +21,19 @@ def main():
     #
 
     # Algorithmic properties
-    nbases = 200
-    lenscale = 0.1  # For all basis functions that take lengthscales
+    nbases = 300
+    lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.2  # For the Combo basis
     noise = 0.2
     order = 5  # For polynomial basis
-    usegradients = True
+    rate = 0.7
+    maxiter = 1e3
+    reg = 0.1
+    usegradients = False
     useSGD = True
 
-    N = 5e2
-    Ns = 1e3
+    N = 1000
+    Ns = 250
 
     # Dataset selection
     # dataset = 'sinusoid'
@@ -128,19 +131,21 @@ def main():
 
     # Log marginal likelihood A La Carte learning
     params_lml = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
-                                         usegradients=usegradients)
-    Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
-                                                   *params_lml)
+                                         usegradients=usegradients,
+                                         regulariser=reg)
+    Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, base, *params_lml)
     Sy_l = np.sqrt(Vy_l)
 
     # Evidence lower-bound A la Carte learning
     if useSGD:
-        params_elbo = regression.bayesreg_sgd(Xtrain, ytrain, base, hypers)
+        params_elbo = regression.bayesreg_sgd(Xtrain, ytrain, base, hypers,
+                                              rate=rate, maxit=maxiter,
+                                              regulariser=reg)
     else:
         params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
-                                               usegradients=usegradients)
-    Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, Xtrain, ytrain, base,
-                                                   *params_elbo)
+                                               usegradients=usegradients,
+                                               regulariser=reg)
+    Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
     #
@@ -164,11 +169,11 @@ def main():
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
 
-    log.info("A la Carte LML: {}, noise: {}, hypers: {}"
-             .format(LL_lml, np.sqrt(params_lml[1]), params_lml[0]))
-    log.info("A la Carte ELBO: {}, noise: {}, hypers: {}"
-             .format(LL_elbo, np.sqrt(params_elbo[1]), params_elbo[0]))
-    log.info("GP: {}, noise: {}, hypers: {}"
+    log.info("A la Carte (LML), LL: {}, noise: {}, hypers: {}"
+             .format(LL_lml, np.sqrt(params_lml[3]), params_lml[2]))
+    log.info("A la Carte (ELBO), LL: {}, noise: {}, hypers: {}"
+             .format(LL_elbo, np.sqrt(params_elbo[3]), params_elbo[2]))
+    log.info("GP, LL: {}, noise: {}, hypers: {}"
              .format(LL_gp, hyper_params[1], hyper_params[0]))
 
     #
@@ -198,6 +203,7 @@ def main():
 
     pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
                'GP'])
+
     pl.show()
 
 

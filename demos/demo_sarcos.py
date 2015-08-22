@@ -20,9 +20,13 @@ logging.basicConfig(level=logging.INFO)
 
 lenscale = 10
 sigma = 100
-noise = 2
-nbases = 400
+noise = 1
+regulariser = 10
+nbases = 1000
 gp_Ntrain = 1024
+maxit = 1e3
+rate = 1.0
+batchsize = 100
 
 
 #
@@ -61,19 +65,20 @@ Ntrain, D = X_train.shape
 # X_test = whiten_apply(X_test, U, l, Xmean)
 
 
+# Get random subset of data for training the GP
+train_ind = np.random.choice(range(Ntrain), size=gp_Ntrain, replace=False)
+X_train_sub = X_train[train_ind, :]
+y_train_sub = y_train[train_ind]
+
 #
 # Train A la Carte
 #
 
 base = bases.RandomRBF_ARD(nbases, D)
 lenARD = lenscale * np.ones(D)
-params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD],
-                                 var=noise**2, maxit=5e3)
-
-# base = bases.RandomRBF(nbases, D)
-# params = regression.alacarte_learn(X_train, y_train, base, (lenscale,),
-#                                    var=noise**2)
-
+params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD], rate=rate,
+                                 var=noise**2, regulariser=regulariser,
+                                 maxit=maxit, batchsize=batchsize)
 
 #
 # Train GP
@@ -87,12 +92,8 @@ kfunc = gp.compose(kdef)
 learning_params = gp.OptConfig()
 learning_params.sigma = gp.auto_range(kdef)
 learning_params.noise = gp.Range([1e-5], [1e5], [noise])
-learning_params.walltime = 60
+learning_params.walltime = 300
 
-# Get random subset of data for training
-train_ind = np.random.choice(range(Ntrain), size=gp_Ntrain, replace=False)
-X_train_sub = X_train[train_ind, :]
-y_train_sub = y_train[train_ind]
 
 # Learn hyperparameters
 hyper_params = gp.learn(X_train_sub, y_train_sub, kfunc, learning_params)
@@ -114,8 +115,7 @@ Sy_gp = np.sqrt(Vy_gp)
 # Predict A la Carte
 #
 
-Ey, Vf, Vy = regression.bayesreg_predict(X_test, X_train, y_train, base,
-                                         *params)
+Ey, Vf, Vy = regression.bayesreg_predict(X_test, base, *params)
 Sy = np.sqrt(Vy)
 
 
@@ -128,4 +128,4 @@ log.info("Subset GP smse = {}, msll = {},\n\thypers = {}, noise = {}."
                  hyper_params[0], hyper_params[1]))
 log.info("A la Carte smse = {}, msll = {},\n\thypers = {}, noise = {}."
          .format(smse(y_test, Ey), msll(y_test, Ey, Vy, y_train),
-                 params[0], np.sqrt(params[1])))
+                 params[2], np.sqrt(params[3])))

@@ -57,16 +57,20 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     """
 
     N, d = X.shape
+    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     vparams = [var, regulariser, bparams]
+
+    # Caches for returning optimal params
+    LMLcache = [-np.inf]
+    LCcache = []
 
     def LML(params):
 
         _var, _lambda, _theta = l2p(vparams, params)
 
         # Common computations
-        Phi = basis(X, *_theta)                      # N x D
+        Phi = basis(X, *_theta)                       # N x D
         PhiPhi = Phi.T.dot(Phi)                       # D x D
-        D = Phi.shape[1]
         LC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
         iCPhi = cho_solve(LC, Phi.T)                            # D x N
         yiK = y.T / _var - (y.T.dot(Phi)).dot(iCPhi) / _var**2  # 1 x N
@@ -80,6 +84,10 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         if verbose:
             log.info("LML = {}, var = {}, reg = {}, bparams = {}."
                      .format(LML, _var, _lambda, _theta))
+
+        if LML > LMLcache[0]:
+            LMLcache[0] = LML
+            LCcache[:] = LC
 
         if not usegradients:
             return -LML
@@ -120,7 +128,11 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         if not res['success']:
             log.info('Terminated unsuccessfully: {}.'.format(res['message']))
 
-    return bparams, var, regulariser
+    # Posterior parameters
+    C = cho_solve(LCcache, np.eye(D))
+    m = C.dot(basis(X, *bparams).T.dot(y)) / var
+
+    return m, C, bparams, var
 
 
 def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
@@ -154,11 +166,13 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     """
 
     N, d = X.shape
-
-    # Caches for correcting the true variance
-    sqErrcache = [0]
-    ELBOcache = [-np.inf]
+    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     vparams = [var, regulariser, bparams]
+
+    # Caches for returning optimal params
+    ELBOcache = [-np.inf]
+    mcache = np.zeros(D)
+    Ccache = np.zeros(D)
 
     def ELBO(params):
 
@@ -167,7 +181,6 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
         PhiPhi = Phi.T.dot(Phi)
-        D = Phi.shape[1]
 
         # Posterior Parameters
         LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
@@ -192,7 +205,8 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
 
         # Cache square error to compute corrected variance
         if ELBO > ELBOcache[0]:
-            sqErrcache[0] = sqErr
+            mcache[:] = m
+            Ccache[:] = C
 
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
@@ -224,8 +238,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     res = minimize(ELBO, p2l(vparams), bounds=bounds, method=method, ftol=ftol,
                    xtol=1e-8, maxiter=maxit)
 
-    _, regulariser, bparams = l2p(vparams, res['x'])
-    var = sqErrcache[0] / (N - 1)  # for corrected
+    var, regulariser, bparams = l2p(vparams, res['x'])
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
@@ -233,12 +246,13 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
         if not res['success']:
             log.info('Terminated unsuccessfully: {}.'.format(res['message']))
 
-    return bparams, var, regulariser
+    return mcache, Ccache, bparams, var
 
 
 def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
                  maxit=1e3, rate=0.5, batchsize=100, verbose=True,
-                 var_bounds=(1e-7, None), regulariser_bounds=(1e-7, None)):
+                 var_bounds=(1e-7, None), regulariser_bounds=(1e-7, None),
+                 C_bounds=(1e-7, None)):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
@@ -259,6 +273,9 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
             regulariser_bounds, (tuple): of (lower bound, upper bound) on the
                 regulariser parameter, None for unbounded (though it cannot be
                 <= 0)
+            C_bounds, (tuple): of (lower bound, upper bound) on the approximate
+                weight posterior parameter, None for unbounded (though it
+                cannot be <= 0)
 
         Returns:
             (tuple): with elements,
@@ -270,20 +287,20 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
 
     N, d = X.shape
 
-    # Caches for correcting the true variance
-    sqErrcache = [0]
-    ELBOcache = [-np.inf]
-
     # Initialise parameters
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     minit = np.random.randn(D) * 1e-2
     Cinit = gamma.rvs(0.1, regulariser/0.1, size=D)
     vparams = [minit, Cinit, var, regulariser, bparams]
 
+    # Caches for returning optimal params
+    m = np.zeros(D)
+    C = np.zeros(D)
+
     def ELBO(params, data):
 
         y, X = data[:, 0], data[:, 1:]
-        m, C, _var, _lambda, _theta = l2p(vparams, params)
+        m[:], C[:], _var, _lambda, _theta = l2p(vparams, params)
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
@@ -305,10 +322,6 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
                        + D * np.log(_lambda)
                        - D)
 
-        # Cache square error to compute corrected variance
-        if ELBO > ELBOcache[0]:
-            sqErrcache[0] = sqErr
-
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
@@ -320,7 +333,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
         gC = 0.5 * (- PPdiag / _var - 1./_lambda + 1./C)
 
         # Grad var
-        gvar = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
+        gvar = 0.5 * (- N / _var + (sqErr + TrPhiPhiC) / _var**2)
 
         # Grad reg
         greg = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
@@ -341,29 +354,28 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
               bounds=bounds, gtol=gtol, maxiter=maxit, batchsize=batchsize,
               eval_obj=True)
 
-    _, _, _, regulariser, bparams = l2p(vparams, res['x'])
-    var = sqErrcache[0] / (N - 1)  # for corrected, otherwise res['x'][2]
+    _, _, var, regulariser, bparams = l2p(vparams, res['x'])
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
                  .format(-res['fun'], var, regulariser, bparams))
         log.info('Termination condition: {}.'.format(res['message']))
 
-    return bparams, var, regulariser
+    return m, C, bparams, var
 
 
-def bayesreg_predict(X_star, X, y, basis, bparams, var, regulariser):
+def bayesreg_predict(X_star, basis, m, C, bparams, var):
     """ Predict using Bayesian linear regression.
 
         Arguments:
-            X_star: N_starxD array query input dataset (N_star samples,
+            X_star: (N_star,D) array query input dataset (N_star samples,
                 D dimensions)
-            X: NxD array training input dataset (N samples, D dimensions)
-            y: N array training targets (N samples)
+            m: (D,) array of regression weights (posterior)
+            C: (D,) or (D, D) array of regression weight covaariances
+               (posterior)
             basis: A basis object, see bases.py
             bparams: A sequence of hyperparameters of the basis object
             var: observation variance
-            regulariser: weight regulariser (variance)
 
         Returns:
             array: The expected value of y_star for the query inputs, X_star
@@ -374,13 +386,12 @@ def bayesreg_predict(X_star, X, y, basis, bparams, var, regulariser):
                of shape (N_star,)
     """
 
-    Phi = basis(X, *bparams)
     Phi_s = basis(X_star, *bparams)
-    N, D = Phi.shape
 
-    LC = jitchol(np.diag(np.ones(D) / regulariser) + Phi.T.dot(Phi) / var)
-
-    Ey = Phi_s.dot(cho_solve(LC, Phi.T.dot(y))) / var
-    Vf = (Phi_s * cho_solve(LC, Phi_s.T).T).sum(axis=1)
+    Ey = Phi_s.dot(m)
+    if C.ndim == 2:
+        Vf = (Phi_s.dot(C) * Phi_s).sum(axis=1)
+    else:
+        Vf = ((Phi_s * C) * Phi_s).sum(axis=1)
 
     return Ey, Vf, Vf + var
