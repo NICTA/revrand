@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import matplotlib.pyplot as pl
 from pyalacarte import bases, regression
-from pyalacarte.validation import mll
+from pyalacarte.validation import mll, smse
 from scipy.spatial.distance import cdist
 import computers.gp as gp
 
@@ -21,16 +21,16 @@ def main():
     #
 
     # Algorithmic properties
-    nbases = 300
-    lenscale = 1  # For all basis functions that take lengthscales
+    nbases = 200
+    lenscale = 0.1  # For all basis functions that take lengthscales
     lenscale2 = 0.2  # For the Combo basis
     noise = 0.2
     order = 5  # For polynomial basis
-    rate = 0.7
+    rate = 0.001
     maxiter = 1e3
-    reg = 0.1
-    usegradients = False
-    useSGD = True
+    reg = 1e-5
+    usegradients = True
+    useSGD = False
 
     N = 1000
     Ns = 250
@@ -168,13 +168,17 @@ def main():
     LL_lml = mll(ftest, Ey_l, Vf_l)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
+    smse_lml = smse(ftest, Ey_l)
+    smse_elbo = smse(ftest, Ey_e)
+    smse_gp = smse(ftest, Ey_gp)
 
-    log.info("A la Carte (LML), LL: {}, noise: {}, hypers: {}"
-             .format(LL_lml, np.sqrt(params_lml[3]), params_lml[2]))
-    log.info("A la Carte (ELBO), LL: {}, noise: {}, hypers: {}"
-             .format(LL_elbo, np.sqrt(params_elbo[3]), params_elbo[2]))
-    log.info("GP, LL: {}, noise: {}, hypers: {}"
-             .format(LL_gp, hyper_params[1], hyper_params[0]))
+    log.info("A la Carte (LML), LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_lml, smse_lml, np.sqrt(params_lml[3]), params_lml[2]))
+    log.info("A la Carte (ELBO), LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
+                     params_elbo[2]))
+    log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
 
     #
     # Plot

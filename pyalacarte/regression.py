@@ -293,14 +293,10 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
     Cinit = gamma.rvs(0.1, regulariser/0.1, size=D)
     vparams = [minit, Cinit, var, regulariser, bparams]
 
-    # Caches for returning optimal params
-    m = np.zeros(D)
-    C = np.zeros(D)
-
     def ELBO(params, data):
 
         y, X = data[:, 0], data[:, 1:]
-        m[:], C[:], _var, _lambda, _theta = l2p(vparams, params)
+        m, C, _var, _lambda, _theta = l2p(vparams, params)
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
@@ -354,7 +350,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
               bounds=bounds, gtol=gtol, maxiter=maxit, batchsize=batchsize,
               eval_obj=True)
 
-    _, _, var, regulariser, bparams = l2p(vparams, res['x'])
+    m, C, var, regulariser, bparams = l2p(vparams, res['x'])
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
