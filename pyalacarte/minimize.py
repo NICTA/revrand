@@ -116,9 +116,9 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
             raise ValueError("The dimension of the bounds does not match x0!")
 
     # Initialise
-    batchgen = sgd_batches(N, batchsize)
+    batchgen = _sgd_batches(N, batchsize)
     gnorm = np.inf
-    Gsums = np.zeros_like(x0)
+    Gsum = np.zeros_like(x0)
     it = 0
 
     # Learning Records
@@ -133,12 +133,30 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
         else:
             obj, grad = fun(x, Data[next(batchgen)], *args)
 
-        Gsums += grad**2
-        gnorm = np.linalg.norm(grad)
-        x -= rate * grad / np.sqrt(Gsums)
+        # Truncate gradients if bounded
         if bounds is not None:
+            xlower = x <= lower
+            grad[xlower] = np.minimum(grad[xlower], 0)
+            xupper = x >= upper
+            grad[xupper] = np.maximum(grad[xupper], 0)
+
+        Gsum += np.power(grad, 2)
+        x -= rate * grad / np.sqrt(Gsum)
+
+        # if it == 10:
+        #     reset = Gsum > 100 * grad**2
+        #     Gsum[reset] = 0
+
+        # print("sgd:", x[-2], grad[-2], Gsum[-2])
+        # import time; time.sleep(0.5)
+
+        # Trucate steps if bounded
+        if bounds is not None:
+            # x, grad, Gsum = _trunc_grad(x, grad, Gsum, rate, lower, x <= lower)
+            # x, grad, Gsum = _trunc_grad(x, grad, Gsum, rate, upper, x >= upper)
             x = np.minimum(np.maximum(x, lower), upper)
 
+        gnorm = np.linalg.norm(grad)
         norms.append(gnorm)
         if eval_obj:
             objs.append(obj)
@@ -158,7 +176,19 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
     return res
 
 
-def sgd_batches(N, batchsize):
+def _trunc_grad(x, grad, gradssum, rate, bound, condition):
+
+    x[condition] = bound[condition]
+    gradssum[condition] -= grad[condition]**2
+
+    grad[condition] = 0  #x[condition] - bound[condition]
+        # * np.sqrt(gradssum[condition]) / rate
+    # gradssum[condition] += grad[condition]**2
+
+    return x, grad, gradssum
+
+
+def _sgd_batches(N, batchsize):
     """ Batch index generator for SGD that will yeild random batches, and touch
         all of the data (given sufficient interations).
 
@@ -194,9 +224,9 @@ def _nlopt_wrap(fun, x0, args, method, bounds, ftol, maxiter, xtol):
     def obj(x, grad=None):
 
         if grad:
-            obj, grad[:] = fun(x, args) if args else fun(x)
+            obj, grad[:] = fun(x, *args) if args else fun(x)
         else:
-            obj = fun(x, args) if args else fun(x)
+            obj = fun(x, *args) if args else fun(x)
 
         return obj
 
