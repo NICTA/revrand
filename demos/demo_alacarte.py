@@ -26,10 +26,10 @@ def main():
     lenscale2 = 0.2  # For the Combo basis
     noise = 0.2
     order = 5  # For polynomial basis
-    rate = 0.1
+    rate = 0.9
     maxiter = 5e3
     batchsize = 100
-    reg = 0.01
+    reg = 1
     usegradients = True
     useSGD = True
 

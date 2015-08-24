@@ -144,16 +144,13 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
         x -= rate * grad / np.sqrt(Gsum)
 
         # if it == 10:
-        #     reset = Gsum > 100 * grad**2
-        #     Gsum[reset] = 0
+        #     Gsum[Gsum > 100 * grad**2] = 0
 
         # print("sgd:", x[-2], grad[-2], Gsum[-2])
         # import time; time.sleep(0.5)
 
         # Trucate steps if bounded
         if bounds is not None:
-            # x, grad, Gsum = _trunc_grad(x, grad, Gsum, rate, lower, x <= lower)
-            # x, grad, Gsum = _trunc_grad(x, grad, Gsum, rate, upper, x >= upper)
             x = np.minimum(np.maximum(x, lower), upper)
 
         gnorm = np.linalg.norm(grad)

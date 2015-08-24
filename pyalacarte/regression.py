@@ -26,7 +26,7 @@ from pyalacarte.bases import list_to_params as l2p
 log = logging.getLogger(__name__)
 
 
-def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
+def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
                  maxit=1000, verbose=True, var_bounds=(1e-7, None),
                  regulariser_bounds=(1e-14, None), usegradients=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
@@ -135,7 +135,7 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     return m, C, bparams, var
 
 
-def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
+def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
                   maxit=1000, verbose=True, var_bounds=(1e-7, None),
                   regulariser_bounds=(1e-14, None), usegradients=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
@@ -249,7 +249,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1e-3, ftol=1e-5,
     return mcache, Ccache, bparams, var
 
 
-def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
+def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
                  maxit=1e3, rate=0.5, batchsize=100, verbose=True,
                  var_bounds=(1e-7, None), regulariser_bounds=(1e-14, None),
                  C_bounds=(1e-14, None)):
@@ -291,16 +291,16 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     minit = np.random.randn(D)
     Cinit = gamma.rvs(0.1, regulariser/0.1, size=D)
-    vparams = [minit, Cinit, 1./var, 1./regulariser, bparams]
+    vparams = [minit, Cinit, var, regulariser, bparams]
 
-    # def ELBO(params, data):
-    def ELBO(params):
+    def ELBO(params, data):
+    # def ELBO(params):
 
-        # y, X = data[:, 0], data[:, 1:]
-        m, C, alpha, beta, theta = l2p(vparams, params)
+        y, X = data[:, 0], data[:, 1:]
+        m, C, _var, _lambda, _theta = l2p(vparams, params)
 
         # Get Basis
-        Phi = basis(X, *theta)                      # N x D
+        Phi = basis(X, *_theta)                      # N x D
         PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
@@ -310,51 +310,50 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1e-3, gtol=1e-1,
 
         # Calculate ELBO
         TrPhiPhiC = (PPdiag * C).sum()
-        ELBO = -0.5 * (N * (np.log(2 * np.pi) - np.log(alpha))
-                       + sqErr * alpha
-                       + TrPhiPhiC * alpha
-                       + C.sum() * beta
+        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
+                       + sqErr / _var
+                       + TrPhiPhiC / _var
+                       + C.sum() / _lambda
                        - np.log(C).sum()
-                       + mm * beta
-                       - D * np.log(beta)
+                       + mm / _lambda
+                       + D * np.log(_lambda)
                        - D)
 
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
-                     .format(ELBO, 1./alpha, 1./beta, theta))
+                     .format(ELBO, _var, _lambda, _theta))
 
         # Mean gradient
-        dm = Err.dot(Phi) * alpha - m * beta
+        dm = Err.dot(Phi) / _var - m / _lambda
 
         # Covariance gradient
-        dC = - 0.5 * (PPdiag * alpha + beta - 1./C)
+        dC = - 0.5 * (PPdiag / _var + 1. / _lambda - 1. / C)
 
         # Grad alpha
-        dalpha = 0.5 * (N / alpha - (sqErr + TrPhiPhiC))
+        dvar = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
 
         # Grad reg
-        dbeta = - 0.5 * (C.sum() + mm - D / beta)
+        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
-        dPhis = basis.grad(X, *theta) if len(theta) > 0 else []
+        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for i,  dPhi in enumerate(dPhis):
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag*C).sum()) * alpha
+            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag*C).sum()) / _var
             dtheta.append(dt)
 
-        return -ELBO, -np.array(p2l([dm, dC, dalpha, dbeta, dtheta]))
+        return -ELBO, -np.array(p2l([dm, dC, dvar, dlambda, dtheta]))
 
     bounds = [(None, None)]*D + [C_bounds]*D + \
         [var_bounds, regulariser_bounds] + basis.bounds
-    # res = sgd(ELBO, p2l(vparams), np.hstack((y[:, np.newaxis], X)), rate=rate,
-    #           bounds=bounds, gtol=gtol, maxiter=maxit, batchsize=batchsize,
-    #           eval_obj=True)
-    res = minimize(ELBO, p2l(vparams), bounds=bounds, method='L-BFGS-B',
-                   ftol=1e-5, xtol=1e-8, maxiter=maxit)
+    res = sgd(ELBO, p2l(vparams), np.hstack((y[:, np.newaxis], X)), rate=rate,
+              bounds=bounds, gtol=gtol, maxiter=maxit, batchsize=batchsize,
+              eval_obj=True)
+    # res = minimize(ELBO, p2l(vparams), bounds=bounds, method='L-BFGS-B',
+    #                ftol=1e-5, xtol=1e-8, maxiter=maxit)
 
-    m, C, alpha, beta, bparams = l2p(vparams, res['x'])
-    var, regulariser = 1./alpha, 1./beta
+    m, C, var, regulariser, bparams = l2p(vparams, res['x'])
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
