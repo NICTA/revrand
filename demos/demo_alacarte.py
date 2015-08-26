@@ -22,18 +22,18 @@ def main():
 
     # Algorithmic properties
     nbases = 200
-    lenscale = 0.1  # For all basis functions that take lengthscales
+    lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.2  # For the Combo basis
-    noise = 0.2
+    noise = 0.5
     order = 5  # For polynomial basis
-    rate = 0.9
+    rate = 0.3
     maxiter = 5e3
-    batchsize = 100
+    batchsize = 10
     reg = 1
     usegradients = True
     useSGD = True
 
-    N = 1000
+    N = 500
     Ns = 250
 
     # Dataset selection
@@ -57,21 +57,21 @@ def main():
 
     # Sinusoid
     if dataset == 'sinusoid':
-        Xtrain = np.linspace(-2*np.pi, 2*np.pi, N)[:, np.newaxis]
+        Xtrain = np.linspace(-2 * np.pi, 2 * np.pi, N)[:, np.newaxis]
         ytrain = np.sin(Xtrain).flatten() + np.random.randn(N) * noise
-        Xtest = np.linspace(-2*np.pi, 2*np.pi, Ns)[:, np.newaxis]
+        Xtest = np.linspace(-2 * np.pi, 2 * np.pi, Ns)[:, np.newaxis]
         ftest = np.sin(Xtest).flatten()
 
     # Random RBF GP
     elif dataset == 'gp1D':
 
-        X = np.linspace(-2*np.pi, 2*np.pi, N)
+        X = np.linspace(-2 * np.pi, 2 * np.pi, N)
         Xtrain = X[:, np.newaxis]
-        Xtest = np.linspace(-2*np.pi, 2*np.pi, Ns)[:, np.newaxis]
+        Xtest = np.linspace(-2 * np.pi, 2 * np.pi, Ns)[:, np.newaxis]
         Xcat = np.vstack((Xtrain, Xtest))
 
-        K = np.exp(-cdist(Xcat, Xcat, metric='sqeuclidean')
-                   / (2*lenscale_true**2))
+        K = np.exp(-cdist(Xcat, Xcat, metric='sqeuclidean') /
+                   (2 * lenscale_true**2))
         U, S, V = np.linalg.svd(K)
         L = U.dot(np.diag(np.sqrt(S))).dot(V)
         f = np.random.randn(N + Ns).dot(L)
@@ -108,14 +108,14 @@ def main():
     # Make real GP
     #
 
-    # kdef = lambda h, k: h(1e-5, 1e2, 1)*k('gaussian', h(1e-5, 1e5, lenscale))
-    # kfunc = gp.compose(kdef)
+    kdef = lambda h, k: h(1e-5, 1e2, 1) * k('gaussian', h(1e-5, 1e5, lenscale))
+    kfunc = gp.compose(kdef)
 
-    # # Set up optimisation
-    # learning_params = gp.OptConfig()
-    # learning_params.sigma = gp.auto_range(kdef)
-    # learning_params.noise = gp.Range([1e-5], [1e5], [1])
-    # learning_params.walltime = 60
+    # Set up optimisation
+    learning_params = gp.OptConfig()
+    learning_params.sigma = gp.auto_range(kdef)
+    learning_params.noise = gp.Range([1e-5], [1e5], [1])
+    learning_params.walltime = 60
 
     #
     # Learn regression parameters and predict
@@ -131,22 +131,22 @@ def main():
         raise ValueError('Invalid basis!')
 
     # Log marginal likelihood A La Carte learning
-    # params_lml = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
-    #                                      usegradients=usegradients,
-    #                                      regulariser=reg, var=noise**2)
-    # Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, base, *params_lml)
-    # Sy_l = np.sqrt(Vy_l)
+    params_lml = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
+                                         usegradients=usegradients,
+                                         regulariser=reg, var=noise**2)
+    Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, base, *params_lml)
+    Sy_l = np.sqrt(Vy_l)
 
     # Evidence lower-bound A la Carte learning
     if useSGD:
         params_elbo = regression.bayesreg_sgd(Xtrain, ytrain, base, hypers,
                                               rate=rate, maxit=maxiter,
-                                              regulariser=reg, var=noise**2)
+                                              regulariser=reg, var=noise**2,
+                                              batchsize=batchsize)
     else:
         params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
                                                usegradients=usegradients,
-                                               regulariser=reg, var=noise**2,
-                                               batchsize=batchsize)
+                                               regulariser=reg, var=noise**2)
     Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
@@ -154,33 +154,33 @@ def main():
     # Learn GP and predict
     #
 
-    # hyper_params = gp.learn(Xtrain, ytrain, kfunc, learning_params)
-    # regressor = gp.condition(Xtrain, ytrain, kfunc, hyper_params)
+    hyper_params = gp.learn(Xtrain, ytrain, kfunc, learning_params)
+    regressor = gp.condition(Xtrain, ytrain, kfunc, hyper_params)
 
-    # query = gp.query(Xtest, regressor)
-    # Ey_gp = gp.mean(regressor, query)
-    # Vf_gp = gp.variance(regressor, query)
-    # Vy_gp = Vf_gp + np.array(hyper_params[1])**2
-    # Sy_gp = np.sqrt(Vy_gp)
+    query = gp.query(Xtest, regressor)
+    Ey_gp = gp.mean(regressor, query)
+    Vf_gp = gp.variance(regressor, query)
+    Vy_gp = Vf_gp + np.array(hyper_params[1])**2
+    Sy_gp = np.sqrt(Vy_gp)
 
     #
     # Evaluate LL
     #
 
-    # LL_lml = mll(ftest, Ey_l, Vf_l)
+    LL_lml = mll(ftest, Ey_l, Vf_l)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
-    # LL_gp = mll(ftest, Ey_gp, Vf_gp)
-    # smse_lml = smse(ftest, Ey_l)
+    LL_gp = mll(ftest, Ey_gp, Vf_gp)
+    smse_lml = smse(ftest, Ey_l)
     smse_elbo = smse(ftest, Ey_e)
-    # smse_gp = smse(ftest, Ey_gp)
+    smse_gp = smse(ftest, Ey_gp)
 
-    # log.info("A la Carte (LML), LL: {}, smse = {}, noise: {}, hypers: {}"
-    #          .format(LL_lml, smse_lml, np.sqrt(params_lml[3]), params_lml[2]))
+    log.info("A la Carte (LML), LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_lml, smse_lml, np.sqrt(params_lml[3]), params_lml[2]))
     log.info("A la Carte (ELBO), LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
                      params_elbo[2]))
-    # log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
-    #          .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
+    log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
 
     #
     # Plot
@@ -193,22 +193,23 @@ def main():
     pl.plot(Xpl_t, ytrain, 'k.', Xpl_s, ftest, 'k-')
 
     # LML Regressor
-    # pl.plot(Xpl_s, Ey_l, 'r-')
-    # pl.fill_between(Xpl_s, Ey_l - 2*Sy_l, Ey_l + 2*Sy_l, facecolor='none',
-    #                 edgecolor='r', linestyle='--', label=None)
+    pl.plot(Xpl_s, Ey_l, 'r-')
+    pl.fill_between(Xpl_s, Ey_l - 2 * Sy_l, Ey_l + 2 * Sy_l, facecolor='none',
+                    edgecolor='r', linestyle='--', label=None)
 
     # ELBO Regressor
     pl.plot(Xpl_s, Ey_e, 'g-')
-    pl.fill_between(Xpl_s, Ey_e - 2*Sy_e, Ey_e + 2*Sy_e, facecolor='none',
+    pl.fill_between(Xpl_s, Ey_e - 2 * Sy_e, Ey_e + 2 * Sy_e, facecolor='none',
                     edgecolor='g', linestyle='--', label=None)
 
     # GP
-    # pl.plot(Xpl_s, Ey_gp, 'b-')
-    # pl.fill_between(Xpl_s, Ey_gp - 2*Sy_gp, Ey_gp + 2*Sy_gp, facecolor='none',
-    #                 edgecolor='b', linestyle='--', label=None)
+    pl.plot(Xpl_s, Ey_gp, 'b-')
+    pl.fill_between(Xpl_s, Ey_gp - 2 * Sy_gp, Ey_gp + 2 * Sy_gp,
+                    facecolor='none', edgecolor='b', linestyle='--',
+                    label=None)
 
-    # pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
-    #            'GP'])
+    pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
+               'GP'])
 
     pl.show()
 

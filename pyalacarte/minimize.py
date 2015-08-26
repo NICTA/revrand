@@ -143,8 +143,8 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
         Gsum += np.power(grad, 2)
         x -= rate * grad / np.sqrt(Gsum)
 
-        # if it == 10:
-        #     Gsum[Gsum > 100 * grad**2] = 0
+        # if it == 100:
+        #     Gsum[Gsum > 1000 * grad**2] = 0
 
         # Trucate steps if bounded
         if bounds is not None:
