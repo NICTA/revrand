@@ -62,7 +62,7 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
 
     # Initial parameter vector
     vparams = [var, regulariser, bparams]
-    pcat = CatParameters(vparams, log_indices=[0, 1])
+    pcat = CatParameters(vparams)  # this algorithm is better NOT in log space!
 
     def LML(params):
 
@@ -112,13 +112,9 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
                     + (yiK.dot(dPhi)).dot(Phi.T).dot(yiK.T)) * _lambda
             dtheta.append(dt)
 
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        dtheta = l2p(_theta, dtheta)
+        return -LML, -pcat.flatten([dvar, dlambda, dtheta])
 
-        return -LML, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
-
-    bounds = [(None, None)] * 2 + basis.bounds
-
+    bounds = [(1e-14, None)] * 2 + basis.bounds
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
     res = minimize(LML, pcat.flatten(vparams), bounds=bounds, method=method,
                    ftol=ftol, xtol=1e-8, maxiter=maxit)
@@ -236,9 +232,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
 
         return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
 
-    # bounds = [var_bounds, regulariser_bounds] + basis.bounds
     bounds = [(None, None)] * 2 + basis.bounds
-
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
     res = minimize(ELBO, pcat.flatten(vparams), bounds=bounds, method=method,
                    ftol=ftol, xtol=1e-8, maxiter=maxit)

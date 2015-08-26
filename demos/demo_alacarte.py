@@ -21,10 +21,10 @@ def main():
     #
 
     # Algorithmic properties
-    nbases = 200
-    lenscale = 1  # For all basis functions that take lengthscales
+    nbases = 300
+    lenscale = 0.5  # For all basis functions that take lengthscales
     lenscale2 = 0.2  # For the Combo basis
-    noise = 0.5
+    noise = 0.2
     order = 5  # For polynomial basis
     rate = 0.3
     maxiter = 5e3
