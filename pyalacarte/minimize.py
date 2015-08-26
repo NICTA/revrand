@@ -146,9 +146,6 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
         # if it == 10:
         #     Gsum[Gsum > 100 * grad**2] = 0
 
-        # print("sgd:", x[-2], grad[-2], Gsum[-2])
-        # import time; time.sleep(0.5)
-
         # Trucate steps if bounded
         if bounds is not None:
             x = np.minimum(np.maximum(x, lower), upper)
@@ -171,18 +168,6 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
         res['fun'] = obj
 
     return res
-
-
-def _trunc_grad(x, grad, gradssum, rate, bound, condition):
-
-    x[condition] = bound[condition]
-    gradssum[condition] -= grad[condition]**2
-
-    grad[condition] = 0  #x[condition] - bound[condition]
-        # * np.sqrt(gradssum[condition]) / rate
-    # gradssum[condition] += grad[condition]**2
-
-    return x, grad, gradssum
 
 
 def _sgd_batches(N, batchsize):

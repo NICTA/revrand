@@ -18,8 +18,8 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 from pyalacarte.linalg import jitchol, logdet
 from pyalacarte.minimize import minimize, sgd
-from pyalacarte.bases import params_to_list as p2l
-from pyalacarte.bases import list_to_params as l2p
+from pyalacarte.utils import params_to_list as p2l
+from pyalacarte.utils import list_to_params as l2p
 
 
 # Set up logging
