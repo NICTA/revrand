@@ -249,7 +249,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
 
 
 def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
-                 maxit=1e3, rate=0.5, batchsize=100, verbose=True):
+                 maxit=1e3, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
@@ -262,7 +262,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
             regulariser, (float): weight regulariser (variance) initial guess
             gtol, (float): SGD tolerance convergence criterion
             maxit, (int): maximum number of iterations for SGD
-            rate, (float): SGD learing rate.
+            rate, (float): SGD decay rate, must be [0, 1].
             batchsize, (int): number of observations to use per SGD batch.
             verbose, (float): log learning status
 
@@ -343,7 +343,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
 
     bounds = [(None, None)] * (2 * D + 2) + basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
-              rate=rate, bounds=bounds, gtol=gtol, maxiter=maxit,
+              rate=rate, eta=eta, bounds=bounds, gtol=gtol, maxiter=maxit,
               batchsize=batchsize, eval_obj=True)
     # res = minimize(ELBO, pcat.flatten(vparams), bounds=bounds,
     #                method='L-BFGS-B', ftol=1e-5, xtol=1e-8, maxiter=maxit)

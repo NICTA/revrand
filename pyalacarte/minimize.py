@@ -55,9 +55,10 @@ def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
                          " str.")
 
 
-def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
-        gtol=1e-3, maxiter=1e6, eval_obj=False):
-    """ Stochastic Gradient Descent, using Adagrad for the learning rate.
+def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
+        eta=0.1, gtol=1e-3, maxiter=1e6, eval_obj=False):
+    """ Stochastic Gradient Descent, using ADADELTA for setting the learning
+        rate.
 
         Arguments:
             fun: the function to evaluate, this must have the signature
@@ -76,12 +77,15 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
                 direction.
             batchsize: (int), optional. The number of observations in an SGD
                 batch.
-            rate: (float), optional. The learning rate of SGD.
-            gtol: (float), optional. The norm of the gradient of x that will
+            rate, (float): ADADELTA smoothing/decay rate parameter, must be [0,
+                1].
+            eta, (float): ADADELTA "jitter" term to ensure continued learning
+                (should be small).
+            gtol, (float): optional. The norm of the gradient of x that will
                 trigger a convergence condition.
-            maxiter: (int) optional. Maximum number of mini-batch function
+            maxiter, (int): optional. Maximum number of mini-batch function
                 evaluations before termination.
-            eval_obj: (bool), optional. This indicates whether or not `fun`
+            eval_obj, (bool): optional. This indicates whether or not `fun`
                 also evaluates and returns the objective function value. If
                 this is true, `fun` must return `(obj, grad)` and then a list
                 of objective function values is also returned.
@@ -103,6 +107,9 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
 
+    if rate < 0 or rate > 1:
+        raise ValueError("rate must be between 0 and 1!")
+
     # Make sure we have a valid batch size
     if N < batchsize:
         batchsize = N
@@ -118,15 +125,15 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
     # Initialise
     batchgen = _sgd_batches(N, batchsize)
     gnorm = np.inf
-    Gsum = np.zeros_like(x0)
-    it = 0
+    Eg2 = 0
+    Edx2 = 0
 
     # Learning Records
     if eval_obj:
         objs = []
     norms = []
 
-    while (it < maxiter) and (gnorm > gtol):
+    for it in range(int(maxiter)):
 
         if not eval_obj:
             grad = fun(x, Data[next(batchgen)], *args)
@@ -140,11 +147,11 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
             xupper = x >= upper
             grad[xupper] = np.maximum(grad[xupper], 0)
 
-        Gsum += np.power(grad, 2)
-        x -= rate * grad / np.sqrt(Gsum)
-
-        # if it == 100:
-        #     Gsum[Gsum > 1000 * grad**2] = 0
+        # ADADELTA
+        Eg2 = rate * Eg2 + (1 - rate) * grad**2
+        dx = - grad * np.sqrt(Edx2 + eta) / np.sqrt(Eg2 + eta)
+        Edx2 = rate * Edx2 + (1 - rate) * dx**2
+        x += dx
 
         # Trucate steps if bounded
         if bounds is not None:
@@ -155,7 +162,8 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=1.0,
         if eval_obj:
             objs.append(obj)
 
-        it += 1
+        if gnorm <= gtol:
+            break
 
     # Format results
     res = {'x': x,
