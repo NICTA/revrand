@@ -11,8 +11,8 @@ from pyalacarte.minimize import minimize, sgd
 log = logging.getLogger(__name__)
 
 
-def logistic_map(X, y, basis, bparams, regulariser=1e-3, ftol=1e-5, maxit=1000,
-                 verbose=True, regulariser_bounds=(1e-7, None)):
+def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
+                 verbose=True):
     """ Learn the weights of a logistic regressor using MAP inference.
 
         Arguments:
@@ -24,9 +24,6 @@ def logistic_map(X, y, basis, bparams, regulariser=1e-3, ftol=1e-5, maxit=1000,
             ftol, (float): optimiser function tolerance convergence criterion
             maxit, (int): maximum number of iterations for SGD
             verbose, (float): log learning status
-            regulariser_bounds, (tuple): of (lower bound, upper bound) on the
-                regulariser parameter, None for unbounded (though it cannot be
-                <= 0)
 
         Returns:
             array: of learned weights, with the same dimension as the basis.
@@ -48,9 +45,8 @@ def logistic_map(X, y, basis, bparams, regulariser=1e-3, ftol=1e-5, maxit=1000,
     return res['x']
 
 
-def logistic_sgd(X, y, basis, bparams, regulariser=1e-3, gtol=1e-5, maxit=1000,
-                 rate=0.5, batchsize=100, verbose=True,
-                 regulariser_bounds=(1e-7, None)):
+def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
+                 rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the weights of a logistic regressor using MAP inference and SGD.
 
         Arguments:

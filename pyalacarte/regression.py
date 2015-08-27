@@ -248,7 +248,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
     return mcache, Ccache, bparams, var
 
 
-def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
+def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
                  maxit=1e3, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
