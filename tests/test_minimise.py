@@ -9,9 +9,10 @@ def test_unbounded(make_quadratic):
     a, b, c, data, _ = make_quadratic
     w0 = np.random.randn(3)
 
-    res = sgd(qobj, w0, data, eval_obj=True, gtol=1e-4)
+    res = sgd(qobj, w0, data, eval_obj=True, gtol=1e-4, maxiter=1e4, rate=0.01,
+              eta=1e-9)
     Ea, Eb, Ec = res['x']
-    assert np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
+    assert np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-2, rtol=0)
 
     res = minimize(qobj, w0, args=(data,), jac=True, method='L-BFGS-B')
     Ea, Eb, Ec = res['x']
@@ -33,7 +34,7 @@ def test_bounded(make_quadratic):
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
 
     res = sgd(qobj, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
-              maxiter=5e3)
+              maxiter=1e4, rate=0.01, eta=1e-6)
     Ea_sgd, Eb_sgd, Ec_sgd = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs),
@@ -47,7 +48,7 @@ def test_catparams(make_quadratic):
     y, x = data[:, 0], data[:, 1]
     N = len(data)
 
-    u = y - (a*x**2 + b*x + c)
+    u = y - (a * x**2 + b * x + c)
     da, db, dc = -2 * np.array([(x**2 * u).sum(), (x * u).sum(), u.sum()]) / N
 
     params = [[a, b], c]
@@ -77,7 +78,7 @@ def qobj(w, data, grad=True):
     N = len(data)
     a, b, c = w
 
-    u = y - (a*x**2 + b*x + c)
+    u = y - (a * x**2 + b * x + c)
     f = (u**2).sum() / N
     df = -2 * np.array([(x**2 * u).sum(), (x * u).sum(), u.sum()]) / N
 
