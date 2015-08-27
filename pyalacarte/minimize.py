@@ -110,6 +110,9 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
     if rate < 0 or rate > 1:
         raise ValueError("rate must be between 0 and 1!")
 
+    if eta <= 0:
+        raise ValueError("eta must be > 0!")
+
     # Make sure we have a valid batch size
     if N < batchsize:
         batchsize = N
