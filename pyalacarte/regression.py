@@ -278,7 +278,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
 
     # Initialise parameters
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
-    minit = np.random.randn(D) * 1e-1
+    minit = np.random.randn(D)
     Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
 
     # Initial parameter vector
