@@ -40,7 +40,7 @@ def msll(y_true, y_predict, y_var, y_train):
     var = y_train.var(ddof=1)
     mu = y_true.mean()
     logp_naive = -0.5 * (np.log(2 * np.pi * var) + (y_true - mu)**2 / var)
-    return (normll(y_true, y_predict, y_var) - logp_naive).mean()
+    return -(normll(y_true, y_predict, y_var) - logp_naive).mean()
 
 
 def normll(y_true, y_predict, y_var):
