@@ -151,6 +151,12 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
             return ((-lPhiw * (1 - lPhiw))[:, np.newaxis, :]
                     * Phi[:, :, np.newaxis]**2).sum(axis=0)
 
+        def logpdtheta(w, dPhi):
+            err = y[:, np.newaxis] - logistic(Phi.dot(w))
+            wdPhi = dPhi.dot(w)
+
+            return (err * wdPhi).sum(axis=0)
+
         # Objective
         KL = 0.5 * (C.sum() / _lambda
                     + mm / _lambda
@@ -175,7 +181,12 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
         # dlambda = 0
 
         # Grad theta
-        dtheta = np.zeros_like(_theta)
+        # Loop through basis param grads
+        dtheta = []
+        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
+        for i, dPhi in enumerate(dPhis):
+            dtheta.append(_MC_dgauss(logpdtheta, m, C, args=(dPhi,)))
+        # dtheta = np.zeros_like(_theta)
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
         dtheta = l2p(_theta, dtheta)
@@ -234,7 +245,7 @@ def logsumexp(X, axis=0):
     return np.log(np.exp(X - mx[:, np.newaxis]).sum(axis=axis)) + mx
 
 
-def _MC_dgauss(f, mean, dcov, nsamples=1e2):
+def _MC_dgauss(f, mean, dcov, args=(), nsamples=1e2):
     """ Monte Carlo sample a function using sample from a diagonal Gaussian.
     """
 
@@ -245,7 +256,7 @@ def _MC_dgauss(f, mean, dcov, nsamples=1e2):
     ws = mean[:, np.newaxis] + np.random.randn(D, nsamples) \
         * np.sqrt(dcov)[:, np.newaxis]
 
-    fs = f(ws)
+    fs = f(ws, *args)
     return fs.sum(axis=fs.shape.index(nsamples)) / nsamples
 
     # nsamples = int(nsamples)
