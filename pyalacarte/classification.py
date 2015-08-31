@@ -4,7 +4,6 @@ from __future__ import division
 
 import numpy as np
 import logging
-from functools import reduce
 from scipy.stats.distributions import gamma
 from pyalacarte.minimize import minimize, sgd
 from pyalacarte.utils import CatParameters
@@ -49,7 +48,7 @@ def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
     return res['x']
 
 
-def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
+def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
                  rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the weights of a logistic regressor using MAP inference and SGD.
 
@@ -88,7 +87,7 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
     return res['x']
 
 
-def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
+def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
                  rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the weights and hyperparameters of a logistic regressor using
         stochastic variational inference.
@@ -123,6 +122,25 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
     vparams = [minit, Cinit, regulariser, bparams]
     pcat = CatParameters(vparams, log_indices=[1, 2])
 
+    # Sampling functions
+    def logp(w, y, Phi):
+        Phiw = Phi.dot(w)
+        return (y[:, np.newaxis] * Phiw + np.log(logistic(Phiw))).sum(axis=0)
+
+    def logpdm(w, y, Phi):
+        err = y[:, np.newaxis] - logistic(Phi.dot(w))
+        return (err[:, np.newaxis, :] * Phi[:, :, np.newaxis]).sum(axis=0)
+
+    def logpdC(w, Phi):
+        lPhiw = logistic(Phi.dot(w))
+        return ((lPhiw * (lPhiw - 1))[:, np.newaxis, :]
+                * (Phi**2)[:, :, np.newaxis]).sum(axis=0)
+
+    def logpdtheta(w, y, Phi, dPhi):
+        err = y[:, np.newaxis] - logistic(Phi.dot(w))
+        wdPhi = dPhi.dot(w)
+        return (err * wdPhi).sum(axis=0)
+
     def ELBO(params, data):
 
         y, X = data[:, 0], data[:, 1:]
@@ -135,58 +153,34 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
         # Common calcs
         mm = (m**2).sum()
 
-        # Sampling functions TODO, define these elsewehere and close over Phi
-        # and y
-        def logp(w):
-            Phiw = Phi.dot(w)  # NxS
-            return (y[:, np.newaxis] * Phiw
-                    + np.log(logistic(-Phiw))).sum(axis=0)
-
-        def logpdm(w):
-            err = y[:, np.newaxis] - logistic(Phi.dot(w))
-            return (err[:, np.newaxis, :] * Phi[:, :, np.newaxis]).sum(axis=0)
-
-        def logpdC(w):
-            lPhiw = logistic(Phi.dot(w))
-            return ((-lPhiw * (1 - lPhiw))[:, np.newaxis, :]
-                    * Phi[:, :, np.newaxis]**2).sum(axis=0)
-
-        def logpdtheta(w, dPhi):
-            err = y[:, np.newaxis] - logistic(Phi.dot(w))
-            wdPhi = dPhi.dot(w)
-
-            return (err * wdPhi).sum(axis=0)
-
         # Objective
-        KL = 0.5 * (C.sum() / _lambda
-                    + mm / _lambda
-                    - np.log(C).sum()
-                    + D * np.log(_lambda)
-                    - D)
-        ELBO = _MC_dgauss(logp, m, C) - KL
+        KL = 0.5 * ((C.sum() + mm) / _lambda - np.log(C).sum()
+                    + D * np.log(_lambda) - D)
+        ELL = _MC_dgauss(logp, m, C, args=(y, Phi), verbose=True)
+        ELBO = ELL - KL
 
         if verbose:
-            log.info("ELBO = {}, reg = {}, bparams = {}."
-                     .format(ELBO, _lambda, _theta))
+            log.info("ELBO = {}, reg = {}, bparams = {},\nELL = {}, KL = {}."
+                     .format(ELBO, _lambda, _theta, ELL, KL))
 
         # Grad m
-        dm = _MC_dgauss(logpdm, m, C) - m / _lambda
+        dm = _MC_dgauss(logpdm, m, C, args=(y, Phi)) - m / _lambda
 
         # Grad C
-        dC = 0.5 * (_MC_dgauss(logpdC, m, C) - 1. / _lambda - 1. / C)
+        dC = 0.5 * (_MC_dgauss(logpdC, m, C, args=(Phi,)) - 1. / _lambda
+                    - 1. / C)
         # dC = np.zeros_like(C)
 
         # Grad reg
-        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
-        # dlambda = 0
+        # dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
+        dlambda = 0
 
-        # Grad theta
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for i, dPhi in enumerate(dPhis):
-            dtheta.append(_MC_dgauss(logpdtheta, m, C, args=(dPhi,)))
-        # dtheta = np.zeros_like(_theta)
+            # dtheta.append(_MC_dgauss(logpdtheta, m, C, args=(y, Phi, dPhi)))
+            dtheta.append(0)
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
         dtheta = l2p(_theta, dtheta)
@@ -211,6 +205,13 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
 def logistic_predict(X_star, weights, basis, bparams):
 
     return logistic(basis(X_star, *bparams).dot(weights))
+
+
+def logistic_mpredict(X_star, wmean, wcov, basis, bparams, nsamples=1000):
+
+    f = lambda w: logistic(basis(X_star, *bparams).dot(w))
+
+    return _MC_dgauss(f, wmean, wcov, nsamples=nsamples)
 
 
 def logistic(X):
@@ -245,7 +246,7 @@ def logsumexp(X, axis=0):
     return np.log(np.exp(X - mx[:, np.newaxis]).sum(axis=axis)) + mx
 
 
-def _MC_dgauss(f, mean, dcov, args=(), nsamples=1e2):
+def _MC_dgauss(f, mean, dcov, args=(), nsamples=1000, verbose=False):
     """ Monte Carlo sample a function using sample from a diagonal Gaussian.
     """
 
@@ -254,15 +255,27 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=1e2):
 
     D = mean.shape[0]
     ws = mean[:, np.newaxis] + np.random.randn(D, nsamples) \
-        * np.sqrt(dcov)[:, np.newaxis]
+        * np.sqrt(dcov)[:, np.newaxis] / 10
 
+    def loggaus(x, m, v):
+        m = m[:, np.newaxis]
+        v = v[:, np.newaxis]
+        return -0.5 * (np.log(2 * np.pi * v) + (x - m)**2 / v).sum(axis=0)
+
+    iw = np.exp(loggaus(ws, mean, dcov) - loggaus(ws, mean, dcov/100))
+
+    import IPython; IPython.embed(); exit()
     fs = f(ws, *args)
-    return fs.sum(axis=fs.shape.index(nsamples)) / nsamples
-
-    # nsamples = int(nsamples)
-    # ws = (mean + np.random.randn(D) * np.sqrt(dcov) for n in range(nsamples))
-
-    # return reduce(lambda x, y: x+y, (f(w) for w in ws))
+    axis = fs.shape.index(nsamples)
+    Efw = (fs * iw).sum(axis=axis) / nsamples
+    Ef = fs.mean()
+    if verbose:
+        Sf = fs.std(axis=axis)
+        import matplotlib.pyplot as pl
+        pl.hist(fs, 50)
+        pl.hist(fs * iw, 50, color='r')
+        pl.show()
+    return Ef
 
 
 def _MAP(weights, data, regulariser, verbose):
