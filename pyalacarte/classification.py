@@ -121,13 +121,13 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
 
     # Initial parameter vector
     vparams = [minit, Cinit, regulariser, bparams]
-    pcat = CatParameters(vparams, log_indices=[1, 2, 3])
+    pcat = CatParameters(vparams, log_indices=[1, 2])
 
     def ELBO(params, data):
 
         y, X = data[:, 0], data[:, 1:]
         uparams = pcat.unflatten(params)
-        m, C, _var, _lambda, _theta = uparams
+        m, C, _lambda, _theta = uparams
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
@@ -135,8 +135,21 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
         # Common calcs
         mm = (m**2).sum()
 
-        # Sampling functions
-        logp = lambda w: (Phi.dot(w) * y).sum() + np.log(logistic(-Phi.dot(w))) 
+        # Sampling functions TODO, define these elsewehere and close over Phi
+        # and y
+        def logp(w):
+            Phiw = Phi.dot(w)  # NxS
+            return (y[:, np.newaxis] * Phiw
+                    + np.log(logistic(-Phiw))).sum(axis=0)
+
+        def logpdm(w):
+            err = y[:, np.newaxis] - logistic(Phi.dot(w))
+            return (err[:, np.newaxis, :] * Phi[:, :, np.newaxis]).sum(axis=0)
+
+        def logpdC(w):
+            lPhiw = logistic(Phi.dot(w))
+            return ((-lPhiw * (1 - lPhiw))[:, np.newaxis, :]
+                    * Phi[:, :, np.newaxis]**2).sum(axis=0)
 
         # Objective
         KL = 0.5 * (C.sum() / _lambda
@@ -144,17 +157,44 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-3, maxit=1000,
                     - np.log(C).sum()
                     + D * np.log(_lambda)
                     - D)
-        # ELL = 
-        # ELBO = 
+        ELBO = _MC_dgauss(logp, m, C) - KL
+
+        if verbose:
+            log.info("ELBO = {}, reg = {}, bparams = {}."
+                     .format(ELBO, _lambda, _theta))
+
+        # Grad m
+        dm = _MC_dgauss(logpdm, m, C) - m / _lambda
+
+        # Grad C
+        dC = 0.5 * (_MC_dgauss(logpdC, m, C) - 1. / _lambda - 1. / C)
+        # dC = np.zeros_like(C)
 
         # Grad reg
         dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
+        # dlambda = 0
+
+        # Grad theta
+        dtheta = np.zeros_like(_theta)
+
+        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
+        dtheta = l2p(_theta, dtheta)
+
+        return -ELBO, -pcat.flatten_grads(uparams, [dm, dC, dlambda, dtheta])
 
     bounds = [(None, None)] * (2 * D + 1) + basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, maxiter=maxit,
               batchsize=batchsize, eval_obj=True)
-    pass
+
+    m, C, regulariser, bparams = pcat.unflatten(res['x'])
+
+    if verbose:
+        log.info("Done! ELBO = {}, reg = {}, bparams = {}."
+                 .format(-res['fun'], regulariser, bparams))
+        log.info('Termination condition: {}.'.format(res['message']))
+
+    return m, C, bparams
 
 
 def logistic_predict(X_star, weights, basis, bparams):
@@ -194,7 +234,7 @@ def logsumexp(X, axis=0):
     return np.log(np.exp(X - mx[:, np.newaxis]).sum(axis=axis)) + mx
 
 
-def _MC_dgauss(f, mean, dcov, nsamples=1e5):
+def _MC_dgauss(f, mean, dcov, nsamples=1e2):
     """ Monte Carlo sample a function using sample from a diagonal Gaussian.
     """
 
@@ -202,9 +242,16 @@ def _MC_dgauss(f, mean, dcov, nsamples=1e5):
         raise ValueError("mean and dcov have to be shape (D,) arrays!")
 
     D = mean.shape[0]
-    ws = (mean + np.random.randn(D) * np.sqrt(dcov) for n in range(nsamples))
+    ws = mean[:, np.newaxis] + np.random.randn(D, nsamples) \
+        * np.sqrt(dcov)[:, np.newaxis]
 
-    return reduce(lambda x, y: x+y, (f(w) for w in ws))
+    fs = f(ws)
+    return fs.sum(axis=fs.shape.index(nsamples)) / nsamples
+
+    # nsamples = int(nsamples)
+    # ws = (mean + np.random.randn(D) * np.sqrt(dcov) for n in range(nsamples))
+
+    # return reduce(lambda x, y: x+y, (f(w) for w in ws))
 
 
 def _MAP(weights, data, regulariser, verbose):
