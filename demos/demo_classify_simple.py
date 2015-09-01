@@ -19,11 +19,11 @@ logging.basicConfig(level=logging.INFO)
 # A la Carte classifier setting
 nbases = 100
 lenscale = 0.5
-reg = 10
+reg = 100
 # method = 'SGD'
 method = 'SVI'
 # method = 'MAP'
-batchsize = 400
+batchsize = 100
 rate = 0.9
 eta = 1e-6
 maxit = 1e3
@@ -34,10 +34,10 @@ Npred = 3000
 
 
 # Gen Data
-X = np.linspace(-2*np.pi, 2*np.pi, Ntrain)[:, np.newaxis]
+X = np.linspace(-2 * np.pi, 2 * np.pi, Ntrain)[:, np.newaxis]
 f = np.sin(X).flatten()
-Y = np.round((f+1)/2)
-Xs = np.linspace(-2.5*np.pi, 2.5*np.pi, Npred)[:, np.newaxis]
+Y = np.round((f + 1) / 2)
+Xs = np.linspace(-2.5 * np.pi, 2.5 * np.pi, Npred)[:, np.newaxis]
 
 
 # Train

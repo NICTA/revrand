@@ -169,18 +169,15 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
         # Grad C
         dC = 0.5 * (_MC_dgauss(logpdC, m, C, args=(Phi,)) - 1. / _lambda
                     - 1. / C)
-        # dC = np.zeros_like(C)
 
         # Grad reg
-        # dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
-        dlambda = 0
+        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for i, dPhi in enumerate(dPhis):
-            # dtheta.append(_MC_dgauss(logpdtheta, m, C, args=(y, Phi, dPhi)))
-            dtheta.append(0)
+            dtheta.append(_MC_dgauss(logpdtheta, m, C, args=(y, Phi, dPhi)))
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
         dtheta = l2p(_theta, dtheta)
@@ -246,7 +243,7 @@ def logsumexp(X, axis=0):
     return np.log(np.exp(X - mx[:, np.newaxis]).sum(axis=axis)) + mx
 
 
-def _MC_dgauss(f, mean, dcov, args=(), nsamples=1000, verbose=False):
+def _MC_dgauss(f, mean, dcov, args=(), nsamples=100, verbose=False):
     """ Monte Carlo sample a function using sample from a diagonal Gaussian.
     """
 
@@ -255,27 +252,10 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=1000, verbose=False):
 
     D = mean.shape[0]
     ws = mean[:, np.newaxis] + np.random.randn(D, nsamples) \
-        * np.sqrt(dcov)[:, np.newaxis] / 10
+        * np.sqrt(dcov)[:, np.newaxis]
 
-    def loggaus(x, m, v):
-        m = m[:, np.newaxis]
-        v = v[:, np.newaxis]
-        return -0.5 * (np.log(2 * np.pi * v) + (x - m)**2 / v).sum(axis=0)
-
-    iw = np.exp(loggaus(ws, mean, dcov) - loggaus(ws, mean, dcov/100))
-
-    import IPython; IPython.embed(); exit()
     fs = f(ws, *args)
-    axis = fs.shape.index(nsamples)
-    Efw = (fs * iw).sum(axis=axis) / nsamples
-    Ef = fs.mean()
-    if verbose:
-        Sf = fs.std(axis=axis)
-        import matplotlib.pyplot as pl
-        pl.hist(fs, 50)
-        pl.hist(fs * iw, 50, color='r')
-        pl.show()
-    return Ef
+    return fs.mean(axis=fs.shape.index(nsamples))
 
 
 def _MAP(weights, data, regulariser, verbose):
