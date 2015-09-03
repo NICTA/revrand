@@ -56,7 +56,7 @@ def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
 
 
 def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
-        eta=0.1, gtol=1e-3, maxiter=1e6, eval_obj=False):
+        eta=1e-5, gtol=1e-3, maxiter=10000, eval_obj=False):
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
         rate.
 
@@ -171,7 +171,7 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
     # Format results
     res = {'x': x,
            'norms': norms,
-           'message': 'converge' if it < maxiter else 'maxiter'
+           'message': 'converge' if it < (maxiter - 1) else 'maxiter'
            }
 
     if eval_obj:

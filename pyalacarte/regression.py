@@ -195,9 +195,8 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + C.sum() / _lambda
+                       + (C.sum() + mm) / _lambda
                        - np.log(C).sum()
-                       + mm / _lambda
                        + D * np.log(_lambda)
                        - D)
 
@@ -305,9 +304,8 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + C.sum() / _lambda
+                       + (C.sum() + mm) / _lambda
                        - np.log(C).sum()
-                       + mm / _lambda
                        + D * np.log(_lambda)
                        - D)
 

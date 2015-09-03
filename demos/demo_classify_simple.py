@@ -18,18 +18,18 @@ logging.basicConfig(level=logging.INFO)
 
 # A la Carte classifier setting
 nbases = 100
-lenscale = 0.5
-reg = 100
+lenscale = 0.2
+reg = 50
 # method = 'SGD'
 method = 'SVI'
 # method = 'MAP'
 batchsize = 100
-rate = 0.9
-eta = 1e-6
+rate = 0.80
+eta = 1e-5
 maxit = 1e3
 
 # Dataset Settings
-Ntrain = 400
+Ntrain = 200
 Npred = 3000
 
 
@@ -61,6 +61,7 @@ else:
 if method != 'SVI':
     Ey = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
 else:
+    # Ey = classification.logistic_predict(Xs, weights, Phi, bparams)
     Ey = classification.logistic_mpredict(Xs, weights, C, Phi, bparams)
 
 
