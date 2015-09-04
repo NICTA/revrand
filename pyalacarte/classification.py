@@ -5,7 +5,7 @@ from __future__ import division
 import numpy as np
 import logging
 from functools import reduce
-# from scipy.stats.distributions import gamma
+from scipy.stats.distributions import gamma
 from pyalacarte.minimize import minimize, sgd
 from pyalacarte.utils import CatParameters
 from pyalacarte.utils import list_to_params as l2p
@@ -118,7 +118,7 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     minit = np.random.randn(D)
     # Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
-    Cinit = np.ones_like(minit) * 1e-3
+    Cinit = np.ones_like(minit) / 10
 
     # Initial parameter vector
     vparams = [minit, Cinit, regulariser, bparams]
@@ -130,8 +130,11 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
         return (y * np.log(np.maximum(s, 1e-10)) + (1 - y)
                 * np.log(1 - np.minimum(s, 1 - 1e-10))).sum()
 
-    def wmV(w, y, Phi, m):
-        return - (w - m) * logp(w, y, Phi)
+    def dELLdm(w, y, Phi, m, C):
+        return (w - m) * logp(w, y, Phi) / C
+
+    def dELLdC(w, y, Phi, m, C):
+        return ((w - m)**2 / C - 1) / (2 * C) * logp(w, y, Phi)
 
     def logpdm(w, y, Phi):
         return ((y - logistic(Phi.dot(w)))[:, np.newaxis] * Phi).sum(axis=0)
@@ -171,20 +174,22 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
 
         # Grad m
         dm = _MC_dgauss(logpdm, m, C, args=(y, Phi)) - m / _lambda
-        # dm2 = _MC_dgauss(wmV, m, C, args=(y, Phi, m)) / C - m / _lambda
+        # dm = _MC_dgauss(dELLdm, m, C, args=(y, Phi, m, C)) - m / _lambda
 
         # import IPython; IPython.embed(); exit()
         # s = logistic(Phi.dot(m))
         # dm = - (s - y).dot(Phi) - m / _lambda
 
         # Grad C
-        # dC = 0.5 * (_MC_dgauss(logpdC, m, C, args=(Phi,)) - 1. / _lambda
-        #             - 1. / C)
-        dC = np.zeros_like(C)
+        dC = 0.5 * (_MC_dgauss(logpdC, m, C, args=(Phi,)) - 1. / _lambda
+                    + 1. / C)
+        # dC = _MC_dgauss(dELLdC, m, C, args=(y, Phi, m, C)) \
+        #     + 0.5 * (1. / C - 1. / _lambda)
+        # dC = np.zeros_like(C)
 
         # Grad reg
-        # dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
-        dlambda = 0
+        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
+        # dlambda = 0
 
         # Loop through basis param grads
         dtheta = []
@@ -264,7 +269,7 @@ def logsumexp(X, axis=0):
     return np.log(np.exp(X - mx[:, np.newaxis]).sum(axis=axis)) + mx
 
 
-def _MC_dgauss(f, mean, dcov, args=(), nsamples=100, verbose=False):
+def _MC_dgauss(f, mean, dcov, args=(), nsamples=10000, verbose=False):
     """ Monte Carlo sample a function using sample from a diagonal Gaussian.
     """
 

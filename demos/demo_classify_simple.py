@@ -24,8 +24,8 @@ reg = 50
 method = 'SVI'
 # method = 'MAP'
 batchsize = 100
-rate = 0.80
-eta = 1e-5
+rate = 0.9
+eta = 1e-6
 maxit = 1e3
 
 # Dataset Settings
