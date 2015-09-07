@@ -21,7 +21,6 @@ nbases = 100
 lenscale = 0.2
 reg = 1000
 # method = 'SGD'
-# method = 'SVI'
 method = 'MAP'
 batchsize = 100
 rate = 0.9
@@ -49,20 +48,12 @@ if method == 'SGD':
 elif method == 'MAP':
     weights = classification.logistic_map(X, Y, Phi, (lenscale,),
                                           regulariser=reg)
-elif method == 'SVI':
-    params = classification.logistic_svi(X, Y, Phi, (lenscale,),
-                                         regulariser=reg)
-    weights, C, bparams = params
 else:
     raise ValueError("Invalid method chosen!")
 
 
 # Predict
-if method != 'SVI':
-    Ey = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
-else:
-    # Ey = classification.logistic_predict(Xs, weights, Phi, bparams)
-    Ey = classification.logistic_mpredict(Xs, weights, C, Phi, bparams)
+Ey = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
 
 
 # Plot
