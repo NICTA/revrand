@@ -19,14 +19,14 @@ logging.basicConfig(level=logging.INFO)
 # A la Carte classifier setting
 nbases = 100
 lenscale = 0.2
-reg = 50
+reg = 1000
 # method = 'SGD'
-method = 'SVI'
-# method = 'MAP'
+# method = 'SVI'
+method = 'MAP'
 batchsize = 100
 rate = 0.9
 eta = 1e-6
-maxit = 1e3
+maxit = 2e3
 
 # Dataset Settings
 Ntrain = 200
