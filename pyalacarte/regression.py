@@ -195,9 +195,8 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + C.sum() / _lambda
+                       + (C.sum() + mm) / _lambda
                        - np.log(C).sum()
-                       + mm / _lambda
                        + D * np.log(_lambda)
                        - D)
 
@@ -248,7 +247,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
     return mcache, Ccache, bparams, var
 
 
-def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
+def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
                  maxit=1e3, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
@@ -278,7 +277,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
 
     # Initialise parameters
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
-    minit = np.random.randn(D) * 1e-1
+    minit = np.random.randn(D)
     Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
 
     # Initial parameter vector
@@ -305,9 +304,8 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-1,
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + C.sum() / _lambda
+                       + (C.sum() + mm) / _lambda
                        - np.log(C).sum()
-                       + mm / _lambda
                        + D * np.log(_lambda)
                        - D)
 

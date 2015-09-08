@@ -21,11 +21,12 @@ logging.basicConfig(level=logging.INFO)
 lenscale = 10
 sigma = 100
 noise = 1
-regulariser = 10
+regulariser = 100
 nbases = 1000
 gp_Ntrain = 1024
 maxit = 1e3
-rate = 1.0
+rate = 0.9
+eta = 1e-4
 batchsize = 100
 
 
@@ -78,7 +79,7 @@ base = bases.RandomRBF_ARD(nbases, D)
 lenARD = lenscale * np.ones(D)
 params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD], rate=rate,
                                  var=noise**2, regulariser=regulariser,
-                                 maxit=maxit, batchsize=batchsize)
+                                 maxit=maxit, batchsize=batchsize, eta=eta)
 
 #
 # Train GP
