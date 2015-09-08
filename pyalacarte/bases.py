@@ -12,6 +12,7 @@ from scipy.spatial.distance import cdist
 from pyalacarte.utils import params_to_list
 from pyalacarte.hadamard import hadamard
 
+from six import with_metaclass
 
 #
 # Basis objects
