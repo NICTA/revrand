@@ -20,13 +20,9 @@ class CatParameters(object):
 
     def __init__(self, params, log_indices=None):
 
-        print(params)
-
         self.pshapes = [np.asarray(p).shape if not np.isscalar(p)
                         else 1 for p in params]
         
-        print(self.pshapes)
-
         if log_indices is not None:
             self.log_indices = log_indices
         else:
