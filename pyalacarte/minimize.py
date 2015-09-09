@@ -206,7 +206,10 @@ def _scipy_wrap(fun, x0, args, method, bounds, ftol, maxiter, jac):
         if args is None:
             args = ()
 
-        options = {'maxiter': maxiter} if maxiter else {}
+        options = {}
+        if maxiter:
+            options['maxiter'] = maxiter
+
         return smin(fun, x0, args, method=method, jac=jac, tol=ftol,
                     options=options, bounds=bounds)
 
