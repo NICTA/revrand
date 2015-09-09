@@ -112,6 +112,9 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
                     + (yiK.dot(dPhi)).dot(Phi.T).dot(yiK.T)) * _lambda
             dtheta.append(dt)
 
+        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
+        dtheta = l2p(_theta, dtheta)
+
         return -LML, -pcat.flatten([dvar, dlambda, dtheta])
 
     bounds = [(1e-14, None)] * 2 + basis.bounds
