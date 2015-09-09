@@ -105,12 +105,15 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for i, dPhi in enumerate(dPhis):
+        for dPhi in dPhis:
             dPhiPhi = dPhi.T.dot(Phi)  # D x D
             dt = - (np.trace(dPhiPhi) / _var
                     - (dPhiPhi * (iCPhi.dot(Phi))).sum() / _var**2
                     + (yiK.dot(dPhi)).dot(Phi.T).dot(yiK.T)) * _lambda
             dtheta.append(dt)
+
+        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
+        dtheta = l2p(_theta, dtheta)
 
         return -LML, -pcat.flatten([dvar, dlambda, dtheta])
 
@@ -221,7 +224,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for i, dPhi in enumerate(dPhis):
+        for dPhi in dPhis:
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var
             dtheta.append(dt)
@@ -328,7 +331,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for i, dPhi in enumerate(dPhis):
+        for dPhi in dPhis:
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var
             dtheta.append(dt)
@@ -343,8 +346,6 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, maxiter=maxit,
               batchsize=batchsize, eval_obj=True)
-    # res = minimize(ELBO, pcat.flatten(vparams), bounds=bounds,
-    #                method='L-BFGS-B', ftol=1e-5, xtol=1e-8, maxiter=maxit)
 
     m, C, var, regulariser, bparams = pcat.unflatten(res['x'])
 
