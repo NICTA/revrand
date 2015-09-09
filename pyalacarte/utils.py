@@ -2,13 +2,31 @@
 
 import numpy as np
 
+pairwise = lambda a: zip(a[:-1], a[1:])
+
+def pre(func):
+    def new_func(*args):
+        return func(*map(np.atleast_1d, args))
+    return new_func
+
+@pre
+def deconstruct(*args):
+    lsts, shapes = zip(*map(lambda x: (x.flatten(), x.shape), args))
+    return list(chain(*lsts)), shapes
+
+reconstruct = lambda flat_lst, shapes: [np.asarray(flat_lst[start:end]).reshape(shape) for (start, end), shape in zip(pairwise(np.cumsum([0]+list(map(np.prod, shapes)))), shapes)]
 
 class CatParameters(object):
 
     def __init__(self, params, log_indices=None):
 
+        print(params)
+
         self.pshapes = [np.asarray(p).shape if not np.isscalar(p)
                         else 1 for p in params]
+        
+        print(self.pshapes)
+
         if log_indices is not None:
             self.log_indices = log_indices
         else:
