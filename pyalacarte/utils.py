@@ -183,7 +183,7 @@ def slices(sizes):
     """
     Notes
     -----
-    Equivalent to::
+    Roughly equivalent to::
 
         lambda sizes: pairwise([0]+cumsum(sizes))
 
@@ -208,6 +208,47 @@ def slices(sizes):
             continue
         yield (start, start+size)
         start += size
+
+def chunks(lst, sizes):
+    """
+    Notes
+    -----
+
+    Equivalent to::
+
+        lambda lst, sizes: (lst[start:end] for start, end in slices(sizes))
+
+    Examples
+    --------
+
+    >>> a = [2, 4, 6, 3, 4, 6, 1, 9, 3]
+
+    >>> list(chunks(a, [3, 2, 4]))
+    [[2, 4, 6], [3, 4], [6, 1, 9, 3]]
+
+    >>> list(chunks([], [3, 2, 5]))
+    [[], [], []]
+
+    >>> list(chunks(a, []))
+    []
+
+    Lists are chunked eagerly:
+
+    >>> list(chunks(a, [3, 2, 3]))
+    [[2, 4, 6], [3, 4], [6, 1, 9]]
+
+    >>> list(chunks(a, [3, 2, 5]))
+    [[2, 4, 6], [3, 4], [6, 1, 9, 3]]
+
+    >>> list(chunks(a, [3, 1, 4]))
+    [[2, 4, 6], [3], [4, 6, 1, 9]]
+
+    >>> list(chunks(a, [3, 3, 4]))
+    [[2, 4, 6], [3, 4, 6], [1, 9, 3]]
+
+    """
+    for start, end in slices(sizes):
+        yield lst[start:end]
 
 def unflatten(flat_lst, shapes, order='C'):
     """
@@ -245,14 +286,20 @@ def unflatten(flat_lst, shapes, order='C'):
 
     Examples
     --------
-    >>> unflatten([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(2,), (3,), (2, 3)])
-    [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+    # >>> list(unflatten([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(2,), (3,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
+    # [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
-    >>> unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(,), (1,), (4,), (2, 3)])
+    >>> list(unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(), (1,), (4,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+
     """
-    for shape in shapes:
-        pass
+    sizes = map(partial(np.prod, dtype=int), shapes)
+    for chunk, shape in zip(chunks(flat_lst, sizes), shapes):
+        if shape == ():
+            # chunk only has 1 element
+            yield from chunk
+        else:
+            yield np.reshape(chunk, shape)
 
 class CatParameters(object):
 
