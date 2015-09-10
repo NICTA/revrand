@@ -4,7 +4,6 @@ import numpy as np
 
 pairwise = lambda a: zip(a[:-1], a[1:])
 
-
 def pre_flatten(func):
     def new_func(*args):
         return func(*map(np.atleast_1d, args))
@@ -14,7 +13,6 @@ def pre_flatten(func):
 def flatten(*args):
     lsts, shapes = zip(*map(lambda x: (x.flatten(), x.shape), args))
     return list(chain(*lsts)), shapes
-
 
 def unflatten(flat_lst, shapes, order='C'):
     """
@@ -33,23 +31,33 @@ def unflatten(flat_lst, shapes, order='C'):
         Reshape array using index order: C (row-major), Fortran (column-major) 
         order, or preserve the C/Fortran ordering from a. The default is ‘C’.
     
+    Returns
+    -------
+    list of ndarrays
+        A list of numpy ndarrays of specified shapes 
+
     See Also
     --------
-    utils.flatten : its inverse
+    pyalacarte.utils.flatten : its inverse
 
     Notes
     -----
     Roughly equivalent to::
 
-        lambda flat_lst, shapes: [np.asarray(flat_lst[start:end]).reshape(shape) \
-            for (start, end), shape in zip(pairwise(np.cumsum([0]+list(map(np.prod, shapes)))), \
-                shapes)]
+        lambda flat_lst, shapes: [np.asarray(flat_lst[start:end]).reshape(shape)
+        for (start, end), shape in zip(pairwise(np.cumsum([0]+list(map(np.prod, shapes)))),
+        shapes)]
 
     Examples
     --------
     >>> unflatten([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(2,), (3,), (2, 3)])
     [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+
+    >>> unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(,), (1,), (4,), (2, 3)])
+    [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
     """
+    for shape in shapes:
+        pass
 
 class CatParameters(object):
 
