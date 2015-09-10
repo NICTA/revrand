@@ -35,7 +35,7 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         using log-marginal likelihood.
 
         Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
+            X: Nxd array input dataset (N samples, d dimensions)
             y: N array targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of parameters of the basis object
@@ -48,9 +48,14 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
                 otherwise false uses BOBYQA (from nlopt)
 
         Returns:
-            list: learned sequence of basis object hyperparameters
-            float: learned observation variance
-            float: learned weight regluariser
+            (tuple): with elements,
+
+                m: (D,) array of posterior weight means (D is the dimension of
+                    the features)
+                C: (D,) array of posterior weight variances.
+                bparams, (list): learned sequence of basis object
+                    hyperparameters
+                (float): learned observation variance
     """
 
     N, d = X.shape
@@ -144,7 +149,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
         Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
+            X: (N, d) array input dataset (N samples, d dimensions)
             y: N array targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of parameters of the basis object
@@ -157,9 +162,14 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
                 otherwise false uses BOBYQA (from nlopt)
 
         Returns:
-            list: learned sequence of basis object hyperparameters
-            float: learned observation variance
-            float: learned weight regluariser
+            (tuple): with elements,
+
+                m: (D,) array of posterior weight means (D is the dimension of
+                    the features)
+                C: (D,) array of posterior weight variances.
+                bparams, (list): learned sequence of basis object
+                    hyperparameters
+                (float): learned observation variance
     """
 
     N, d = X.shape
@@ -256,7 +266,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
         Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
+            X: Nxd array input dataset (N samples, d dimensions)
             y: N array targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of parameters of the basis object
@@ -271,9 +281,12 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         Returns:
             (tuple): with elements,
 
-                (list): learned sequence of basis object hyperparameters
+                m: (D,) array of posterior weight means (D is the dimension of
+                    the features)
+                C: (D,) array of posterior weight variances.
+                bparams, (list): learned sequence of basis object
+                    hyperparameters
                 (float): learned observation variance
-                (float): learned weight regluariser
     """
 
     N, d = X.shape
@@ -371,12 +384,14 @@ def bayesreg_predict(X_star, basis, m, C, bparams, var):
             var: observation variance
 
         Returns:
-            array: The expected value of y_star for the query inputs, X_star
-               of shape (N_star,)
-            array: The expected variance of f_star for the query inputs, X_star
-               of shape (N_star,)
-            array: The expected variance of y_star for the query inputs, X_star
-               of shape (N_star,)
+            (tuple): with elements:
+
+                Ey: The expected value of y_star for the query inputs, X_star
+                    of shape (N_star,)
+                Vf: The expected variance of f_star for the query inputs,
+                    X_star of shape (N_star,)
+                Vy: The expected variance of y_star for the query inputs,
+                    X_star of shape (N_star,)
     """
 
     Phi_s = basis(X_star, *bparams)
