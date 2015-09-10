@@ -286,11 +286,10 @@ def unflatten(flat_lst, shapes, order='C'):
 
     Notes
     -----
-    Roughly equivalent to::
+    Equivalent to::
 
-        lambda flat_lst, shapes: [np.reshape(flat_lst[start:end], shape)
-        for (start, end), shape in zip(pairwise(np.cumsum([0]+list(map(np.prod, shapes)))),
-        shapes)]
+        lambda flat_lst, shapes, order='C': (np.reshape(chunk, shape, order) if shape else chunk[0] for 
+            chunk, shape in zip(chunks(flat_lst, map(partial(np.prod, dtype=int), shapes)), shapes))
 
     Examples
     --------
@@ -325,6 +324,10 @@ def unflatten(flat_lst, shapes, order='C'):
             yield from chunk
         else:
             yield np.reshape(chunk, shape, order)
+
+def map_indices(fn, iterable, *indices):
+    index_set = set(indices)
+    return [fn(arg) if i in index_set else arg for i, arg in enumerate(iterable)]
 
 class CatParameters(object):
 
