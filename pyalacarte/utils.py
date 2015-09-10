@@ -292,20 +292,27 @@ def unflatten(flat_lst, shapes, order='C'):
 
     Examples
     --------
-    # >>> list(unflatten([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(2,), (3,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
-    # [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+    >>> list(unflatten([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(2,), (3,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
+    [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
     >>> list(unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(), (1,), (4,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
+    >>> list(unflatten([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(2,), (3,), (2, 3)], order='F')) # doctest: +NORMALIZE_WHITESPACE
+    [array([4, 5]), array([8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
+
+    >>> list(unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(), (1,), (4,), (2, 3)], order='F')) # doctest: +NORMALIZE_WHITESPACE
+    [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
     """
-    sizes = map(partial(np.prod, dtype=int), shapes)
+    # important to make sure dtype is int
+    # since prod on empty tuple is a float (1.0)
+    sizes = map(partial(np.prod, dtype=int), shapes) 
     for chunk, shape in zip(chunks(flat_lst, sizes), shapes):
         if shape == ():
             # chunk only has 1 element
             yield from chunk
         else:
-            yield np.reshape(chunk, shape)
+            yield np.reshape(chunk, shape, order)
 
 class CatParameters(object):
 
