@@ -4,17 +4,52 @@ import numpy as np
 
 pairwise = lambda a: zip(a[:-1], a[1:])
 
-def pre(func):
+
+def pre_flatten(func):
     def new_func(*args):
         return func(*map(np.atleast_1d, args))
     return new_func
 
-@pre
-def deconstruct(*args):
+@pre_flatten
+def flatten(*args):
     lsts, shapes = zip(*map(lambda x: (x.flatten(), x.shape), args))
     return list(chain(*lsts)), shapes
 
-reconstruct = lambda flat_lst, shapes: [np.asarray(flat_lst[start:end]).reshape(shape) for (start, end), shape in zip(pairwise(np.cumsum([0]+list(map(np.prod, shapes)))), shapes)]
+
+def unflatten(flat_lst, shapes, order='C'):
+    """
+    Given a flat (one-dimensional) list, and a list of ndarray shapes return 
+    a list of numpy ndarrays of specified shapes.
+
+    Parameters
+    ----------
+    flat_lst : list
+        A flat (one-dimensional) list
+    
+    shapes : list of tuples
+        A list of ndarray shapes (tuple of array dimensions)
+
+    order : {‘C’, ‘F’, ‘A’}, optional
+        Reshape array using index order: C (row-major), Fortran (column-major) 
+        order, or preserve the C/Fortran ordering from a. The default is ‘C’.
+    
+    See Also
+    --------
+    utils.flatten : its inverse
+
+    Notes
+    -----
+    Roughly equivalent to::
+
+        lambda flat_lst, shapes: [np.asarray(flat_lst[start:end]).reshape(shape) \
+            for (start, end), shape in zip(pairwise(np.cumsum([0]+list(map(np.prod, shapes)))), \
+                shapes)]
+
+    Examples
+    --------
+    >>> unflatten([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(2,), (3,), (2, 3)])
+    [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+    """
 
 class CatParameters(object):
 

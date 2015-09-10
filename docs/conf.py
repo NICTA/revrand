@@ -43,9 +43,12 @@ extensions = [
 # Execute and display IPython code blocks inline
 # Very useful for embedding demos inside documentation
 extensions.extend(
-  ['IPython.sphinxext.ipython_console_highlighting',
+  ['sphinx.ext.napoleon',
+   'IPython.sphinxext.ipython_console_highlighting',
    'IPython.sphinxext.ipython_directive']
 )
+
+napoleon_numpy_docstring = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
