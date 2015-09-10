@@ -179,6 +179,36 @@ def flatten(lst, order='C', returns_shapes=False):
     else:
         return flattened
 
+def slices(sizes):
+    """
+    Notes
+    -----
+    Equivalent to::
+
+        lambda sizes: pairwise([0]+cumsum(sizes))
+
+    Examples
+    --------
+
+    >>> list(slices([1, 3, 2, 3]))
+    [(0, 1), (1, 4), (4, 6), (6, 9)]
+
+    >>> list(slices([2, 0, 1]))
+    [(0, 2), (2, 3)]
+
+    >>> list(slices([2]))
+    [(0, 2)]
+
+    >>> list(slices([]))
+    []
+    """
+    start = 0
+    for size in sizes:
+        if size == 0: 
+            continue
+        yield (start, start+size)
+        start += size
+
 def unflatten(flat_lst, shapes, order='C'):
     """
     Given a flat (one-dimensional) list, and a list of ndarray shapes return 
