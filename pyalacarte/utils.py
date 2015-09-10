@@ -2,7 +2,17 @@
 
 import numpy as np
 
-pairwise = lambda a: zip(a[:-1], a[1:])
+from six.moves import range, zip
+from itertools import tee
+
+def nwise(iterable, n=2):
+    iters = tee(iterable, n)
+    for i, it in enumerate(iters):
+        for _ in range(i):
+            next(it, None)
+    return zip(*iters)
+
+
 
 def pre_flatten(func):
     def new_func(*args):
@@ -54,7 +64,7 @@ def unflatten(flat_lst, shapes, order='C'):
     [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
     >>> unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(,), (1,), (4,), (2, 3)])
-    [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+    [7, array([4]), array([5, 8, 9, 1]), array([[git s4, 2, 5], [3, 4, 3]])]
     """
     for shape in shapes:
         pass
