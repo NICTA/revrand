@@ -4,9 +4,10 @@ Reusable utility functions
 
 import numpy as np
 
-from six.moves import map, range, zip
+from six.moves import map, range, reduce, zip
 from itertools import chain, tee
-from functools import partial 
+from functools import partial
+from operator import mul
 
 def nwise(iterable, n):
     """
@@ -102,7 +103,8 @@ def flatten(lst, order='C', returns_shapes=True):
 
        Not to be confused with `np.ndarray.flatten()` (a more befitting might 
        be `chain` or maybe something else entirely since this function 
-       essentially is `chain` composed with `np.flatten`.)
+       is more than merely `chain` or `np.flatten`. Rather, it is the 
+       composition of the former with the latter.
 
     Parameters
     ----------
