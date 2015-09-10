@@ -1,4 +1,6 @@
-""" Various utilities that help out with things. """
+""" 
+Reusable utility functions
+"""
 
 import numpy as np
 
@@ -59,7 +61,14 @@ def nwise(iterable, n):
     >>> list(nwise(a, n=7))
     [(2, 5, 7, 4, 2, 8, 6)]
 
+    .. todo::
+
+       These should probably raise `ValueError`...
+
     >>> list(nwise(a, 8))
+    []
+
+    >>> list(nwise(a, 9))
     []
 
     A sliding window of size `n` over a list of `m` elements
@@ -123,7 +132,7 @@ def unflatten(flat_lst, shapes, order='C'):
     [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
     >>> unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(,), (1,), (4,), (2, 3)])
-    [7, array([4]), array([5, 8, 9, 1]), array([[git s4, 2, 5], [3, 4, 3]])]
+    [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
     """
     for shape in shapes:
         pass
