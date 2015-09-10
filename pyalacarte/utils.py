@@ -4,9 +4,9 @@ Reusable utility functions
 
 import numpy as np
 
-from six.moves import range, zip
-from functools import partial
-from itertools import tee
+from six.moves import map, range, zip
+from itertools import chain, tee
+from functools import partial 
 
 def nwise(iterable, n):
     """
@@ -40,19 +40,20 @@ def nwise(iterable, n):
             for _ in range(i):
                 next(it, None)
 
-    Then, the iterators are zipped back up again::
+    Finally, the iterators are zipped back up again::
 
         return zip(*iters)
 
     Examples
     --------
+
     >>> a = [2, 5, 7, 4, 2, 8, 6]
 
     >>> list(nwise(a, n=3))
     [(2, 5, 7), (5, 7, 4), (7, 4, 2), (4, 2, 8), (2, 8, 6)]
 
     >>> pairwise = partial(nwise, n=2)
-    >>> pairwise(a)
+    >>> list(pairwise(a))
     [(2, 5), (5, 7), (7, 4), (4, 2), (2, 8), (8, 6)]
 
     >>> list(nwise(a, n=1))
@@ -74,13 +75,13 @@ def nwise(iterable, n):
     A sliding window of size `n` over a list of `m` elements
     gives `m-n+1` windows 
 
-    >>> len(a) - 2 == len(list(nwise(a, 2))) - 1
+    >>> len(a) - len(list(nwise(a, 2))) == 1
     True
 
-    >>> len(a) - 3 == len(list(nwise(a, 3))) - 1
+    >>> len(a) - len(list(nwise(a, 3))) == 2
     True
 
-    >>> len(a) - 7 == len(list(nwise(a, 7))) - 1
+    >>> len(a) - len(list(nwise(a, 7))) == 6
     True
     """
 
@@ -91,6 +92,93 @@ def nwise(iterable, n):
     return zip(*iters)
 
 pairwise = partial(nwise, n=2)
+
+def flatten(lst, order='C', returns_shapes=False):
+    """
+    Flatten ndarrays from a list of numpy scalars and/or ndarrays of possibly
+    heterogenous dimensions and chain together into a flat (1D) list.
+
+    .. note::
+
+       Not to be confused with `np.ndarray.flatten()` (a more befitting might 
+       be `chain` or maybe something else entirely since this function 
+       essentially is `chain` composed with `np.flatten`.)
+
+    Parameters
+    ----------
+    lst : list
+        A list of scalars and/or numpy arrays of possibly heterogenous dimensions.
+
+    order : {‘C’, ‘F’, ‘A’}, optional
+        Whether to flatten in C (row-major), Fortran (column-major) order, 
+        or preserve the C/Fortran ordering from a. The default is ‘C’.
+    
+    returns_shapes : bool, optional 
+        Default is `False`. If `True`, the tuple (flattened, shapes) is returned,
+        otherwise only the flattened is returned.
+
+    Returns
+    -------
+    flattened,[shapes] : {list of numeric, list of tuples}
+        Return the flat (1D) list chained together from flattened (according to order)
+        ndarrays. When `returns_shapes` is `True`, return a list of tuples containing 
+        also the shapes of each element of `lst` the second element.
+
+    See Also
+    --------
+    pyalacarte.utils.unflatten : its inverse
+
+    Notes
+    -----
+    Roughly equivalent to::
+
+        def flatten(lst, order='C'):
+            lsts, shapes = zip(*map(lambda x: (np.ravel(x, order), np.shape(x)), lst))
+            return list(chain(*lsts)), shapes
+
+    It is important to remember that scalars are considered 0-dimensional arrays. That is,
+
+    >>> a = 4.6
+    
+    >>> np.shape(a)
+    ()
+
+    >>> np.ravel(a)
+    array([ 4.6])
+
+    Examples
+    --------
+    >>> a = 9
+    >>> b = np.array([4, 7, 4, 5, 2])
+    >>> c = np.array([[7, 3, 1],
+    ...               [2, 6, 6]])
+    >>> d = np.array([[[6, 5, 5],
+    ...                [1, 6, 9]],
+    ...               [[3, 9, 1],  
+    ...                [9, 4, 1]]])
+    
+    >>> flatten([a, b, c, d]) # doctest: +NORMALIZE_WHITESPACE
+    [9, 4, 7, 4, 5, 2, 
+     7, 3, 1, 2, 6, 6, 
+     6, 5, 5, 1, 6, 9, 
+     3, 9, 1, 9, 4, 1]
+
+    >>> flatten([a, b, c, d], returns_shapes=True) # doctest: +NORMALIZE_WHITESPACE
+    ([9, 4, 7, 4, 5, 2, 
+      7, 3, 1, 2, 6, 6, 
+      6, 5, 5, 1, 6, 9, 
+      3, 9, 1, 9, 4, 1], 
+      [(), (5,), (2, 3), (2, 2, 3)])
+
+    """
+    ravel = partial(np.ravel, order=order)
+    flattened = list(chain(*map(ravel, lst)))
+
+    if returns_shapes:
+        shapes = list(map(np.shape, lst))
+        return flattened, shapes
+    else:
+        return flattened
 
 def unflatten(flat_lst, shapes, order='C'):
     """
