@@ -119,6 +119,12 @@ def flatten(lst, order='C', returns_shapes=False):
 
     Returns
     -------
+
+    .. todo:: 
+
+       For consistency, might consider keeping with the Python 3 theme of returning
+       generators everywhere... Especially since most other functions here does...
+
     flattened,[shapes] : {list of numeric, list of tuples}
         Return the flat (1D) list chained together from flattened (according to order)
         ndarrays. When `returns_shapes` is `True`, return a list of tuples containing 
