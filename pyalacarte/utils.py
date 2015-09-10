@@ -30,11 +30,11 @@ def nwise(iterable, n):
     Notes
     -----
         
-    First n iterators are created::
+    First `n` iterators are created::
 
         iters = tee(iterable, n)
 
-    Next, iterator i is advanced i times::
+    Next, iterator `i` is advanced `i` times::
 
         for i, it in enumerate(iters):
             for _ in range(i):
