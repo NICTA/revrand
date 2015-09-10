@@ -3,26 +3,85 @@
 import numpy as np
 
 from six.moves import range, zip
+from functools import partial
 from itertools import tee
 
-def nwise(iterable, n=2):
+def nwise(iterable, n):
+    """
+    Iterator that acts like a sliding window of size `n`; slides over
+    some iterable `n` items at a time. If iterable has `m` elements, 
+    this function will return an iterator over `m-n+1` tuples.
+
+    Parameters
+    ----------
+    iterable : iterable
+        An iterable object.
+    
+    n : int
+        Window size.
+    
+    Returns
+    -------
+    iterator of tuples.
+        Iterator of size `n` tuples 
+
+    Notes
+    -----
+        
+    First n iterators are created::
+
+        iters = tee(iterable, n)
+
+    Next, iterator i is advanced i times::
+
+        for i, it in enumerate(iters):
+            for _ in range(i):
+                next(it, None)
+
+    Then, the iterators are zipped back up again::
+
+        return zip(*iters)
+
+    Examples
+    --------
+    >>> a = [2, 5, 7, 4, 2, 8, 6]
+
+    >>> list(nwise(a, n=3))
+    [(2, 5, 7), (5, 7, 4), (7, 4, 2), (4, 2, 8), (2, 8, 6)]
+
+    >>> pairwise = partial(nwise, n=2)
+    >>> pairwise(a)
+    [(2, 5), (5, 7), (7, 4), (4, 2), (2, 8), (8, 6)]
+
+    >>> list(nwise(a, n=1))
+    [(2,), (5,), (7,), (4,), (2,), (8,), (6,)]
+
+    >>> list(nwise(a, n=7))
+    [(2, 5, 7, 4, 2, 8, 6)]
+
+    >>> list(nwise(a, 8))
+    []
+
+    A sliding window of size `n` over a list of `m` elements
+    gives `m-n+1` windows 
+
+    >>> len(a) - 2 == len(list(nwise(a, 2))) - 1
+    True
+
+    >>> len(a) - 3 == len(list(nwise(a, 3))) - 1
+    True
+
+    >>> len(a) - 7 == len(list(nwise(a, 7))) - 1
+    True
+    """
+
     iters = tee(iterable, n)
     for i, it in enumerate(iters):
         for _ in range(i):
             next(it, None)
     return zip(*iters)
 
-
-
-def pre_flatten(func):
-    def new_func(*args):
-        return func(*map(np.atleast_1d, args))
-    return new_func
-
-@pre_flatten
-def flatten(*args):
-    lsts, shapes = zip(*map(lambda x: (x.flatten(), x.shape), args))
-    return list(chain(*lsts)), shapes
+pairwise = partial(nwise, n=2)
 
 def unflatten(flat_lst, shapes, order='C'):
     """
