@@ -93,7 +93,7 @@ def nwise(iterable, n):
 
 pairwise = partial(nwise, n=2)
 
-def flatten(lst, order='C', returns_shapes=False):
+def flatten(lst, order='C', returns_shapes=True):
     """
     Flatten ndarrays from a list of numpy scalars and/or ndarrays of possibly
     heterogenous dimensions and chain together into a flat (1D) list.
@@ -114,7 +114,7 @@ def flatten(lst, order='C', returns_shapes=False):
         or preserve the C/Fortran ordering from a. The default is ‘C’.
     
     returns_shapes : bool, optional 
-        Default is `False`. If `True`, the tuple (flattened, shapes) is returned,
+        Default is `True`. If `True`, the tuple (flattened, shapes) is returned,
         otherwise only the flattened is returned.
 
     Returns
@@ -303,6 +303,11 @@ def unflatten(flat_lst, shapes, order='C'):
 
     >>> list(unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(), (1,), (4,), (2, 3)], order='F')) # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
+    
+    .. todo::
+
+       Doctests verifying `unflatten(*flatten(lst)) == lst` for all `lst`.
+
     """
     # important to make sure dtype is int
     # since prod on empty tuple is a float (1.0)
