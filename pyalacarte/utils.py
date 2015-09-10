@@ -164,16 +164,16 @@ def flatten(lst, order='C', returns_shapes=True):
     ...                [9, 4, 1]]])
     
     >>> flatten([a, b, c, d])
-    [9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 1, 9, 4, 1]
-
-    >>> flatten([a, b, c, d], order='F')
-    [9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1]
-
-    >>> flatten([a, b, c, d], returns_shapes=True)
     ([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 1, 9, 4, 1], [(), (5,), (2, 3), (2, 2, 3)])
 
-    >>> flatten([a, b, c, d], order='F', returns_shapes=True)
+    >>> flatten([a, b, c, d], order='F')
     ([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1], [(), (5,), (2, 3), (2, 2, 3)])
+
+    >>> flatten([a, b, c, d], returns_shapes=False)
+    [9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 1, 9, 4, 1]
+
+    >>> flatten([a, b, c, d], order='F', returns_shapes=False)
+    [9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1]
 
     """
     ravel = partial(np.ravel, order=order)
@@ -286,7 +286,7 @@ def unflatten(flat_lst, shapes, order='C'):
     -----
     Roughly equivalent to::
 
-        lambda flat_lst, shapes: [np.asarray(flat_lst[start:end]).reshape(shape)
+        lambda flat_lst, shapes: [np.reshape(flat_lst[start:end], shape)
         for (start, end), shape in zip(pairwise(np.cumsum([0]+list(map(np.prod, shapes)))),
         shapes)]
 
@@ -304,10 +304,15 @@ def unflatten(flat_lst, shapes, order='C'):
     >>> list(unflatten([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3], [(), (1,), (4,), (2, 3)], order='F')) # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
     
-    .. todo::
+    It goes without saying that `unflatten` is the inverse of of `flatten`. 
+    For all lists `lst`, `unflatten(*flatten(lst)) == lst` and for all `shapes`
+    `flatten(unflatten(lst, shapes)) == (lst, shapes)`
 
-       Doctests verifying `unflatten(*flatten(lst)) == lst` for all `lst`.
+    >>> lst = [4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]
+    >>> shapes = [(2,), (3,), (2, 3)]
 
+    >>> flatten(list(unflatten(lst, shapes))) == (lst, shapes)
+    True
     """
     # important to make sure dtype is int
     # since prod on empty tuple is a float (1.0)
