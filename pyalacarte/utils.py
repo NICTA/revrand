@@ -157,18 +157,17 @@ def flatten(lst, order='C', returns_shapes=False):
     ...               [[3, 9, 1],  
     ...                [9, 4, 1]]])
     
-    >>> flatten([a, b, c, d]) # doctest: +NORMALIZE_WHITESPACE
-    [9, 4, 7, 4, 5, 2, 
-     7, 3, 1, 2, 6, 6, 
-     6, 5, 5, 1, 6, 9, 
-     3, 9, 1, 9, 4, 1]
+    >>> flatten([a, b, c, d])
+    [9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 1, 9, 4, 1]
 
-    >>> flatten([a, b, c, d], returns_shapes=True) # doctest: +NORMALIZE_WHITESPACE
-    ([9, 4, 7, 4, 5, 2, 
-      7, 3, 1, 2, 6, 6, 
-      6, 5, 5, 1, 6, 9, 
-      3, 9, 1, 9, 4, 1], 
-      [(), (5,), (2, 3), (2, 2, 3)])
+    >>> flatten([a, b, c, d], order='F')
+    [9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1]
+
+    >>> flatten([a, b, c, d], returns_shapes=True)
+    ([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 1, 9, 4, 1], [(), (5,), (2, 3), (2, 2, 3)])
+
+    >>> flatten([a, b, c, d], order='F', returns_shapes=True)
+    ([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1], [(), (5,), (2, 3), (2, 2, 3)])
 
     """
     ravel = partial(np.ravel, order=order)
