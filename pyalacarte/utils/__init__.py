@@ -376,7 +376,7 @@ def map_indices(fn, iterable, indices):
        Floating point precision
 
     >>> list(map_indices(np.exp, list(map_indices(np.log, b, [0, 2])), [0, 2]))
-    ... # doctest: +NORMALIZE_WHITESPACE
+    ... # doctest: +NORMALIZE_WHITESPACE +SKIP
     [9.,
      array([5., 6., 2.]),
      array([[ 5.,  6.,  2.],
