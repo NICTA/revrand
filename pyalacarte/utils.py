@@ -164,8 +164,10 @@ def flatten(lst, order='C', returns_shapes=True):
     >>> np.shape(b)
     ()
 
-    When 0-dimensional arrays of the latter form are flattened, they will be 
-    unflattened as a scalar.
+    .. important::
+
+       When 0-dimensional arrays of the latter form are flattened, *they  will be 
+       unflattened as a scalar*. (Special cases aren't special enough to break the rules!)
 
     Examples
     --------
@@ -253,7 +255,7 @@ def chunks(lst, sizes):
     >>> list(chunks(a, []))
     []
 
-    Lists are chunked eagerly:
+    Lists are chunked greedily:
 
     >>> list(chunks(a, [3, 2, 3]))
     [[2, 4, 6], [3, 4], [6, 1, 9]]
@@ -327,6 +329,12 @@ def unflatten(flat_lst, shapes, order='C'):
 
     >>> flatten(list(unflatten(lst, shapes))) == (lst, shapes)
     True
+
+    .. todo::
+
+       * Demonstrate that lists are unflattened greedily as well
+       * Edge cases...
+
     """
     # important to make sure dtype is int
     # since prod on empty tuple is a float (1.0)
@@ -369,8 +377,8 @@ def map_indices(fn, iterable, indices):
 
     >>> list(map_indices(np.exp, list(map_indices(np.log, b, [0, 2])), [0, 2]))
     ... # doctest: +NORMALIZE_WHITESPACE
-    [9., 
-     array([5, 6, 2]), 
+    [9.,
+     array([5., 6., 2.]),
      array([[ 5.,  6.,  2.],
             [ 2.,  3.,  9.]])]
     """
