@@ -144,15 +144,28 @@ def flatten(lst, order='C', returns_shapes=True):
             lsts, shapes = zip(*map(lambda x: (np.ravel(x, order), np.shape(x)), lst))
             return list(chain(*lsts)), shapes
 
-    It is important to remember that scalars are considered 0-dimensional arrays. That is,
+    This implementation relies on the fact that scalars are 0-dimensional arrays. 
+    That is,
 
     >>> a = 4.6
-    
+    >>> np.ndim(a)
+    0
     >>> np.shape(a)
     ()
 
     >>> np.ravel(a)
     array([ 4.6])
+
+    Note also that the following is also a 0-dimensional array
+
+    >>> b = np.array(3.14)
+    >>> np.ndim(b)
+    0
+    >>> np.shape(b)
+    ()
+
+    When 0-dimensional arrays of the latter form are flattened, they will be 
+    unflattened as a scalar.
 
     Examples
     --------
