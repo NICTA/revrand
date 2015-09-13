@@ -18,6 +18,72 @@ def vectorize_args(fn):
     interface when higher-order functions/decorators can abstract away the 
     details for us. This is what this decorator does. 
 
+    See Also
+    --------
+    pyalacarte.utils.decorators.unvectorize_args
+
+    Examples
+    --------
+
+    Optimizers such as those in `scipy.optimize` expects a function defined like
+    this.
+
+    >>> def fun1(v):
+    ...     # elliptic parabaloid
+    ...     return 2*v[0]**2 + 2*v[1]**2 - 4
+    
+    >>> a = np.array([2, 3])
+    
+    >>> fun1(a)
+    22
+
+    Whereas this representation is not only more readable but more natural.
+
+    >>> def fun2(x, y):
+    ...     # elliptic parabaloid
+    ...     return 2*x**2 + 2*y**2 - 4
+    
+    >>> fun2(2, 3)
+    22
+
+    It is also important for evaluating functions on a `numpy.meshgrid`
+
+    >>> y, x = np.mgrid[-5:5:0.2, -5:5:0.2]
+    >>> fun2(x, y)
+    array([[ 96.  ,  92.08,  88.32, ...,  84.72,  88.32,  92.08],
+           [ 92.08,  88.16,  84.4 , ...,  80.8 ,  84.4 ,  88.16],
+           [ 88.32,  84.4 ,  80.64, ...,  77.04,  80.64,  84.4 ],
+           ..., 
+           [ 84.72,  80.8 ,  77.04, ...,  73.44,  77.04,  80.8 ],
+           [ 88.32,  84.4 ,  80.64, ...,  77.04,  80.64,  84.4 ],
+           [ 92.08,  88.16,  84.4 , ...,  80.8 ,  84.4 ,  88.16]])
+
+    We can easily reconcile the differences between these representation
+    without having to compromise readability.
+
+    >>> fun1(a) == vectorize_args(fun2)(a)
+    True
+
+    >>> @vectorize_args
+    ... def fun3(x, y):
+    ...     # elliptic parabaloid
+    ...     return 2*x**2 + 2*y**2 - 4
+    
+    >>> fun1(a) == fun3(a)
+    True
+    """
+
+    def new_fn(vec):
+        return fn(*vec)
+    return new_fn
+
+def unvectorize_args(fn):
+
+    """
+    See Also
+    --------
+    pyalacarte.utils.decorators.vectorize_args
+
     Examples
     --------
 
@@ -42,7 +108,7 @@ def vectorize_args(fn):
     >>> fun2(2, 3)
     22
 
-    It is also important evaluating functions on a `numpy.meshgrid`
+    It is also important for evaluating functions on a `numpy.meshgrid`
 
     >>> y, x = np.mgrid[-5:5:0.2, -5:5:0.2]
     >>> fun2(x, y)
@@ -54,25 +120,22 @@ def vectorize_args(fn):
            [ 88.32,  84.4 ,  80.64, ...,  77.04,  80.64,  84.4 ],
            [ 92.08,  88.16,  84.4 , ...,  80.8 ,  84.4 ,  88.16]])
 
-    We no longer need to be subject to this oppression.
+    We can easily reconcile the differences between these representation
+    without having to compromise readability.
 
-    >>> fun1(a) == vectorize_args(fun2)(a)
+    >>> unvectorize_args(fun1)(2, 3) == fun2(2, 3)
     True
 
-    >>> @vectorize_args
-    ... def fun3(x, y):
+    >>> @unvectorize_args
+    ... def fun3(v):
     ...     # elliptic parabaloid
-    ...     return 2*x**2 + 2*y**2 - 4
+    ...     return 2*v[0]**2 + 2*v[1]**2 - 4
     
-    >>> fun1(a) == fun3(a)
+    >>> fun2(2, 3) == fun3(2, 3)
     True
+
     """
 
-    def new_fn(vec):
-        return fn(*vec)
-    return new_fn
-
-def unvectorize_args(fn):
     def new_fn(*args):
         return fn(np.asarray(args))
     return new_fn
