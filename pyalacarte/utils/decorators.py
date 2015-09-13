@@ -142,5 +142,5 @@ def unvectorize_args(fn):
 
 def vectorize_result(fn):
     def new_fn(*args):
-        return fn(np.asarray(args))
+        return np.asarray(fn(*args))
     return new_fn
