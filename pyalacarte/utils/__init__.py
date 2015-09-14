@@ -98,41 +98,46 @@ pairwise = partial(nwise, n=2)
 
 def flatten(lst, order='C', returns_shapes=True):
     """
-    Flatten ndarrays from a list of numpy scalars and/or ndarrays of possibly
-    heterogenous dimensions and chain together into a flat (1D) list.
+    Flatten ndarrays from a list of numpy scalars and/or ndarrays of 
+    possibly heterogenous dimensions and chain together into a flat (1D)
+    list.
 
     .. note::
 
-       Not to be confused with `np.ndarray.flatten()` (a more befitting might 
-       be `chain` or maybe something else entirely since this function 
-       is more than merely `chain` or `np.flatten`. Rather, it is the 
-       composition of the former with the latter.
+       Not to be confused with `np.ndarray.flatten()` (a more befitting
+       might be `chain` or maybe something else entirely since this 
+       function is more than merely `chain` or `np.flatten`. Rather, it 
+       is the composition of the former with the latter.
 
     Parameters
     ----------
     lst : list
-        A list of scalars and/or numpy arrays of possibly heterogenous dimensions.
+        A list of scalars and/or numpy arrays of possibly heterogenous 
+        dimensions.
 
     order : {‘C’, ‘F’, ‘A’}, optional
-        Whether to flatten in C (row-major), Fortran (column-major) order, 
-        or preserve the C/Fortran ordering from a. The default is ‘C’.
+        Whether to flatten in C (row-major), Fortran (column-major) 
+        order, or preserve the C/Fortran ordering from a. The default is
+        ‘C’.
     
     returns_shapes : bool, optional 
-        Default is `True`. If `True`, the tuple (flattened, shapes) is returned,
-        otherwise only the flattened is returned.
+        Default is `True`. If `True`, the tuple (flattened, shapes) is 
+        returned, otherwise only the flattened is returned.
 
     Returns
     -------
 
     .. todo:: 
 
-       For consistency, might consider keeping with the Python 3 theme of returning
-       generators everywhere... Especially since most other functions here does...
+       For consistency, might consider keeping with the Python 3 theme 
+       of returning generators everywhere... Especially since most other 
+       functions here does...
 
     flattened,[shapes] : {list of numeric, list of tuples}
-        Return the flat (1D) list chained together from flattened (according to order)
-        ndarrays. When `returns_shapes` is `True`, return a list of tuples containing 
-        also the shapes of each element of `lst` the second element.
+        Return the flat (1D) list chained together from flattened 
+        (according to order) ndarrays. When `returns_shapes` is `True`, 
+        return a list of tuples containing also the shapes of each 
+        element of `lst` the second element.
 
     See Also
     --------
@@ -146,8 +151,8 @@ def flatten(lst, order='C', returns_shapes=True):
             lsts, shapes = zip(*map(lambda x: (np.ravel(x, order), np.shape(x)), lst))
             return list(chain(*lsts)), shapes
 
-    This implementation relies on the fact that scalars are 0-dimensional arrays. 
-    That is,
+    This implementation relies on the fact that scalars are 0-dimensional 
+    arrays. That is,
 
     >>> a = 4.6
     >>> np.ndim(a)
@@ -168,8 +173,9 @@ def flatten(lst, order='C', returns_shapes=True):
 
     .. important::
 
-       When 0-dimensional arrays of the latter form are flattened, *they  will be 
-       unflattened as a scalar*. (Special cases aren't special enough to break the rules!)
+       When 0-dimensional arrays of the latter form are flattened, 
+       *they  will be unflattened as a scalar*. (Because special cases 
+       aren't special enough to break the rules.)
 
     Examples
     --------
@@ -277,8 +283,8 @@ def chunks(lst, sizes):
 
 def unflatten(flat_lst, shapes, order='C'):
     """
-    Given a flat (one-dimensional) list, and a list of ndarray shapes return 
-    a list of numpy ndarrays of specified shapes.
+    Given a flat (one-dimensional) list, and a list of ndarray shapes 
+    return a list of numpy ndarrays of specified shapes.
 
     Parameters
     ----------
@@ -289,8 +295,9 @@ def unflatten(flat_lst, shapes, order='C'):
         A list of ndarray shapes (tuple of array dimensions)
 
     order : {‘C’, ‘F’, ‘A’}, optional
-        Reshape array using index order: C (row-major), Fortran (column-major) 
-        order, or preserve the C/Fortran ordering from a. The default is ‘C’.
+        Reshape array using index order: C (row-major), Fortran 
+        (column-major) order, or preserve the C/Fortran ordering from a. 
+        The default is ‘C’.
     
     Returns
     -------

@@ -6,17 +6,18 @@ import numpy as np
 
 def vectorize_args(fn):
     """
-    When defining functions of several variables, it is usually more readable to 
-    write out each variable as a separate argument. This is alsoconvenient for 
-    evaluating functions on a `numpy.meshgrid`. 
+    When defining functions of several variables, it is usually more 
+    readable to write out each variable as a separate argument. This is 
+    also convenient for evaluating functions on a `numpy.meshgrid`. 
 
-    However, the family of optimizers in `scipy.optimize` expects that all 
-    functions, including those of several variables, receive a single argument, 
-    which is a `numpy.ndarray` in the case of functions of several variables.
+    However, the family of optimizers in `scipy.optimize` expects that 
+    all functions, including those of several variables, receive a 
+    single argument, which is a `numpy.ndarray` in the case of functions
+    of several variables.
 
-    Readability counts. We need not compromise readability to conform to some 
-    interface when higher-order functions/decorators can abstract away the 
-    details for us. This is what this decorator does. 
+    Readability counts. We need not compromise readability to conform to
+    some interface when higher-order functions/decorators can abstract 
+    away the details for us. This is what this decorator does. 
 
     See Also
     --------
@@ -25,8 +26,8 @@ def vectorize_args(fn):
     Examples
     --------
 
-    Optimizers such as those in `scipy.optimize` expects a function defined like
-    this.
+    Optimizers such as those in `scipy.optimize` expects a function 
+    defined like this.
 
     >>> def fun1(v):
     ...     # elliptic parabaloid
@@ -37,7 +38,8 @@ def vectorize_args(fn):
     >>> fun1(a)
     22
 
-    Whereas this representation is not only more readable but more natural.
+    Whereas this representation is not only more readable but more 
+    natural.
 
     >>> def fun2(x, y):
     ...     # elliptic parabaloid
@@ -86,30 +88,32 @@ def unvectorize_args(fn):
 
     Examples
     --------
-    The Rosenbrock function is commonly used as a performance test problem for
-    optimization algorithms. It and its derivatives are included in 
-    `scipy.optimize` and is implemented as expected by the family of 
-    optimization methods in `scipy.optimize`.
+    The Rosenbrock function is commonly used as a performance test 
+    problem for optimization algorithms. It and its derivatives are 
+    included in `scipy.optimize` and is implemented as expected by the 
+    family of optimization methods in `scipy.optimize`.
 
         def rosen(x):
             return sum(100.0*(x[1:]-x[:-1]**2.0)**2.0 + (1-x[:-1])**2.0)
 
     This representation makes it unwieldy to perform operations such as 
-    plotting since it is less straightforward to evaluate the function on a
-    `meshgrid`. This decorator helps reconcile the differences between these
-    representations.
+    plotting since it is less straightforward to evaluate the function 
+    on a `meshgrid`. This decorator helps reconcile the differences 
+    between these representations.
 
     >>> from scipy.optimize import rosen
 
     >>> rosen(np.array([0.5, 1.5]))
     156.5
 
-    >>> unvectorize_args(rosen)(0.5, 1.5) # doctest: +NORMALIZE_WHITESPACE
+    >>> unvectorize_args(rosen)(0.5, 1.5) 
+    ... # doctest: +NORMALIZE_WHITESPACE
     156.5    
 
-    The `rosen` function is implemented in such a way that it generalizes to
-    the Rosenbrock function of any number of variables. This decorator 
-    supports can support any functions defined in a similar manner.
+    The `rosen` function is implemented in such a way that it 
+    generalizes to the Rosenbrock function of any number of variables. 
+    This decorator supports can support any functions defined in a 
+    similar manner.
 
     The function with any number of arguments are well-defined:
 
@@ -117,6 +121,7 @@ def unvectorize_args(fn):
     418.0
 
     >>> unvectorize_args(rosen)(0.5, 1.5, 1., 0., 0.2)
+    ... # can accept any variable number of arguments!
     418.0
 
     Make it easier to work with for other operations
@@ -133,8 +138,8 @@ def unvectorize_args(fn):
            [ 104.  ,  124.25,  145.22, ...,   80.55,   62.42,   45.92],
            [ 114.25,  135.48,  157.37, ...,   89.78,   70.57,   52.95]])
 
-    Now this can be directly plotted with `mpl_toolkits.mplot3d.Axes3D` and 
-    `ax.plot_surface`.
+    Now this can be directly plotted with `mpl_toolkits.mplot3d.Axes3D` 
+    and `ax.plot_surface`.
 
     """
 
