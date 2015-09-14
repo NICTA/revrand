@@ -11,6 +11,9 @@ from operator import mul
 from .decorators import (vectorize_args, unvectorize_args, 
                         vectorize_result)
 
+compose = lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))
+compose_all = lambda *fns: reduce(compose, fns)
+
 def nwise(iterable, n):
     """
     Iterator that acts like a sliding window of size `n`; slides over

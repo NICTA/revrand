@@ -2,10 +2,70 @@
     scipy.optimize.minimize.
 """
 
-import nlopt
 import numpy as np
-from scipy.optimize import minimize as smin
+import nlopt
 
+from scipy.optimize import minimize as sp_min, OptimizeResult
+from six.moves import filter
+from functools import partial
+from re import search
+
+# NLOpt Helper
+NLOPT_ALGORITHMS_KEYS = list(filter(partial(search, r'^[GL][ND]_'), dir(nlopt)))
+NLOPT_ALGORITHMS = {k:getattr(nlopt, k) for k in NLOPT_ALGORITHMS_KEYS}
+
+def get_nlopt(method_name=None):
+    """
+    Get NLOpt algorithm by name. If the algorithm is not found, defaults
+    to `nlopt.LNBOBYQA`.
+
+    Notes
+    -----
+
+    From http://ab-initio.mit.edu/wiki/index.php/NLopt_Algorithms#Nomenclature:
+
+        Each algorithm in NLopt is identified by a named constant, which 
+        is passed to the NLopt routines in the various languages in 
+        order to select a particular algorithm. These constants are 
+        mostly of the form `NLOPT_{G,L}{N,D}_xxxx`, where G/L denotes 
+        global/local optimization and N/D denotes derivative-free/
+        gradient-based algorithms, respectively.
+
+        For example, the NLOPT_LN_COBYLA constant refers to the COBYLA 
+        algorithm (described below), which is a local (L) 
+        derivative-free (N) optimization algorithm.
+
+        Two exceptions are the MLSL and augmented Lagrangian algorithms, 
+        denoted by NLOPT_G_MLSL and NLOPT_AUGLAG, since whether or not 
+        they use derivatives (and whether or not they are global, in 
+        AUGLAG's case) is determined by what subsidiary optimization 
+        algorithm is specified. 
+
+    Equivalent to::
+
+        partial(NLOPT_ALGORITHMS.get, default=nlopt.LN_BOBYQA)
+
+    Examples
+    --------
+    >>> get_nlopt('LN_NELDERMEAD') == nlopt.LN_NELDERMEAD
+    True
+
+    >>> get_nlopt() == nlopt.LN_BOBYQA
+    True
+
+    >>> get_nlopt('foobar') == nlopt.LN_BOBYQA
+    True
+
+    .. todo:: Exceptional cases (low-priority)
+
+    >>> get_nlopt('G_MLSL') == nlopt.G_MLSL # doctest: +SKIP
+    True
+
+    >>> get_nlopt('AUGLAG') == nlopt.AUGLAG # doctest: +SKIP
+    True
+    """
+
+    return NLOPT_ALGORITHMS.get(method_name, nlopt.LN_BOBYQA)
 
 def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
              xtol=None, maxiter=None, jac=True):
@@ -54,6 +114,56 @@ def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
         raise ValueError("Type of input not understood, needs to be int or"
                          " str.")
 
+def _scipy_wrap(fun, x0, args, method, bounds, ftol, maxiter, jac):
+
+        if args is None:
+            args = ()
+
+        options = {}
+        if maxiter:
+            options['maxiter'] = maxiter
+
+        return sp_min(fun, x0, args, method=method, jac=jac, tol=ftol,
+                    options=options, bounds=bounds)
+
+def _nlopt_wrap(fun, x0, args, method, bounds, ftol, maxiter, xtol):
+
+    # Wrap the objective function into something NLopt expects
+    def obj(x, grad=None):
+
+        if grad:
+            obj, grad[:] = fun(x, *args) if args else fun(x)
+        else:
+            obj = fun(x, *args) if args else fun(x)
+
+        return obj
+
+    # Create NLopt object
+    N = len(x0)
+    opt = nlopt.opt(method, N)
+    opt.set_min_objective(obj)
+
+    # Translate the parameter bounds
+    if bounds:
+        lower = [b[0] if b[0] else -float('inf') for b in bounds]
+        upper = [b[1] if b[1] else float('inf') for b in bounds]
+        opt.set_lower_bounds(lower)
+        opt.set_upper_bounds(upper)
+
+    # Stoping Criteria
+    if ftol:
+        opt.set_ftol_rel(ftol)
+    if xtol:
+        opt.set_xtol_rel(xtol)
+    if maxiter:
+        opt.set_maxeval(maxiter)
+
+    return OptimizeResult(
+        x = opt.optimize(x0), 
+        fun = opt.last_optimum_value()),
+        message = str(opt.last_optimize_result()),
+        success = opt.last_optimize_result() > 0,
+    )
 
 def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
         eta=1e-5, gtol=1e-3, maxiter=10000, eval_obj=False):
@@ -199,59 +309,3 @@ def _sgd_batches(N, batchsize):
 
         for b_inds in batch_inds:
             yield b_inds
-
-
-def _scipy_wrap(fun, x0, args, method, bounds, ftol, maxiter, jac):
-
-        if args is None:
-            args = ()
-
-        options = {}
-        if maxiter:
-            options['maxiter'] = maxiter
-
-        return smin(fun, x0, args, method=method, jac=jac, tol=ftol,
-                    options=options, bounds=bounds)
-
-
-def _nlopt_wrap(fun, x0, args, method, bounds, ftol, maxiter, xtol):
-
-    # Wrap the objective function into something NLopt expects
-    def obj(x, grad=None):
-
-        if grad:
-            obj, grad[:] = fun(x, *args) if args else fun(x)
-        else:
-            obj = fun(x, *args) if args else fun(x)
-
-        return obj
-
-    # Create NLopt object
-    N = len(x0)
-    opt = nlopt.opt(method, N)
-    opt.set_min_objective(obj)
-
-    # Translate the parameter bounds
-    if bounds:
-        lower = [b[0] if b[0] else -float('inf') for b in bounds]
-        upper = [b[1] if b[1] else float('inf') for b in bounds]
-        opt.set_lower_bounds(lower)
-        opt.set_upper_bounds(upper)
-
-    # Stoping Criteria
-    if ftol:
-        opt.set_ftol_rel(ftol)
-    if xtol:
-        opt.set_xtol_rel(xtol)
-    if maxiter:
-        opt.set_maxeval(maxiter)
-
-    # Run and get results
-    res = {
-        'x': opt.optimize(x0),
-        'fun': opt.last_optimum_value(),
-        'message': str(opt.last_optimize_result()),
-        'success': opt.last_optimize_result() > 0
-        }
-
-    return res
