@@ -6,7 +6,7 @@ import numpy as np
 import nlopt
 
 from scipy.optimize import minimize as sp_min, OptimizeResult
-from six.moves import filter
+from six.moves import filter, range
 from functools import partial
 from re import search
 
@@ -17,7 +17,7 @@ NLOPT_ALGORITHMS = {k:getattr(nlopt, k) for k in NLOPT_ALGORITHMS_KEYS}
 def get_nlopt(method_name=None):
     """
     Get NLOpt algorithm by name. If the algorithm is not found, defaults
-    to `nlopt.LNBOBYQA`.
+    to `nlopt.LN_BOBYQA`.
 
     Notes
     -----
@@ -50,6 +50,14 @@ def get_nlopt(method_name=None):
     >>> get_nlopt('LN_NELDERMEAD') == nlopt.LN_NELDERMEAD
     True
 
+    >>> get_nlopt('ln_neldermead') == nlopt.LN_NELDERMEAD
+    True
+
+    One is allowed to be cavalier with these method names.
+
+    >>> get_nlopt('ln_NelderMead') == nlopt.LN_NELDERMEAD
+    True
+
     >>> get_nlopt() == nlopt.LN_BOBYQA
     True
 
@@ -65,7 +73,8 @@ def get_nlopt(method_name=None):
     True
     """
 
-    return NLOPT_ALGORITHMS.get(method_name, nlopt.LN_BOBYQA)
+    return NLOPT_ALGORITHMS.get(method_name.upper() if method_name is not None \
+        else None, nlopt.LN_BOBYQA)
 
 def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
              xtol=None, maxiter=None, jac=True):
@@ -114,29 +123,106 @@ def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
         raise ValueError("Type of input not understood, needs to be int or"
                          " str.")
 
-def _scipy_wrap(fun, x0, args, method, bounds, ftol, maxiter, jac):
+def sp_minimize(fun, x0, args, method, bounds, ftol, maxiter, jac):
 
-        if args is None:
-            args = ()
+    if args is None:
+        args = ()
 
-        options = {}
-        if maxiter:
-            options['maxiter'] = maxiter
+    options = {}
+    if maxiter:
+        options['maxiter'] = maxiter
 
-        return sp_min(fun, x0, args, method=method, jac=jac, tol=ftol,
-                    options=options, bounds=bounds)
+    return sp_min(fun, x0, args, method=method, jac=jac, tol=ftol,
+                options=options, bounds=bounds)
 
-def _nlopt_wrap(fun, x0, args, method, bounds, ftol, maxiter, xtol):
+def make_nlopt_obj(fun, args=(), jac=True):
 
-    # Wrap the objective function into something NLopt expects
-    def obj(x, grad=None):
+    """
+    Make NLOpt objective function (as specified by the the `NLOpt Python interface`_),
+    from SciPy-style objective functions.
 
-        if grad:
-            obj, grad[:] = fun(x, *args) if args else fun(x)
+    The NLOpt objective functions are less pleasant to work with and are 
+    even *required* to have side effects.
+
+    .. _`NLOpt Python interface`: 
+       http://ab-initio.mit.edu/wiki/index.php/NLopt_Python_Reference#Objective_function
+
+    Examples
+    --------
+
+    >>> from scipy.optimize import rosen, rosen_der
+    >>> rosen_combined = lambda x: (rosen(x), rosen_der(x))
+    >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_obj(rosen, jac=rosen_der)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_obj(rosen_combined, jac=True)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_obj(rosen, jac=False)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
+    >>> obj_fun = make_nlopt_obj(rosen, jac=False)
+    >>> opt.set_min_objective(obj_fun)
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LN_BOBYQA, len(x0))
+    >>> obj_fun = make_nlopt_obj(rosen, jac=False)
+    >>> opt.set_min_objective(obj_fun)
+    >>> opt.set_ftol_abs(1e-11)
+    >>> np.allclose(np.array([ 1.,  1.,  1.,  1.,  1.]), opt.optimize(x0))
+    True
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
+    >>> obj_fun = make_nlopt_obj(rosen_combined, jac=True)
+    >>> opt.set_min_objective(obj_fun)
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+    """
+
+    def nlopt_obj(x, grad):
+
+        if grad.size > 0:
+            if callable(jac):
+                grad[:] = jac(x, *args)
+                val = fun(x, *args)
+            else:            
+                if bool(jac):
+                    val, grad[:] = fun(x, *args)
+                else:
+                    val = fun(x, *args)
         else:
-            obj = fun(x, *args) if args else fun(x)
+            val = fun(x, *args) 
 
-        return obj
+        return val
+
+    return nlopt_obj
+
+def nlopt_minimize(fun, x0, args, method, jac, bounds, constraints, tol, options):
 
     # Create NLopt object
     N = len(x0)
@@ -160,7 +246,7 @@ def _nlopt_wrap(fun, x0, args, method, bounds, ftol, maxiter, xtol):
 
     return OptimizeResult(
         x = opt.optimize(x0), 
-        fun = opt.last_optimum_value()),
+        fun = opt.last_optimum_value(),
         message = str(opt.last_optimize_result()),
         success = opt.last_optimize_result() > 0,
     )
