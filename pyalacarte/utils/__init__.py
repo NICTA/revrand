@@ -1,13 +1,15 @@
 """ 
 Reusable utility functions
 """
-
 import numpy as np
 
 from six.moves import map, range, reduce, zip
 from itertools import chain, tee
 from functools import partial
 from operator import mul
+
+from .decorators import (vectorize_args, unvectorize_args, 
+                        vectorize_result)
 
 def nwise(iterable, n):
     """

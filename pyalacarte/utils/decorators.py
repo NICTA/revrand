@@ -86,53 +86,55 @@ def unvectorize_args(fn):
 
     Examples
     --------
+    The Rosenbrock function is commonly used as a performance test problem for
+    optimization algorithms. It and its derivatives are included in 
+    `scipy.optimize` and is implemented as expected by the family of 
+    optimization methods in `scipy.optimize`.
 
-    Optimizers such as those in `scipy.optimize` expects a function defined like
-    this.
+        def rosen(x):
+            return sum(100.0*(x[1:]-x[:-1]**2.0)**2.0 + (1-x[:-1])**2.0)
 
-    >>> def fun1(v):
-    ...     # elliptic parabaloid
-    ...     return 2*v[0]**2 + 2*v[1]**2 - 4
-    
-    >>> a = np.array([2, 3])
-    
-    >>> fun1(a)
-    22
+    This representation makes it unwieldy to perform operations such as 
+    plotting since it is less straightforward to evaluate the function on a
+    `meshgrid`. This decorator helps reconcile the differences between these
+    representations.
 
-    Whereas this representation is not only more readable but natural.
+    >>> from scipy.optimize import rosen
 
-    >>> def fun2(x, y):
-    ...     # elliptic parabaloid
-    ...     return 2*x**2 + 2*y**2 - 4
-    
-    >>> fun2(2, 3)
-    22
+    >>> rosen(np.array([0.5, 1.5]))
+    156.5
 
-    It is also important for evaluating functions on a `numpy.meshgrid`
+    >>> unvectorize_args(rosen)(0.5, 1.5) # doctest: +NORMALIZE_WHITESPACE
+    156.5    
 
-    >>> y, x = np.mgrid[-5:5:0.2, -5:5:0.2]
-    >>> fun2(x, y)
-    array([[ 96.  ,  92.08,  88.32, ...,  84.72,  88.32,  92.08],
-           [ 92.08,  88.16,  84.4 , ...,  80.8 ,  84.4 ,  88.16],
-           [ 88.32,  84.4 ,  80.64, ...,  77.04,  80.64,  84.4 ],
+    The `rosen` function is implemented in such a way that it generalizes to
+    the Rosenbrock function of any number of variables. This decorator 
+    supports can support any functions defined in a similar manner.
+
+    The function with any number of arguments are well-defined:
+
+    >>> rosen(np.array([0.5, 1.5, 1., 0., 0.2]))
+    418.0
+
+    >>> unvectorize_args(rosen)(0.5, 1.5, 1., 0., 0.2)
+    418.0
+
+    Make it easier to work with for other operations
+
+    >>> rosen_ = unvectorize_args(rosen)
+    >>> y, x = np.mgrid[-1:3.1:0.1, -2:2.2:0.1]
+    >>> z = rosen_(x, y)
+    >>> z
+    array([[ 2509.  ,  2133.62,  1805.6 , ...,  2126.02,  2501.  ,  2928.02],
+           [ 2410.  ,  2042.42,  1721.8 , ...,  2034.82,  2402.  ,  2820.82],
+           [ 2313.  ,  1953.22,  1640.  , ...,  1945.62,  2305.  ,  2715.62],
            ..., 
-           [ 84.72,  80.8 ,  77.04, ...,  73.44,  77.04,  80.8 ],
-           [ 88.32,  84.4 ,  80.64, ...,  77.04,  80.64,  84.4 ],
-           [ 92.08,  88.16,  84.4 , ...,  80.8 ,  84.4 ,  88.16]])
+           [  153.  ,    74.02,    27.2 , ...,    66.42,   145.  ,   260.42],
+           [  130.  ,    58.82,    19.4 , ...,    51.22,   122.  ,   229.22],
+           [  109.  ,    45.62,    13.6 , ...,    38.02,   101.  ,   200.02]])
 
-    We can easily reconcile the differences between these representation
-    without having to compromise readability.
-
-    >>> unvectorize_args(fun1)(2, 3) == fun2(2, 3)
-    True
-
-    >>> @unvectorize_args
-    ... def fun3(v):
-    ...     # elliptic parabaloid
-    ...     return 2*v[0]**2 + 2*v[1]**2 - 4
-    
-    >>> fun2(2, 3) == fun3(2, 3)
-    True
+    Now this can be directly plotted with `mpl_toolkits.mplot3d.Axes3D` and 
+    `ax.plot_surface`.
 
     """
 
