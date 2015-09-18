@@ -14,6 +14,52 @@ from .decorators import (vectorize_args, unvectorize_args,
 compose = lambda f, g: lambda *args, **kwargs: f(g(*args, **kwargs))
 compose_all = lambda *fns: reduce(compose, fns)
 
+def couple(f, g):
+    """
+    Given a pair of functions that take the same arguments, return a 
+    single function that returns a pair consisting of the return values 
+    of each function.
+
+    Notes
+    -----
+
+    Equivalent to::
+
+        lambda f, g: lambda *args, **kwargs: (f(*args, **kwargs), g(*args, **kwargs))
+
+    Examples
+    --------
+
+    >>> f = lambda x: 2*x**3
+    >>> Df = lambda x: 6*x**2
+    >>> f_new = couple(f, Df)
+    >>> f_new(5)
+    (250, 150)
+
+    """
+    def coupled(*args, **kwargs):
+        return f(*args, **kwargs), g(*args, **kwargs)
+    return coupled
+
+def decouple(fn):
+    """
+    >>> h = lambda x: (2*x**3, 6*x**2)
+    >>> f, g = decouple(h)
+    
+    >>> f(5)
+    250
+    
+    >>> g(5)
+    150
+    """
+    def fst(*args, **kwargs):
+        return fn(*args, **kwargs)[0]
+
+    def snd(*args, **kwargs):
+        return fn(*args, **kwargs)[1]
+
+    return fst, snd
+
 def nwise(iterable, n):
     """
     Iterator that acts like a sliding window of size `n`; slides over
