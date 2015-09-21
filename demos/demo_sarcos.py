@@ -22,12 +22,15 @@ lenscale = 10
 sigma = 100
 noise = 1
 regulariser = 100
-nbases = 1000
+nbases = 400
 gp_Ntrain = 1024
 maxit = 1e3
 rate = 0.9
 eta = 1e-4
 batchsize = 100
+
+useSGD = False
+diagcov = False
 
 
 #
@@ -77,9 +80,15 @@ y_train_sub = y_train[train_ind]
 
 base = bases.RandomRBF_ARD(nbases, D)
 lenARD = lenscale * np.ones(D)
-params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD], rate=rate,
-                                 var=noise**2, regulariser=regulariser,
-                                 maxit=maxit, batchsize=batchsize, eta=eta)
+if useSGD:
+    params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD],
+                                     rate=rate, var=noise**2,
+                                     regulariser=regulariser, maxit=maxit,
+                                     batchsize=batchsize, eta=eta)
+else:
+    params = regression.bayesreg_elbo(X_train, y_train, base, [lenARD],
+                                      var=noise**2, diagcov=diagcov,
+                                      regulariser=regulariser, maxit=maxit)
 
 #
 # Train GP

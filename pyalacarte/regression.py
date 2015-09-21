@@ -142,9 +142,8 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
     return m, C, bparams, var
 
 
-def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
-                  maxit=1000, verbose=True, var_bounds=(1e-7, None),
-                  regulariser_bounds=(1e-14, None), usegradients=True):
+def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
+                  ftol=1e-5, maxit=1000, verbose=True, usegradients=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
@@ -153,13 +152,15 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
             y: N array targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of parameters of the basis object
-            var: observation variance initial guess
-            regulariser: weight regulariser (variance) initial guess
-            verbose: log learning status
-            ftol: optimiser function tolerance convergence criterion
-            maxit: maximum number of iterations for the optimiser
-            usegradients: True for using gradients to optimize the parameters,
-                otherwise false uses BOBYQA (from nlopt)
+            var, (float): observation variance initial guess
+            regulariser, (float): weight regulariser (variance) initial guess
+            diagcov, (bool): approximate posterior covariance with diagional
+                matrix.
+            verbose, (bool): log learning status
+            ftol, (float): optimiser function tolerance convergence criterion
+            maxit, (int): maximum number of iterations for the optimiser
+            usegradients, (bool): True for using gradients to optimize the
+                parameters, otherwise false uses BOBYQA (from nlopt)
 
         Returns:
             (tuple): with elements,
@@ -178,7 +179,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
     # Caches for returning optimal params
     ELBOcache = [-np.inf]
     mcache = np.zeros(D)
-    Ccache = np.zeros(D)
+    Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
 
     # Initial parameter vector
     vparams = [var, regulariser, bparams]
@@ -196,20 +197,32 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         # Posterior Parameters
         LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
         m = cho_solve(LfullC, Phi.T.dot(y)) / _var
-        C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
+        if diagcov:
+            C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
+        else:
+            C = cho_solve(LfullC, np.eye(D))
 
         # Common computations
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
 
+        # Common calcs dependent on form of C
+        if diagcov:
+            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
+            logdetC = np.log(C).sum()
+            TrC = C.sum()
+        else:
+            TrPhiPhiC = (PhiPhi * C).sum()
+            logdetC = -logdet(LfullC[0])
+            TrC = np.trace(C)
+
         # Calculate ELBO
-        TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + (C.sum() + mm) / _lambda
-                       - np.log(C).sum()
+                       + (TrC + mm) / _lambda
+                       - logdetC
                        + D * np.log(_lambda)
                        - D)
 
@@ -229,7 +242,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         dvar = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
 
         # Grad reg
-        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
+        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []

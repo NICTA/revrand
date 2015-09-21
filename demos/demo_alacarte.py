@@ -32,7 +32,8 @@ def main():
     batchsize = 10
     reg = 1
     usegradients = True
-    useSGD = True
+    useSGD = False
+    diagcov = True
 
     N = 500
     Ns = 250
@@ -45,12 +46,12 @@ def main():
     lenscale_true = 0.7  # For the gpdraw dataset
     noise_true = 0.1
 
-    # basis = 'RKS'
+    basis = 'RKS'
     # basis = 'FF'
     # basis = 'RBF'
     # basis = 'Linear'
     # basis = 'Poly'
-    basis = 'Combo'
+    # basis = 'Combo'
 
     #
     # Make Data
@@ -146,6 +147,7 @@ def main():
                                               batchsize=batchsize)
     else:
         params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
+                                               diagcov=diagcov,
                                                usegradients=usegradients,
                                                regulariser=reg, var=noise**2)
     Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, base, *params_elbo)
