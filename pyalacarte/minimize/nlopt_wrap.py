@@ -39,6 +39,244 @@ NLOPT_MESSAGES = {
                        "function or constraints."
 }
 
+def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
+                   constraints=[], ftol=None, xtol=None, maxiter=None):
+    """
+    >>> from scipy.optimize import rosen, rosen_der
+    >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
+    >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der)
+    >>> res.success
+    True
+    >>> res.message
+    'Success'
+    >>> np.isclose(res.fun, 0)
+    True
+    >>> res.x
+    array([ 1.,  1.,  1.,  1.,  1.])
+
+    >>> x0 = np.array([-1., 1.])
+    >>> fun = lambda x: - 2*x[0]*x[1] - 2*x[0] + x[0]**2 + 2*x[1]**2
+    >>> dfun = lambda x: np.array([2*x[0] - 2*x[1] - 2, - 2*x[0] + 4*x[1]])
+    >>> cons = [{'type': 'eq', 
+    ...           'fun': lambda x: x[0]**3 - x[1],
+    ...           'jac': lambda x: np.array([3.0*(x[0]**2.0), -1.0])},
+    ...         {'type': 'ineq', 
+    ...          'fun': lambda x: x[1] - 1, 
+    ...          'jac': lambda x: np.array([0.0, 1.0])}]
+    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol=1e-20)
+    """
+    # Create NLopt object
+    dim = len(x0)
+
+    if isinstance(method, str):
+        method = get_nlopt_enum_by_name(method)
+
+    opt = nlopt.opt(method, dim)
+
+    # Create NLOpt objective function
+    obj_fun = make_nlopt_fun(fun, jac, args)
+    opt.set_min_objective(obj_fun)
+
+    # Normalize and set parameter bounds
+    if bounds:
+        lower, upper = zip(*normalize_bounds(bounds))
+        opt.set_lower_bounds(lower)
+        opt.set_upper_bounds(upper)
+
+    # Equality and Inequality Constraints
+    for constr in constraints:
+
+        fun = make_nlopt_fun(fun=constr['fun'], 
+                             jac=constr.get('jac', False), 
+                             args=constr.get('args', ()))
+
+        if constr['type'] == 'eq':
+            opt.add_equality_constraint(fun)
+        elif constr['type'] == 'ineq':
+            opt.add_inequality_constraint(fun)
+        else:
+            # TODO: Add support for vector/matrix-valued constraints
+            raise ValueError('Constraint type not recognized')
+
+    # Termination Criteria
+    if ftol is not None:
+        opt.set_ftol_rel(ftol)
+
+    if xtol is not None:
+        opt.set_xtol_rel(xtol)
+
+    if maxiter is not None:
+        opt.set_maxeval(maxiter)
+
+    # Perform the optimization
+    try:
+        x = opt.optimize(x0)
+    except nlopt.RoundoffLimited:
+        x = None
+
+    return OptimizeResult(
+            x = x,
+            fun = opt.last_optimum_value(),
+            message = make_nlopt_message(opt.last_optimize_result()),
+            success = opt.last_optimize_result() > 0,
+        )
+
+def make_nlopt_fun(fun, jac=True, args=()):
+
+    """
+    Make NLOpt objective function (as specified by the the `NLOpt Python 
+    interface`_), from SciPy-style objective functions.
+
+    The NLOpt objective functions are far less pleasant to work with and
+    are even *required* to have side effects since gradient arrays are
+    required to be passed-by-reference and modifed in-place.
+
+    .. _`NLOpt Python interface`: 
+       http://ab-initio.mit.edu/wiki/index.php/NLopt_Python_Reference#Objective_function
+
+    Examples
+    --------
+
+    .. todo:: 
+
+       Only a few examples are needed here, the edge-cases are only
+       useful for unit testing or inclusion in sphinx documentation.
+
+    >>> from scipy.optimize import rosen, rosen_der
+    >>> rosen_couple = couple(rosen, rosen_der)
+    >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
+
+    Gradient-based methods
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen, jac=rosen_der)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen_couple, jac=True)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    If a callable jacobian `jac` is specified, it will take precedence 
+    over the gradient given by a function that returns a tuple with the 
+    gradient as its second value.   
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_fun(couple(rosen, lambda x: 2*x), jac=rosen_der)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    If you use a gradient-based optimization method with `jac=True` but
+    fail to supply any gradient information, you will receive a 
+    `RuntimeWarning` and terrible results.
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen, jac=True)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.3,  0.7,  0.8,  1.9,  1.2])
+
+    Likewise, if you *do* supply gradient information, but set `jac=False`
+    you will be reminded of the fact that the gradient information is 
+    being ignored through a `RuntimeWarning`. 
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen_couple, jac=False)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.3,  0.7,  0.8,  1.9,  1.2])
+
+    Of course, you can use gradient-based optimization and not supply 
+    any gradient information at your own discretion. 
+    No warning are raised. 
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen, jac=False)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.3,  0.7,  0.8,  1.9,  1.2])
+
+    Derivative-free methods
+
+    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen, jac=False)
+    >>> opt.set_min_objective(obj_fun)
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LN_BOBYQA, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen, jac=False)
+    >>> opt.set_min_objective(obj_fun)
+    >>> opt.set_ftol_abs(1e-11)
+    >>> np.allclose(np.array([ 1.,  1.,  1.,  1.,  1.]), opt.optimize(x0))
+    True
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    When using derivative-free optimization methods, gradient information
+    supplied in any form is disregarded without warning.
+
+    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen, jac=rosen_der)
+    >>> opt.set_min_objective(obj_fun)
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
+    >>> obj_fun = make_nlopt_fun(rosen_couple, jac=True)
+    >>> opt.set_min_objective(obj_fun)
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+
+    """
+
+    def nlopt_fun(x, grad):
+
+        ret = fun(x, *args)
+        grad_temp = None
+
+        if isinstance(ret, tuple):
+            val, grad_temp = ret
+        else:
+            val = ret
+
+        if grad.size > 0:
+            if callable(jac):
+                grad[:] = jac(x, *args)
+            else:            
+                if bool(jac):
+                    if grad_temp is None:
+                        warn('Using gradient-based optimization with '
+                            'jac=True, but no gradient information is '
+                            'available.', RuntimeWarning)
+                    else:
+                        grad[:] = grad_temp
+                else:
+                    if grad_temp is not None:
+                        warn('Using gradient-based optimization with '
+                            'jac=False, the provided gradient information '
+                            'is ignored.', RuntimeWarning)
+
+        return val
+
+    return nlopt_fun
+
 def get_nlopt_enum_by_name(method_name=None):
     """
     Get NLOpt algorithm object by name. If the algorithm is not found, 
@@ -101,165 +339,6 @@ def get_nlopt_enum_by_name(method_name=None):
     return NLOPT_ALGORITHMS.get(method_name.upper() if method_name is not None \
         else None, nlopt.LN_BOBYQA)
 
-def get_nlopt_by_name(method_name=None, dimensions=None):
-    pass
-
-def make_nlopt_obj(fun, args=(), jac=True):
-
-    """
-    Make NLOpt objective function (as specified by the the `NLOpt Python 
-    interface`_), from SciPy-style objective functions.
-
-    The NLOpt objective functions are far less pleasant to work with and
-    are even *required* to have side effects since gradient arrays are
-    required to be passed-by-reference and modifed in-place.
-
-    .. _`NLOpt Python interface`: 
-       http://ab-initio.mit.edu/wiki/index.php/NLopt_Python_Reference#Objective_function
-
-    Examples
-    --------
-
-    .. todo:: 
-
-       Only a few examples are needed here, the edge-cases are only
-       useful for unit testing or inclusion in sphinx documentation.
-
-    >>> from scipy.optimize import rosen, rosen_der
-    >>> rosen_couple = couple(rosen, rosen_der)
-    >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
-
-    Gradient-based methods
-
-    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen, jac=rosen_der)
-    >>> opt.set_min_objective(obj_fun)    
-    >>> opt.optimize(x0)
-    array([ 1.,  1.,  1.,  1.,  1.])
-    >>> np.isclose(opt.last_optimum_value(), 0)
-    True
-
-    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen_couple, jac=True)
-    >>> opt.set_min_objective(obj_fun)    
-    >>> opt.optimize(x0)
-    array([ 1.,  1.,  1.,  1.,  1.])
-    >>> np.isclose(opt.last_optimum_value(), 0)
-    True
-
-    If a callable jacobian `jac` is specified, it will take precedence 
-    over the gradient given by a function that returns a tuple with the 
-    gradient as its second value.   
-
-    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
-    >>> obj_fun = make_nlopt_obj(couple(rosen, lambda x: 2*x), jac=rosen_der)
-    >>> opt.set_min_objective(obj_fun)    
-    >>> opt.optimize(x0)
-    array([ 1.,  1.,  1.,  1.,  1.])
-    >>> np.isclose(opt.last_optimum_value(), 0)
-    True
-
-    If you use a gradient-based optimization method with `jac=True` but
-    fail to supply any gradient information, you will receive a 
-    `RuntimeWarning` and terrible results.
-
-    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen, jac=True)
-    >>> opt.set_min_objective(obj_fun)    
-    >>> opt.optimize(x0)
-    array([ 1.3,  0.7,  0.8,  1.9,  1.2])
-
-    Likewise, if you *do* supply gradient information, but set `jac=False`
-    you will be reminded of the fact that the gradient information is 
-    being ignored through a `RuntimeWarning`. 
-
-    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen_couple, jac=False)
-    >>> opt.set_min_objective(obj_fun)    
-    >>> opt.optimize(x0)
-    array([ 1.3,  0.7,  0.8,  1.9,  1.2])
-
-    Of course, you can use gradient-based optimization and not supply 
-    any gradient information at your own discretion. 
-    No warning are raised. 
-
-    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen, jac=False)
-    >>> opt.set_min_objective(obj_fun)    
-    >>> opt.optimize(x0)
-    array([ 1.3,  0.7,  0.8,  1.9,  1.2])
-
-    Derivative-free methods
-
-    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen, jac=False)
-    >>> opt.set_min_objective(obj_fun)
-    >>> opt.optimize(x0)
-    array([ 1.,  1.,  1.,  1.,  1.])
-    >>> np.isclose(opt.last_optimum_value(), 0)
-    True
-
-    >>> opt = nlopt.opt(nlopt.LN_BOBYQA, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen, jac=False)
-    >>> opt.set_min_objective(obj_fun)
-    >>> opt.set_ftol_abs(1e-11)
-    >>> np.allclose(np.array([ 1.,  1.,  1.,  1.,  1.]), opt.optimize(x0))
-    True
-    >>> np.isclose(opt.last_optimum_value(), 0)
-    True
-
-    When using derivative-free optimization methods, gradient information
-    supplied in any form is disregarded without warning.
-
-    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen, jac=rosen_der)
-    >>> opt.set_min_objective(obj_fun)
-    >>> opt.optimize(x0)
-    array([ 1.,  1.,  1.,  1.,  1.])
-    >>> np.isclose(opt.last_optimum_value(), 0)
-    True
-
-    >>> opt = nlopt.opt(nlopt.LN_NELDERMEAD, len(x0))
-    >>> obj_fun = make_nlopt_obj(rosen_couple, jac=True)
-    >>> opt.set_min_objective(obj_fun)
-    >>> opt.optimize(x0)
-    array([ 1.,  1.,  1.,  1.,  1.])
-    >>> np.isclose(opt.last_optimum_value(), 0)
-    True
-
-    """
-
-    def nlopt_obj_fun(x, grad):
-
-        ret = fun(x, *args)
-        grad_temp = None
-
-        if isinstance(ret, tuple):
-            val, grad_temp = ret
-        else:
-            val = ret
-
-        if grad.size > 0:
-            if callable(jac):
-                grad[:] = jac(x, *args)
-            else:            
-                if bool(jac):
-                    if grad_temp is None:
-                        warn('Using gradient-based optimization with '
-                            'jac=True, but no gradient information is '
-                            'available.', RuntimeWarning)
-                    else:
-                        grad[:] = grad_temp
-                else:
-                    if grad_temp is not None:
-                        warn('Using gradient-based optimization with '
-                            'jac=False, the provided gradient information '
-                            'is ignored.', RuntimeWarning)
-
-        return val
-
-    return nlopt_obj_fun
-
 def normalize_bound(bound):
     """
     >>> normalize_bound((2.6, 7.2))
@@ -305,60 +384,3 @@ def make_nlopt_message(ret_code):
     'Invalid arguments (e.g. lower bounds are bigger than upper bounds, an unknown algorithm was specified, etcetera).'
     """ 
     return NLOPT_MESSAGES.get(ret_code)
-
-def nlopt_minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
-                   constraints=[], ftol=None, xtol=None, maxiter=None):
-    """
-    >>> from scipy.optimize import rosen, rosen_der
-    >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
-    
-    >>> res = nlopt_minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der)
-    >>> res.success
-    True
-    >>> res.message
-    'Success'
-    >>> np.isclose(res.fun, 0)
-    True
-    >>> res.x
-    array([ 1.,  1.,  1.,  1.,  1.])
-
-    >>> res = nlopt_minimize(rosen, x0, method='cobyla', constraints=[3])
-    """
-    if constraints:
-        warn("Equality and inequality constraints are currently "
-             "not supported", NotImplementedError)
-
-    # Create NLopt object
-    dim = len(x0)
-
-    if isinstance(method, str):
-        method = get_nlopt_enum_by_name(method)
-
-    opt = nlopt.opt(method, dim)
-
-    # Create NLOpt objective function
-    obj_fun = make_nlopt_obj(fun, args, jac)
-    opt.set_min_objective(obj_fun)
-
-    # Normalize and set parameter bounds
-    if bounds:
-        lower, upper = zip(*normalize_bounds(bounds))
-        opt.set_lower_bounds(lower)
-        opt.set_upper_bounds(upper)
-
-    # Termination Criteria
-    if ftol is not None:
-        opt.set_ftol_rel(ftol)
-
-    if xtol is not None:
-        opt.set_xtol_rel(xtol)
-
-    if maxiter is not None:
-        opt.set_maxeval(maxiter)
-
-    return OptimizeResult(
-        x = opt.optimize(x0), 
-        fun = opt.last_optimum_value(),
-        message = make_nlopt_message(opt.last_optimize_result()),
-        success = opt.last_optimize_result() > 0,
-    )

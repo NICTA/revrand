@@ -31,8 +31,8 @@ def couple(f, g):
     --------
 
     >>> f = lambda x: 2*x**3
-    >>> Df = lambda x: 6*x**2
-    >>> f_new = couple(f, Df)
+    >>> df = lambda x: 6*x**2
+    >>> f_new = couple(f, df)
     >>> f_new(5)
     (250, 150)
 

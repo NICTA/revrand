@@ -6,6 +6,7 @@ import numpy as np
 import nlopt
 
 from scipy.optimize import minimize as sp_min
+from nlopt_wrap import minimize as nl_min
 
 def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
              xtol=None, maxiter=None, jac=True):
