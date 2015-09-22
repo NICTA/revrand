@@ -237,7 +237,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             return -ELBO
 
         # Grad var
-        dvar = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
+        dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
 
         # Grad reg
         dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
@@ -303,7 +303,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
     N, d = X.shape
 
     # Initialise parameters
-    iind = np.random.choice(N, size=batchsize)
+    iind = np.random.choice(N, size=min(2 * batchsize, N))
     Phi_i = basis(X[iind, :], *bparams)
     D = Phi_i.shape[1]
 
@@ -322,16 +322,16 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
 
     def ELBO(params, data):
 
-        _y, _X = data[:, 0], data[:, 1:]
+        y, X = data[:, 0], data[:, 1:]
         uparams = pcat.unflatten(params)
         m, C, _var, _lambda, _theta = uparams
 
         # Get Basis
-        Phi = basis(_X, *_theta)                      # Nb x D
+        Phi = basis(X, *_theta)                      # Nb x D
         PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
-        Err = _y - Phi.dot(m)
+        Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
 
@@ -356,14 +356,14 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         dC = - 0.5 * (PPdiag / _var + 1. / _lambda - 1. / C)
 
         # Grad alpha
-        dvar = 0.5 * (-batchsize / _var + (sqErr + TrPhiPhiC) / _var**2)
+        dvar = 0.5 / _var * (-batchsize + (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
         dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
-        dPhis = basis.grad(_X, *_theta) if len(_theta) > 0 else []
+        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var

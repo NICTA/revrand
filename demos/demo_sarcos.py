@@ -24,9 +24,9 @@ noise = 1
 regulariser = 1
 nbases = 400
 gp_Ntrain = 1024
-maxit = 1e3
-rate = 0.9
-eta = 1e-5
+maxit = 1e5
+rate = 0.95
+eta = 1e-6
 batchsize = 100
 
 useSGD = True
