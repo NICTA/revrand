@@ -1,10 +1,11 @@
 import numpy as np
 
-from scipy.optimize import minimize as sp_min
+from ..utils import flatten, unflatten
 from .nlopt_wrap import minimize as nl_min
+from scipy.optimize import minimize as sp_min
 
-def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
-             xtol=None, maxiter=None, jac=True):
+def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
+             constraints=[], ftol=None, xtol=None, maxiter=None):
     """
     Scipy.optimize.minimize-style wrapper for NLopt and scipy's minimize.
 
@@ -51,14 +52,8 @@ def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
         raise ValueError("Type of input not understood, needs to be int or"
                          " str.")
 
-def sp_minimize(fun, x0, args, method, bounds, ftol, maxiter, jac):
-
-    if args is None:
-        args = ()
-
-    options = {}
-    if maxiter:
-        options['maxiter'] = maxiter
-
+def sp_minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
+                constraints=[], **options):
+    
     return sp_min(fun, x0, args, method=method, jac=jac, tol=ftol,
                 options=options, bounds=bounds)
