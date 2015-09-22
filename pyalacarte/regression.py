@@ -197,25 +197,23 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         # Posterior Parameters
         LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
         m = cho_solve(LfullC, Phi.T.dot(y)) / _var
+
+        # Common calcs dependent on form of C
         if diagcov:
             C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
+            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
+            logdetC = np.log(C).sum()
+            TrC = C.sum()
         else:
             C = cho_solve(LfullC, np.eye(D))
+            TrPhiPhiC = (PhiPhi * C).sum()
+            logdetC = -logdet(LfullC[0])
+            TrC = np.trace(C)
 
         # Common computations
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
-
-        # Common calcs dependent on form of C
-        if diagcov:
-            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
-            logdetC = np.log(C).sum()
-            TrC = C.sum()
-        else:
-            TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -logdet(LfullC[0])
-            TrC = np.trace(C)
 
         # Calculate ELBO
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
@@ -248,8 +246,8 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
-            dPhiPhidiag = (dPhi * Phi).sum(axis=0)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var
+            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
+            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(dt)
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
@@ -305,6 +303,15 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
     N, d = X.shape
 
     # Initialise parameters
+    # iind = np.random.choice(N, size=batchsize)
+    # Phi_i = basis(X[iind, :], *bparams)
+    # D = Phi_i.shape[1]
+
+    # PhiPhi_i = Phi_i.T.dot(Phi_i)
+    # LC = jitchol(np.diag(np.ones(D) / regulariser) + PhiPhi_i / var)
+    # minit = cho_solve(LC, Phi_i.T.dot(y[iind])) / var
+    # Cinit = 1. / (PhiPhi_i.diagonal() / var + 1. / regulariser)
+    # del PhiPhi_i, Phi_i, LC
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     minit = np.random.randn(D)
     Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
@@ -315,22 +322,22 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
 
     def ELBO(params, data):
 
-        y, X = data[:, 0], data[:, 1:]
+        _y, _X = data[:, 0], data[:, 1:]
         uparams = pcat.unflatten(params)
         m, C, _var, _lambda, _theta = uparams
 
         # Get Basis
-        Phi = basis(X, *_theta)                      # N x D
+        Phi = basis(_X, *_theta)                      # Nb x D
         PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
-        Err = y - Phi.dot(m)
+        Err = _y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
 
         # Calculate ELBO
         TrPhiPhiC = (PPdiag * C).sum()
-        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
+        ELBO = -0.5 * (batchsize * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
                        + (C.sum() + mm) / _lambda
@@ -349,14 +356,14 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         dC = - 0.5 * (PPdiag / _var + 1. / _lambda - 1. / C)
 
         # Grad alpha
-        dvar = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
+        dvar = 0.5 * (-batchsize / _var + (sqErr + TrPhiPhiC) / _var**2)
 
         # Grad reg
         dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
-        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
+        dPhis = basis.grad(_X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var

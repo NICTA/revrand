@@ -27,13 +27,13 @@ def main():
     noise = 0.2
     order = 5  # For polynomial basis
     rate = 0.9
-    eta = 1e-6
+    eta = 1e-5
     maxit = 5e3
-    batchsize = 10
+    batchsize = 500
     reg = 1
     usegradients = True
-    useSGD = False
-    diagcov = True
+    useSGD = True
+    diagcov = False
 
     N = 500
     Ns = 250
