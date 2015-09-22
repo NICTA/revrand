@@ -1,18 +1,16 @@
 import numpy as np
 import nlopt
 
-from pyalacarte.utils import couple
+from ..utils import couple
 
 from scipy.optimize import OptimizeResult
-from six.moves import filter, range
+from six.moves import filter
 from functools import partial
 from warnings import warn
 from re import search
 
 NLOPT_ALGORITHMS_KEYS = list(filter(partial(search, r'^[GL][ND]_'), dir(nlopt)))
-
 NLOPT_ALGORITHMS = {k:getattr(nlopt, k) for k in NLOPT_ALGORITHMS_KEYS}
-
 NLOPT_MESSAGES = {
     nlopt.SUCCESS: 'Success',
     nlopt.STOPVAL_REACHED: 'Optimization stopped because stopval (above) '
@@ -40,8 +38,11 @@ NLOPT_MESSAGES = {
 }
 
 def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
-                   constraints=[], ftol=None, xtol=None, maxiter=None):
+             constraints=[], ftol=None, xtol=None, maxiter=None):
     """
+    Examples
+    --------
+
     >>> from scipy.optimize import rosen, rosen_der
     >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
     >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der)
@@ -54,16 +55,29 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
     >>> res.x
     array([ 1.,  1.,  1.,  1.,  1.])
 
+    .. todo:: Some sensible way of testing this.
+
     >>> x0 = np.array([-1., 1.])
     >>> fun = lambda x: - 2*x[0]*x[1] - 2*x[0] + x[0]**2 + 2*x[1]**2
     >>> dfun = lambda x: np.array([2*x[0] - 2*x[1] - 2, - 2*x[0] + 4*x[1]])
     >>> cons = [{'type': 'eq', 
     ...           'fun': lambda x: x[0]**3 - x[1],
-    ...           'jac': lambda x: np.array([3.0*(x[0]**2.0), -1.0])},
+    ...           'jac': lambda x: np.array([3.*(x[0]**2.), -1.])},
     ...         {'type': 'ineq', 
-    ...          'fun': lambda x: x[1] - 1, 
-    ...          'jac': lambda x: np.array([0.0, 1.0])}]
+    ...           'fun': lambda x: x[1] - 1, 
+    ...           'jac': lambda x: np.array([0., 1.])}]
     >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol=1e-20)
+
+    >>> cons = [{'type': 'some bogus type', 
+    ...           'fun': lambda x: x[0]**3 - x[1],
+    ...           'jac': lambda x: np.array([3.*(x[0]**2.), -1.])},
+    ...         {'type': 'ineq', 
+    ...           'fun': lambda x: x[1] - 1, 
+    ...           'jac': lambda x: np.array([0., 1.])}]
+    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol=1e-20)
+    Traceback (most recent call last):
+        ...
+    ValueError: Constraint type not recognized
     """
     # Create NLopt object
     dim = len(x0)
@@ -94,8 +108,11 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
             opt.add_equality_constraint(fun)
         elif constr['type'] == 'ineq':
             opt.add_inequality_constraint(fun)
-        else:
+        elif constr['type'] in ('eq_m', 'ineq_m'):
             # TODO: Add support for vector/matrix-valued constraints
+            raise NotImplementedError('Vector-valued constraints currently '
+                                      'not supported.')
+        else:
             raise ValueError('Constraint type not recognized')
 
     # Termination Criteria

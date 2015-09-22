@@ -22,14 +22,12 @@ def couple(f, g):
 
     Notes
     -----
-
     Equivalent to::
 
         lambda f, g: lambda *args, **kwargs: (f(*args, **kwargs), g(*args, **kwargs))
 
     Examples
     --------
-
     >>> f = lambda x: 2*x**3
     >>> df = lambda x: 6*x**2
     >>> f_new = couple(f, df)
@@ -43,6 +41,8 @@ def couple(f, g):
 
 def decouple(fn):
     """
+    Examples
+    --------
     >>> h = lambda x: (2*x**3, 6*x**2)
     >>> f, g = decouple(h)
     
@@ -81,7 +81,6 @@ def nwise(iterable, n):
 
     Notes
     -----
-        
     First `n` iterators are created::
 
         iters = tee(iterable, n)

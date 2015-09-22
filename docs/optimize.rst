@@ -1,5 +1,5 @@
 Optimization
 ============
 
-.. automodule:: pyalacarte.minimize
+.. automodule:: pyalacarte.optimize
    :members:
