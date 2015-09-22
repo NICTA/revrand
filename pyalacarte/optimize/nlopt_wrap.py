@@ -365,9 +365,16 @@ def get_nlopt_enum_by_name(method_name=None, default=nlopt.LN_BOBYQA):
     >>> get_nlopt_enum_by_name('AUGLAG') == nlopt.AUGLAG # doctest: +SKIP
     True
     """
+    if method_name is None:
+        method_name = 'LN_BOBYQA'
 
-    return NLOPT_ALGORITHMS.get(method_name.upper() if method_name is not None \
-        else None, default)
+    try:
+        return NLOPT_ALGORITHMS[method_name.upper()]
+    except KeyError:
+        warn('Method {name} could not be found. Defaulting to '
+             '{default}'.format(name=method_name, default=default), 
+             RuntimeWarning)
+        return default
 
 def normalize_bound(bound):
     """

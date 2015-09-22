@@ -6,7 +6,7 @@ from ..utils.base import flatten, unflatten
 
 import numpy as np 
 
-def flatten_args(fn):
+def flatten_args(callback=None):
     """
     Examples
     --------
