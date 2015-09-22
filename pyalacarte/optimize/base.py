@@ -35,9 +35,6 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
             message, (str): Description of the cause of the termination (see
                 NLopts documentation for codes).
             fun, (float): Final value of objective function.
-
-        TODO:
-            - Incoporate constraints for COBYLA etc
     """
     if use_nlopt:
     
