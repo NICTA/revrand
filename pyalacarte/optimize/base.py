@@ -1,11 +1,10 @@
 import numpy as np
 
-from ..utils import flatten, unflatten
-from .nlopt_wrap import minimize as nl_min
+from warnings import warn
 from scipy.optimize import minimize as sp_min
 
 def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
-             constraints=[], ftol=None, xtol=None, maxiter=None):
+             constraints=[], use_nlopt=False, **options):
     """
     Scipy.optimize.minimize-style wrapper for NLopt and scipy's minimize.
 
@@ -40,20 +39,15 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
         TODO:
             - Incoporate constraints for COBYLA etc
     """
-
-    if method is None:
-        method = nlopt.LN_BOBYQA
-
-    if type(method) is int:
-        return _nlopt_wrap(fun, x0, args, method, bounds, ftol, maxiter, xtol)
-    elif type(method) is str:
-        return _scipy_wrap(fun, x0, args, method, bounds, ftol, maxiter, jac)
-    else:
-        raise ValueError("Type of input not understood, needs to be int or"
-                         " str.")
-
-def sp_minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
-                constraints=[], **options):
+    if use_nlopt:
     
-    return sp_min(fun, x0, args, method=method, jac=jac, tol=ftol,
-                options=options, bounds=bounds)
+        try:
+            from .nlopt_wrap import minimize as nl_min
+        except ImportError:
+            warn("NLOpt could not be imported. Defaulting to scipy.optimize")
+        else:
+            return nl_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
+                      constraints=constraints, options=options)
+
+    return sp_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
+                      constraints=constraints, options=options)

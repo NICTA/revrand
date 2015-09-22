@@ -38,7 +38,7 @@ NLOPT_MESSAGES = {
 }
 
 def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
-             constraints=[], ftol=None, xtol=None, maxiter=None):
+             constraints=[], **options):
     """
     Examples
     --------
@@ -55,6 +55,17 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
     >>> res.x
     array([ 1.,  1.,  1.,  1.,  1.])
 
+    >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der, ftol_abs=1e-5)
+    >>> res.success
+    True
+    >>> res.message
+    'Optimization stopped because ftol_rel or ftol_abs (above) was reached.'
+
+    >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der, foo=3)
+    Traceback (most recent call last):
+        ...
+    ValueError: Parameter foo could not be recognized.
+    
     .. todo:: Some sensible way of testing this.
 
     >>> x0 = np.array([-1., 1.])
@@ -66,7 +77,7 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
     ...         {'type': 'ineq', 
     ...           'fun': lambda x: x[1] - 1, 
     ...           'jac': lambda x: np.array([0., 1.])}]
-    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol=1e-20)
+    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol_abs=1e-20)
 
     >>> cons = [{'type': 'some bogus type', 
     ...           'fun': lambda x: x[0]**3 - x[1],
@@ -74,7 +85,7 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
     ...         {'type': 'ineq', 
     ...           'fun': lambda x: x[1] - 1, 
     ...           'jac': lambda x: np.array([0., 1.])}]
-    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol=1e-20)
+    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol_abs=1e-20)
     Traceback (most recent call last):
         ...
     ValueError: Constraint type not recognized
@@ -108,22 +119,23 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
             opt.add_equality_constraint(fun)
         elif constr['type'] == 'ineq':
             opt.add_inequality_constraint(fun)
-        elif constr['type'] in ('eq_m', 'ineq_m'):
+        elif constr['type'] in ('eq_m', 'ineq_m'): # TODO: Define '_m' as suffix
+                                                   # for now. 
             # TODO: Add support for vector/matrix-valued constraints
             raise NotImplementedError('Vector-valued constraints currently '
                                       'not supported.')
         else:
             raise ValueError('Constraint type not recognized')
 
-    # Termination Criteria
-    if ftol is not None:
-        opt.set_ftol_rel(ftol)
-
-    if xtol is not None:
-        opt.set_xtol_rel(xtol)
-
-    if maxiter is not None:
-        opt.set_maxeval(maxiter)
+    # Set other options, e.g. termination criteria
+    # This may or may not be a great idea... Time will tell. 
+    for key, val in options.items():
+        try:
+            set_method = getattr(opt, 'set_{option}'.format(option=key))
+            set_method(val)
+        except AttributeError:
+            raise ValueError('Parameter {option} could not be ' 
+                             'recognized.'.format(option=key))
 
     # Perform the optimization
     try:
@@ -156,8 +168,9 @@ def make_nlopt_fun(fun, jac=True, args=()):
 
     .. todo:: 
 
-       Only a few examples are needed here, the edge-cases are only
-       useful for unit testing or inclusion in sphinx documentation.
+       Only a few examples are needed here, the edge-cases, while
+       useful for unit testing, is not particularly informative. Move
+       to Sphinx documentation or unit tests.
 
     >>> from scipy.optimize import rosen, rosen_der
     >>> rosen_couple = couple(rosen, rosen_der)
@@ -294,7 +307,7 @@ def make_nlopt_fun(fun, jac=True, args=()):
 
     return nlopt_fun
 
-def get_nlopt_enum_by_name(method_name=None):
+def get_nlopt_enum_by_name(method_name=None, default=nlopt.LN_BOBYQA):
     """
     Get NLOpt algorithm object by name. If the algorithm is not found, 
     defaults to `nlopt.LN_BOBYQA`.
@@ -354,7 +367,7 @@ def get_nlopt_enum_by_name(method_name=None):
     """
 
     return NLOPT_ALGORITHMS.get(method_name.upper() if method_name is not None \
-        else None, nlopt.LN_BOBYQA)
+        else None, default)
 
 def normalize_bound(bound):
     """

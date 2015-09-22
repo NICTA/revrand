@@ -4,7 +4,7 @@ from __future__ import division
 
 import numpy as np
 import logging
-from pyalacarte.minimize import minimize, sgd
+from .optimize import minimize, sgd
 
 
 # Set up logging
