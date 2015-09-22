@@ -303,18 +303,18 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
     N, d = X.shape
 
     # Initialise parameters
-    # iind = np.random.choice(N, size=batchsize)
-    # Phi_i = basis(X[iind, :], *bparams)
-    # D = Phi_i.shape[1]
+    iind = np.random.choice(N, size=batchsize)
+    Phi_i = basis(X[iind, :], *bparams)
+    D = Phi_i.shape[1]
 
-    # PhiPhi_i = Phi_i.T.dot(Phi_i)
-    # LC = jitchol(np.diag(np.ones(D) / regulariser) + PhiPhi_i / var)
-    # minit = cho_solve(LC, Phi_i.T.dot(y[iind])) / var
-    # Cinit = 1. / (PhiPhi_i.diagonal() / var + 1. / regulariser)
-    # del PhiPhi_i, Phi_i, LC
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
-    minit = np.random.randn(D)
-    Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
+    PhiPhi_i = Phi_i.T.dot(Phi_i)
+    LC = jitchol(np.diag(np.ones(D) / regulariser) + PhiPhi_i / var)
+    minit = cho_solve(LC, Phi_i.T.dot(y[iind])) / var
+    Cinit = 1. / (PhiPhi_i.diagonal() / var + 1. / regulariser)
+    del PhiPhi_i, Phi_i, LC
+    # D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+    # minit = np.random.randn(D)
+    # Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
 
     # Initial parameter vector
     vparams = [minit, Cinit, var, regulariser, bparams]

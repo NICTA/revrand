@@ -24,12 +24,12 @@ def main():
     nbases = 300
     lenscale = 0.5  # For all basis functions that take lengthscales
     lenscale2 = 0.2  # For the Combo basis
-    noise = 0.2
+    noise = 0.01
     order = 5  # For polynomial basis
-    rate = 0.9
-    eta = 1e-5
-    maxit = 5e3
-    batchsize = 500
+    rate = 0.95
+    eta = 1e-7
+    maxit = 1e4
+    batchsize = 50
     reg = 1
     usegradients = True
     useSGD = True

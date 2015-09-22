@@ -22,14 +22,14 @@ def f(w, Data, sigma=1.0):
 def sgd_demo():
     # Settings
 
-    batchsize = 10
+    batchsize = 100
     var = 0.05
     nPoints = 1000
     nQueries = 500
     maxIterations = 10000
     min_grad_norm = 0.01
     rate = 0.95
-    eta = 1e-6
+    eta = 1e-7
 
     # Create dataset
     X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
