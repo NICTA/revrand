@@ -51,7 +51,7 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
     return sp_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
                       constraints=constraints, options=options)
 
-def lift_minimizer(minimizer):
+def augment_minimizer(minimizer):
 
     def new_minimizer(fun, *ndarrays, **kwargs):
         array1d, shapes = flatten_join(*ndarrays)
