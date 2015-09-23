@@ -139,6 +139,202 @@ def nwise(iterable, n):
 
 pairwise = partial(nwise, n=2)
 
+def flatten_join(*ndarrays, order='C', returns_shapes=True):
+    """
+    Flatten ndarrays from a list of numpy scalars and/or ndarrays of 
+    possibly heterogenous dimensions and chain together into a flat (1D)
+    list.
+
+    .. note::
+
+       Not to be confused with `np.ndarray.flatten()` (a more befitting
+       might be `chain` or maybe something else entirely since this 
+       function is more than merely `chain` or `np.flatten`. Rather, it 
+       is the composition of the former with the latter.
+
+    Parameters
+    ----------
+    lst : list
+        A list of scalars and/or numpy arrays of possibly heterogenous 
+        dimensions.
+
+    order : {‘C’, ‘F’, ‘A’}, optional
+        Whether to flatten in C (row-major), Fortran (column-major) 
+        order, or preserve the C/Fortran ordering from a. The default is
+        ‘C’.
+    
+    returns_shapes : bool, optional 
+        Default is `True`. If `True`, the tuple (flattened, shapes) is 
+        returned, otherwise only the flattened is returned.
+
+    Returns
+    -------
+
+    .. todo:: 
+
+       For consistency, might consider keeping with the Python 3 theme 
+       of returning generators everywhere... Especially since most other 
+       functions here does...
+
+    flattened,[shapes] : {list of numeric, list of tuples}
+        Return the flat (1D) list chained together from flattened 
+        (according to order) ndarrays. When `returns_shapes` is `True`, 
+        return a list of tuples containing also the shapes of each 
+        element of `lst` the second element.
+
+    See Also
+    --------
+    pyalacarte.utils.unflatten : its inverse
+
+    Notes
+    -----
+    Equivalent to::
+
+        lambda *ndarrays, order='C', returns_shapes=True: (np.hstack(map(partial(np.ravel, order=order), ndarrays)), list(map(np.shape, ndarrays))) if returns_shapes else np.hstack(map(partial(np.ravel, order=order), ndarrays))
+
+    This implementation relies on the fact that scalars are 0-dimensional 
+    arrays. That is,
+
+    >>> a = 4.6
+    >>> np.ndim(a)
+    0
+    >>> np.shape(a)
+    ()
+
+    >>> np.ravel(a)
+    array([ 4.6])
+
+    Note also that the following is also a 0-dimensional array
+
+    >>> b = np.array(3.14)
+    >>> np.ndim(b)
+    0
+    >>> np.shape(b)
+    ()
+
+    .. important::
+
+       When 0-dimensional arrays of the latter form are flattened, 
+       *they  will be unflattened as a scalar*. (Because special cases 
+       aren't special enough to break the rules.)
+
+    Examples
+    --------
+    >>> a = 9
+    >>> b = np.array([4, 7, 4, 5, 2])
+    >>> c = np.array([[7, 3, 1],
+    ...               [2, 6, 6]])
+    >>> d = np.array([[[6, 5, 5],
+    ...                [1, 6, 9]],
+    ...               [[3, 9, 1],  
+    ...                [9, 4, 1]]])
+    
+    >>> flatten_join(a, b, c, d) # doctest: +NORMALIZE_WHITESPACE
+    (array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 1, 9, 4, 1]), [(), (5,), (2, 3), (2, 2, 3)])
+
+    >>> flatten_join(a, b, c, d, order='F') # doctest: +NORMALIZE_WHITESPACE
+    (array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1]), [(), (5,), (2, 3), (2, 2, 3)])
+
+    Note that scalars and 0-dimensional arrays are treated differently 
+    from 1-dimensional singleton arrays.
+
+    >>> flatten_join(3.14, np.array(2.71), np.array([1.61])) # doctest: +NORMALIZE_WHITESPACE
+    (array([ 3.14,  2.71,  1.61]), [(), (), (1,)])
+
+    >>> flatten_join(a, b, c, d, returns_shapes=False) # doctest: +NORMALIZE_WHITESPACE
+    array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 1, 9, 4, 1])
+
+    >>> flatten_join(a, b, c, d, order='F', returns_shapes=False) # doctest: +NORMALIZE_WHITESPACE
+    array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1])
+
+    """
+    ravel = partial(np.ravel, order=order)
+    flattened = np.hstack(map(ravel, ndarrays))
+
+    if returns_shapes:
+        shapes = list(map(np.shape, ndarrays))
+        return flattened, shapes
+    
+    return flattened
+
+def split_unflatten(array1d, shapes, order='C'):
+    """
+    Given a flat (one-dimensional) list, and a list of ndarray shapes 
+    return a list of numpy ndarrays of specified shapes.
+
+    Parameters
+    ----------
+    flat_lst : list
+        A flat (one-dimensional) list
+    
+    shapes : list of tuples
+        A list of ndarray shapes (tuple of array dimensions)
+
+    order : {‘C’, ‘F’, ‘A’}, optional
+        Reshape array using index order: C (row-major), Fortran 
+        (column-major) order, or preserve the C/Fortran ordering from a. 
+        The default is ‘C’.
+    
+    Returns
+    -------
+    list of ndarrays
+        A list of numpy ndarrays of specified shapes 
+
+    See Also
+    --------
+    pyalacarte.utils.flatten : its inverse
+
+    Notes
+    -----
+    Equivalent to::
+
+        lambda flat_lst, shapes, order='C': (np.reshape(chunk, shape, order) if shape else chunk[0] for 
+            chunk, shape in zip(chunks(flat_lst, map(partial(np.prod, dtype=int), shapes)), shapes))
+
+    Examples
+    --------
+    >>> list(split_unflatten(np.array([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), [(2,), (3,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
+    [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+
+    >>> list(split_unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), [(), (1,), (4,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
+    [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+
+    >>> list(split_unflatten(np.array([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), [(2,), (3,), (2, 3)], order='F')) # doctest: +NORMALIZE_WHITESPACE
+    [array([4, 5]), array([8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
+
+    >>> list(split_unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), [(), (1,), (4,), (2, 3)], order='F')) # doctest: +NORMALIZE_WHITESPACE
+    [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
+    
+    It goes without saying that `unflatten` is the inverse of of `flatten`. 
+    For all lists `lst`, `unflatten(*flatten(lst)) == lst` and for all `shapes`
+    `flatten(split_unflatten(lst, shapes)) == (lst, shapes)`
+
+    >>> lst = [4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]
+    >>> shapes = [(2,), (3,), (2, 3)]
+
+    >>> flatten(list(unflatten(lst, shapes))) == (lst, shapes)
+    True
+
+    .. todo::
+
+       * Demonstrate that lists are unflattened greedily as well
+       * Edge cases...
+
+    """
+    # important to make sure dtype is int
+    # since prod on empty tuple is a float (1.0)
+    sizes = list(map(partial(np.prod, dtype=int), shapes))
+    sections = np.cumsum(sizes)
+    subarrays = np.hsplit(array1d, sections)
+    # Subtle but important: last element of subarrays is always a extraneous
+    # empty array but is ignored when zipped with shapes. Not really a bug...
+    for subarray, shape in zip(subarrays, shapes):
+        if shape == ():
+            # chunk only has 1 element
+            yield from subarray
+        else:
+            yield np.reshape(subarray, shape, order)
+
 def flatten(lst, order='C', returns_shapes=True):
     """
     Flatten ndarrays from a list of numpy scalars and/or ndarrays of 
@@ -242,7 +438,6 @@ def flatten(lst, order='C', returns_shapes=True):
 
     >>> flatten([a, b, c, d], order='F', returns_shapes=False)
     [9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 5, 1, 9, 1]
-
     """
     ravel = partial(np.ravel, order=order)
     flattened = list(chain(*map(ravel, lst)))
@@ -521,7 +716,6 @@ class CatParameters(object):
             rparams.append(up if i not in self.log_indices else np.exp(up))
 
         return rparams
-
 
 def params_to_list(params):
     """ This will take a list of parameters of scalars or arrays, and return a
