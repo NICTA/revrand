@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    bases
+   optimize
    utils
    demo
 

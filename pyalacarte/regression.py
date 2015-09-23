@@ -19,11 +19,10 @@ import numpy as np
 import logging
 from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
-from pyalacarte.linalg import jitchol, logdet
-from pyalacarte.minimize import minimize, sgd
-from pyalacarte.utils import list_to_params as l2p
-from pyalacarte.utils import CatParameters
 
+from .linalg import jitchol, logdet
+from .optimize import minimize, sgd
+from .utils import list_to_params as l2p, CatParameters
 
 # Set up logging
 log = logging.getLogger(__name__)

@@ -2,7 +2,40 @@
 Reusable decorators
 """
 
+from ..utils.base import flatten, unflatten
+
 import numpy as np 
+
+def flatten_args(callback=None):
+    """
+    Examples
+    --------
+    >>> from scipy.optimize import rosen
+    
+    >>> @flatten_args
+    ... def f(x):
+    ...     return 2*x
+
+    >>> x, y, z = f(np.array([1., 2.]), 3., np.array([[1., 2.],[.5, .9]]))
+    
+    >>> x
+    array([ 2.,  4.])
+
+    >>> y
+    6.0
+
+    >>> z
+    array([[ 2. ,  4. ],
+           [ 1. ,  1.8]])
+    """
+    def new_fn(*args):
+        args_flat, shapes = flatten(args)
+        result = fn(np.asarray(args_flat)) # need to revisit flatten/unflatten
+                                           # should directly work over ndarrays 
+                                           # instead of lists
+        return unflatten(result, shapes)
+
+    return new_fn
 
 def vectorize_args(fn):
     """
