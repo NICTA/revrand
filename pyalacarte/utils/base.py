@@ -176,7 +176,7 @@ def flatten_join(*ndarrays, order='C', returns_shapes=True):
        of returning generators everywhere... Especially since most other 
        functions here does...
 
-    flattened,[shapes] : {list of numeric, list of tuples}
+    flattened,[shapes] : {1D array, list of tuples}
         Return the flat (1D) list chained together from flattened 
         (according to order) ndarrays. When `returns_shapes` is `True`, 
         return a list of tuples containing also the shapes of each 

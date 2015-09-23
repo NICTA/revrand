@@ -1,5 +1,7 @@
 import numpy as np
 
+from ..utils import flatten_join, split_unflatten
+
 from warnings import warn
 from scipy.optimize import minimize as sp_min
 
@@ -44,7 +46,17 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
             warn("NLopt could not be imported. Defaulting to scipy.optimize")
         else:
             return nl_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
-                      constraints=constraints, options=options)
+                      constraints=constraints, **options)
 
     return sp_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
                       constraints=constraints, options=options)
+
+def lift_minimizer(minimizer):
+
+    def new_minimizer(fun, *ndarrays, **kwargs):
+        array1d, shapes = flatten_join(*ndarrays)
+        result = minimizer(fun, array1d, **kwargs)
+        result['x'] = split_unflatten(result['x'], shapes)
+        return result
+
+    return new_minimizer
