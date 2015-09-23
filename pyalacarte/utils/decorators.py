@@ -2,16 +2,14 @@
 Reusable decorators
 """
 
-from ..utils.base import flatten, unflatten
+from ..utils.base import flatten_join, split_unflatten
 
 import numpy as np 
 
-def flatten_args(callback=None):
+def flatten_args(fn=None):
     """
     Examples
-    --------
-    >>> from scipy.optimize import rosen
-    
+    --------    
     >>> @flatten_args
     ... def f(x):
     ...     return 2*x
@@ -29,11 +27,9 @@ def flatten_args(callback=None):
            [ 1. ,  1.8]])
     """
     def new_fn(*args):
-        args_flat, shapes = flatten(args)
-        result = fn(np.asarray(args_flat)) # need to revisit flatten/unflatten
-                                           # should directly work over ndarrays 
-                                           # instead of lists
-        return unflatten(result, shapes)
+        args_flat, shapes = flatten_join(*args)
+        result = fn(args_flat)
+        return split_unflatten(result, shapes=shapes)
 
     return new_fn
 
