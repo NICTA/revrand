@@ -333,26 +333,27 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + (C.sum() + mm) / _lambda
-                       - np.log(C).sum()
-                       + D * np.log(_lambda)
-                       - D)
+                       + Nb / N * (
+                           + (C.sum() + mm) / _lambda
+                           - np.log(C).sum()
+                           + D * np.log(_lambda)
+                           - D))
 
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
 
         # Mean gradient
-        dm = Err.dot(Phi) / _var - m / _lambda
+        dm = Err.dot(Phi) / _var - m * Nb / (_lambda * N)
 
         # Covariance gradient
-        dC = - 0.5 * (PPdiag / _var + 1. / _lambda - 1. / C)
+        dC = - 0.5 * (PPdiag / _var + Nb / N * (1. / _lambda - 1. / C))
 
         # Grad variance
         dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
-        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
+        dlambda = 0.5 * Nb / (_lambda * N) * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
