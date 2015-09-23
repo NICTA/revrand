@@ -123,8 +123,8 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-6,
 
     bounds = [(1e-14, None)] * 2 + basis.bounds
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = minimize(LML, pcat.flatten(vparams), bounds=bounds, method=method,
-                   ftol=ftol, xtol=1e-8, maxiter=maxit)
+    res = minimize(LML, pcat.flatten(vparams), method=method, jac=True, 
+                   bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
 
     var, regulariser, bparams = pcat.unflatten(res['x'])
 
