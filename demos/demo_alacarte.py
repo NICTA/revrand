@@ -26,14 +26,14 @@ def main():
     lenscale2 = 0.2  # For the Combo basis
     noise = 0.2
     order = 5  # For polynomial basis
-    rate = 0.95
-    eta = 1e-6
-    maxit = 5e3
+    rate = 0.9
+    eta = 1e-5
+    passes = 1000
     batchsize = 100
     reg = 1
     usegradients = True
     useSGD = True
-    diagcov = False
+    diagcov = True
 
     N = 500
     Ns = 250
@@ -142,8 +142,8 @@ def main():
     # Evidence lower-bound A la Carte learning
     if useSGD:
         params_elbo = regression.bayesreg_sgd(Xtrain, ytrain, base, hypers,
-                                              rate=rate, eta=eta, maxit=maxit,
-                                              regulariser=reg, var=noise**2,
+                                              var=noise**2, rate=rate, eta=eta,
+                                              passes=passes, regulariser=reg,
                                               batchsize=batchsize)
     else:
         params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,

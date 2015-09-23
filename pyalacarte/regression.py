@@ -29,7 +29,7 @@ from pyalacarte.utils import CatParameters
 log = logging.getLogger(__name__)
 
 
-def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
+def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-6,
                  maxit=1000, verbose=True, usegradients=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using log-marginal likelihood.
@@ -143,7 +143,7 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
 
 
 def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-                  ftol=1e-5, maxit=1000, verbose=True, usegradients=True):
+                  ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
@@ -238,6 +238,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         # Grad var
         dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
+        print(dvar, " : ", N, TrPhiPhiC, sqErr)
 
         # Grad reg
         dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
@@ -272,7 +273,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
 
 def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
-                 maxit=1e3, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
+                 passes=10, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
@@ -284,7 +285,8 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
             var, (float): observation variance initial guess
             regulariser, (float): weight regulariser (variance) initial guess
             gtol, (float): SGD tolerance convergence criterion
-            maxit, (int): maximum number of iterations for SGD
+            passes, (int): Number of complete passes through the data before
+                optimization terminates (unless it converges first).
             rate, (float): SGD decay rate, must be [0, 1].
             batchsize, (int): number of observations to use per SGD batch.
             verbose, (float): log learning status
@@ -303,18 +305,9 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
     N, d = X.shape
 
     # Initialise parameters
-    iind = np.random.choice(N, size=min(2 * batchsize, N))
-    Phi_i = basis(X[iind, :], *bparams)
-    D = Phi_i.shape[1]
-
-    PhiPhi_i = Phi_i.T.dot(Phi_i)
-    LC = jitchol(np.diag(np.ones(D) / regulariser) + PhiPhi_i / var)
-    minit = cho_solve(LC, Phi_i.T.dot(y[iind])) / var
-    Cinit = 1. / (PhiPhi_i.diagonal() / var + 1. / regulariser)
-    del PhiPhi_i, Phi_i, LC
-    # D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
-    # minit = np.random.randn(D)
-    # Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
+    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+    minit = np.random.randn(D)
+    Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
 
     # Initial parameter vector
     vparams = [minit, Cinit, var, regulariser, bparams]
@@ -336,8 +329,9 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         mm = (m**2).sum()
 
         # Calculate ELBO
+        Nb = len(y)
         TrPhiPhiC = (PPdiag * C).sum()
-        ELBO = -0.5 * (batchsize * np.log(2 * np.pi * _var)
+        ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
                        + (C.sum() + mm) / _lambda
@@ -355,8 +349,8 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         # Covariance gradient
         dC = - 0.5 * (PPdiag / _var + 1. / _lambda - 1. / C)
 
-        # Grad alpha
-        dvar = 0.5 / _var * (-batchsize + (TrPhiPhiC + sqErr) / _var)
+        # Grad variance
+        dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
         dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
@@ -377,7 +371,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
 
     bounds = [(None, None)] * (2 * D + 2) + basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
-              rate=rate, eta=eta, bounds=bounds, gtol=gtol, maxiter=maxit,
+              rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
 
     m, C, var, regulariser, bparams = pcat.unflatten(res['x'])

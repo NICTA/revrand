@@ -22,18 +22,15 @@ lenscale = 10
 sigma = 100
 noise = 1
 regulariser = 1
-nbases = 400
+nbases = 1000
 gp_Ntrain = 1024
-maxit = 1e5
-rate = 0.95
-eta = 1e-6
+passes = 20
+rate = 0.9
+eta = 1e-5
 batchsize = 100
 
 useSGD = True
 diagcov = True
-
-# noise = 3.089897655618356
-# regulariser = 18191.35201528529
 
 
 #
@@ -64,14 +61,6 @@ y_test = sarcos_test[:, 21]
 Ntrain, D = X_train.shape
 
 
-#
-# Whitening
-#
-
-# X_train, U, l, Xmean = whiten(X_train)
-# X_test = whiten_apply(X_test, U, l, Xmean)
-
-
 # Get random subset of data for training the GP
 train_ind = np.random.choice(range(Ntrain), size=gp_Ntrain, replace=False)
 X_train_sub = X_train[train_ind, :]
@@ -84,39 +73,17 @@ y_train_sub = y_train[train_ind]
 base = bases.RandomRBF_ARD(nbases, D)
 lenARD = lenscale * np.ones(D)
 
-# lenARD = np.array([1.15895334,
-#                    4.90825038,
-#                    12.39142359,
-#                    1.00389066,
-#                    9.81194189,
-#                    11.43710948,
-#                    7.58182018,
-#                    9.97105491,
-#                    15.21816297,
-#                    16.94271258,
-#                    1.59809687,
-#                    14.44737729,
-#                    12.52705036,
-#                    7.92625432,
-#                    33.34440466,
-#                    55.46652518,
-#                    52.02653434,
-#                    56.79806777,
-#                    55.84145868,
-#                    27.73558116,
-#                    40.22196858])
-
 if useSGD:
     log.info("Using SGD regressor")
     params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD],
                                      rate=rate, var=noise**2,
-                                     regulariser=regulariser, maxit=maxit,
+                                     regulariser=regulariser, passes=passes,
                                      batchsize=batchsize, eta=eta)
 else:
     log.info("Using full variational regressor")
     params = regression.bayesreg_elbo(X_train, y_train, base, [lenARD],
                                       var=noise**2, diagcov=diagcov,
-                                      regulariser=regulariser, maxit=maxit)
+                                      regulariser=regulariser)
 
 #
 # Train GP

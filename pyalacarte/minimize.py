@@ -56,7 +56,7 @@ def minimize(fun, x0, args=None, method=None, bounds=None, ftol=None,
 
 
 def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
-        eta=1e-5, gtol=1e-3, maxiter=10000, eval_obj=False):
+        eta=1e-5, gtol=1e-3, passes=10, eval_obj=False):
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
         rate.
 
@@ -83,8 +83,8 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
                 (should be small).
             gtol, (float): optional. The norm of the gradient of x that will
                 trigger a convergence condition.
-            maxiter, (int): optional. Maximum number of mini-batch function
-                evaluations before termination.
+            passes, (int): Number of complete passes through the data before
+                optimization terminates (unless it converges first).
             eval_obj, (bool): optional. This indicates whether or not `fun`
                 also evaluates and returns the objective function value. If
                 this is true, `fun` must return `(obj, grad)` and then a list
@@ -126,7 +126,6 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
             raise ValueError("The dimension of the bounds does not match x0!")
 
     # Initialise
-    batchgen = _sgd_batches(N, batchsize)
     gnorm = np.inf
     Eg2 = 0
     Edx2 = 0
@@ -135,43 +134,46 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
     if eval_obj:
         objs = []
     norms = []
+    allpasses = True
 
-    for it in range(int(maxiter)):
+    for p in range(passes):
+        for ind in _sgd_pass(N, batchsize):
 
-        if not eval_obj:
-            grad = fun(x, Data[next(batchgen)], *args)
-        else:
-            obj, grad = fun(x, Data[next(batchgen)], *args)
+            if not eval_obj:
+                grad = fun(x, Data[ind], *args)
+            else:
+                obj, grad = fun(x, Data[ind], *args)
 
-        # Truncate gradients if bounded
-        if bounds is not None:
-            xlower = x <= lower
-            grad[xlower] = np.minimum(grad[xlower], 0)
-            xupper = x >= upper
-            grad[xupper] = np.maximum(grad[xupper], 0)
+            # Truncate gradients if bounded
+            if bounds is not None:
+                xlower = x <= lower
+                grad[xlower] = np.minimum(grad[xlower], 0)
+                xupper = x >= upper
+                grad[xupper] = np.maximum(grad[xupper], 0)
 
-        # ADADELTA
-        Eg2 = rate * Eg2 + (1 - rate) * grad**2
-        dx = - grad * np.sqrt(Edx2 + eta) / np.sqrt(Eg2 + eta)
-        Edx2 = rate * Edx2 + (1 - rate) * dx**2
-        x += dx
+            # ADADELTA
+            Eg2 = rate * Eg2 + (1 - rate) * grad**2
+            dx = - grad * np.sqrt(Edx2 + eta) / np.sqrt(Eg2 + eta)
+            Edx2 = rate * Edx2 + (1 - rate) * dx**2
+            x += dx
 
-        # Trucate steps if bounded
-        if bounds is not None:
-            x = np.minimum(np.maximum(x, lower), upper)
+            # Trucate steps if bounded
+            if bounds is not None:
+                x = np.minimum(np.maximum(x, lower), upper)
 
-        gnorm = np.linalg.norm(grad)
-        norms.append(gnorm)
-        if eval_obj:
-            objs.append(obj)
+            gnorm = np.linalg.norm(grad)
+            norms.append(gnorm)
+            if eval_obj:
+                objs.append(obj)
 
-        if gnorm <= gtol:
-            break
+            if gnorm <= gtol:
+                allpasses = False
+                break
 
     # Format results
     res = {'x': x,
            'norms': norms,
-           'message': 'converge' if it < (maxiter - 1) else 'maxiter'
+           'message': 'converge' if not allpasses else 'all passes'
            }
 
     if eval_obj:
@@ -183,7 +185,8 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
 
 def _sgd_batches(N, batchsize):
     """ Batch index generator for SGD that will yeild random batches, and touch
-        all of the data (given sufficient interations).
+        all of the data (given sufficient interations). This is an infinite
+        sequence.
 
         Arguments:
             N, (int): length of dataset.
@@ -194,11 +197,25 @@ def _sgd_batches(N, batchsize):
     """
 
     while True:
-        batch_inds = np.array_split(np.random.permutation(N),
-                                    round(N / batchsize))
+        return _sgd_pass(N, batchsize)
 
-        for b_inds in batch_inds:
-            yield b_inds
+
+def _sgd_pass(N, batchsize):
+    """ Batch index generator for SGD that will yeild random batches for a
+        single pass through the whole dataset (i.e. a finitie sequence).
+
+        Arguments:
+            N, (int): length of dataset.
+            batchsize, (int): number of data points in each batch.
+
+        Yields:
+            array: of size (batchsize,) of random (int).
+    """
+
+    batch_inds = np.array_split(np.random.permutation(N), round(N / batchsize))
+
+    for b_inds in batch_inds:
+        yield b_inds
 
 
 def _scipy_wrap(fun, x0, args, method, bounds, ftol, maxiter, jac):
@@ -252,6 +269,6 @@ def _nlopt_wrap(fun, x0, args, method, bounds, ftol, maxiter, xtol):
         'fun': opt.last_optimum_value(),
         'message': str(opt.last_optimize_result()),
         'success': opt.last_optimize_result() > 0
-        }
+    }
 
     return res

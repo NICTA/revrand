@@ -9,8 +9,8 @@ def test_unbounded(make_quadratic):
     a, b, c, data, _ = make_quadratic
     w0 = np.random.randn(3)
 
-    res = sgd(qobj, w0, data, eval_obj=True, gtol=1e-4, maxiter=1e4, rate=0.01,
-              eta=1e-9)
+    res = sgd(qobj, w0, data, eval_obj=True, gtol=1e-4, passes=1000, rate=0.95,
+              eta=1e-7)
     Ea, Eb, Ec = res['x']
     assert np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-2, rtol=0)
 
@@ -34,7 +34,7 @@ def test_bounded(make_quadratic):
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
 
     res = sgd(qobj, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
-              maxiter=1e4, rate=0.01, eta=1e-6)
+              passes=1000, rate=0.95, eta=1e-6)
     Ea_sgd, Eb_sgd, Ec_sgd = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs),
