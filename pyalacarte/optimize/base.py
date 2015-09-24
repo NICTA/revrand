@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils import flatten_join, split_unflatten
+from ..utils import flatten, unflatten
 
 from warnings import warn
 from scipy.optimize import minimize as sp_min

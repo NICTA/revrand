@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    bases
+   regression
    optimize
    utils
    demo

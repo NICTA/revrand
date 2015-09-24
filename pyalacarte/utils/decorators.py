@@ -2,7 +2,7 @@
 Reusable decorators
 """
 
-from ..utils.base import flatten_join, split_unflatten
+from ..utils.base import flatten, unflatten
 
 import numpy as np 
 
@@ -27,9 +27,9 @@ def flatten_args(fn=None):
            [ 1. ,  1.8]])
     """
     def new_fn(*args):
-        args_flat, shapes = flatten_join(*args)
+        args_flat, shapes = flatten(*args)
         result = fn(args_flat)
-        return split_unflatten(result, shapes=shapes)
+        return unflatten(result, shapes=shapes)
 
     return new_fn
 

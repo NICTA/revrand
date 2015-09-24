@@ -146,7 +146,7 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
     return OptimizeResult(
             x = x,
             fun = opt.last_optimum_value(),
-            message = make_nlopt_message(opt.last_optimize_result()),
+            message = get_nlopt_message(opt.last_optimize_result()),
             success = opt.last_optimize_result() > 0,
         )
 
@@ -412,12 +412,12 @@ def normalize_bounds(bounds=[]):
     """
     return map(normalize_bound, bounds)
 
-def make_nlopt_message(ret_code):
+def get_nlopt_message(ret_code):
     """
-    >>> make_nlopt_message(nlopt.SUCCESS)
+    >>> get_nlopt_message(nlopt.SUCCESS)
     'Success'
     
-    >>> make_nlopt_message(nlopt.INVALID_ARGS)
+    >>> get_nlopt_message(nlopt.INVALID_ARGS)
     'Invalid arguments (e.g. lower bounds are bigger than upper bounds, an unknown algorithm was specified, etcetera).'
     """ 
     return NLOPT_MESSAGES.get(ret_code)

@@ -1,13 +1,13 @@
-""" Various Bayesian linear regression learning and prediction functions.
+"""
+Various Bayesian linear regression learning and prediction functions.
 
-    By using the appropriate bases, this will also yeild a simple
-    implementation of the "A la Carte" GP [1].
+By using the appropriate bases, this will also yield a simple 
+implementation of the "A la Carte" GP [1]_.
 
-    References:
-        - Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
-          Learning Fast Kernels". Proceedings of the Eighteenth International
-          Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
-          2015.
+.. [1] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
+   Learning Fast Kernels". Proceedings of the Eighteenth International
+   Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
+   2015.
 """
 
 # TODO:
@@ -30,31 +30,32 @@ log = logging.getLogger(__name__)
 
 def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-6,
                  maxit=1000, verbose=True, usegradients=True):
-    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
-        using log-marginal likelihood.
+    """
+    Learn the parameters and hyperparameters of a Bayesian linear 
+    regressor using log-marginal likelihood.
 
-        Arguments:
-            X: Nxd array input dataset (N samples, d dimensions)
-            y: N array targets (N samples)
-            basis: A basis object, see bases.py
-            bparams: A sequence of parameters of the basis object
-            var: observation variance initial guess
-            regulariser: weight regulariser (variance) initial guess
-            verbose: log learning status
-            ftol: optimiser function tolerance convergence criterion
-            maxit: maximum number of iterations for the optimiser
-            usegradients: True for using gradients to optimize the parameters,
-                otherwise false uses BOBYQA (from nlopt)
+    Arguments:
+        X: Nxd array input dataset (N samples, d dimensions)
+        y: N array targets (N samples)
+        basis: A basis object, see bases.py
+        bparams: A sequence of parameters of the basis object
+        var: observation variance initial guess
+        regulariser: weight regulariser (variance) initial guess
+        verbose: log learning status
+        ftol: optimiser function tolerance convergence criterion
+        maxit: maximum number of iterations for the optimiser
+        usegradients: True for using gradients to optimize the parameters,
+            otherwise false uses BOBYQA (from nlopt)
 
-        Returns:
-            (tuple): with elements,
+    Returns:
+        (tuple): with elements,
 
-                m: (D,) array of posterior weight means (D is the dimension of
-                    the features)
-                C: (D,) array of posterior weight variances.
-                bparams, (list): learned sequence of basis object
-                    hyperparameters
-                (float): learned observation variance
+            m: (D,) array of posterior weight means (D is the dimension of
+                the features)
+            C: (D,) array of posterior weight variances.
+            bparams, (list): learned sequence of basis object
+                hyperparameters
+            (float): learned observation variance
     """
 
     N, d = X.shape
