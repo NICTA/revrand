@@ -5,7 +5,7 @@ from ..utils import flatten_join, split_unflatten
 from warnings import warn
 from scipy.optimize import minimize as sp_min
 
-def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
+def minimize(fun, x0, args=(), method=None, jac=None, bounds=None, 
              constraints=[], use_nlopt=False, **options):
     """
     Scipy.optimize.minimize-style wrapper for NLopt and scipy's minimize.
@@ -45,6 +45,8 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
         except ImportError:
             warn("NLopt could not be imported. Defaulting to scipy.optimize")
         else:
+            if bounds is None:
+                bounds = []
             return nl_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
                       constraints=constraints, **options)
 
