@@ -337,6 +337,8 @@ def custom_reshape(a, newshape, order='C'):
     the empty tuple, in which case we return a scalar instead of a
     0-dimensional array.
     
+    Examples
+    --------
     >>> a = np.arange(6)
     >>> np.array_equal(np.reshape(a, (3, 2)), custom_reshape(a, (3, 2)))
     True
