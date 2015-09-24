@@ -22,11 +22,11 @@ lenscale = 10
 sigma = 100
 noise = 1
 regulariser = 1
-nbases = 1000
+nbases = 500
 gp_Ntrain = 1024
 passes = 20
 rate = 0.9
-eta = 1e-5
+eta = 1e-6
 batchsize = 100
 
 useSGD = True
