@@ -5,7 +5,7 @@ from ..utils import flatten, unflatten
 from warnings import warn
 from scipy.optimize import minimize as sp_min
 
-def minimize(fun, x0, args=(), method=None, jac=None, bounds=None, 
+def minimize(fun, x0, args=(), method=None, jac=True, bounds=None, 
              constraints=[], use_nlopt=False, **options):
     """
     Scipy.optimize.minimize-style wrapper for NLopt and scipy's minimize.
@@ -47,11 +47,11 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
         else:
             if bounds is None:
                 bounds = []
-            return nl_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
-                      constraints=constraints, **options)
+            return nl_min(fun, x0, args=args, method=method, jac=jac, 
+                          bounds=bounds, constraints=constraints, **options)
 
     return sp_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
-                      constraints=constraints, options=options)
+                  constraints=constraints, options=options)
 
 def augment_minimizer(minimizer):
 

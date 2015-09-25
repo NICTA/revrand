@@ -273,9 +273,7 @@ def make_nlopt_fun(fun, jac=True, args=()):
     array([ 1.,  1.,  1.,  1.,  1.])
     >>> np.isclose(opt.last_optimum_value(), 0)
     True
-
     """
-
     def nlopt_fun(x, grad):
 
         ret = fun(x, *args)

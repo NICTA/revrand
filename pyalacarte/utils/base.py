@@ -312,41 +312,43 @@ def unflatten(ary, shapes, order='C'):
 
     Examples
     --------
-    >>> list(unflatten(np.array([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
-    ...     [(2,), (3,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
-    [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
-    >>> list(unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
-    ...     [(), (1,), (4,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
+    >>> a = np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3])
+
+    >>> list(unflatten(a, [(1,), (1,), (4,), (2, 3)]))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [array([7]), array([4]), array([5, 8, 9, 1]), array([[4, 2, 5],
+        [3, 4, 3]])]
+
+    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)])) 
+    ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
     Fortran-order:
 
-    >>> list(unflatten(np.array([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
-    ...     [(2,), (3,), (2, 3)], order='F')) 
+    >>> list(unflatten(a, [(1,), (1,), (4,), (2, 3)], order='F')) 
     ... # doctest: +NORMALIZE_WHITESPACE
-    [array([4, 5]), array([8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
-
-    >>> list(unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
-    ...     [(), (1,), (4,), (2, 3)], order='F')) 
+    [array([7]), array([4]), array([5, 8, 9, 1]), array([[4, 5, 4],
+        [2, 3, 3]])]
+    
+    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)], order='F')) 
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
     
-    >>> list(unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
-    ...     [(), (1,), (3,), (2, 3)])) 
+    >>> list(unflatten(a, [(), (1,), (3,), (2, 3)])) 
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9]), array([[1, 4, 2], [5, 3, 4]])]
 
-    >>> list(unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
-    ...     [(), (1,), (5,), (2, 3)])) 
+    >>> list(unflatten(a, [(), (1,), (5,), (2, 3)])) 
     ... # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
         ...
     ValueError: total size of new array must be unchanged
 
-    np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
-    [(), (1,), (4,), (2, 3)]
-
+    >>> flatten(*unflatten(a, [(), (1,), (4,), (2, 3)]))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    (array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
+        [(), (1,), (4,), (2, 3)])
     """
     # important to make sure dtype is int
     # since prod on empty tuple is a float (1.0)
