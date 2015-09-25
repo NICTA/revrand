@@ -32,7 +32,7 @@ def main():
     batchsize = 100
     reg = 1
     usegradients = True
-    useSGD = True
+    useSGD = False
     diagcov = True
 
     N = 500

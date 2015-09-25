@@ -251,6 +251,21 @@ def flatten(*arys, order='C', returns_shapes=True):
     ... # doctest: +NORMALIZE_WHITESPACE
     array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 
            5, 1, 9, 1])
+
+    >>> w, x, y, z = unflatten(*flatten(a, b, c, d))
+
+    >>> w == a
+    True
+
+    >>> np.array_equal(x, b)
+    True
+
+    >>> np.array_equal(y, c)
+    True
+
+    >>> np.array_equal(z, d)
+    True
+
     """
     ravel = partial(np.ravel, order=order)
     flattened = np.hstack(map(ravel, arys))
@@ -297,7 +312,6 @@ def unflatten(ary, shapes, order='C'):
 
     Examples
     --------
-
     >>> list(unflatten(np.array([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
     ...     [(2,), (3,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
     [array([4, 5]), array([8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
@@ -305,6 +319,8 @@ def unflatten(ary, shapes, order='C'):
     >>> list(unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
     ...     [(), (1,), (4,), (2, 3)])) # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
+
+    Fortran-order:
 
     >>> list(unflatten(np.array([4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
     ...     [(2,), (3,), (2, 3)], order='F')) 
@@ -316,10 +332,20 @@ def unflatten(ary, shapes, order='C'):
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
     
-    .. todo::
+    >>> list(unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
+    ...     [(), (1,), (3,), (2, 3)])) 
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [7, array([4]), array([5, 8, 9]), array([[1, 4, 2], [5, 3, 4]])]
 
-       * Demonstrate that lists are unflattened greedily as well
-       * Edge cases...
+    >>> list(unflatten(np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
+    ...     [(), (1,), (5,), (2, 3)])) 
+    ... # doctest: +NORMALIZE_WHITESPACE
+    Traceback (most recent call last):
+        ...
+    ValueError: total size of new array must be unchanged
+
+    np.array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
+    [(), (1,), (4,), (2, 3)]
 
     """
     # important to make sure dtype is int
