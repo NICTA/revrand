@@ -305,11 +305,34 @@ def _MAP(weights, data, regulariser, verbose, N=None):
     sig = logistic(Phi.dot(weights))
 
     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
-        - (weights**2).sum() / (2 * regulariser)
+        - scale * (weights**2).sum() / (2 * regulariser)
 
-    grad = - (sig - y).dot(Phi) - scale * weights / regulariser
+    grad = (y - sig).dot(Phi) - scale * weights / regulariser
 
     if verbose:
         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
 
     return -MAP, -grad
+
+
+# def _MAPmulti(weights, data, regulariser, verbose, N=None):
+
+#     y, Phi = data[:, 0], data[:, 1:]
+
+#     Nb, K = y.shape
+#     weights = weights.reshape((D, K))
+#     scale = 1 if N is None else len(y) / N
+
+#     sig = logistic(Phi.dot(weights))
+
+#     TODO:
+#     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
+#         - scale * (weights**2).sum() / (2 * regulariser)
+
+#     TODO:
+#     grad = (y - sig).dot(Phi) - scale * weights / regulariser
+
+#     if verbose:
+#         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
+
+#     return -MAP, -grad.flatten()
