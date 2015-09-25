@@ -5,7 +5,7 @@ from __future__ import division
 import numpy as np
 import logging
 from .optimize import minimize, sgd
-from functools import reduce
+from six.moves import reduce
 from scipy.stats.distributions import gamma
 from pyalacarte.utils import CatParameters
 from pyalacarte.utils import list_to_params as l2p
