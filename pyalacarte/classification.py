@@ -40,7 +40,7 @@ def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
     w = np.random.randn(D)
 
     res = minimize(_MAP, w, args=(data, regulariser, verbose),
-                   method='L-BFGS-B', ftol=ftol, maxiter=maxit)
+                   method='L-BFGS-B', ftol=ftol, maxiter=maxit, jac=True)
 
     if verbose:
         log.info("Done! MAP = {}, success = {}".format(-res['fun'],
@@ -79,7 +79,7 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
     data = np.hstack((np.atleast_2d(y).T, Phi))
     w = np.random.randn(D)
 
-    res = sgd(_MAP, w, data, args=(regulariser, verbose), gtol=gtol,
+    res = sgd(_MAP, w, data, args=(regulariser, verbose, N), gtol=gtol,
               passes=passes, rate=rate, batchsize=batchsize, eval_obj=True)
 
     if verbose:
@@ -296,16 +296,18 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=50, verbose=False, h=None,
     return Ef
 
 
-def _MAP(weights, data, regulariser, verbose):
+def _MAP(weights, data, regulariser, verbose, N=None):
 
     y, Phi = data[:, 0], data[:, 1:]
+
+    scale = 1 if N is None else len(y) / N
 
     sig = logistic(Phi.dot(weights))
 
     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
         - (weights**2).sum() / (2 * regulariser)
 
-    grad = - (sig - y).dot(Phi) - weights / regulariser
+    grad = - (sig - y).dot(Phi) - scale * weights / regulariser
 
     if verbose:
         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
