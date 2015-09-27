@@ -10,10 +10,9 @@ from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
-from .utils import params_to_list
+from .utils import params_to_list, Positive
 from .hadamard import hadamard
 
-from six import with_metaclass
 
 #
 # Basis objects
@@ -239,7 +238,7 @@ class PolynomialBasis(Basis):
         Phi = X[:, :, np.newaxis] ** pow_arr
 
         # Flatten along last axes
-        Phi = Phi.reshape(N, D*self.order)
+        Phi = Phi.reshape(N, D * self.order)
 
         # Prepend intercept
         if self.include_bias:
@@ -261,7 +260,7 @@ class RadialBasis(Basis):
         uncertainty and for deaggregation tasks!
     """
 
-    def __init__(self, centres, lenscale_bounds=(1e-7, None)):
+    def __init__(self, centres, lenscale_bounds=Positive()):
         """
         Construct a radial basis function (RBF) object.
 
@@ -333,15 +332,14 @@ class RadialBasis(Basis):
 class SigmoidalBasis(Basis):
     """Sigmoidal Basis"""
 
-    def __init__(self, centres, lenscale_bounds=(1e-7, None)):
+    def __init__(self, centres, lenscale_bounds=Positive()):
         """Construct a sigmoidal basis function object.
 
         Arguments:
             centres: array of shape (Dxd) where D is the number of centres
                 for the bases, and d is the dimensionality of X.
-
             lenscale_bounds: a tuple of bounds for the basis function length
-            scales.
+                scales.
         """
 
         self.M, self.D = centres.shape
@@ -376,7 +374,7 @@ class SigmoidalBasis(Basis):
             raise ValueError("Expected X of dimensionality {0}, got {1}"
                              .format(self.D, D))
 
-        return expit(cdist(X, self.C, 'seuclidean')/lenscale)
+        return expit(cdist(X, self.C, 'seuclidean') / lenscale)
 
     def grad(self, X, lenscale):
         r"""Get the gradients of this basis w.r.t. the length scale.
@@ -407,7 +405,7 @@ class SigmoidalBasis(Basis):
 
         dist = cdist(X, self.C, 'seuclidean')
 
-        sigma = expit(dist/lenscale)
+        sigma = expit(dist / lenscale)
 
         dPhi = - dist * sigma * (1 - sigma) / lenscale**2
 
@@ -422,7 +420,7 @@ class RandomRBF(RadialBasis):
     covariance function.
     """
 
-    def __init__(self, nbases, Xdim, lenscale_bounds=(1e-7, None)):
+    def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
         """
         Construct a random radial basis function (RBF) object.
 
@@ -497,7 +495,7 @@ class RandomRBF_ARD(RandomRBF):
         ARD-RBF covariance function.
     """
 
-    def __init__(self, nbases, Xdim, lenscale_bounds=(1e-7, None)):
+    def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
         """ Construct a random radial basis function (RBF) object, with ARD.
 
             Arguments:
@@ -555,7 +553,8 @@ class RandomRBF_ARD(RandomRBF):
         dPhi = []
         for i, l in enumerate(lenscales):
             dWX = np.outer(X[:, i], - 1. / l**2 * self.W[i, :])
-            dPhi.append(np.hstack((dWX*sinWX, dWX*cosWX)) / np.sqrt(self.n))
+            dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX))
+                        / np.sqrt(self.n))
 
         return dPhi
 
@@ -581,7 +580,7 @@ class FastFood(RandomRBF):
     covariance function.
     """
 
-    def __init__(self, nbases, Xdim, lenscale_bounds=(1e-7, None)):
+    def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
         """
         Construct a random radial basis function (RBF) object.
 
@@ -602,7 +601,7 @@ class FastFood(RandomRBF):
 
         self.d = Xdim
         self.d2 = pow(2, l)
-        self.k = int(np.ceil(nbases/self.d2))
+        self.k = int(np.ceil(nbases / self.d2))
         self.n = self.d2 * self.k
 
         # Draw consistent samples from the covariance matrix
@@ -660,7 +659,7 @@ class FastFood(RandomRBF):
         B = np.random.randint(2, size=self.d2) * 2 - 1  # uniform from [-1,1]
         G = np.random.randn(self.d2)  # mean 0 std 1
         PI = np.random.permutation(self.d2)
-        S = np.sqrt(2 * gammaincinv(np.ceil(self.d2/2),
+        S = np.sqrt(2 * gammaincinv(np.ceil(self.d2 / 2),
                                     np.random.rand(self.d2))) / norm(G)
         return B, G, PI, S
 

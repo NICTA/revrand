@@ -1,8 +1,8 @@
 """
 Various Bayesian linear regression learning and prediction functions.
 
-By using the appropriate bases, this will also yield a simple 
-implementation of the "A la Carte" GP [1]_.
+By using the appropriate bases, this will also yield a simple implementation of
+the "A la Carte" GP [1]_.
 
 .. [1] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
    Learning Fast Kernels". Proceedings of the Eighteenth International
@@ -23,124 +23,11 @@ from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, logdet
 from .optimize import minimize, sgd
-from .utils import list_to_params as l2p, CatParameters
+from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
+    checktypes
 
 # Set up logging
 log = logging.getLogger(__name__)
-
-
-def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-6,
-                 maxit=1000, verbose=True, usegradients=True):
-    """
-    Learn the parameters and hyperparameters of a Bayesian linear 
-    regressor using log-marginal likelihood.
-
-    Arguments:
-        X: Nxd array input dataset (N samples, d dimensions)
-        y: N array targets (N samples)
-        basis: A basis object, see bases.py
-        bparams: A sequence of parameters of the basis object
-        var: observation variance initial guess
-        regulariser: weight regulariser (variance) initial guess
-        verbose: log learning status
-        ftol: optimiser function tolerance convergence criterion
-        maxit: maximum number of iterations for the optimiser
-        usegradients: True for using gradients to optimize the parameters,
-            otherwise false uses BOBYQA (from nlopt)
-
-    Returns:
-        (tuple): with elements,
-
-            m: (D,) array of posterior weight means (D is the dimension of
-                the features)
-            C: (D,) array of posterior weight variances.
-            bparams, (list): learned sequence of basis object
-                hyperparameters
-            (float): learned observation variance
-    """
-
-    N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
-
-    # Caches for returning optimal params
-    LMLcache = [-np.inf]
-    LCcache = []
-
-    # Initial parameter vector
-    vparams = [var, regulariser, bparams]
-    pcat = CatParameters(vparams)  # this algorithm is better NOT in log space!
-
-    def LML(params):
-
-        uparams = pcat.unflatten(params)
-        _var, _lambda, _theta = uparams
-
-        # Common computations
-        Phi = basis(X, *_theta)                       # N x D
-        PhiPhi = Phi.T.dot(Phi)                       # D x D
-        LC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
-        iCPhi = cho_solve(LC, Phi.T)                            # D x N
-        yiK = y.T / _var - (y.T.dot(Phi)).dot(iCPhi) / _var**2  # 1 x N
-
-        # Objective
-        LML = -0.5 * (N * np.log(2 * np.pi * _var**2)
-                      + D * np.log(_lambda)
-                      + logdet(LC[0])
-                      + yiK.dot(y))
-
-        if verbose:
-            log.info("LML = {}, var = {}, reg = {}, bparams = {}."
-                     .format(LML, _var, _lambda, _theta))
-
-        if LML > LMLcache[0]:
-            LMLcache[0] = LML
-            LCcache[:] = LC
-
-        if not usegradients:
-            return -LML
-
-        # Grad var
-        dvar = - N / _var + (Phi * iCPhi.T).sum() / (2 * _var**2) \
-            + (yiK**2).sum() / 2
-
-        # Grad reg -- the second trace here is the largest computation
-        dlambda = 0.5 * (- np.trace(PhiPhi) / _var
-                         + (PhiPhi * (iCPhi).dot(Phi)).sum() / _var**2
-                         + (yiK.dot(Phi)**2).sum())
-
-        # Loop through basis param grads
-        dtheta = []
-        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for dPhi in dPhis:
-            dPhiPhi = dPhi.T.dot(Phi)  # D x D
-            dt = - (np.trace(dPhiPhi) / _var
-                    - (dPhiPhi * (iCPhi.dot(Phi))).sum() / _var**2
-                    + (yiK.dot(dPhi)).dot(Phi.T).dot(yiK.T)) * _lambda
-            dtheta.append(dt)
-
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        dtheta = l2p(_theta, dtheta)
-
-        return -LML, -pcat.flatten([dvar, dlambda, dtheta])
-
-    bounds = [(1e-14, None)] * 2 + basis.bounds
-    method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = minimize(LML, pcat.flatten(vparams), method=method, jac=True, 
-                   bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
-
-    var, regulariser, bparams = pcat.unflatten(res['x'])
-
-    if verbose:
-        log.info("Done! LML = {}, var = {}, reg = {}, bparams = {}."
-                 .format(-res['fun'], var, regulariser, bparams))
-        if not res['success']:
-            log.info('Terminated unsuccessfully: {}.'.format(res['message']))
-
-    # Posterior parameters
-    C = cho_solve(LCcache, np.eye(D))
-    m = C.dot(basis(X, *bparams).T.dot(y)) / var
-
-    return m, C, bparams, var
 
 
 def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
@@ -184,7 +71,9 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
     # Initial parameter vector
     vparams = [var, regulariser, bparams]
-    pcat = CatParameters(vparams, log_indices=[0, 1])
+    posbounds = checktypes(basis.bounds, Positive)
+    pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
+                         else [0, 1])
 
     def ELBO(params):
 
@@ -239,7 +128,6 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         # Grad var
         dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
-        print(dvar, " : ", N, TrPhiPhiC, sqErr)
 
         # Grad reg
         dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
@@ -257,7 +145,11 @@ def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
 
-    bounds = [(None, None)] * 2 + basis.bounds
+    # NOTE: It would be nice if the optimizer knew how to handle Positive
+    # bounds when the log trick is used, so we dont have to have this boiler
+    # plate...
+    bounds = [Bound()] * 2
+    bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
     res = minimize(ELBO, pcat.flatten(vparams), method=method, jac=True,
                    bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
@@ -312,7 +204,9 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
 
     # Initial parameter vector
     vparams = [minit, Cinit, var, regulariser, bparams]
-    pcat = CatParameters(vparams, log_indices=[1, 2, 3])
+    posbounds = checktypes(basis.bounds, Positive)
+    pcat = CatParameters(vparams, log_indices=[1, 2, 3, 4] if posbounds
+                         else [1, 2, 3])
 
     def ELBO(params, data):
 
@@ -371,7 +265,11 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         return -ELBO, -pcat.flatten_grads(uparams, [dm, dC, dvar, dlambda,
                                                     dtheta])
 
-    bounds = [(None, None)] * (2 * D + 2) + basis.bounds
+    # NOTE: It would be nice if the optimizer knew how to handle Positive
+    # bounds when the log trick is used, so we dont have to have this boiler
+    # plate...
+    bounds = [Bound()] * (2 * D + 2)
+    bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
