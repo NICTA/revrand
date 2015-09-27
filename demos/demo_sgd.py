@@ -4,7 +4,7 @@
 
 import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte.minimize import minimize, sgd
+from pyalacarte.optimize import minimize, sgd
 from pyalacarte.bases import RadialBasis
 
 
@@ -22,14 +22,14 @@ def f(w, Data, sigma=1.0):
 def sgd_demo():
     # Settings
 
-    batchsize = 10
+    batchsize = 100
     var = 0.05
     nPoints = 1000
     nQueries = 500
-    maxIterations = 10000
+    passes = 200
     min_grad_norm = 0.01
-    rate = 0.95
-    eta = 1e-6
+    rate = 0.9
+    eta = 1e-5
 
     # Create dataset
     X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
@@ -52,7 +52,7 @@ def sgd_demo():
 
     # SGD for learning w
     w0 = np.random.randn(Phi.shape[1])
-    results = sgd(f, w0, train_dat, maxiter=maxIterations, batchsize=batchsize,
+    results = sgd(f, w0, train_dat, passes=passes, batchsize=batchsize,
                   eval_obj=True, gtol=min_grad_norm, rate=rate, eta=eta)
     w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
 

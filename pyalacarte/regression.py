@@ -1,13 +1,13 @@
-""" Various Bayesian linear regression learning and prediction functions.
+"""
+Various Bayesian linear regression learning and prediction functions.
 
-    By using the appropriate bases, this will also yeild a simple
-    implementation of the "A la Carte" GP [1].
+By using the appropriate bases, this will also yield a simple 
+implementation of the "A la Carte" GP [1]_.
 
-    References:
-        - Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
-          Learning Fast Kernels". Proceedings of the Eighteenth International
-          Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
-          2015.
+.. [1] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
+   Learning Fast Kernels". Proceedings of the Eighteenth International
+   Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
+   2015.
 """
 
 # TODO:
@@ -17,40 +17,46 @@ from __future__ import division
 
 import numpy as np
 import logging
+
 from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
-from pyalacarte.linalg import jitchol, logdet
-from pyalacarte.minimize import minimize, sgd
-from pyalacarte.utils import list_to_params as l2p
-from pyalacarte.utils import CatParameters
 
+from .linalg import jitchol, logdet
+from .optimize import minimize, sgd
+from .utils import list_to_params as l2p, CatParameters
 
 # Set up logging
 log = logging.getLogger(__name__)
 
 
-def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
+def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-6,
                  maxit=1000, verbose=True, usegradients=True):
-    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
-        using log-marginal likelihood.
+    """
+    Learn the parameters and hyperparameters of a Bayesian linear 
+    regressor using log-marginal likelihood.
 
-        Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
-            y: N array targets (N samples)
-            basis: A basis object, see bases.py
-            bparams: A sequence of parameters of the basis object
-            var: observation variance initial guess
-            regulariser: weight regulariser (variance) initial guess
-            verbose: log learning status
-            ftol: optimiser function tolerance convergence criterion
-            maxit: maximum number of iterations for the optimiser
-            usegradients: True for using gradients to optimize the parameters,
-                otherwise false uses BOBYQA (from nlopt)
+    Arguments:
+        X: Nxd array input dataset (N samples, d dimensions)
+        y: N array targets (N samples)
+        basis: A basis object, see bases.py
+        bparams: A sequence of parameters of the basis object
+        var: observation variance initial guess
+        regulariser: weight regulariser (variance) initial guess
+        verbose: log learning status
+        ftol: optimiser function tolerance convergence criterion
+        maxit: maximum number of iterations for the optimiser
+        usegradients: True for using gradients to optimize the parameters,
+            otherwise false uses BOBYQA (from nlopt)
 
-        Returns:
-            list: learned sequence of basis object hyperparameters
-            float: learned observation variance
-            float: learned weight regluariser
+    Returns:
+        (tuple): with elements,
+
+            m: (D,) array of posterior weight means (D is the dimension of
+                the features)
+            C: (D,) array of posterior weight variances.
+            bparams, (list): learned sequence of basis object
+                hyperparameters
+            (float): learned observation variance
     """
 
     N, d = X.shape
@@ -105,19 +111,22 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for i, dPhi in enumerate(dPhis):
+        for dPhi in dPhis:
             dPhiPhi = dPhi.T.dot(Phi)  # D x D
             dt = - (np.trace(dPhiPhi) / _var
                     - (dPhiPhi * (iCPhi.dot(Phi))).sum() / _var**2
                     + (yiK.dot(dPhi)).dot(Phi.T).dot(yiK.T)) * _lambda
             dtheta.append(dt)
 
+        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
+        dtheta = l2p(_theta, dtheta)
+
         return -LML, -pcat.flatten([dvar, dlambda, dtheta])
 
     bounds = [(1e-14, None)] * 2 + basis.bounds
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = minimize(LML, pcat.flatten(vparams), bounds=bounds, method=method,
-                   ftol=ftol, xtol=1e-8, maxiter=maxit)
+    res = minimize(LML, pcat.flatten(vparams), method=method, jac=True, 
+                   bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
 
     var, regulariser, bparams = pcat.unflatten(res['x'])
 
@@ -134,29 +143,35 @@ def bayesreg_lml(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
     return m, C, bparams, var
 
 
-def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
-                  maxit=1000, verbose=True, var_bounds=(1e-7, None),
-                  regulariser_bounds=(1e-14, None), usegradients=True):
+def bayesreg_elbo(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
+                  ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
         Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
+            X: (N, d) array input dataset (N samples, d dimensions)
             y: N array targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of parameters of the basis object
-            var: observation variance initial guess
-            regulariser: weight regulariser (variance) initial guess
-            verbose: log learning status
-            ftol: optimiser function tolerance convergence criterion
-            maxit: maximum number of iterations for the optimiser
-            usegradients: True for using gradients to optimize the parameters,
-                otherwise false uses BOBYQA (from nlopt)
+            var, (float): observation variance initial guess
+            regulariser, (float): weight regulariser (variance) initial guess
+            diagcov, (bool): approximate posterior covariance with diagional
+                matrix.
+            verbose, (bool): log learning status
+            ftol, (float): optimiser function tolerance convergence criterion
+            maxit, (int): maximum number of iterations for the optimiser
+            usegradients, (bool): True for using gradients to optimize the
+                parameters, otherwise false uses BOBYQA (from nlopt)
 
         Returns:
-            list: learned sequence of basis object hyperparameters
-            float: learned observation variance
-            float: learned weight regluariser
+            (tuple): with elements,
+
+                m: (D,) array of posterior weight means (D is the dimension of
+                    the features)
+                C: (D,) array of posterior weight variances.
+                bparams, (list): learned sequence of basis object
+                    hyperparameters
+                (float): learned observation variance
     """
 
     N, d = X.shape
@@ -165,7 +180,7 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
     # Caches for returning optimal params
     ELBOcache = [-np.inf]
     mcache = np.zeros(D)
-    Ccache = np.zeros(D)
+    Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
 
     # Initial parameter vector
     vparams = [var, regulariser, bparams]
@@ -183,7 +198,18 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         # Posterior Parameters
         LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
         m = cho_solve(LfullC, Phi.T.dot(y)) / _var
-        C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
+
+        # Common calcs dependent on form of C
+        if diagcov:
+            C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
+            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
+            logdetC = np.log(C).sum()
+            TrC = C.sum()
+        else:
+            C = cho_solve(LfullC, np.eye(D))
+            TrPhiPhiC = (PhiPhi * C).sum()
+            logdetC = -logdet(LfullC[0])
+            TrC = np.trace(C)
 
         # Common computations
         Err = y - Phi.dot(m)
@@ -191,12 +217,11 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
         mm = (m**2).sum()
 
         # Calculate ELBO
-        TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + (C.sum() + mm) / _lambda
-                       - np.log(C).sum()
+                       + (TrC + mm) / _lambda
+                       - logdetC
                        + D * np.log(_lambda)
                        - D)
 
@@ -213,17 +238,18 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
             return -ELBO
 
         # Grad var
-        dvar = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
+        dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
+        print(dvar, " : ", N, TrPhiPhiC, sqErr)
 
         # Grad reg
-        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
+        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for i, dPhi in enumerate(dPhis):
-            dPhiPhidiag = (dPhi * Phi).sum(axis=0)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var
+        for dPhi in dPhis:
+            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
+            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(dt)
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
@@ -233,8 +259,8 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
 
     bounds = [(None, None)] * 2 + basis.bounds
     method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = minimize(ELBO, pcat.flatten(vparams), bounds=bounds, method=method,
-                   ftol=ftol, xtol=1e-8, maxiter=maxit)
+    res = minimize(ELBO, pcat.flatten(vparams), method=method, jac=True,
+                   bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
 
     var, regulariser, bparams = pcat.unflatten(res['x'])
 
@@ -248,19 +274,20 @@ def bayesreg_elbo(X, y, basis, bparams, var=1, regulariser=1., ftol=1e-5,
 
 
 def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
-                 maxit=1e3, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
+                 passes=10, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
 
         Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
+            X: Nxd array input dataset (N samples, d dimensions)
             y: N array targets (N samples)
             basis: A basis object, see bases.py
             bparams: A sequence of parameters of the basis object
             var, (float): observation variance initial guess
             regulariser, (float): weight regulariser (variance) initial guess
             gtol, (float): SGD tolerance convergence criterion
-            maxit, (int): maximum number of iterations for SGD
+            passes, (int): Number of complete passes through the data before
+                optimization terminates (unless it converges first).
             rate, (float): SGD decay rate, must be [0, 1].
             batchsize, (int): number of observations to use per SGD batch.
             verbose, (float): log learning status
@@ -268,9 +295,12 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         Returns:
             (tuple): with elements,
 
-                (list): learned sequence of basis object hyperparameters
+                m: (D,) array of posterior weight means (D is the dimension of
+                    the features)
+                C: (D,) array of posterior weight variances.
+                bparams, (list): learned sequence of basis object
+                    hyperparameters
                 (float): learned observation variance
-                (float): learned weight regluariser
     """
 
     N, d = X.shape
@@ -291,7 +321,7 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         m, C, _var, _lambda, _theta = uparams
 
         # Get Basis
-        Phi = basis(X, *_theta)                      # N x D
+        Phi = basis(X, *_theta)                      # Nb x D
         PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
@@ -300,35 +330,37 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         mm = (m**2).sum()
 
         # Calculate ELBO
+        Nb = len(y)
         TrPhiPhiC = (PPdiag * C).sum()
-        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
+        ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + (C.sum() + mm) / _lambda
-                       - np.log(C).sum()
-                       + D * np.log(_lambda)
-                       - D)
+                       + Nb / N * (
+                           + (C.sum() + mm) / _lambda
+                           - np.log(C).sum()
+                           + D * np.log(_lambda)
+                           - D))
 
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
 
         # Mean gradient
-        dm = Err.dot(Phi) / _var - m / _lambda
+        dm = Err.dot(Phi) / _var - m * Nb / (_lambda * N)
 
         # Covariance gradient
-        dC = - 0.5 * (PPdiag / _var + 1. / _lambda - 1. / C)
+        dC = - 0.5 * (PPdiag / _var + Nb / N * (1. / _lambda - 1. / C))
 
-        # Grad alpha
-        dvar = 0.5 * (-N / _var + (sqErr + TrPhiPhiC) / _var**2)
+        # Grad variance
+        dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
-        dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
+        dlambda = 0.5 * Nb / (_lambda * N) * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for i, dPhi in enumerate(dPhis):
+        for dPhi in dPhis:
             dPhiPhidiag = (dPhi * Phi).sum(axis=0)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var
             dtheta.append(dt)
@@ -341,10 +373,8 @@ def bayesreg_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
 
     bounds = [(None, None)] * (2 * D + 2) + basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
-              rate=rate, eta=eta, bounds=bounds, gtol=gtol, maxiter=maxit,
+              rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
-    # res = minimize(ELBO, pcat.flatten(vparams), bounds=bounds,
-    #                method='L-BFGS-B', ftol=1e-5, xtol=1e-8, maxiter=maxit)
 
     m, C, var, regulariser, bparams = pcat.unflatten(res['x'])
 
@@ -370,12 +400,14 @@ def bayesreg_predict(X_star, basis, m, C, bparams, var):
             var: observation variance
 
         Returns:
-            array: The expected value of y_star for the query inputs, X_star
-               of shape (N_star,)
-            array: The expected variance of f_star for the query inputs, X_star
-               of shape (N_star,)
-            array: The expected variance of y_star for the query inputs, X_star
-               of shape (N_star,)
+            (tuple): with elements:
+
+                Ey: The expected value of y_star for the query inputs, X_star
+                    of shape (N_star,)
+                Vf: The expected variance of f_star for the query inputs,
+                    X_star of shape (N_star,)
+                Vy: The expected variance of y_star for the query inputs,
+                    X_star of shape (N_star,)
     """
 
     Phi_s = basis(X_star, *bparams)

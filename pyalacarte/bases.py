@@ -9,9 +9,11 @@ import numpy as np
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
-from pyalacarte.utils import params_to_list
-from pyalacarte.hadamard import hadamard
 
+from .utils import params_to_list
+from .hadamard import hadamard
+
+from six import with_metaclass
 
 #
 # Basis objects

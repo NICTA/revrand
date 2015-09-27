@@ -21,13 +21,16 @@ logging.basicConfig(level=logging.INFO)
 lenscale = 10
 sigma = 100
 noise = 1
-regulariser = 100
-nbases = 1000
+regulariser = 1
+nbases = 500
 gp_Ntrain = 1024
-maxit = 1e3
+passes = 25
 rate = 0.9
-eta = 1e-4
+eta = 1e-6
 batchsize = 100
+
+useSGD = True
+diagcov = True
 
 
 #
@@ -58,14 +61,6 @@ y_test = sarcos_test[:, 21]
 Ntrain, D = X_train.shape
 
 
-#
-# Whitening
-#
-
-# X_train, U, l, Xmean = whiten(X_train)
-# X_test = whiten_apply(X_test, U, l, Xmean)
-
-
 # Get random subset of data for training the GP
 train_ind = np.random.choice(range(Ntrain), size=gp_Ntrain, replace=False)
 X_train_sub = X_train[train_ind, :]
@@ -77,9 +72,18 @@ y_train_sub = y_train[train_ind]
 
 base = bases.RandomRBF_ARD(nbases, D)
 lenARD = lenscale * np.ones(D)
-params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD], rate=rate,
-                                 var=noise**2, regulariser=regulariser,
-                                 maxit=maxit, batchsize=batchsize, eta=eta)
+
+if useSGD:
+    log.info("Using SGD regressor")
+    params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD],
+                                     rate=rate, var=noise**2,
+                                     regulariser=regulariser, passes=passes,
+                                     batchsize=batchsize, eta=eta)
+else:
+    log.info("Using full variational regressor")
+    params = regression.bayesreg_elbo(X_train, y_train, base, [lenARD],
+                                      var=noise**2, diagcov=diagcov,
+                                      regulariser=regulariser)
 
 #
 # Train GP

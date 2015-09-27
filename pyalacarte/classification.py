@@ -4,9 +4,9 @@ from __future__ import division
 
 import numpy as np
 import logging
-from functools import reduce
+from .optimize import minimize, sgd
+from six.moves import reduce
 from scipy.stats.distributions import gamma
-from pyalacarte.minimize import minimize, sgd
 from pyalacarte.utils import CatParameters
 from pyalacarte.utils import list_to_params as l2p
 
@@ -40,7 +40,7 @@ def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
     w = np.random.randn(D)
 
     res = minimize(_MAP, w, args=(data, regulariser, verbose),
-                   method='L-BFGS-B', ftol=ftol, maxiter=maxit)
+                   method='L-BFGS-B', ftol=ftol, maxiter=maxit, jac=True)
 
     if verbose:
         log.info("Done! MAP = {}, success = {}".format(-res['fun'],
@@ -49,7 +49,7 @@ def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
     return res['x']
 
 
-def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
+def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
                  rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the weights of a logistic regressor using MAP inference and SGD.
 
@@ -60,7 +60,8 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
             bparams: A sequence of parameters of the basis object
             regulariser, (float): weight regulariser (variance) initial guess
             gtol, (float): SGD tolerance convergence criterion
-            maxit, (int): maximum number of iterations for SGD
+            passes, (int): Number of complete passes through the data before
+                optimization terminates (unless it converges first).
             rate, (float): SGD learing rate.
             batchsize, (int): number of observations to use per SGD batch.
             verbose, (float): log learning status
@@ -78,8 +79,8 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
     data = np.hstack((np.atleast_2d(y).T, Phi))
     w = np.random.randn(D)
 
-    res = sgd(_MAP, w, data, args=(regulariser, verbose), gtol=gtol,
-              maxiter=maxit, rate=rate, batchsize=batchsize, eval_obj=True)
+    res = sgd(_MAP, w, data, args=(regulariser, verbose, N), gtol=gtol,
+              passes=passes, rate=rate, batchsize=batchsize, eval_obj=True)
 
     if verbose:
         log.info("Done! MAP = {}, message = {}".format(-res['fun'],
@@ -88,7 +89,7 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
     return res['x']
 
 
-def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
+def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
                  rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the weights and hyperparameters of a logistic regressor using
         stochastic variational inference.
@@ -100,7 +101,8 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
             bparams: A sequence of parameters of the basis object
             regulariser, (float): weight regulariser (variance) initial guess
             gtol, (float): SGD tolerance convergence criterion
-            maxit, (int): maximum number of iterations for SGD
+            passes, (int): Number of complete passes through the data before
+                optimization terminates (unless it converges first).
             rate, (float): SGD learing rate.
             batchsize, (int): number of observations to use per SGD batch.
             verbose, (float): log learning status
@@ -117,8 +119,7 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
     # Initialise parameters
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     minit = np.random.randn(D)
-    # Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
-    Cinit = np.ones_like(minit)
+    Cinit = np.abs(np.random.randn(D)) + 1e-6
 
     # Initial parameter vector
     vparams = [minit, Cinit, regulariser, bparams]
@@ -158,6 +159,7 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
         Phi = basis(X, *_theta)                      # N x D
 
         # Objective
+        Nb = len(y)
         mm = (m**2).sum()
         KL = 0.5 * ((C.sum() + mm) / _lambda
                     - np.log(C).sum()
@@ -165,41 +167,33 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
                     - D)
 
         ELL = _MC_dgauss(logp, m, C, args=(y, Phi), verbose=True)
-        ELBO = ELL - KL
+        ELBO = ELL - Nb / N * KL
 
         if verbose:
-            log.info("ELBO = {}, reg = {}, bparams = {},\nELL = {}, KL = {}."
-                     .format(ELBO, _lambda, _theta, ELL, KL))
-
-        print("Trace(C) = {}\n-log|C| = {}\nm.T.dot(m) = {}"
-              .format(C.sum(), -np.log(C).sum(), mm))
+            log.info("ELBO = {}, reg = {}, bparams = {}."
+                     .format(ELBO, _lambda, _theta))
 
         # Grad m
-        dm = _MC_dgauss(logpdm, m, C, args=(y, Phi)) - m / _lambda
-        # dm = _MC_dgauss(logpdm, m, C, args=(y, Phi), h=hm, hargs=(m, C)) \
-        #     - m / _lambda
-
-        # import IPython; IPython.embed(); exit()
-        # s = logistic(Phi.dot(m))
-        # dm = - (s - y).dot(Phi) - m / _lambda
+        # dm = _MC_dgauss(logpdm, m, C, args=(y, Phi)) - Nb * m / (N * _lambda)
+        dm = _MC_dgauss(logpdm, m, C, args=(y, Phi), h=hm, hargs=(m, C)) \
+            - Nb * m / (N * _lambda)
 
         # Grad C
-        # dC = 0.5 * (_MC_dgauss(logpdC, m, C, args=(Phi,)) - 1. / _lambda
-        #             + 1. / C)
+        # dC = 0.5 * (_MC_dgauss(logpdC, m, C, args=(Phi,))
+        #             - Nb / N * (1. / _lambda + 1. / C))
         dC = 0.5 * (_MC_dgauss(logpdC, m, C, args=(Phi,), h=hC, hargs=(m, C))
-                    - 1. / _lambda + 1. / C)
+                    - Nb / N * (1. / _lambda + 1. / C))
         # dC = np.zeros_like(C)
 
         # Grad reg
-        # dlambda = 0.5 / _lambda * ((C.sum() + mm) / _lambda - D)
-        dlambda = 0
+        dlambda = 0.5 * Nb / (_lambda * N) * ((C.sum() + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for i, dPhi in enumerate(dPhis):
-            # dtheta.append(0)
             dtheta.append(_MC_dgauss(logpdtheta, m, C, args=(y, Phi, dPhi)))
+            # dtheta.append(0)
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
         dtheta = l2p(_theta, dtheta)
@@ -208,7 +202,7 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, maxit=1000,
 
     bounds = [(None, None)] * (2 * D + 1) + basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
-              rate=rate, eta=eta, bounds=bounds, gtol=gtol, maxiter=maxit,
+              rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
 
     m, C, regulariser, bparams = pcat.unflatten(res['x'])
@@ -283,9 +277,12 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=50, verbose=False, h=None,
     D = mean.shape[0]
     ws = (mean + np.random.randn(D) + np.sqrt(dcov) for s in range(nsamples))
 
+    # Regular MC integration
     if h is None:
         fgen = (f(w, *args) for w in ws)
         Ef = reduce(lambda x, y: x + y, fgen) / nsamples
+
+    # Control variates
     else:
         fs, hs = zip(*[(f(w, *args), h(w, *hargs)) for w in ws])
         fs = np.array(fs)
@@ -296,23 +293,46 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=50, verbose=False, h=None,
         a = ((fs - fmean) * hc).sum() / (hc**2).sum()
         Ef = (fs - a * hs).sum(axis=0)
 
-        # import IPython; IPython.embed(); exit()
-
     return Ef
 
 
-def _MAP(weights, data, regulariser, verbose):
+def _MAP(weights, data, regulariser, verbose, N=None):
 
     y, Phi = data[:, 0], data[:, 1:]
+
+    scale = 1 if N is None else len(y) / N
 
     sig = logistic(Phi.dot(weights))
 
     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
-        - (weights**2).sum() / (2 * regulariser)
+        - scale * (weights**2).sum() / (2 * regulariser)
 
-    grad = - (sig - y).dot(Phi) - weights / regulariser
+    grad = (y - sig).dot(Phi) - scale * weights / regulariser
 
     if verbose:
         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
 
     return -MAP, -grad
+
+
+# def _MAPmulti(weights, data, regulariser, verbose, N=None):
+
+#     y, Phi = data[:, 0], data[:, 1:]
+
+#     Nb, K = y.shape
+#     weights = weights.reshape((D, K))
+#     scale = 1 if N is None else len(y) / N
+
+#     sig = logistic(Phi.dot(weights))
+
+#     TODO:
+#     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
+#         - scale * (weights**2).sum() / (2 * regulariser)
+
+#     TODO:
+#     grad = (y - sig).dot(Phi) - scale * weights / regulariser
+
+#     if verbose:
+#         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
+
+#     return -MAP, -grad.flatten()

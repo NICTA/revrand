@@ -20,13 +20,13 @@ logging.basicConfig(level=logging.INFO)
 nbases = 100
 lenscale = 0.2
 reg = 1000
-# method = 'SGD'
+method = 'SGD'
 # method = 'SVI'
-method = 'MAP'
+# method = 'MAP'
 batchsize = 100
 rate = 0.9
 eta = 1e-6
-maxit = 2e3
+passes = 1000
 
 # Dataset Settings
 Ntrain = 200
@@ -45,12 +45,12 @@ Phi = bases.RandomRBF(nbases, X.shape[1])
 if method == 'SGD':
     weights = classification.logistic_sgd(X, Y, Phi, (lenscale,),
                                           regulariser=reg, batchsize=batchsize,
-                                          rate=rate, eta=eta, maxit=maxit)
+                                          rate=rate, eta=eta, passes=passes)
 elif method == 'MAP':
     weights = classification.logistic_map(X, Y, Phi, (lenscale,),
                                           regulariser=reg)
 elif method == 'SVI':
-    params = classification.logistic_svi(X, Y, Phi, (lenscale,),
+    params = classification.logistic_svi(X, Y, Phi, (lenscale,), passes=passes,
                                          regulariser=reg)
     weights, C, bparams = params
 else:
