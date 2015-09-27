@@ -22,9 +22,9 @@ def main():
 
     # Algorithmic properties
     nbases = 300
-    lenscale = 0.5  # For all basis functions that take lengthscales
-    lenscale2 = 0.2  # For the Combo basis
-    noise = 0.2
+    lenscale = 1  # For all basis functions that take lengthscales
+    lenscale2 = 0.5  # For the Combo basis
+    noise = 1
     order = 5  # For polynomial basis
     rate = 0.9
     eta = 1e-5
@@ -32,8 +32,7 @@ def main():
     batchsize = 100
     reg = 1
     usegradients = True
-    useSGD = False
-    diagcov = True
+    diagcov = False
 
     N = 500
     Ns = 250
@@ -132,24 +131,18 @@ def main():
     else:
         raise ValueError('Invalid basis!')
 
-    # Log marginal likelihood A La Carte learning
-    params_lml = regression.bayesreg_lml(Xtrain, ytrain, base, hypers,
-                                         usegradients=usegradients,
-                                         regulariser=reg, var=noise**2)
-    Ey_l, Vf_l, Vy_l = regression.bayesreg_predict(Xtest, base, *params_lml)
-    Sy_l = np.sqrt(Vy_l)
-
     # Evidence lower-bound A la Carte learning
-    if useSGD:
-        params_elbo = regression.bayesreg_sgd(Xtrain, ytrain, base, hypers,
-                                              var=noise**2, rate=rate, eta=eta,
-                                              passes=passes, regulariser=reg,
-                                              batchsize=batchsize)
-    else:
-        params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
-                                               diagcov=diagcov,
-                                               usegradients=usegradients,
-                                               regulariser=reg, var=noise**2)
+    params_sgd = regression.bayesreg_sgd(Xtrain, ytrain, base, hypers,
+                                         var=noise**2, rate=rate, eta=eta,
+                                         passes=passes, regulariser=reg,
+                                         batchsize=batchsize)
+    Ey_s, Vf_s, Vy_s = regression.bayesreg_predict(Xtest, base, *params_sgd)
+    Sy_s = np.sqrt(Vy_s)
+
+    params_elbo = regression.bayesreg_elbo(Xtrain, ytrain, base, hypers,
+                                           diagcov=diagcov,
+                                           usegradients=usegradients,
+                                           regulariser=reg, var=noise**2)
     Ey_e, Vf_e, Vy_e = regression.bayesreg_predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
@@ -170,16 +163,16 @@ def main():
     # Evaluate LL
     #
 
-    LL_lml = mll(ftest, Ey_l, Vf_l)
+    LL_sgd = mll(ftest, Ey_s, Vf_s)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
-    smse_lml = smse(ftest, Ey_l)
+    smse_sgd = smse(ftest, Ey_s)
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
 
-    log.info("A la Carte (LML), LL: {}, smse = {}, noise: {}, hypers: {}"
-             .format(LL_lml, smse_lml, np.sqrt(params_lml[3]), params_lml[2]))
-    log.info("A la Carte (ELBO), LL: {}, smse = {}, noise: {}, hypers: {}"
+    log.info("A la Carte (SGD), LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_sgd, smse_sgd, np.sqrt(params_sgd[3]), params_sgd[2]))
+    log.info("A la Cart, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
@@ -195,9 +188,9 @@ def main():
     # Training/Truth
     pl.plot(Xpl_t, ytrain, 'k.', Xpl_s, ftest, 'k-')
 
-    # LML Regressor
-    pl.plot(Xpl_s, Ey_l, 'r-')
-    pl.fill_between(Xpl_s, Ey_l - 2 * Sy_l, Ey_l + 2 * Sy_l, facecolor='none',
+    # SGD Regressor
+    pl.plot(Xpl_s, Ey_s, 'r-')
+    pl.fill_between(Xpl_s, Ey_s - 2 * Sy_s, Ey_s + 2 * Sy_s, facecolor='none',
                     edgecolor='r', linestyle='--', label=None)
 
     # ELBO Regressor
@@ -211,7 +204,7 @@ def main():
                     facecolor='none', edgecolor='b', linestyle='--',
                     label=None)
 
-    pl.legend(['Training', 'Truth', 'A la Carte (LML)', 'A la Carte (ELBO)',
+    pl.legend(['Training', 'Truth', 'A la Carte (SGD)', 'A la Carte (ELBO)',
                'GP'])
 
     pl.show()

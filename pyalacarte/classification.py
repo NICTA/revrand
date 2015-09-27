@@ -6,8 +6,8 @@ import numpy as np
 import logging
 from .optimize import minimize, sgd
 from six.moves import reduce
-from scipy.stats.distributions import gamma
-from pyalacarte.utils import CatParameters
+# from scipy.stats.distributions import gamma
+from pyalacarte.utils import CatParameters, checktypes, Positive, Bound
 from pyalacarte.utils import list_to_params as l2p
 
 
@@ -123,7 +123,9 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
 
     # Initial parameter vector
     vparams = [minit, Cinit, regulariser, bparams]
-    pcat = CatParameters(vparams, log_indices=[1, 2])
+    posbounds = checktypes(basis.bounds, Positive)
+    pcat = CatParameters(vparams, log_indices=[1, 2, 3] if posbounds
+                         else [1, 2])
 
     # Sampling functions
     def logp(w, y, Phi):
@@ -200,7 +202,8 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
 
         return -ELBO, -pcat.flatten_grads(uparams, [dm, dC, dlambda, dtheta])
 
-    bounds = [(None, None)] * (2 * D + 1) + basis.bounds
+    bounds = [Bound()] * (2 * D + 1)
+    bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
