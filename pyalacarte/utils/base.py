@@ -1,15 +1,63 @@
 
 import numpy as np
 
-from six.moves import map, range, reduce, zip
-from itertools import chain, tee
+from six.moves import map, range, zip
+from itertools import tee
 from functools import partial
-from operator import mul
+
+
+class Bound(tuple):
+    def __new__(self, lowerlim=None, upperlim=None):
+        """ Define bounds on a variable for the optimiser. This defaults to all
+            real values allowed (i.e. no bounds).
+
+            Arguments
+            ---------
+            lowerlim, (float): The lower limit on the variable
+            upperlim, (float): The upper limit on the variable
+
+        """
+        if not (lowerlim is None or upperlim is None):
+            if lowerlim > upperlim:
+                raise ValueError("lowerlim cannot be greater than upperlim!")
+
+        return super(Bound, self).__new__(self, tuple([lowerlim, upperlim]))
+
+
+class Positive(Bound):
+    def __new__(self, smallest=1e-14):
+        """ Define a positive only bound for the optimiser. This may induce the
+            'log trick' in the optimiser, which will ignore the 'smallest'
+            value (but will stay above 0).
+
+            Arguments
+            ---------
+                smallest, (float): The smallest value allowed for the optimiser
+                    to evaluate (if not using the log trick).
+        """
+        return super(Positive, self).__new__(self, smallest, None)
+
+
+def checktypes(sequence, checktype):
+    """ Check if all types are the same in a sequence.
+
+        Arguments
+        ---------
+        sequence: some sequence to check each element within
+        checktype: the type to compare to each element in the sequence
+
+        Returns
+        -------
+        bool: True if all of the elements are the same type, else False
+    """
+
+    return all(isinstance(i, checktype) for i in sequence)
+
 
 def couple(f, g):
     """
-    Given a pair of functions that take the same arguments, return a 
-    single function that returns a pair consisting of the return values 
+    Given a pair of functions that take the same arguments, return a
+    single function that returns a pair consisting of the return values
     of each function.
 
     Notes
@@ -31,6 +79,7 @@ def couple(f, g):
         return f(*args, **kwargs), g(*args, **kwargs)
     return coupled
 
+
 def decouple(fn):
     """
     Examples
@@ -51,6 +100,7 @@ def decouple(fn):
         return fn(*args, **kwargs)[1]
 
     return fst, snd
+
 
 def nwise(iterable, n):
     """
@@ -135,6 +185,7 @@ def nwise(iterable, n):
     return zip(*iters)
 
 pairwise = partial(nwise, n=2)
+
 
 def flatten(*arys, order='C', returns_shapes=True):
     """
@@ -277,6 +328,7 @@ def flatten(*arys, order='C', returns_shapes=True):
     
     return flattened
 
+
 def unflatten(ary, shapes, order='C'):
     """
     Given a flat (1d) array, and a list of shapes (represented as 
@@ -359,6 +411,7 @@ def unflatten(ary, shapes, order='C'):
     # empty array but is ignored when zipped with shapes. Not really a bug...
     return map(partial(custom_reshape, order=order), subarrays, shapes)
 
+
 def custom_reshape(a, newshape, order='C'):
     """
     Identical to `numpy.reshape` except in the case where `newshape` is
@@ -381,6 +434,7 @@ def custom_reshape(a, newshape, order='C'):
         return np.asscalar(a)
     
     return np.reshape(a, newshape, order)
+
 
 def map_indices(fn, iterable, indices):
     
@@ -426,13 +480,14 @@ def map_indices(fn, iterable, indices):
         else:
             yield arg
 
+
 class CatParameters(object):
 
     def __init__(self, params, log_indices=None):
 
         self.pshapes = [np.asarray(p).shape if not np.isscalar(p)
                         else 1 for p in params]
-        
+
         if log_indices is not None:
             self.log_indices = log_indices
         else:
@@ -505,6 +560,7 @@ class CatParameters(object):
             rparams.append(up if i not in self.log_indices else np.exp(up))
 
         return rparams
+
 
 def params_to_list(params):
     """ This will take a list of parameters of scalars or arrays, and return a

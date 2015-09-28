@@ -5,9 +5,9 @@ from __future__ import division
 import numpy as np
 import logging
 from .optimize import minimize, sgd
-from functools import reduce
-from scipy.stats.distributions import gamma
-from pyalacarte.utils import CatParameters
+from six.moves import reduce
+# from scipy.stats.distributions import gamma
+from pyalacarte.utils import CatParameters, checktypes, Positive, Bound
 from pyalacarte.utils import list_to_params as l2p
 
 
@@ -40,7 +40,7 @@ def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
     w = np.random.randn(D)
 
     res = minimize(_MAP, w, args=(data, regulariser, verbose),
-                   method='L-BFGS-B', ftol=ftol, maxiter=maxit)
+                   method='L-BFGS-B', ftol=ftol, maxiter=maxit, jac=True)
 
     if verbose:
         log.info("Done! MAP = {}, success = {}".format(-res['fun'],
@@ -79,7 +79,7 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
     data = np.hstack((np.atleast_2d(y).T, Phi))
     w = np.random.randn(D)
 
-    res = sgd(_MAP, w, data, args=(regulariser, verbose), gtol=gtol,
+    res = sgd(_MAP, w, data, args=(regulariser, verbose, N), gtol=gtol,
               passes=passes, rate=rate, batchsize=batchsize, eval_obj=True)
 
     if verbose:
@@ -123,7 +123,9 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
 
     # Initial parameter vector
     vparams = [minit, Cinit, regulariser, bparams]
-    pcat = CatParameters(vparams, log_indices=[1, 2])
+    posbounds = checktypes(basis.bounds, Positive)
+    pcat = CatParameters(vparams, log_indices=[1, 2, 3] if posbounds
+                         else [1, 2])
 
     # Sampling functions
     def logp(w, y, Phi):
@@ -200,7 +202,8 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
 
         return -ELBO, -pcat.flatten_grads(uparams, [dm, dC, dlambda, dtheta])
 
-    bounds = [(None, None)] * (2 * D + 1) + basis.bounds
+    bounds = [Bound()] * (2 * D + 1)
+    bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
@@ -296,18 +299,43 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=50, verbose=False, h=None,
     return Ef
 
 
-def _MAP(weights, data, regulariser, verbose):
+def _MAP(weights, data, regulariser, verbose, N=None):
 
     y, Phi = data[:, 0], data[:, 1:]
+
+    scale = 1 if N is None else len(y) / N
 
     sig = logistic(Phi.dot(weights))
 
     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
-        - (weights**2).sum() / (2 * regulariser)
+        - scale * (weights**2).sum() / (2 * regulariser)
 
-    grad = - (sig - y).dot(Phi) - weights / regulariser
+    grad = (y - sig).dot(Phi) - scale * weights / regulariser
 
     if verbose:
         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
 
     return -MAP, -grad
+
+
+# def _MAPmulti(weights, data, regulariser, verbose, N=None):
+
+#     y, Phi = data[:, 0], data[:, 1:]
+
+#     Nb, K = y.shape
+#     weights = weights.reshape((D, K))
+#     scale = 1 if N is None else len(y) / N
+
+#     sig = logistic(Phi.dot(weights))
+
+#     TODO:
+#     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
+#         - scale * (weights**2).sum() / (2 * regulariser)
+
+#     TODO:
+#     grad = (y - sig).dot(Phi) - scale * weights / regulariser
+
+#     if verbose:
+#         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
+
+#     return -MAP, -grad.flatten()
