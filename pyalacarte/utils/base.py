@@ -7,7 +7,8 @@ from functools import partial
 
 
 class Bound(tuple):
-    def __new__(self, lowerlim=None, upperlim=None):
+
+    def __new__(cls, lowerlim=None, upperlim=None):
         """ Define bounds on a variable for the optimiser. This defaults to all
             real values allowed (i.e. no bounds).
 
@@ -21,11 +22,11 @@ class Bound(tuple):
             if lowerlim > upperlim:
                 raise ValueError("lowerlim cannot be greater than upperlim!")
 
-        return super(Bound, self).__new__(self, tuple([lowerlim, upperlim]))
+        super(Bound, cls).__new__(cls, tuple([lowerlim, upperlim]))
 
 
 class Positive(Bound):
-    def __new__(self, smallest=1e-14):
+    def __new__(cls, smallest=1e-14):
         """ Define a positive only bound for the optimiser. This may induce the
             'log trick' in the optimiser, which will ignore the 'smallest'
             value (but will stay above 0).
@@ -35,7 +36,7 @@ class Positive(Bound):
                 smallest, (float): The smallest value allowed for the optimiser
                     to evaluate (if not using the log trick).
         """
-        return super(Positive, self).__new__(self, smallest, None)
+        return super(Positive, cls).__new__(cls, smallest, None)
 
 
 def checktypes(sequence, checktype):
