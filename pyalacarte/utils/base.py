@@ -5,27 +5,43 @@ from six.moves import map, range, zip
 from itertools import tee
 from functools import partial
 
+class Bound(namedtuple('Bound', ['lower', 'upper'])):
+    """
+    Define bounds on a variable for the optimiser. This defaults to all
+    real values allowed (i.e. no bounds).
+    
+    Parameters
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
 
-class Bound(tuple):
+    Attributes
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
 
-    def __new__(cls, lowerlim=None, upperlim=None):
-        """ Define bounds on a variable for the optimiser. This defaults to all
-            real values allowed (i.e. no bounds).
+    Examples
+    --------
+    >>> b = Bounds(1e-10, 1e-5)
 
-            Arguments
-            ---------
-            lowerlim, (float): The lower limit on the variable
-            upperlim, (float): The upper limit on the variable
+    >>> b
+    
+    """
 
-        """
-        if not (lowerlim is None or upperlim is None):
-            if lowerlim > upperlim:
-                raise ValueError("lowerlim cannot be greater than upperlim!")
+    def __new__(cls, lower=None, upper=None):
 
-        super(Bound, cls).__new__(cls, tuple([lowerlim, upperlim]))
+        if lower is not None and upper is not None:
+            if lower > upper:
+                raise ValueError('lower cannot be greater than upper!')
 
+        return super(Bound, cls).__new__(cls, lower, upper)
 
 class Positive(Bound):
+
     def __new__(cls, smallest=1e-14):
         """ Define a positive only bound for the optimiser. This may induce the
             'log trick' in the optimiser, which will ignore the 'smallest'
@@ -37,7 +53,6 @@ class Positive(Bound):
                     to evaluate (if not using the log trick).
         """
         return super(Positive, cls).__new__(cls, smallest, None)
-
 
 def checktypes(sequence, checktype):
     """ Check if all types are the same in a sequence.
