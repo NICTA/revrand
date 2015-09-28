@@ -334,7 +334,8 @@ def _MAP(weights, data, regulariser, cweights, verbose, N=None):
 def _parse_labels(y, balance):
 
     # Parse input labels
-    labels, yu, counts = np.unique(y, return_inverse=True, return_counts=True)
+    labels, yu = np.unique(y, return_inverse=True)
+    counts = np.bincount(yu)
     cweights = counts.mean() / counts if balance else None
     K = len(labels)
 
