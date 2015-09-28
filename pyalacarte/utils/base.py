@@ -2,8 +2,10 @@
 import numpy as np
 
 from six.moves import map, range, zip
-from itertools import tee
+from collections import namedtuple
 from functools import partial
+from itertools import tee
+from operator import mul
 
 class Bound(namedtuple('Bound', ['lower', 'upper'])):
     """
@@ -26,10 +28,26 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
 
     Examples
     --------
-    >>> b = Bounds(1e-10, 1e-5)
-
+    >>> b = Bound(1e-10, upper=1e-5)
     >>> b
-    
+    Bound(lower=1e-10, upper=1e-05)
+    >>> b.lower
+    1e-10
+    >>> b.upper
+    1e-05
+    >>> isinstance(b, tuple)
+    True
+    >>> tuple(b)
+    (1e-10, 1e-05)
+    >>> lower, upper = b
+    >>> lower
+    1e-10
+    >>> upper
+    1e-05
+    >>> Bound(42, 10)
+    Traceback (most recent call last):
+        ...
+    ValueError: lower cannot be greater than upper!
     """
 
     def __new__(cls, lower=None, upper=None):
