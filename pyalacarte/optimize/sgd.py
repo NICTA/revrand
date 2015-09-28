@@ -81,8 +81,8 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
     Edx2 = 0
 
     # Learning Records
-    if eval_obj:
-        objs = []
+    obj = None
+    objs = []
     norms = []
     allpasses = True
 
@@ -121,14 +121,13 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
                 break
 
     # Format results
-    res = {'x': x,
-           'norms': norms,
-           'message': 'converge' if not allpasses else 'all passes'
-           }
-
-    if eval_obj:
-        res['objs'] = objs
-        res['fun'] = obj
+    res = OptimizeResult(
+        x=x,
+        norms=norms,
+        message='converge' if not allpasses else 'all passes',
+        fun=obj,
+        objs=objs
+    )
 
     return res
 

@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 # A la Carte classifier setting
-nbases = 100
+nbases = 500
 lenscale = 0.2
 reg = 1000
 method = 'SGD'
@@ -43,16 +43,17 @@ Xs = np.linspace(-2.5 * np.pi, 2.5 * np.pi, Npred)[:, np.newaxis]
 # Train
 Phi = bases.RandomRBF(nbases, X.shape[1])
 if method == 'SGD':
-    weights = classification.logistic_sgd(X, Y, Phi, (lenscale,),
-                                          regulariser=reg, batchsize=batchsize,
-                                          rate=rate, eta=eta, passes=passes)
+    weights, l = classification.logistic_sgd(X, Y, Phi, (lenscale,),
+                                             regulariser=reg, eta=eta,
+                                             batchsize=batchsize, rate=rate,
+                                             passes=passes)
 elif method == 'MAP':
-    weights = classification.logistic_map(X, Y, Phi, (lenscale,),
-                                          regulariser=reg)
+    weights, l = classification.logistic_map(X, Y, Phi, (lenscale,),
+                                             regulariser=reg)
 elif method == 'SVI':
     params = classification.logistic_svi(X, Y, Phi, (lenscale,), passes=passes,
                                          regulariser=reg)
-    weights, C, bparams = params
+    weights, C, bparams, l = params
 else:
     raise ValueError("Invalid method chosen!")
 
@@ -69,7 +70,7 @@ else:
 pl.figure()
 ax = pl.subplot(111)
 pl.plot(X, Y, 'k--', linewidth=2, label='Training data')
-pl.plot(Xs, Ey, 'r-', label='Prediction')
+pl.plot(Xs, Ey, label='Prediction')
 pl.grid(True)
 pl.title('Classification Test')
 pl.xlabel('X')
