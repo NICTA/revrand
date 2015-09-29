@@ -20,9 +20,9 @@ logging.basicConfig(level=logging.INFO)
 nbases = 500
 lenscale = 0.2
 reg = 1000
-# method = 'SGD'
+method = 'SGD'
 # method = 'SVI'
-method = 'MAP'
+# method = 'MAP'
 batchsize = 100
 rate = 0.9
 eta = 1e-6
@@ -59,7 +59,7 @@ else:
 
 
 # Predict
-import ipdb; ipdb.set_trace()
+# import ipdb; ipdb.set_trace()
 if method != 'SVI':
     Ey = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
 else:

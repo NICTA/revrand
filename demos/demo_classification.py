@@ -27,7 +27,7 @@ nbases = 2000
 lenscale = 5
 reg = 1e3
 doSGD = False
-method = 'SGD'
+method = 'MAP'
 passes = 5000
 
 #

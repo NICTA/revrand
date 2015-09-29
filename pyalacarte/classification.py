@@ -230,7 +230,8 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
 
 def logistic_predict(X_star, weights, basis, bparams):
 
-    return logistic(basis(X_star, *bparams).dot(weights))
+    # return logistic(basis(X_star, *bparams).dot(weights))
+    return softmax(basis(X_star, *bparams).dot(weights), axis=1)
 
 
 def logistic_mpredict(X_star, wmean, wcov, basis, bparams,
@@ -265,6 +266,19 @@ def logistic(X):
         return lgX
     else:
         raise ValueError("This only works on up to 2D arrays.")
+
+
+def softmax(X, axis=0):
+    """ Pass X through a softmax function, exp(X) / sum(exp(X), axis=axis), in
+        a numerically stable way using the log-sum-exp trick.
+    """
+
+    if axis == 1:
+        return np.exp(X - logsumexp(X, axis=1)[:, np.newaxis])
+    elif axis == 0:
+        return np.exp(X - logsumexp(X, axis=0))
+    else:
+        raise ValueError("This only works on 2D arrays for now.")
 
 
 def logsumexp(X, axis=0):
@@ -305,24 +319,23 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=50, verbose=False, h=None,
 
 
 def _MAP(weights, data, regulariser, cweights, verbose, N=None):
-    # import ipdb; ipdb.set_trace()
     y, Phi = data[:, 0], data[:, 1:]
     scale = 1 if N is None else len(y) / N
 
     D, K = Phi.shape[1], int(y.max() + 1)
     weights = weights.reshape((D, K))
-    if not (cweights is None):
-        weights *= cweights
+    if cweights is None:
+        cweights = np.ones(K)
 
-    sig = logistic(Phi.dot(weights)) + 1e-100
+    sig = softmax(Phi.dot(weights), axis=1)
     grad = np.zeros_like(weights)
     MAP = 0
 
     for k in range(K):
         yk = (y == k)
-        MAP += (np.log(sig[yk, k])).sum() \
+        MAP += cweights[k] * (np.log(sig[yk, k])).sum() \
             - scale * (weights[:, k]**2).sum() / (2 * regulariser)
-        grad[:, k] = (yk - sig[:, k]).dot(Phi) \
+        grad[:, k] = cweights[k] * (yk - sig[:, k]).dot(Phi) \
             - scale * weights[:, k] / regulariser
 
     if verbose:

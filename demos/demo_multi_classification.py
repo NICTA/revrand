@@ -20,12 +20,12 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # A la Carte classifier setting
-nbases = 10000
+nbases = 1000
 lenscale = 5
 reg = 1e3
 doSGD = False
 method = 'MAP'
-numdigits = 3
+numdigits = 9
 
 #
 # Load data
