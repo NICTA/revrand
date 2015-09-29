@@ -19,16 +19,13 @@ from pyalacarte.validation import loglosscat, errrate
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-dig1 = 3
-dig2 = 5
-
 # A la Carte classifier setting
-nbases = 2000
+nbases = 10000
 lenscale = 5
 reg = 1e3
 doSGD = False
-method = 'SGD'
-passes = 5000
+method = 'MAP'
+
 
 #
 # Load data
@@ -44,23 +41,17 @@ if not os.path.exists(dpath):
 
 # Extract data
 data = loadmat('usps_resampled/usps_resampled.mat')
-ind1 = data['train_labels'][dig1, :] == 1
-ind2 = data['train_labels'][dig2, :] == 1
-X = np.hstack((data['train_patterns'][:, ind1],
-               data['train_patterns'][:, ind2])).T
-Y = np.concatenate((np.ones(ind1.sum()), np.zeros(ind2.sum())))
+X = data['train_patterns'].T
+Y = np.asarray([np.argmax(y) for y in data['train_labels'].T])
 
-ind1 = data['test_labels'][dig1, :] == 1
-ind2 = data['test_labels'][dig2, :] == 1
-Xs = np.hstack((data['test_patterns'][:, ind1],
-                data['test_patterns'][:, ind2])).T
-Ys = np.concatenate((np.ones(ind1.sum()), np.zeros(ind2.sum())))
+Xs = data['test_patterns'].T
+Ys = np.asarray([np.argmax(y) for y in data['test_labels'].T])
 
 # Classify
 Phi = bases.RandomRBF(nbases, X.shape[1])
 if method == 'SGD':
     weights, labels = classification.logistic_sgd(X, Y, Phi, (lenscale,),
-                                          regulariser=reg, passes = passes)
+                                          regulariser=reg)
 elif method == 'MAP':
     weights, labels = classification.logistic_map(X, Y, Phi, (lenscale,),
                                           regulariser=reg)

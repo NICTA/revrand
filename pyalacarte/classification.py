@@ -305,7 +305,7 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=50, verbose=False, h=None,
 
 
 def _MAP(weights, data, regulariser, cweights, verbose, N=None):
-
+    # import ipdb; ipdb.set_trace()
     y, Phi = data[:, 0], data[:, 1:]
     scale = 1 if N is None else len(y) / N
 
@@ -314,13 +314,13 @@ def _MAP(weights, data, regulariser, cweights, verbose, N=None):
     if not (cweights is None):
         weights *= cweights
 
-    sig = logistic(Phi.dot(weights))
+    sig = logistic(Phi.dot(weights)) + 1e-100
     grad = np.zeros_like(weights)
     MAP = 0
 
     for k in range(K):
         yk = (y == k)
-        MAP += (yk * np.log(sig[:, k])).sum() \
+        MAP += (np.log(sig[yk, k])).sum() \
             - scale * (weights[:, k]**2).sum() / (2 * regulariser)
         grad[:, k] = (yk - sig[:, k]).dot(Phi) \
             - scale * weights[:, k] / regulariser

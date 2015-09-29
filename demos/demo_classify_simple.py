@@ -59,6 +59,7 @@ else:
 
 
 # Predict
+import ipdb; ipdb.set_trace()
 if method != 'SVI':
     Ey = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
 else:
