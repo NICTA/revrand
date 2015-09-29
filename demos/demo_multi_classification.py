@@ -25,7 +25,7 @@ lenscale = 5
 reg = 1e3
 doSGD = False
 method = 'MAP'
-
+numdigits = 3
 
 #
 # Load data
@@ -46,6 +46,21 @@ Y = np.asarray([np.argmax(y) for y in data['train_labels'].T])
 
 Xs = data['test_patterns'].T
 Ys = np.asarray([np.argmax(y) for y in data['test_labels'].T])
+
+# Sort and Remove excess labels (specified by numdigits)
+sorted_idx = np.argsort(Y)
+X = X[sorted_idx,:]
+Y = Y[sorted_idx]
+sorted_idx_s = np.argsort(Ys)
+Xs = Xs[sorted_idx_s,:]
+Ys = Ys[sorted_idx_s]
+end_id= np.argwhere(Y==numdigits)[0][0]
+X = X[:end_id,:]
+Y = Y[:end_id]
+end_id_s= np.where(Ys==numdigits)[0][0]
+Xs = Xs[:end_id_s,:]
+Ys = Ys[:end_id_s]
+
 
 # Classify
 Phi = bases.RandomRBF(nbases, X.shape[1])
