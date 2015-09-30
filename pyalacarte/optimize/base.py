@@ -40,13 +40,14 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
     """
     if use_nlopt:
     
+        if bounds is None:
+            bounds = []
+    
         try:
             from .nlopt_wrap import minimize as nl_min
         except ImportError:
             warn("NLopt could not be imported. Defaulting to scipy.optimize")
         else:
-            if bounds is None:
-                bounds = []
             return nl_min(fun, x0, args=args, method=method, jac=jac, 
                           bounds=bounds, constraints=constraints, **options)
 

@@ -2,30 +2,65 @@
 import numpy as np
 
 from six.moves import map, range, zip
-from itertools import tee
+from collections import namedtuple
 from functools import partial
+from itertools import tee
+from operator import mul
 
+class Bound(namedtuple('Bound', ['lower', 'upper'])):
+    """
+    Define bounds on a variable for the optimiser. This defaults to all
+    real values allowed (i.e. no bounds).
+    
+    Parameters
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
 
-class Bound(tuple):
-    def __new__(self, lowerlim=None, upperlim=None):
-        """ Define bounds on a variable for the optimiser. This defaults to all
-            real values allowed (i.e. no bounds).
+    Attributes
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
 
-            Arguments
-            ---------
-            lowerlim, (float): The lower limit on the variable
-            upperlim, (float): The upper limit on the variable
+    Examples
+    --------
+    >>> b = Bound(1e-10, upper=1e-5)
+    >>> b
+    Bound(lower=1e-10, upper=1e-05)
+    >>> b.lower
+    1e-10
+    >>> b.upper
+    1e-05
+    >>> isinstance(b, tuple)
+    True
+    >>> tuple(b)
+    (1e-10, 1e-05)
+    >>> lower, upper = b
+    >>> lower
+    1e-10
+    >>> upper
+    1e-05
+    >>> Bound(42, 10)
+    Traceback (most recent call last):
+        ...
+    ValueError: lower cannot be greater than upper!
+    """
 
-        """
-        if not (lowerlim is None or upperlim is None):
-            if lowerlim > upperlim:
-                raise ValueError("lowerlim cannot be greater than upperlim!")
+    def __new__(cls, lower=None, upper=None):
 
-        return super(Bound, self).__new__(self, tuple([lowerlim, upperlim]))
+        if lower is not None and upper is not None:
+            if lower > upper:
+                raise ValueError('lower cannot be greater than upper!')
 
+        return super(Bound, cls).__new__(cls, lower, upper)
 
 class Positive(Bound):
-    def __new__(self, smallest=1e-14):
+
+    def __new__(cls, smallest=1e-14):
         """ Define a positive only bound for the optimiser. This may induce the
             'log trick' in the optimiser, which will ignore the 'smallest'
             value (but will stay above 0).
@@ -35,8 +70,7 @@ class Positive(Bound):
                 smallest, (float): The smallest value allowed for the optimiser
                     to evaluate (if not using the log trick).
         """
-        return super(Positive, self).__new__(self, smallest, None)
-
+        return super(Positive, cls).__new__(cls, smallest, None)
 
 def checktypes(sequence, checktype):
     """ Check if all types are the same in a sequence.
