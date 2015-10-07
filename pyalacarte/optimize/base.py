@@ -3,7 +3,9 @@ import numpy as np
 from ..utils import flatten, unflatten
 
 from warnings import warn
+from itertools import repeat
 from functools import partial
+from collections import Iterable
 from six.moves import zip_longest
 from scipy.optimize import minimize as sp_min
 
@@ -56,15 +58,15 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
     return sp_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
                   constraints=constraints, options=options)
 
-def candidate_start_points_random(*bounds, n_candidates=100):
+def candidate_start_points_random(bounds, n_candidates=100):
     """
     Randomly generate candidate starting points uniformly within a 
     hyperrectangle.
 
     Parameters
     ----------
-    bound1, bound2, ... : tuple
-        One or more bounds
+    bounds : list of tuples (pairs)
+        List of one or more bound pairs
     
     n_candidates : int
         Number of candidate starting points to generate         
@@ -78,17 +80,18 @@ def candidate_start_points_random(*bounds, n_candidates=100):
     -----
     Equivalent to::
 
-        lambda bounds, n_candidates=50: np.random.uniform(*zip(*bounds), size=(n_candidates, len(bounds))).T
+        lambda bounds, n_candidates=100: np.random.uniform(*zip(*bounds), size=(n_candidates, len(bounds))).T
     
     Examples
     --------
-    >>> candidate_start_points_random((-10., -3.5), (-1., 2.), n_candidates=5)
+    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.)], 
+    ...     n_candidates=5)
     ... # doctest: +SKIP
     array([[-7.7165118 , -8.35534484, -3.625521  , -4.02359491, -4.82233003],
            [ 0.9498959 , -0.37492893,  0.16908869, -0.78321786,  1.40738975]])
 
     >>> candidate_start_points = candidate_start_points_random(
-    ...     (-10., -3.5), (-1., 2.))
+    ...     [(-10., -3.5), (-1., 2.)])
 
     >>> candidate_start_points.shape
     (2, 100)
@@ -103,21 +106,16 @@ def candidate_start_points_random(*bounds, n_candidates=100):
     >>> np.all(candidate_start_points[1] <= 2.)
     True
 
-    >>> candidate_start_points_random(n_candidates=5)
-    Traceback (most recent call last):
-        ...
-    ValueError: need more than 0 values to unpack
-
     Uniformly sample from line segment:
 
-    >>> candidate_start_points_random((-1., 2.), n_candidates=5) 
+    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5) 
     ... # doctest: +SKIP
     array([[ 0.33371234,  1.52775115,  1.51805039,  0.32079371,  0.75478597]])
 
     Uniformly sample from hyperrectangle:
 
-    >>> candidate_start_points_random((-10., -3.5), (-1., 2.), (5., 7.), 
-    ... (2.71, 3.14), n_candidates=5) # doctest: +SKIP
+    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.), (5., 7.), 
+    ... (2.71, 3.14)], n_candidates=5) # doctest: +SKIP
     array([[-8.65860645, -6.83830936, -6.66424853, -7.92209109, -8.87889632],
            [ 0.54385109,  0.63564042,  1.43670096, -0.56410552, -0.61085342],
            [ 5.34469192,  6.8235269 ,  6.74123457,  5.26933478,  6.07431495],
@@ -127,23 +125,75 @@ def candidate_start_points_random(*bounds, n_candidates=100):
     n_dims = len(bounds)
     return np.random.uniform(low, high, (n_candidates, n_dims)).transpose()
 
-def candidate_start_points_grid(*bounds, nums=None):
+def candidate_start_points_grid(bounds, nums=5):
     """
     Examples
     --------
-    >>> candidate_start_points_grid((-1, 1.5), (-1.5, 3), (0, 5), 
-    ...                             nums=[5, 10, 12]) # doctest: +ELLIPSIS
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=[5, 3])
+    array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
+             0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
+           [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
+             0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=[5, 3]).shape
+    (2, 15)
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], 
+    ...                             nums=[5, 10, 9]) # doctest: +ELLIPSIS
+    array([[-1.   , -1.   , -1.   , ...,  1.5  ,  1.5  ,  1.5  ],
+           [-1.5  , -1.5  , -1.5  , ...,  3.   ,  3.   ,  3.   ],
+           [ 0.   ,  0.625,  1.25 , ...,  3.75 ,  4.375,  5.   ]])
+    
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], 
+    ...                             nums=[5, 10, 9]).shape
+    (3, 450)
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)], 
+    ...                             nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
     array([[-1. , -1. , -1. , ...,  1.5,  1.5,  1.5],
-           [-1.5, -1. , -0.5, ...,  2. ,  2.5,  3. ],
-           [ 0. ,  0. ,  0. , ...,  5. ,  5. ,  5. ]])
+           [-1.5, -1.5, -1.5, ...,  3. ,  3. ,  3. ],
+           [ 0. ,  0. ,  0. , ...,  5. ,  5. ,  5. ],
+           [ 1. ,  3. ,  5. , ...,  1. ,  3. ,  5. ]])
+    
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)], 
+    ...                             nums=[5, 10, 9, 3]).shape
+    (4, 1350)
+
+    Third ``num`` is ignored
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=[5, 3, 9])
+    array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
+             0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
+           [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
+             0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
+
+    Third bound is ignored
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], nums=[5, 3])
+    array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
+             0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
+           [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
+             0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
+    
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)]).shape
+    (2, 25)
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=9).shape
+    (2, 81)
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], nums=2).shape
+    (3, 8)
     """
+
+    if isinstance(nums, int):
+        nums = repeat(nums)
+
     linspaces = [np.linspace(start, end, num) for (start, end), num \
         in zip(bounds, nums)]
-    meshgrid =  np.meshgrid(*linspaces)
-    return np.dstack(meshgrid).T.reshape(len(bounds), -1)
+    return np.vstack(a.flatten() for a in np.meshgrid(*linspaces))
 
-def minimize_bounded_start(n_candidates=100):
-
+def minimize_bounded_start(candidates_func=candidate_start_points_random, 
+    *candidates_func_args, **candidates_func_kwargs):
     """
     Examples
     --------
@@ -181,13 +231,34 @@ def minimize_bounded_start(n_candidates=100):
 
     >>> my_min = minimize_bounded_start_dec(sp_min)
     >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
+    
+    >>> @minimize_bounded_start(candidate_start_points_grid, nums=[5, 9])
+    ... def my_min(fun, x0, *args, **kwargs):
+    ...     return sp_min(fun, x0, *args, **kwargs)
+    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
+    >>> res.start
+    array([ 0.875,  0.75 ])
+
+    >>> minimize_bounded_start_dec = minimize_bounded_start(
+    ...     candidate_start_points_grid, nums=[5, 9])
+
+    >>> my_min = minimize_bounded_start_dec(sp_min)
+    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
+    >>> res.start
+    array([ 0.875,  0.75 ])
+
+    Just to confirm this is the correct starting point:
+
+    >>> candidates = candidate_start_points_grid(rect, nums=[5, 9])
+    >>> candidates[:, rosen(candidates).argmin()]
+    array([ 0.875,  0.75 ])
     """
 
     def minimize_bounded_start_dec(minimize_func):
 
         def _minimize_bounded_start(fun, x0_bounds, *args, **kwargs):
-            candidate_start_points = candidate_start_points_random(
-                *x0_bounds, n_candidates=n_candidates)
+            candidate_start_points = candidates_func(x0_bounds,
+                *candidates_func_args, **candidates_func_kwargs)
             candidate_start_values = fun(candidate_start_points)
             min_start_point_ind = np.argmin(candidate_start_values)
             min_start_point = candidate_start_points[:, min_start_point_ind]
