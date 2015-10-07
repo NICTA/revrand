@@ -6,7 +6,6 @@ import numpy as np
 import logging
 from .optimize import minimize, sgd
 from six.moves import reduce
-# from scipy.stats.distributions import gamma
 from pyalacarte.utils import CatParameters, checktypes, Positive, Bound
 from pyalacarte.utils import list_to_params as l2p
 
@@ -15,8 +14,8 @@ from pyalacarte.utils import list_to_params as l2p
 log = logging.getLogger(__name__)
 
 
-def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
-                 verbose=True):
+def logistic_map(X, y, basis, bparams, regulariser=1, balance=True, ftol=1e-6,
+                 maxit=1000, verbose=True):
     """ Learn the weights of a logistic regressor using MAP inference.
 
         Arguments:
@@ -33,24 +32,26 @@ def logistic_map(X, y, basis, bparams, regulariser=1, ftol=1e-5, maxit=1000,
             array: of learned weights, with the same dimension as the basis.
     """
 
+    # Parse input labels
+    labels, yu, cweights, K = _parse_labels(y, balance)
+
     Phi = basis(X, *bparams)
     N, D = Phi.shape
 
-    data = np.hstack((np.atleast_2d(y).T, Phi))
-    w = np.random.randn(D)
+    data = np.hstack((np.atleast_2d(yu).T, Phi))
+    W = np.random.randn(D, K).flatten()
 
-    res = minimize(_MAP, w, args=(data, regulariser, verbose),
+    res = minimize(_MAP, W, args=(data, regulariser, cweights, verbose),
                    method='L-BFGS-B', ftol=ftol, maxiter=maxit, jac=True)
 
     if verbose:
-        log.info("Done! MAP = {}, success = {}".format(-res['fun'],
-                                                       res['success']))
+        log.info("Done! MAP = {}, success = {}".format(-res.fun, res.success))
 
-    return res['x']
+    return res.x.reshape((D, K)), labels
 
 
-def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
-                 rate=0.9, eta=1e-6, batchsize=100, verbose=True):
+def logistic_sgd(X, y, basis, bparams, regulariser=1, balance=True, gtol=1e-4,
+                 passes=10, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """ Learn the weights of a logistic regressor using MAP inference and SGD.
 
         Arguments:
@@ -73,20 +74,23 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
             array: of learned weights, with the same dimension as the basis.
     """
 
+    # Parse input labels
+    labels, yu, cweights, K = _parse_labels(y, balance)
+
     Phi = basis(X, *bparams)
     N, D = Phi.shape
 
-    data = np.hstack((np.atleast_2d(y).T, Phi))
-    w = np.random.randn(D)
+    data = np.hstack((np.atleast_2d(yu).T, Phi))
+    W = np.random.randn(D, K).flatten()
 
-    res = sgd(_MAP, w, data, args=(regulariser, verbose, N), gtol=gtol,
-              passes=passes, rate=rate, batchsize=batchsize, eval_obj=True)
+    res = sgd(_MAP, W, data, args=(regulariser, cweights, verbose, N),
+              gtol=gtol, passes=passes, rate=rate, batchsize=batchsize,
+              eval_obj=True)
 
     if verbose:
-        log.info("Done! MAP = {}, message = {}".format(-res['fun'],
-                                                       res['message']))
+        log.info("Done! MAP = {}, message = {}".format(-res.fun, res.message))
 
-    return res['x']
+    return res.x.reshape((D, K)), labels
 
 
 def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
@@ -226,10 +230,12 @@ def logistic_svi(X, y, basis, bparams, regulariser=1, gtol=1e-4, passes=10,
 
 def logistic_predict(X_star, weights, basis, bparams):
 
-    return logistic(basis(X_star, *bparams).dot(weights))
+    # return logistic(basis(X_star, *bparams).dot(weights))
+    return softmax(basis(X_star, *bparams).dot(weights), axis=1)
 
 
-def logistic_mpredict(X_star, wmean, wcov, basis, bparams, nsamples=1000):
+def logistic_mpredict(X_star, wmean, wcov, basis, bparams,
+                      nsamples=1000):
 
     Phi = basis(X_star, *bparams)
     f = lambda w: logistic(Phi.dot(w))
@@ -260,6 +266,19 @@ def logistic(X):
         return lgX
     else:
         raise ValueError("This only works on up to 2D arrays.")
+
+
+def softmax(X, axis=0):
+    """ Pass X through a softmax function, exp(X) / sum(exp(X), axis=axis), in
+        a numerically stable way using the log-sum-exp trick.
+    """
+
+    if axis == 1:
+        return np.exp(X - logsumexp(X, axis=1)[:, np.newaxis])
+    elif axis == 0:
+        return np.exp(X - logsumexp(X, axis=0))
+    else:
+        raise ValueError("This only works on 2D arrays for now.")
 
 
 def logsumexp(X, axis=0):
@@ -299,43 +318,38 @@ def _MC_dgauss(f, mean, dcov, args=(), nsamples=50, verbose=False, h=None,
     return Ef
 
 
-def _MAP(weights, data, regulariser, verbose, N=None):
-
+def _MAP(weights, data, regulariser, cweights, verbose, N=None):
     y, Phi = data[:, 0], data[:, 1:]
-
     scale = 1 if N is None else len(y) / N
 
-    sig = logistic(Phi.dot(weights))
+    D, K = Phi.shape[1], int(y.max() + 1)
+    weights = weights.reshape((D, K))
+    if cweights is None:
+        cweights = np.ones(K)
 
-    MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
-        - scale * (weights**2).sum() / (2 * regulariser)
+    sig = softmax(Phi.dot(weights), axis=1)
+    grad = np.zeros_like(weights)
+    MAP = 0
 
-    grad = (y - sig).dot(Phi) - scale * weights / regulariser
+    for k in range(K):
+        yk = (y == k)
+        MAP += cweights[k] * (np.log(sig[yk, k])).sum() \
+            - scale * (weights[:, k]**2).sum() / (2 * regulariser)
+        grad[:, k] = cweights[k] * (yk - sig[:, k]).dot(Phi) \
+            - scale * weights[:, k] / regulariser
 
     if verbose:
         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
 
-    return -MAP, -grad
+    return -MAP, -grad.flatten()
 
 
-# def _MAPmulti(weights, data, regulariser, verbose, N=None):
+def _parse_labels(y, balance):
 
-#     y, Phi = data[:, 0], data[:, 1:]
+    # Parse input labels
+    labels, yu = np.unique(y, return_inverse=True)
+    counts = np.bincount(yu)
+    cweights = counts.mean() / counts if balance else None
+    K = len(labels)
 
-#     Nb, K = y.shape
-#     weights = weights.reshape((D, K))
-#     scale = 1 if N is None else len(y) / N
-
-#     sig = logistic(Phi.dot(weights))
-
-#     TODO:
-#     MAP = (y * np.log(sig) + (1 - y) * np.log(1 - sig)).sum() \
-#         - scale * (weights**2).sum() / (2 * regulariser)
-
-#     TODO:
-#     grad = (y - sig).dot(Phi) - scale * weights / regulariser
-
-#     if verbose:
-#         log.info('MAP = {}, norm grad = {}'.format(MAP, np.linalg.norm(grad)))
-
-#     return -MAP, -grad.flatten()
+    return labels, yu, cweights, K
