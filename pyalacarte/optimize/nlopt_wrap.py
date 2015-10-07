@@ -40,9 +40,13 @@ NLOPT_MESSAGES = {
 def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
              constraints=[], **options):
     """
+    Parameters
+    ----------
+    fun : callable
+        Objective function
+    
     Examples
     --------
-
     >>> from scipy.optimize import rosen, rosen_der
     >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
     >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der)
@@ -77,7 +81,13 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
     ...         {'type': 'ineq', 
     ...           'fun': lambda x: x[1] - 1, 
     ...           'jac': lambda x: np.array([0., 1.])}]
-    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol_abs=1e-20)
+    >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons)
+    >>> res.success
+    False
+    >>> res.message
+    'Halted because roundoff errors limited progress. (In this case, the optimization still typically returns a useful result.)'
+    >>> res.x.round(2)
+    array([ 0.84,  0.6 ])
 
     >>> cons = [{'type': 'some bogus type', 
     ...           'fun': lambda x: x[0]**3 - x[1],
@@ -98,8 +108,10 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
 
     opt = nlopt.opt(method, dim)
 
+    xs = []
+
     # Create NLOpt objective function
-    obj_fun = make_nlopt_fun(fun, jac, args)
+    obj_fun = make_nlopt_fun(fun, jac, args, xs)
     opt.set_min_objective(obj_fun)
 
     # Normalize and set parameter bounds
@@ -129,19 +141,20 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
 
     # Set other options, e.g. termination criteria
     # This may or may not be a great idea... Time will tell. 
-    for key, val in options.items():
+    for option, val in options.items():
         try:
-            set_method = getattr(opt, 'set_{option}'.format(option=key))
-            set_method(val)
+            set_option = getattr(opt, 'set_{option}'.format(option=option))
         except AttributeError:
             raise ValueError('Parameter {option} could not be ' 
-                             'recognized.'.format(option=key))
+                             'recognized.'.format(option=option))
+        else:
+            set_option(val)
 
     # Perform the optimization
     try:
         x = opt.optimize(x0)
     except nlopt.RoundoffLimited:
-        x = None
+        x = xs[-1]
 
     return OptimizeResult(
             x = x,
@@ -150,8 +163,7 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=[],
             success = opt.last_optimize_result() > 0,
         )
 
-def make_nlopt_fun(fun, jac=True, args=()):
-
+def make_nlopt_fun(fun, jac=True, args=(), xs=None):
     """
     Make NLOpt objective function (as specified by the the `NLOpt Python 
     interface`_), from SciPy-style objective functions.
@@ -273,8 +285,73 @@ def make_nlopt_fun(fun, jac=True, args=()):
     array([ 1.,  1.,  1.,  1.,  1.])
     >>> np.isclose(opt.last_optimum_value(), 0)
     True
+
+    >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
+    >>> cache = []
+    >>> obj_fun = make_nlopt_fun(rosen, jac=rosen_der, xs=cache)
+    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.optimize(x0)
+    array([ 1.,  1.,  1.,  1.,  1.])
+    >>> np.isclose(opt.last_optimum_value(), 0)
+    True
+    >>> list(map(partial(np.round, decimals=2), cache))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [array([ 1.3,  0.7,  0.8,  1.9,  1.2]), 
+    array([ -514.1,   286.1,   342.4, -2083.5,   483.2]), 
+    array([-170.83,   96.02,  114.89, -694.57,  162.18]), 
+    array([ -56.41,   32.66,   39.05, -231.6 ,   55.17]), 
+    array([-18.27,  11.53,  13.77, -77.26,  19.5 ]), 
+    array([ -5.55,   4.49,   5.34, -25.8 ,   7.6 ]), 
+    array([-1.29,  2.14,  2.52, -8.59,  3.63]), 
+    array([ 0.16,  1.33,  1.56, -2.71,  2.27]), 
+    array([ 0.78,  0.99,  1.15, -0.22,  1.69]), 
+    array([ 0.84,  0.99,  0.65, -0.18,  1.48]), 
+    array([ 0.94,  0.81,  0.45, -0.17,  1.16]), 
+    array([ 0.86,  0.66,  0.15, -0.14,  0.31]), 
+    array([ 0.68,  0.45,  0.11, -0.05,  0.04]), 
+    array([ 0.64,  0.4 ,  0.12,  0.  , -0.  ]), 
+    array([ 0.62,  0.39,  0.14,  0.03, -0.  ]), 
+    array([ 0.63,  0.39,  0.16,  0.03,  0.  ]), 
+    array([ 0.64,  0.41,  0.18,  0.04,  0.01]), 
+    array([ 0.69,  0.48,  0.25,  0.07,  0.02]), 
+    array([ 0.95,  0.83,  0.64,  0.2 ,  0.08]), 
+    array([ 0.79,  0.61,  0.4 ,  0.12,  0.04]), 
+    array([ 0.8 ,  0.64,  0.43,  0.15,  0.03]), 
+    array([ 0.88,  0.76,  0.53,  0.24,  0.02]), 
+    array([ 0.84,  0.7 ,  0.48,  0.2 ,  0.02]), 
+    array([ 0.8 ,  0.66,  0.42,  0.24,  0.  ]), 
+    array([ 0.83,  0.69,  0.47,  0.21,  0.02]), 
+    array([ 0.84,  0.7 ,  0.48,  0.22,  0.03]), 
+    array([ 0.89,  0.78,  0.57,  0.32,  0.09]), 
+    array([ 0.89,  0.8 ,  0.62,  0.38,  0.14]), 
+    array([ 0.95,  0.91,  0.81,  0.6 ,  0.28]), 
+    array([ 0.92,  0.84,  0.7 ,  0.47,  0.2 ]), 
+    array([ 0.92,  0.86,  0.74,  0.54,  0.28]), 
+    array([ 0.94,  0.89,  0.79,  0.61,  0.37]), 
+    array([ 0.97,  0.94,  0.88,  0.76,  0.54]), 
+    array([ 0.96,  0.92,  0.84,  0.69,  0.47]), 
+    array([ 0.97,  0.94,  0.88,  0.79,  0.63]), 
+    array([ 0.98,  0.96,  0.92,  0.84,  0.69]), 
+    array([ 0.97,  0.94,  0.89,  0.78,  0.62]), 
+    array([ 0.98,  0.95,  0.91,  0.82,  0.67]), 
+    array([ 0.98,  0.96,  0.92,  0.85,  0.71]), 
+    array([ 0.99,  0.98,  0.96,  0.92,  0.84]), 
+    array([ 0.99,  0.98,  0.97,  0.94,  0.88]), 
+    array([ 1.  ,  1.  ,  0.99,  0.98,  0.96]), 
+    array([ 1.  ,  1.  ,  0.99,  0.99,  0.97]), 
+    array([ 1.,  1.,  1.,  1.,  1.]), 
+    array([ 1.,  1.,  1.,  1.,  1.]), 
+    array([ 1.,  1.,  1.,  1.,  1.]), 
+    array([ 1.,  1.,  1.,  1.,  1.]), 
+    array([ 1.,  1.,  1.,  1.,  1.]), 
+    array([ 1.,  1.,  1.,  1.,  1.]), 
+    array([ 1.,  1.,  1.,  1.,  1.]), 
+    array([ 1.,  1.,  1.,  1.,  1.])]
     """
     def nlopt_fun(x, grad):
+
+        if xs is not None:
+            xs.append(x.copy())
 
         ret = fun(x, *args)
         grad_temp = None

@@ -5,7 +5,6 @@ from six.moves import map, range, zip
 from collections import namedtuple
 from functools import partial
 from itertools import tee
-from operator import mul
 
 class Bound(namedtuple('Bound', ['lower', 'upper'])):
     """
@@ -47,30 +46,57 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
     >>> Bound(42, 10)
     Traceback (most recent call last):
         ...
-    ValueError: lower cannot be greater than upper!
+    ValueError: lower bound cannot be greater than upper bound!
     """
 
     def __new__(cls, lower=None, upper=None):
 
         if lower is not None and upper is not None:
             if lower > upper:
-                raise ValueError('lower cannot be greater than upper!')
+                raise ValueError('lower bound cannot be greater than upper '
+                                 'bound!')
 
         return super(Bound, cls).__new__(cls, lower, upper)
 
 class Positive(Bound):
+    """
+    Define a positive only bound for the optimiser. This may induce the
+    'log trick' in the optimiser, which will ignore the 'smallest'
+    value (but will stay above 0).
 
-    def __new__(cls, smallest=1e-14):
-        """ Define a positive only bound for the optimiser. This may induce the
-            'log trick' in the optimiser, which will ignore the 'smallest'
-            value (but will stay above 0).
+    Parameters
+    ---------
+    lower : float
+        The smallest value allowed for the optimiser to evaluate (if 
+        not using the log trick).
 
-            Arguments
-            ---------
-                smallest, (float): The smallest value allowed for the optimiser
-                    to evaluate (if not using the log trick).
-        """
-        return super(Positive, cls).__new__(cls, smallest, None)
+    Examples
+    --------
+    >>> b = Positive()
+    >>> b
+    Positive(lower=1e-14, upper=None)
+
+    Since ``tuple`` (and by extension its descendents) are immutable, 
+    the lower bound for all instances of ``Positive`` are guaranteed to 
+    be positive. 
+
+    .. admonition:: 
+
+       Actually this is not totally true. Something like 
+       ``b._replace(lower=-42)`` would actually thwart this. Should 
+       delete this method from ``namedtuple`` when inheriting.
+
+    >>> c = Positive(lower=-10)
+    Traceback (most recent call last):
+        ...
+    ValueError: lower bound must be positive!
+    """
+    def __new__(cls, lower=1e-14):
+
+        if lower <= 0:
+            raise ValueError('lower bound must be positive!')
+
+        return super(Positive, cls).__new__(cls, lower, None)
 
 def checktypes(sequence, checktype):
     """ Check if all types are the same in a sequence.
@@ -173,7 +199,6 @@ def nwise(iterable, n):
 
     Examples
     --------
-
     >>> a = [2, 5, 7, 4, 2, 8, 6]
 
     >>> list(nwise(a, n=3))
@@ -484,6 +509,7 @@ def map_indices(fn, iterable, indices):
 
     >>> a = [4, 6, 7, 1, 6, 8, 2]
 
+    >>> from operator import mul
     >>> list(map_indices(partial(mul, 3), a, [0, 3, 5]))
     [12, 6, 7, 3, 6, 24, 2]
 
