@@ -89,7 +89,7 @@
 <p>To make a new basis object, see the documentation of the Basis class.</p>
 <dl class="class">
 <dt id="pyalacarte.bases.Basis">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">Basis</code><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">Basis</code><a class="headerlink" href="#pyalacarte.bases.Basis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The base Basis class. To make other basis classes, make sure they are
 subclasses of this class to enable concatenation and operation with the
@@ -100,12 +100,12 @@ machine learning algorithms.</p>
 <div>ConcatBasis = MyBasis1(properties1) + MyBasis2(properties2)</div></blockquote>
 <dl class="method">
 <dt id="pyalacarte.bases.Basis.__add__">
-<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis.__add__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.Basis.__add__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.Basis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.Basis.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the basis function applied to X, i.e. Phi(X, params), where
 params can also optionally be used and learned.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -133,12 +133,12 @@ functions.</p>
 
 <dl class="attribute">
 <dt id="pyalacarte.bases.Basis.__dict__">
-<code class="descname">__dict__</code><em class="property"> = mappingproxy({'__doc__': ' The base Basis class. To make other basis classes, make sure they are\n        subclasses of this class to enable concatenation and operation with the\n        machine learning algorithms.\n\n        Example:\n            Basis concatentation works as follows if you subclass this class:\n\n                ConcatBasis = MyBasis1(properties1) + MyBasis2(properties2)\n    ', 'grad': &lt;function Basis.grad at 0x10a443158&gt;, '__dict__': &lt;attribute '__dict__' of 'Basis' objects&gt;, '__weakref__': &lt;attribute '__weakref__' of 'Basis' objects&gt;, '__module__': 'pyalacarte.bases', 'bounds': &lt;property object at 0x10a1f2ea8&gt;, 'grad_from_vector': &lt;function Basis.grad_from_vector at 0x10a443378&gt;, '__call__': &lt;function Basis.__call__ at 0x10a4430d0&gt;, 'from_vector': &lt;function Basis.from_vector at 0x10a4432f0&gt;, '_bounds': [], '__add__': &lt;function Basis.__add__ at 0x10a443400&gt;, '__init__': &lt;function Basis.__init__ at 0x10a1ffd08&gt;, '__radd__': &lt;function Basis.__radd__ at 0x10a443488&gt;})</em><a class="headerlink" href="#pyalacarte.bases.Basis.__dict__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__dict__</code><em class="property"> = mappingproxy({'__doc__': ' The base Basis class. To make other basis classes, make sure they are\n        subclasses of this class to enable concatenation and operation with the\n        machine learning algorithms.\n\n        Example:\n            Basis concatentation works as follows if you subclass this class:\n\n                ConcatBasis = MyBasis1(properties1) + MyBasis2(properties2)\n    ', '__call__': &lt;function Basis.__call__ at 0x10d72ebf8&gt;, 'from_vector': &lt;function Basis.from_vector at 0x10d72ee18&gt;, '_bounds': [], 'grad': &lt;function Basis.grad at 0x10d72ec80&gt;, '__add__': &lt;function Basis.__add__ at 0x10d72ef28&gt;, '__weakref__': &lt;attribute '__weakref__' of 'Basis' objects&gt;, '__dict__': &lt;attribute '__dict__' of 'Basis' objects&gt;, '__radd__': &lt;function Basis.__radd__ at 0x10d72f048&gt;, 'grad_from_vector': &lt;function Basis.grad_from_vector at 0x10d72eea0&gt;, '__init__': &lt;function Basis.__init__ at 0x10d4fe8c8&gt;, '__module__': 'pyalacarte.bases', 'bounds': &lt;property object at 0x10d4f4ef8&gt;})</em><a class="headerlink" href="#pyalacarte.bases.Basis.__dict__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.Basis.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.Basis.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct this an instance of this class. This is also a good place
 to set non-learnable properties, and bounds on the parameters. An
 example Basis class with parameters may be,</p>
@@ -166,7 +166,7 @@ these bounds work.</li>
 
 <dl class="method">
 <dt id="pyalacarte.bases.Basis.__radd__">
-<code class="descname">__radd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis.__radd__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis.__radd__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__radd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.Basis.__radd__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -190,7 +190,7 @@ scalars in all of the parameters combined (and in order).</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.Basis.from_vector">
-<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis.from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis.from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.Basis.from_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply this basis function to X like __call__(), but instead of
 being given parameter arguments, this function is given a flat list
 of all of the parameters. The parameters must be constructed from
@@ -221,7 +221,7 @@ functions.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.Basis.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis.grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis.grad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.Basis.grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the gradient of the basis function w.r.t. each of the
 parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -256,7 +256,7 @@ which case a list of one element, containing an array of
 
 <dl class="method">
 <dt id="pyalacarte.bases.Basis.grad_from_vector">
-<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#Basis.grad_from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.Basis.grad_from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.Basis.grad_from_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the gradient of the basis function w.r.t. each of the
 parameters, but like from_vector, instead of being given parameter
 arguments, this function is given a flat list of all of the
@@ -295,27 +295,27 @@ which case a list of one element, containing an array of
 
 <dl class="class">
 <dt id="pyalacarte.bases.BasisCat">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">BasisCat</code><span class="sig-paren">(</span><em>basis_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">BasisCat</code><span class="sig-paren">(</span><em>basis_list</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A class that implements concatenation of bases.</p>
 <dl class="method">
 <dt id="pyalacarte.bases.BasisCat.__add__">
-<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat.__add__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat.__add__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.BasisCat.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>*params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>*params</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat.__call__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="pyalacarte.bases.BasisCat.__dict__">
-<code class="descname">__dict__</code><em class="property"> = mappingproxy({'__doc__': ' A class that implements concatenation of bases. ', 'grad': &lt;function BasisCat.grad at 0x10a433620&gt;, '__dict__': &lt;attribute '__dict__' of 'BasisCat' objects&gt;, '__weakref__': &lt;attribute '__weakref__' of 'BasisCat' objects&gt;, 'bounds': &lt;property object at 0x10a204a98&gt;, 'grad_from_vector': &lt;function BasisCat.grad_from_vector at 0x10a433598&gt;, 'from_vector': &lt;function BasisCat.from_vector at 0x10a433510&gt;, '__module__': 'pyalacarte.bases', '__add__': &lt;function BasisCat.__add__ at 0x10a433730&gt;, '__call__': &lt;function BasisCat.__call__ at 0x10a433488&gt;, '__init__': &lt;function BasisCat.__init__ at 0x10a433400&gt;, '__radd__': &lt;function BasisCat.__radd__ at 0x10a4337b8&gt;})</em><a class="headerlink" href="#pyalacarte.bases.BasisCat.__dict__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__dict__</code><em class="property"> = mappingproxy({'__call__': &lt;function BasisCat.__call__ at 0x10d731048&gt;, '__doc__': ' A class that implements concatenation of bases. ', 'grad': &lt;function BasisCat.grad at 0x10d7311e0&gt;, '__add__': &lt;function BasisCat.__add__ at 0x10d7312f0&gt;, '__weakref__': &lt;attribute '__weakref__' of 'BasisCat' objects&gt;, '__dict__': &lt;attribute '__dict__' of 'BasisCat' objects&gt;, 'grad_from_vector': &lt;function BasisCat.grad_from_vector at 0x10d731158&gt;, '__radd__': &lt;function BasisCat.__radd__ at 0x10d731378&gt;, 'from_vector': &lt;function BasisCat.from_vector at 0x10d7310d0&gt;, '__init__': &lt;function BasisCat.__init__ at 0x10d72ff28&gt;, '__module__': 'pyalacarte.bases', 'bounds': &lt;property object at 0x10d502ae8&gt;})</em><a class="headerlink" href="#pyalacarte.bases.BasisCat.__dict__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.BasisCat.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>basis_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>basis_list</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -325,7 +325,7 @@ which case a list of one element, containing an array of
 
 <dl class="method">
 <dt id="pyalacarte.bases.BasisCat.__radd__">
-<code class="descname">__radd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat.__radd__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat.__radd__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__radd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat.__radd__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -341,24 +341,24 @@ which case a list of one element, containing an array of
 
 <dl class="method">
 <dt id="pyalacarte.bases.BasisCat.from_vector">
-<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat.from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat.from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat.from_vector" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.BasisCat.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>*params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat.grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat.grad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>*params</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat.grad" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.BasisCat.grad_from_vector">
-<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#BasisCat.grad_from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.BasisCat.grad_from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.BasisCat.grad_from_vector" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="pyalacarte.bases.FastFood">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">FastFood</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#FastFood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.FastFood" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">FastFood</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.FastFood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyalacarte.bases.RandomRBF" title="pyalacarte.bases.RandomRBF"><code class="xref py py-class docutils literal"><span class="pre">pyalacarte.bases.RandomRBF</span></code></a></p>
 <p>Fast Food basis function, which is an approximation of the random
 radial basis function for a large number of bases.</p>
@@ -376,7 +376,7 @@ covariance function.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.FastFood.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#FastFood.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.FastFood.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.FastFood.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the Fast Food RBF basis to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -403,7 +403,7 @@ two power).</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.FastFood.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#FastFood.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.FastFood.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.FastFood.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a random radial basis function (RBF) object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -430,7 +430,7 @@ scales.</li>
 
 <dl class="method">
 <dt id="pyalacarte.bases.FastFood.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#FastFood.grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.FastFood.grad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.FastFood.grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gradients of this basis w.r.t. the length scale.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -459,13 +459,13 @@ two power. This is d Phi(X) / d lenscale.</p>
 
 <dl class="class">
 <dt id="pyalacarte.bases.LinearBasis">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">LinearBasis</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#LinearBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.LinearBasis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">LinearBasis</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.LinearBasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyalacarte.bases.Basis" title="pyalacarte.bases.Basis"><code class="xref py py-class docutils literal"><span class="pre">pyalacarte.bases.Basis</span></code></a></p>
 <p>Linear basis class, basically this just prepending a columns of ones
 onto X.</p>
 <dl class="method">
 <dt id="pyalacarte.bases.LinearBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#LinearBasis.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.LinearBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.LinearBasis.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return this basis applied to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -484,7 +484,7 @@ samples, and d is the dimensionality of X.</td>
 
 <dl class="method">
 <dt id="pyalacarte.bases.LinearBasis.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#LinearBasis.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.LinearBasis.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.LinearBasis.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a linear basis object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -505,13 +505,13 @@ samples, and d is the dimensionality of X.</td>
 
 <dl class="class">
 <dt id="pyalacarte.bases.PolynomialBasis">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">PolynomialBasis</code><span class="sig-paren">(</span><em>order</em>, <em>include_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#PolynomialBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.PolynomialBasis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">PolynomialBasis</code><span class="sig-paren">(</span><em>order</em>, <em>include_bias=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.PolynomialBasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyalacarte.bases.Basis" title="pyalacarte.bases.Basis"><code class="xref py py-class docutils literal"><span class="pre">pyalacarte.bases.Basis</span></code></a></p>
 <p>Polynomial basis class, this essentially creates the concatenation,
 Phi = [X^0, X^1, ..., X^p] where p is specified in the constructor.</p>
 <dl class="method">
 <dt id="pyalacarte.bases.PolynomialBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#PolynomialBasis.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.PolynomialBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.PolynomialBasis.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return this basis applied to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -531,7 +531,7 @@ prepended ones column.</td>
 
 <dl class="method">
 <dt id="pyalacarte.bases.PolynomialBasis.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>order</em>, <em>include_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#PolynomialBasis.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.PolynomialBasis.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>order</em>, <em>include_bias=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.PolynomialBasis.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a polynomial basis object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -560,7 +560,7 @@ linear model)</li>
 
 <dl class="class">
 <dt id="pyalacarte.bases.RadialBasis">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">RadialBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RadialBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RadialBasis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">RadialBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RadialBasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyalacarte.bases.Basis" title="pyalacarte.bases.Basis"><code class="xref py py-class docutils literal"><span class="pre">pyalacarte.bases.Basis</span></code></a></p>
 <p>Radial basis class.</p>
 <div class="admonition note">
@@ -570,7 +570,7 @@ uncertainty and for deaggregation tasks!</p>
 </div>
 <dl class="method">
 <dt id="pyalacarte.bases.RadialBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RadialBasis.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RadialBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RadialBasis.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the RBF to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -595,7 +595,7 @@ samples, and d is the dimensionality of X.</li>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RadialBasis.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RadialBasis.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RadialBasis.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RadialBasis.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a radial basis function (RBF) object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -619,12 +619,12 @@ for the radial bases, and d is the dimensionality of X.</li>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RadialBasis.from_vector">
-<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RadialBasis.from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RadialBasis.from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RadialBasis.from_vector" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RadialBasis.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RadialBasis.grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RadialBasis.grad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RadialBasis.grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gradients of this basis w.r.t. the length scale.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -650,21 +650,21 @@ centres. This is d Phi(X) / d lenscale.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RadialBasis.grad_from_vector">
-<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RadialBasis.grad_from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RadialBasis.grad_from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RadialBasis.grad_from_vector" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="pyalacarte.bases.RandomRBF">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">RandomRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">RandomRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyalacarte.bases.RadialBasis" title="pyalacarte.bases.RadialBasis"><code class="xref py py-class docutils literal"><span class="pre">pyalacarte.bases.RadialBasis</span></code></a></p>
 <p>Random RBF Basis, otherwise known as Random Kitchen Sinks.</p>
 <p>This will make a linear regression model approximate a GP with an RBF
 covariance function.</p>
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the random RBF to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -690,7 +690,7 @@ bases to use, given in the constructor.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a random radial basis function (RBF) object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -714,12 +714,12 @@ bases to use, given in the constructor.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF._checkD">
-<code class="descname">_checkD</code><span class="sig-paren">(</span><em>D</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF._checkD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF._checkD" title="Permalink to this definition">¶</a></dt>
+<code class="descname">_checkD</code><span class="sig-paren">(</span><em>D</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF._checkD" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF.grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF.grad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF.grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gradients of this basis w.r.t. the length scale.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -747,7 +747,7 @@ number of random RBF bases. This is d Phi(X) / d lenscale.</p>
 
 <dl class="class">
 <dt id="pyalacarte.bases.RandomRBF_ARD">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">RandomRBF_ARD</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF_ARD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">RandomRBF_ARD</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyalacarte.bases.RandomRBF" title="pyalacarte.bases.RandomRBF"><code class="xref py py-class docutils literal"><span class="pre">pyalacarte.bases.RandomRBF</span></code></a></p>
 <p>Random RBF Basis, otherwise known as Random Kitchen Sinks, with
 automatic relevance determination (ARD).</p>
@@ -755,7 +755,7 @@ automatic relevance determination (ARD).</p>
 ARD-RBF covariance function.</p>
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF_ARD.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscales</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF_ARD.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscales</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the random ARD-RBF to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -782,7 +782,7 @@ bases to use, given in the constructor.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF_ARD.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF_ARD.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a random radial basis function (RBF) object, with ARD.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -806,17 +806,17 @@ bases to use, given in the constructor.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF_ARD._checkD">
-<code class="descname">_checkD</code><span class="sig-paren">(</span><em>Xdim</em>, <em>lendim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF_ARD._checkD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD._checkD" title="Permalink to this definition">¶</a></dt>
+<code class="descname">_checkD</code><span class="sig-paren">(</span><em>Xdim</em>, <em>lendim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD._checkD" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF_ARD.from_vector">
-<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF_ARD.from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.from_vector" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF_ARD.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscales</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF_ARD.grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.grad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscales</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gradients of this basis w.r.t. the length scales.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -844,19 +844,19 @@ for each length scale parameter.</p>
 
 <dl class="method">
 <dt id="pyalacarte.bases.RandomRBF_ARD.grad_from_vector">
-<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#RandomRBF_ARD.grad_from_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.grad_from_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad_from_vector</code><span class="sig-paren">(</span><em>X</em>, <em>vec</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.RandomRBF_ARD.grad_from_vector" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="pyalacarte.bases.SigmoidalBasis">
-<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">SigmoidalBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#SigmoidalBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyalacarte.bases.</code><code class="descname">SigmoidalBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyalacarte.bases.Basis" title="pyalacarte.bases.Basis"><code class="xref py py-class docutils literal"><span class="pre">pyalacarte.bases.Basis</span></code></a></p>
 <p>Sigmoidal Basis</p>
 <dl class="method">
 <dt id="pyalacarte.bases.SigmoidalBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#SigmoidalBasis.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the sigmoid basis function to X.</p>
 <div class="math">
 \[\phi_j (x) = \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )\]</div>
@@ -887,7 +887,7 @@ apply to X.</li>
 
 <dl class="method">
 <dt id="pyalacarte.bases.SigmoidalBasis.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#SigmoidalBasis.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a sigmoidal basis function object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -912,7 +912,7 @@ scales.</li>
 
 <dl class="method">
 <dt id="pyalacarte.bases.SigmoidalBasis.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/bases.html#SigmoidalBasis.grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis.grad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.bases.SigmoidalBasis.grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gradients of this basis w.r.t. the length scale.</p>
 <div class="math">
 \[\frac{\partial}{\partial s} \phi_j(x) =

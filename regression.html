@@ -99,7 +99,7 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </table>
 <dl class="function">
 <dt id="pyalacarte.regression.bayes_predict">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>bparams</em>, <em>var</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#bayes_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.bayes_predict" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>bparams</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayes_predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict using Bayesian linear regression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -141,7 +141,7 @@ D dimensions)</li>
 
 <dl class="function">
 <dt id="pyalacarte.regression.bayes_regress">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em>, <em>usegradients=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#bayes_regress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.bayes_regress" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em>, <em>usegradients=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayes_regress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor
 using the evidence lower bound (ELBO) on log-marginal likelihood.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -189,7 +189,7 @@ bparams, (list): learned sequence of basis object</p>
 
 <dl class="function">
 <dt id="pyalacarte.regression.bayes_regress_sgd">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#bayes_regress_sgd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.bayes_regress_sgd" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayes_regress_sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor
 using the evidence lower bound (ELBO) on log-marginal likelihood.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -236,7 +236,7 @@ bparams, (list): learned sequence of basis object</p>
 
 <dl class="function">
 <dt id="pyalacarte.regression.make_elbo">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">make_elbo</code><span class="sig-paren">(</span><em>pcat</em>, <em>basis</em>, <em>X</em>, <em>D</em>, <em>y</em>, <em>diagcov</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#make_elbo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.make_elbo" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">make_elbo</code><span class="sig-paren">(</span><em>pcat</em>, <em>basis</em>, <em>X</em>, <em>D</em>, <em>y</em>, <em>diagcov</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.make_elbo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make Evidence lower bound objective function.</p>
 </dd></dl>
 
