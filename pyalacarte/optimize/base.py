@@ -58,7 +58,7 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
     return sp_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
                   constraints=constraints, options=options)
 
-def candidate_start_points_random(bounds, n_candidates=100):
+def candidate_start_points_random(bounds, n_candidates=1000):
     """
     Randomly generate candidate starting points uniformly within a 
     hyperrectangle.
@@ -125,7 +125,7 @@ def candidate_start_points_random(bounds, n_candidates=100):
     n_dims = len(bounds)
     return np.random.uniform(low, high, (n_candidates, n_dims)).transpose()
 
-def candidate_start_points_grid(bounds, nums=5):
+def candidate_start_points_grid(bounds, nums=3):
     """
     Examples
     --------
