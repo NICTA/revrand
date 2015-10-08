@@ -1,0 +1,423 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyalacarte.regression &mdash; pyalacarte 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pyalacarte 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pyalacarte 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyalacarte.regression</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Various Bayesian linear regression learning and prediction functions.</span>
+
+<span class="sd">By using the appropriate bases, this will also yield a simple implementation of</span>
+<span class="sd">the &quot;A la Carte&quot; GP [1]_.</span>
+
+<span class="sd">.. [1] Yang, Z., Smola, A. J., Song, L., &amp; Wilson, A. G. &quot;A la Carte --</span>
+<span class="sd">   Learning Fast Kernels&quot;. Proceedings of the Eighteenth International</span>
+<span class="sd">   Conference on Artificial Intelligence and Statistics, pp. 1098-1106,</span>
+<span class="sd">   2015.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># TODO:</span>
+<span class="c">#   - Make reshaping dtheta less clunky with log trick</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">cho_solve</span>
+<span class="kn">from</span> <span class="nn">scipy.stats.distributions</span> <span class="kn">import</span> <span class="n">gamma</span>
+
+<span class="kn">from</span> <span class="nn">.linalg</span> <span class="kn">import</span> <span class="n">jitchol</span><span class="p">,</span> <span class="n">logdet</span>
+<span class="kn">from</span> <span class="nn">.optimize</span> <span class="kn">import</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">sgd</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">list_to_params</span> <span class="k">as</span> <span class="n">l2p</span><span class="p">,</span> <span class="n">CatParameters</span><span class="p">,</span> <span class="n">Positive</span><span class="p">,</span> <span class="n">Bound</span><span class="p">,</span> \
+    <span class="n">checktypes</span>
+
+<span class="c"># Set up logging</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="make_elbo"><a class="viewcode-back" href="../../regression.html#pyalacarte.regression.make_elbo">[docs]</a><span class="k">def</span> <span class="nf">make_elbo</span><span class="p">(</span><span class="n">pcat</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">diagcov</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make Evidence lower bound objective function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">def</span> <span class="nf">ELBO</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+
+        <span class="n">uparams</span> <span class="o">=</span> <span class="n">pcat</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">_var</span><span class="p">,</span> <span class="n">_lambda</span><span class="p">,</span> <span class="n">_theta</span> <span class="o">=</span> <span class="n">uparams</span>
+
+        <span class="c"># Get Basis</span>
+        <span class="n">Phi</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">_theta</span><span class="p">)</span>                      <span class="c"># N x D</span>
+        <span class="n">PhiPhi</span> <span class="o">=</span> <span class="n">Phi</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Phi</span><span class="p">)</span>
+
+        <span class="c"># Posterior Parameters</span>
+        <span class="n">LfullC</span> <span class="o">=</span> <span class="n">jitchol</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">D</span><span class="p">)</span> <span class="o">/</span> <span class="n">_lambda</span><span class="p">)</span> <span class="o">+</span> <span class="n">PhiPhi</span> <span class="o">/</span> <span class="n">_var</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">cho_solve</span><span class="p">(</span><span class="n">LfullC</span><span class="p">,</span> <span class="n">Phi</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="n">_var</span>
+
+        <span class="c"># Common calcs dependent on form of C</span>
+        <span class="k">if</span> <span class="n">diagcov</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">PhiPhi</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span> <span class="o">/</span> <span class="n">_var</span> <span class="o">+</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">_lambda</span><span class="p">)</span>
+            <span class="n">TrPhiPhiC</span> <span class="o">=</span> <span class="p">(</span><span class="n">PhiPhi</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">logdetC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">TrC</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">cho_solve</span><span class="p">(</span><span class="n">LfullC</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">D</span><span class="p">))</span>
+            <span class="n">TrPhiPhiC</span> <span class="o">=</span> <span class="p">(</span><span class="n">PhiPhi</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">logdetC</span> <span class="o">=</span> <span class="o">-</span><span class="n">logdet</span><span class="p">(</span><span class="n">LfullC</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">TrC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+
+        <span class="c"># Common computations</span>
+        <span class="n">Err</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">Phi</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">sqErr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Err</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">mm</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="c"># Calculate ELBO</span>
+        <span class="n">ELBO</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">_var</span><span class="p">)</span>
+                       <span class="o">+</span> <span class="n">sqErr</span> <span class="o">/</span> <span class="n">_var</span>
+                       <span class="o">+</span> <span class="n">TrPhiPhiC</span> <span class="o">/</span> <span class="n">_var</span>
+                       <span class="o">+</span> <span class="p">(</span><span class="n">TrC</span> <span class="o">+</span> <span class="n">mm</span><span class="p">)</span> <span class="o">/</span> <span class="n">_lambda</span>
+                       <span class="o">-</span> <span class="n">logdetC</span>
+                       <span class="o">+</span> <span class="n">D</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_lambda</span><span class="p">)</span>
+                       <span class="o">-</span> <span class="n">D</span><span class="p">)</span>
+
+        <span class="c"># Cache square error to compute corrected variance</span>
+        <span class="k">if</span> <span class="n">ELBO</span> <span class="o">&gt;</span> <span class="n">ELBOcache</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">mcache</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">m</span>
+            <span class="n">Ccache</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">C</span>
+            <span class="n">ELBOcache</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ELBO</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ELBO = {}, var = {}, reg = {}, bparams = {}.&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ELBO</span><span class="p">,</span> <span class="n">_var</span><span class="p">,</span> <span class="n">_lambda</span><span class="p">,</span> <span class="n">_theta</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">usegradients</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">ELBO</span>
+
+        <span class="c"># Grad var</span>
+        <span class="n">dvar</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">/</span> <span class="n">_var</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">N</span> <span class="o">+</span> <span class="p">(</span><span class="n">sqErr</span> <span class="o">+</span> <span class="n">TrPhiPhiC</span><span class="p">)</span> <span class="o">/</span> <span class="n">_var</span><span class="p">)</span>
+
+        <span class="c"># Grad reg</span>
+        <span class="n">dlambda</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">/</span> <span class="n">_lambda</span> <span class="o">*</span> <span class="p">((</span><span class="n">TrC</span> <span class="o">+</span> <span class="n">mm</span><span class="p">)</span> <span class="o">/</span> <span class="n">_lambda</span> <span class="o">-</span> <span class="n">D</span><span class="p">)</span>
+
+        <span class="c"># Loop through basis param grads</span>
+        <span class="n">dtheta</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dPhis</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">_theta</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_theta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dPhi</span> <span class="ow">in</span> <span class="n">dPhis</span><span class="p">:</span>
+            <span class="n">dPhiPhi</span> <span class="o">=</span> <span class="p">(</span><span class="n">dPhi</span> <span class="o">*</span> <span class="n">Phi</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">diagcov</span> <span class="k">else</span> <span class="n">dPhi</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Phi</span><span class="p">)</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Err</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dPhi</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">dPhiPhi</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="n">_var</span>
+            <span class="n">dtheta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+
+        <span class="c"># Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!</span>
+        <span class="n">dtheta</span> <span class="o">=</span> <span class="n">l2p</span><span class="p">(</span><span class="n">_theta</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">ELBO</span><span class="p">,</span> <span class="o">-</span><span class="n">pcat</span><span class="o">.</span><span class="n">flatten_grads</span><span class="p">(</span><span class="n">uparams</span><span class="p">,</span> <span class="p">[</span><span class="n">dvar</span><span class="p">,</span> <span class="n">dlambda</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">ELBO</span>
+</div>
+<div class="viewcode-block" id="bayes_regress"><a class="viewcode-back" href="../../regression.html#pyalacarte.regression.bayes_regress">[docs]</a><span class="k">def</span> <span class="nf">bayes_regress</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">bparams</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">regulariser</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">diagcov</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">ftol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">maxit</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">usegradients</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Learn the parameters and hyperparameters of a Bayesian linear regressor</span>
+<span class="sd">        using the evidence lower bound (ELBO) on log-marginal likelihood.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            X: (N, d) array input dataset (N samples, d dimensions)</span>
+<span class="sd">            y: N array targets (N samples)</span>
+<span class="sd">            basis: A basis object, see bases.py</span>
+<span class="sd">            bparams: A sequence of parameters of the basis object</span>
+<span class="sd">            var, (float): observation variance initial guess</span>
+<span class="sd">            regulariser, (float): weight regulariser (variance) initial guess</span>
+<span class="sd">            diagcov, (bool): approximate posterior covariance with diagional</span>
+<span class="sd">                matrix.</span>
+<span class="sd">            verbose, (bool): log learning status</span>
+<span class="sd">            ftol, (float): optimiser function tolerance convergence criterion</span>
+<span class="sd">            maxit, (int): maximum number of iterations for the optimiser</span>
+<span class="sd">            usegradients, (bool): True for using gradients to optimize the</span>
+<span class="sd">                parameters, otherwise false uses BOBYQA (from nlopt)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): with elements,</span>
+
+<span class="sd">                m: (D,) array of posterior weight means (D is the dimension of</span>
+<span class="sd">                    the features)</span>
+<span class="sd">                C: (D,) array of posterior weight variances.</span>
+<span class="sd">                bparams, (list): learned sequence of basis object</span>
+<span class="sd">                    hyperparameters</span>
+<span class="sd">                (float): learned observation variance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="o">*</span><span class="n">bparams</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c"># Caches for returning optimal params</span>
+    <span class="n">ELBOcache</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+    <span class="n">mcache</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+    <span class="n">Ccache</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">D</span><span class="p">)</span> <span class="k">if</span> <span class="n">diagcov</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+
+    <span class="c"># Initial parameter vector</span>
+    <span class="n">vparams</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span><span class="p">,</span> <span class="n">regulariser</span><span class="p">,</span> <span class="n">bparams</span><span class="p">]</span>
+    <span class="n">posbounds</span> <span class="o">=</span> <span class="n">checktypes</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">Positive</span><span class="p">)</span>
+    <span class="n">pcat</span> <span class="o">=</span> <span class="n">CatParameters</span><span class="p">(</span><span class="n">vparams</span><span class="p">,</span> <span class="n">log_indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="n">posbounds</span>
+                         <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">ELBO</span> <span class="o">=</span> <span class="n">make_elbo</span><span class="p">(</span><span class="n">pcat</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">diagcov</span><span class="p">)</span>
+
+    <span class="c"># NOTE: It would be nice if the optimizer knew how to handle Positive</span>
+    <span class="c"># bounds when the log trick is used, so we dont have to have this boiler</span>
+    <span class="c"># plate...</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bound</span><span class="p">()]</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="n">bounds</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Bound</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span> <span class="k">if</span> <span class="n">posbounds</span> <span class="k">else</span> <span class="n">basis</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;L-BFGS-B&#39;</span> <span class="k">if</span> <span class="n">usegradients</span> <span class="k">else</span> <span class="bp">None</span>  <span class="c"># else BOBYQA numerical</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">ELBO</span><span class="p">,</span> <span class="n">pcat</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">vparams</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                   <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="n">ftol</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="n">maxit</span><span class="p">)</span>
+
+    <span class="n">var</span><span class="p">,</span> <span class="n">regulariser</span><span class="p">,</span> <span class="n">bparams</span> <span class="o">=</span> <span class="n">pcat</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Done! ELBO = {}, var = {}, reg = {}, bparams = {}.&quot;</span>
+                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">-</span><span class="n">res</span><span class="p">[</span><span class="s">&#39;fun&#39;</span><span class="p">],</span> <span class="n">var</span><span class="p">,</span> <span class="n">regulariser</span><span class="p">,</span> <span class="n">bparams</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="p">[</span><span class="s">&#39;success&#39;</span><span class="p">]:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Terminated unsuccessfully: {}.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s">&#39;message&#39;</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">mcache</span><span class="p">,</span> <span class="n">Ccache</span><span class="p">,</span> <span class="n">bparams</span><span class="p">,</span> <span class="n">var</span>
+
+</div>
+<div class="viewcode-block" id="bayes_regress_sgd"><a class="viewcode-back" href="../../regression.html#pyalacarte.regression.bayes_regress_sgd">[docs]</a><span class="k">def</span> <span class="nf">bayes_regress_sgd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">bparams</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">regulariser</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">gtol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+                      <span class="n">passes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">batchsize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
+                      <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Learn the parameters and hyperparameters of a Bayesian linear regressor</span>
+<span class="sd">        using the evidence lower bound (ELBO) on log-marginal likelihood.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            X: Nxd array input dataset (N samples, d dimensions)</span>
+<span class="sd">            y: N array targets (N samples)</span>
+<span class="sd">            basis: A basis object, see bases.py</span>
+<span class="sd">            bparams: A sequence of parameters of the basis object</span>
+<span class="sd">            var, (float): observation variance initial guess</span>
+<span class="sd">            regulariser, (float): weight regulariser (variance) initial guess</span>
+<span class="sd">            gtol, (float): SGD tolerance convergence criterion</span>
+<span class="sd">            passes, (int): Number of complete passes through the data before</span>
+<span class="sd">                optimization terminates (unless it converges first).</span>
+<span class="sd">            rate, (float): SGD decay rate, must be [0, 1].</span>
+<span class="sd">            batchsize, (int): number of observations to use per SGD batch.</span>
+<span class="sd">            verbose, (float): log learning status</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): with elements,</span>
+
+<span class="sd">                m: (D,) array of posterior weight means (D is the dimension of</span>
+<span class="sd">                    the features)</span>
+<span class="sd">                C: (D,) array of posterior weight variances.</span>
+<span class="sd">                bparams, (list): learned sequence of basis object</span>
+<span class="sd">                    hyperparameters</span>
+<span class="sd">                (float): learned observation variance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c"># Initialise parameters</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="o">*</span><span class="n">bparams</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">minit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+    <span class="n">Cinit</span> <span class="o">=</span> <span class="n">gamma</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">regulariser</span> <span class="o">/</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
+
+    <span class="c"># Initial parameter vector</span>
+    <span class="n">vparams</span> <span class="o">=</span> <span class="p">[</span><span class="n">minit</span><span class="p">,</span> <span class="n">Cinit</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">regulariser</span><span class="p">,</span> <span class="n">bparams</span><span class="p">]</span>
+    <span class="n">posbounds</span> <span class="o">=</span> <span class="n">checktypes</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">Positive</span><span class="p">)</span>
+    <span class="n">pcat</span> <span class="o">=</span> <span class="n">CatParameters</span><span class="p">(</span><span class="n">vparams</span><span class="p">,</span> <span class="n">log_indices</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">posbounds</span>
+                         <span class="k">else</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">ELBO</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+        <span class="n">y</span><span class="p">,</span> <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="n">uparams</span> <span class="o">=</span> <span class="n">pcat</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">_var</span><span class="p">,</span> <span class="n">_lambda</span><span class="p">,</span> <span class="n">_theta</span> <span class="o">=</span> <span class="n">uparams</span>
+
+        <span class="c"># Get Basis</span>
+        <span class="n">Phi</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">_theta</span><span class="p">)</span>                      <span class="c"># Nb x D</span>
+        <span class="n">PPdiag</span> <span class="o">=</span> <span class="p">(</span><span class="n">Phi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Common computations</span>
+        <span class="n">Err</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">Phi</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">sqErr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Err</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">mm</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="c"># Calculate ELBO</span>
+        <span class="n">Nb</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">TrPhiPhiC</span> <span class="o">=</span> <span class="p">(</span><span class="n">PPdiag</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">ELBO</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">Nb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">_var</span><span class="p">)</span>
+                       <span class="o">+</span> <span class="n">sqErr</span> <span class="o">/</span> <span class="n">_var</span>
+                       <span class="o">+</span> <span class="n">TrPhiPhiC</span> <span class="o">/</span> <span class="n">_var</span>
+                       <span class="o">+</span> <span class="n">Nb</span> <span class="o">/</span> <span class="n">N</span> <span class="o">*</span> <span class="p">(</span>
+                           <span class="o">+</span> <span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">mm</span><span class="p">)</span> <span class="o">/</span> <span class="n">_lambda</span>
+                           <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                           <span class="o">+</span> <span class="n">D</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_lambda</span><span class="p">)</span>
+                           <span class="o">-</span> <span class="n">D</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ELBO = {}, var = {}, reg = {}, bparams = {}.&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ELBO</span><span class="p">,</span> <span class="n">_var</span><span class="p">,</span> <span class="n">_lambda</span><span class="p">,</span> <span class="n">_theta</span><span class="p">))</span>
+
+        <span class="c"># Mean gradient</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">Err</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Phi</span><span class="p">)</span> <span class="o">/</span> <span class="n">_var</span> <span class="o">-</span> <span class="n">m</span> <span class="o">*</span> <span class="n">Nb</span> <span class="o">/</span> <span class="p">(</span><span class="n">_lambda</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span>
+
+        <span class="c"># Covariance gradient</span>
+        <span class="n">dC</span> <span class="o">=</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">PPdiag</span> <span class="o">/</span> <span class="n">_var</span> <span class="o">+</span> <span class="n">Nb</span> <span class="o">/</span> <span class="n">N</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">_lambda</span> <span class="o">-</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">C</span><span class="p">))</span>
+
+        <span class="c"># Grad variance</span>
+        <span class="n">dvar</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">/</span> <span class="n">_var</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">Nb</span> <span class="o">+</span> <span class="p">(</span><span class="n">TrPhiPhiC</span> <span class="o">+</span> <span class="n">sqErr</span><span class="p">)</span> <span class="o">/</span> <span class="n">_var</span><span class="p">)</span>
+
+        <span class="c"># Grad reg</span>
+        <span class="n">dlambda</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Nb</span> <span class="o">/</span> <span class="p">(</span><span class="n">_lambda</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">C</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">mm</span><span class="p">)</span> <span class="o">/</span> <span class="n">_lambda</span> <span class="o">-</span> <span class="n">D</span><span class="p">)</span>
+
+        <span class="c"># Loop through basis param grads</span>
+        <span class="n">dtheta</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dPhis</span> <span class="o">=</span> <span class="n">basis</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">_theta</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_theta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dPhi</span> <span class="ow">in</span> <span class="n">dPhis</span><span class="p">:</span>
+            <span class="n">dPhiPhidiag</span> <span class="o">=</span> <span class="p">(</span><span class="n">dPhi</span> <span class="o">*</span> <span class="n">Phi</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Err</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dPhi</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">dPhiPhidiag</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="n">_var</span>
+            <span class="n">dtheta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+
+        <span class="c"># Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!</span>
+        <span class="n">dtheta</span> <span class="o">=</span> <span class="n">l2p</span><span class="p">(</span><span class="n">_theta</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">ELBO</span><span class="p">,</span> <span class="o">-</span><span class="n">pcat</span><span class="o">.</span><span class="n">flatten_grads</span><span class="p">(</span><span class="n">uparams</span><span class="p">,</span> <span class="p">[</span><span class="n">dm</span><span class="p">,</span> <span class="n">dC</span><span class="p">,</span> <span class="n">dvar</span><span class="p">,</span> <span class="n">dlambda</span><span class="p">,</span>
+                                                    <span class="n">dtheta</span><span class="p">])</span>
+
+    <span class="c"># NOTE: It would be nice if the optimizer knew how to handle Positive</span>
+    <span class="c"># bounds when the log trick is used, so we dont have to have this boiler</span>
+    <span class="c"># plate...</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bound</span><span class="p">()]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">bounds</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Bound</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span> <span class="k">if</span> <span class="n">posbounds</span> <span class="k">else</span> <span class="n">basis</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">sgd</span><span class="p">(</span><span class="n">ELBO</span><span class="p">,</span> <span class="n">pcat</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">vparams</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">y</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">X</span><span class="p">)),</span>
+              <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">gtol</span><span class="o">=</span><span class="n">gtol</span><span class="p">,</span> <span class="n">passes</span><span class="o">=</span><span class="n">passes</span><span class="p">,</span>
+              <span class="n">batchsize</span><span class="o">=</span><span class="n">batchsize</span><span class="p">,</span> <span class="n">eval_obj</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">m</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">regulariser</span><span class="p">,</span> <span class="n">bparams</span> <span class="o">=</span> <span class="n">pcat</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Done! ELBO = {}, var = {}, reg = {}, bparams = {}.&quot;</span>
+                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">-</span><span class="n">res</span><span class="p">[</span><span class="s">&#39;fun&#39;</span><span class="p">],</span> <span class="n">var</span><span class="p">,</span> <span class="n">regulariser</span><span class="p">,</span> <span class="n">bparams</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Termination condition: {}.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s">&#39;message&#39;</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">bparams</span><span class="p">,</span> <span class="n">var</span>
+
+</div>
+<div class="viewcode-block" id="bayes_predict"><a class="viewcode-back" href="../../regression.html#pyalacarte.regression.bayes_predict">[docs]</a><span class="k">def</span> <span class="nf">bayes_predict</span><span class="p">(</span><span class="n">X_star</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">bparams</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Predict using Bayesian linear regression.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            X_star: (N_star,D) array query input dataset (N_star samples,</span>
+<span class="sd">                D dimensions)</span>
+<span class="sd">            m: (D,) array of regression weights (posterior)</span>
+<span class="sd">            C: (D,) or (D, D) array of regression weight covaariances</span>
+<span class="sd">               (posterior)</span>
+<span class="sd">            basis: A basis object, see bases.py</span>
+<span class="sd">            bparams: A sequence of hyperparameters of the basis object</span>
+<span class="sd">            var: observation variance</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): with elements:</span>
+
+<span class="sd">                Ey: The expected value of y_star for the query inputs, X_star</span>
+<span class="sd">                    of shape (N_star,)</span>
+<span class="sd">                Vf: The expected variance of f_star for the query inputs,</span>
+<span class="sd">                    X_star of shape (N_star,)</span>
+<span class="sd">                Vy: The expected variance of y_star for the query inputs,</span>
+<span class="sd">                    X_star of shape (N_star,)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Phi_s</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="n">X_star</span><span class="p">,</span> <span class="o">*</span><span class="n">bparams</span><span class="p">)</span>
+
+    <span class="n">Ey</span> <span class="o">=</span> <span class="n">Phi_s</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">C</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">Vf</span> <span class="o">=</span> <span class="p">(</span><span class="n">Phi_s</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="n">Phi_s</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Vf</span> <span class="o">=</span> <span class="p">((</span><span class="n">Phi_s</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="n">Phi_s</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Ey</span><span class="p">,</span> <span class="n">Vf</span><span class="p">,</span> <span class="n">Vf</span> <span class="o">+</span> <span class="n">var</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pyalacarte 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

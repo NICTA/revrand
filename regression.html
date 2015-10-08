@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Regression &mdash; pyalacarte 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
+    <link rel="next" title="Optimization" href="optimize.html" />
+    <link rel="prev" title="Basis Functions" href="bases.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="optimize.html" title="Optimization"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bases.html" title="Basis Functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bases.html"
+                        title="previous chapter">Basis Functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="optimize.html"
+                        title="next chapter">Optimization</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/regression.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pyalacarte.regression">
+<span id="regression"></span><h1>Regression<a class="headerlink" href="#module-pyalacarte.regression" title="Permalink to this headline">¶</a></h1>
+<p>Various Bayesian linear regression learning and prediction functions.</p>
+<p>By using the appropriate bases, this will also yield a simple implementation of
+the &#8220;A la Carte&#8221; GP <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Yang, Z., Smola, A. J., Song, L., &amp; Wilson, A. G. &#8220;A la Carte &#8211;
+Learning Fast Kernels&#8221;. Proceedings of the Eighteenth International
+Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
+2015.</td></tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyalacarte.regression.bayes_predict">
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>bparams</em>, <em>var</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#bayes_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.bayes_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict using Bayesian linear regression.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X_star</strong> &#8211; (N_star,D) array query input dataset (N_star samples,
+D dimensions)</li>
+<li><strong>m</strong> &#8211; (D,) array of regression weights (posterior)</li>
+<li><strong>C</strong> &#8211; (D,) or (D, D) array of regression weight covaariances
+(posterior)</li>
+<li><strong>basis</strong> &#8211; A basis object, see bases.py</li>
+<li><strong>bparams</strong> &#8211; A sequence of hyperparameters of the basis object</li>
+<li><strong>var</strong> &#8211; observation variance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with elements:</p>
+<dl class="docutils">
+<dt>Ey: The expected value of y_star for the query inputs, X_star</dt>
+<dd><p class="first last">of shape (N_star,)</p>
+</dd>
+<dt>Vf: The expected variance of f_star for the query inputs,</dt>
+<dd><p class="first last">X_star of shape (N_star,)</p>
+</dd>
+<dt>Vy: The expected variance of y_star for the query inputs,</dt>
+<dd><p class="first last">X_star of shape (N_star,)</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalacarte.regression.bayes_regress">
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em>, <em>usegradients=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#bayes_regress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.bayes_regress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor
+using the evidence lower bound (ELBO) on log-marginal likelihood.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> &#8211; (N, d) array input dataset (N samples, d dimensions)</li>
+<li><strong>y</strong> &#8211; N array targets (N samples)</li>
+<li><strong>basis</strong> &#8211; A basis object, see bases.py</li>
+<li><strong>bparams</strong> &#8211; A sequence of parameters of the basis object</li>
+<li><strong>var,</strong> (<em>float</em>) &#8211; observation variance initial guess</li>
+<li><strong>regulariser,</strong> (<em>float</em>) &#8211; weight regulariser (variance) initial guess</li>
+<li><strong>diagcov,</strong> (<em>bool</em>) &#8211; approximate posterior covariance with diagional
+matrix.</li>
+<li><strong>verbose,</strong> (<em>bool</em>) &#8211; log learning status</li>
+<li><strong>ftol,</strong> (<em>float</em>) &#8211; optimiser function tolerance convergence criterion</li>
+<li><strong>maxit,</strong> (<em>int</em>) &#8211; maximum number of iterations for the optimiser</li>
+<li><strong>usegradients,</strong> (<em>bool</em>) &#8211; True for using gradients to optimize the
+parameters, otherwise false uses BOBYQA (from nlopt)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with elements,</p>
+<dl class="docutils">
+<dt>m: (D,) array of posterior weight means (D is the dimension of</dt>
+<dd><p class="first last">the features)</p>
+</dd>
+</dl>
+<p>C: (D,) array of posterior weight variances.
+bparams, (list): learned sequence of basis object</p>
+<blockquote>
+<div><p>hyperparameters</p>
+</div></blockquote>
+<p>(float): learned observation variance</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalacarte.regression.bayes_regress_sgd">
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#bayes_regress_sgd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.bayes_regress_sgd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor
+using the evidence lower bound (ELBO) on log-marginal likelihood.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> &#8211; Nxd array input dataset (N samples, d dimensions)</li>
+<li><strong>y</strong> &#8211; N array targets (N samples)</li>
+<li><strong>basis</strong> &#8211; A basis object, see bases.py</li>
+<li><strong>bparams</strong> &#8211; A sequence of parameters of the basis object</li>
+<li><strong>var,</strong> (<em>float</em>) &#8211; observation variance initial guess</li>
+<li><strong>regulariser,</strong> (<em>float</em>) &#8211; weight regulariser (variance) initial guess</li>
+<li><strong>gtol,</strong> (<em>float</em>) &#8211; SGD tolerance convergence criterion</li>
+<li><strong>passes,</strong> (<em>int</em>) &#8211; Number of complete passes through the data before
+optimization terminates (unless it converges first).</li>
+<li><strong>rate,</strong> (<em>float</em>) &#8211; SGD decay rate, must be [0, 1].</li>
+<li><strong>batchsize,</strong> (<em>int</em>) &#8211; number of observations to use per SGD batch.</li>
+<li><strong>verbose,</strong> (<em>float</em>) &#8211; log learning status</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with elements,</p>
+<dl class="docutils">
+<dt>m: (D,) array of posterior weight means (D is the dimension of</dt>
+<dd><p class="first last">the features)</p>
+</dd>
+</dl>
+<p>C: (D,) array of posterior weight variances.
+bparams, (list): learned sequence of basis object</p>
+<blockquote>
+<div><p>hyperparameters</p>
+</div></blockquote>
+<p>(float): learned observation variance</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalacarte.regression.make_elbo">
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">make_elbo</code><span class="sig-paren">(</span><em>pcat</em>, <em>basis</em>, <em>X</em>, <em>D</em>, <em>y</em>, <em>diagcov</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyalacarte/regression.html#make_elbo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalacarte.regression.make_elbo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make Evidence lower bound objective function.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="optimize.html" title="Optimization"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="bases.html" title="Basis Functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
