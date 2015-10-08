@@ -29,11 +29,51 @@ from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
 # Set up logging
 log = logging.getLogger(__name__)
 
-def make_elbo(pcat, basis, X, D, y, diagcov):
+
+def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
+                  ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
+    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
+        using the evidence lower bound (ELBO) on log-marginal likelihood.
+
+        Arguments:
+            X: (N, d) array input dataset (N samples, d dimensions)
+            y: N array targets (N samples)
+            basis: A basis object, see bases.py
+            bparams: A sequence of parameters of the basis object
+            var, (float): observation variance initial guess
+            regulariser, (float): weight regulariser (variance) initial guess
+            diagcov, (bool): approximate posterior covariance with diagional
+                matrix.
+            verbose, (bool): log learning status
+            ftol, (float): optimiser function tolerance convergence criterion
+            maxit, (int): maximum number of iterations for the optimiser
+            usegradients, (bool): True for using gradients to optimize the
+                parameters, otherwise false uses BOBYQA (from nlopt)
+
+        Returns:
+            (tuple): with elements,
+
+                m: (D,) array of posterior weight means (D is the dimension of
+                    the features)
+                C: (D,) array of posterior weight variances.
+                bparams, (list): learned sequence of basis object
+                    hyperparameters
+                (float): learned observation variance
     """
-    Make Evidence lower bound objective function.
-    """
+
     N, d = X.shape
+    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+
+    # Caches for returning optimal params
+    ELBOcache = [-np.inf]
+    mcache = np.zeros(D)
+    Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
+
+    # Initial parameter vector
+    vparams = [var, regulariser, bparams]
+    posbounds = checktypes(basis.bounds, Positive)
+    pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
+                         else [0, 1])
 
     def ELBO(params):
 
@@ -110,55 +150,6 @@ def make_elbo(pcat, basis, X, D, y, diagcov):
 
         return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
 
-    return ELBO
-
-def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-                  ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
-    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
-        using the evidence lower bound (ELBO) on log-marginal likelihood.
-
-        Arguments:
-            X: (N, d) array input dataset (N samples, d dimensions)
-            y: N array targets (N samples)
-            basis: A basis object, see bases.py
-            bparams: A sequence of parameters of the basis object
-            var, (float): observation variance initial guess
-            regulariser, (float): weight regulariser (variance) initial guess
-            diagcov, (bool): approximate posterior covariance with diagional
-                matrix.
-            verbose, (bool): log learning status
-            ftol, (float): optimiser function tolerance convergence criterion
-            maxit, (int): maximum number of iterations for the optimiser
-            usegradients, (bool): True for using gradients to optimize the
-                parameters, otherwise false uses BOBYQA (from nlopt)
-
-        Returns:
-            (tuple): with elements,
-
-                m: (D,) array of posterior weight means (D is the dimension of
-                    the features)
-                C: (D,) array of posterior weight variances.
-                bparams, (list): learned sequence of basis object
-                    hyperparameters
-                (float): learned observation variance
-    """
-
-    N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
-
-    # Caches for returning optimal params
-    ELBOcache = [-np.inf]
-    mcache = np.zeros(D)
-    Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
-
-    # Initial parameter vector
-    vparams = [var, regulariser, bparams]
-    posbounds = checktypes(basis.bounds, Positive)
-    pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
-                         else [0, 1])
-
-    ELBO = make_elbo(pcat, basis, X, D, y, diagcov)
-
     # NOTE: It would be nice if the optimizer knew how to handle Positive
     # bounds when the log trick is used, so we dont have to have this boiler
     # plate...
@@ -180,7 +171,7 @@ def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
 
 def bayes_regress_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
-                      passes=10, rate=0.9, eta=1e-6, batchsize=100, 
+                      passes=10, rate=0.9, eta=1e-6, batchsize=100,
                       verbose=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
