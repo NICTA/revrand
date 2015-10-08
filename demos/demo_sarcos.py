@@ -75,13 +75,13 @@ lenARD = lenscale * np.ones(D)
 
 if useSGD:
     log.info("Using SGD regressor")
-    params = regression.bayesreg_sgd(X_train, y_train, base, [lenARD],
-                                     rate=rate, var=noise**2,
-                                     regulariser=regulariser, passes=passes,
-                                     batchsize=batchsize, eta=eta)
+    params = regression.bayes_regress_sgd(X_train, y_train, base, [lenARD],
+                                          rate=rate, var=noise**2,
+                                          regulariser=regulariser, eta=eta,
+                                          passes=passes, batchsize=batchsize)
 else:
     log.info("Using full variational regressor")
-    params = regression.bayesreg_elbo(X_train, y_train, base, [lenARD],
+    params = regression.bayes_regress(X_train, y_train, base, [lenARD],
                                       var=noise**2, diagcov=diagcov,
                                       regulariser=regulariser)
 
@@ -120,7 +120,7 @@ Sy_gp = np.sqrt(Vy_gp)
 # Predict A la Carte
 #
 
-Ey, Vf, Vy = regression.bayesreg_predict(X_test, base, *params)
+Ey, Vf, Vy = regression.bayes_predict(X_test, base, *params)
 Sy = np.sqrt(Vy)
 
 

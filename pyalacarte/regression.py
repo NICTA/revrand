@@ -29,84 +29,6 @@ from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
 # Set up logging
 log = logging.getLogger(__name__)
 
-def make_elbo(pcat, basis, X, D, y, diagcov):
-    """
-    Make Evidence lower bound objective function.
-    """
-    N, d = X.shape
-
-    def ELBO(params):
-
-        uparams = pcat.unflatten(params)
-        _var, _lambda, _theta = uparams
-
-        # Get Basis
-        Phi = basis(X, *_theta)                      # N x D
-        PhiPhi = Phi.T.dot(Phi)
-
-        # Posterior Parameters
-        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
-        m = cho_solve(LfullC, Phi.T.dot(y)) / _var
-
-        # Common calcs dependent on form of C
-        if diagcov:
-            C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
-            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
-            logdetC = np.log(C).sum()
-            TrC = C.sum()
-        else:
-            C = cho_solve(LfullC, np.eye(D))
-            TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -logdet(LfullC[0])
-            TrC = np.trace(C)
-
-        # Common computations
-        Err = y - Phi.dot(m)
-        sqErr = (Err**2).sum()
-        mm = (m**2).sum()
-
-        # Calculate ELBO
-        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
-                       + sqErr / _var
-                       + TrPhiPhiC / _var
-                       + (TrC + mm) / _lambda
-                       - logdetC
-                       + D * np.log(_lambda)
-                       - D)
-
-        # Cache square error to compute corrected variance
-        if ELBO > ELBOcache[0]:
-            mcache[:] = m
-            Ccache[:] = C
-            ELBOcache[0] = ELBO
-
-        if verbose:
-            log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
-                     .format(ELBO, _var, _lambda, _theta))
-
-        if not usegradients:
-            return -ELBO
-
-        # Grad var
-        dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
-
-        # Grad reg
-        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
-
-        # Loop through basis param grads
-        dtheta = []
-        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for dPhi in dPhis:
-            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
-            dtheta.append(dt)
-
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        dtheta = l2p(_theta, dtheta)
-
-        return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
-
-    return ELBO
 
 def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
                   ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
@@ -153,7 +75,80 @@ def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
                          else [0, 1])
 
-    ELBO = make_elbo(pcat, basis, X, D, y, diagcov)
+    def ELBO(params):
+
+        uparams = pcat.unflatten(params)
+        _var, _lambda, _theta = uparams
+
+        # Get Basis
+        Phi = basis(X, *_theta)                      # N x D
+        PhiPhi = Phi.T.dot(Phi)
+
+        # Posterior Parameters
+        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var)
+        m = cho_solve(LfullC, Phi.T.dot(y)) / _var
+
+        # Common calcs dependent on form of C
+        if diagcov:
+            C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
+            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
+            logdetC = np.log(C).sum()
+            TrC = C.sum()
+        else:
+            C = cho_solve(LfullC, np.eye(D))
+            TrPhiPhiC = (PhiPhi * C).sum()
+            logdetC = -logdet(LfullC[0])
+            TrC = np.trace(C)
+
+        # Common computations
+        Err = y - Phi.dot(m)
+        sqErr = (Err**2).sum()
+        mm = (m**2).sum()
+
+        # Calculate ELBO
+        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
+                       + sqErr / _var
+                       + TrPhiPhiC / _var
+                       + (TrC + mm) / _lambda
+                       - logdetC
+                       + D * np.log(_lambda)
+                       - D)
+
+        # NOTE: In the above, TriPhiPhiC / _var = D - TrC / _lambda when we
+        # analytically solve for C, but we need the trace terms for gradients
+        # anyway, so we'll keep them.
+
+        # Cache square error to compute corrected variance
+        if ELBO > ELBOcache[0]:
+            mcache[:] = m
+            Ccache[:] = C
+            ELBOcache[0] = ELBO
+
+        if verbose:
+            log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
+                     .format(ELBO, _var, _lambda, _theta))
+
+        if not usegradients:
+            return -ELBO
+
+        # Grad var
+        dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
+
+        # Grad reg
+        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
+
+        # Loop through basis param grads
+        dtheta = []
+        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
+        for dPhi in dPhis:
+            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
+            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
+            dtheta.append(dt)
+
+        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
+        dtheta = l2p(_theta, dtheta)
+
+        return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
 
     # NOTE: It would be nice if the optimizer knew how to handle Positive
     # bounds when the log trick is used, so we dont have to have this boiler
@@ -176,7 +171,7 @@ def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
 
 def bayes_regress_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
-                      passes=10, rate=0.9, eta=1e-6, batchsize=100, 
+                      passes=10, rate=0.9, eta=1e-6, batchsize=100,
                       verbose=True):
     """ Learn the parameters and hyperparameters of a Bayesian linear regressor
         using the evidence lower bound (ELBO) on log-marginal likelihood.
