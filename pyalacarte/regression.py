@@ -74,6 +74,10 @@ def make_elbo(pcat, basis, X, D, y, diagcov):
                        + D * np.log(_lambda)
                        - D)
 
+        # NOTE: In the above, TriPhiPhiC / _var = D - TrC / _lambda when we
+        # analytically solve for C, but we need the trace terms for gradients
+        # anyway, so we'll keep them.
+
         # Cache square error to compute corrected variance
         if ELBO > ELBOcache[0]:
             mcache[:] = m
