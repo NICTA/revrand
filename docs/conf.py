@@ -37,7 +37,6 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
 ]
 
 # Execute and display IPython code blocks inline
