@@ -3,6 +3,7 @@ Reusable decorators
 """
 
 from ..utils.base import flatten, unflatten
+from six import wraps
 
 import numpy as np 
 
@@ -26,6 +27,7 @@ def flatten_args(fn=None):
     array([[ 2. ,  4. ],
            [ 1. ,  1.8]])
     """
+    @wraps(fn)
     def new_fn(*args):
         args_flat, shapes = flatten(*args)
         result = fn(args_flat)
@@ -103,7 +105,7 @@ def vectorize_args(fn):
     >>> fun1(a) == fun3(a)
     True
     """
-
+    @wraps(fn)
     def new_fn(vec):
         return fn(*vec)
     return new_fn
@@ -171,12 +173,13 @@ def unvectorize_args(fn):
     and `ax.plot_surface`.
 
     """
-
+    @wraps(fn)
     def new_fn(*args):
         return fn(np.asarray(args))
     return new_fn
 
 def vectorize_result(fn):
+    @wraps(fn)
     def new_fn(*args):
         return np.asarray(fn(*args))
     return new_fn

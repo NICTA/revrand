@@ -2,6 +2,7 @@ import numpy as np
 
 from ..utils import flatten, unflatten
 
+from six import wraps
 from warnings import warn
 from itertools import repeat
 from functools import partial
@@ -94,7 +95,7 @@ def candidate_start_points_random(bounds, n_candidates=1000):
     ...     [(-10., -3.5), (-1., 2.)])
 
     >>> candidate_start_points.shape
-    (2, 100)
+    (2, 1000)
 
     >>> np.all(-10 <= candidate_start_points[0])
     True
@@ -176,7 +177,7 @@ def candidate_start_points_grid(bounds, nums=3):
              0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
     
     >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)]).shape
-    (2, 25)
+    (2, 9)
 
     >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=9).shape
     (2, 81)
@@ -256,6 +257,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
 
     def minimize_bounded_start_dec(minimize_func):
 
+        @wraps(minimize_func)
         def _minimize_bounded_start(fun, x0_bounds, *args, **kwargs):
             candidate_start_points = candidates_func(x0_bounds,
                 *candidates_func_args, **candidates_func_kwargs)

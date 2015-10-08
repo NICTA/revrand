@@ -1,13 +1,15 @@
 """ Various classification algorithms. """
 
 from __future__ import division
+from six.moves import reduce
 
 import numpy as np
 import logging
+
 from .optimize import minimize, sgd
-from six.moves import reduce
-from pyalacarte.utils import CatParameters, checktypes, Positive, Bound
-from pyalacarte.utils import list_to_params as l2p
+
+from .utils import CatParameters, checktypes, Positive, Bound
+from .utils import list_to_params as l2p
 
 
 # Set up logging
