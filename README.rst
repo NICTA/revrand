@@ -31,7 +31,7 @@ pyalacarte is tested to work under Python 2.7 and Python 3.4.
 License
 -------
 
-Please see [LICENSE](LICENSE)
+Please see `LICENSE <LICENSE>`_
 
 References
 ==========
