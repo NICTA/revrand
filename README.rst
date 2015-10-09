@@ -22,10 +22,12 @@ Links
 
 Source
     http://github.com/nicta/pyalacarte
+
 Documentation
     http://nicta.github.io/pyalacarte
+
 Issue tracking
-    https://github.com/nicta/pyalacarte/issues
+    https://github.com/nicta/pyalacart de/issues
 
 Dependencies
 ------------
