@@ -2,13 +2,13 @@ import numpy as np
 
 from ..utils import flatten, unflatten
 
-from six import wraps
-from warnings import warn
-from itertools import repeat
-from functools import partial
-from collections import Iterable
-from six.moves import zip_longest
 from scipy.optimize import minimize as sp_min
+from six.moves import zip_longest
+from collections import Iterable
+from functools import partial
+from itertools import repeat
+from warnings import warn
+from six import wraps
 
 def minimize(fun, x0, args=(), method=None, jac=True, bounds=None, 
              constraints=[], use_nlopt=False, **options):

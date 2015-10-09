@@ -17,13 +17,19 @@ To run the demo, just call ``alacarte_demo.py`` *if you have installed this
 package*. Otherwise, from the root directory of this package, run
 ``demos/alacarte_demo.py``.
 
-Requirements
-============
+Dependencies
+------------
 
-- Numpy
-- Scipy
-- NLopt
+pyalacarte is tested to work under Python 2.7 and Python 3.4.
+
+- NumPy >= 1.9
+- SciPy >= 0.15
+
+- NLopt 
 - bdkd-external (https://github.com/NICTA/bdkd-external) for the demo
+
+License
+-------
 
 References
 ==========
