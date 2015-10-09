@@ -17,6 +17,12 @@ To run the demo, just call ``alacarte_demo.py`` *if you have installed this
 package*. Otherwise, from the root directory of this package, run
 ``demos/alacarte_demo.py``.
 
+Installation
+------------
+
+Please see 
+
+
 Dependencies
 ------------
 
@@ -31,7 +37,12 @@ pyalacarte is tested to work under Python 2.7 and Python 3.4.
 License
 -------
 
-Please see `LICENSE <LICENSE>`_
+Licensed under the Apache License, Version 2.0. Please see `LICENSE <LICENSE>`_.
+
+Bug Reports
+-----------
+
+
 
 References
 ==========
