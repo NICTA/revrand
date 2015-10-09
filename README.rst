@@ -6,16 +6,25 @@ pyalacarte
 A Python 3 implementation of the A la Carte large scale GP
 ----------------------------------------------------------
 
-:Authors: Daniel Steinberg; Alistair Reid; Lachlan McCalman; Louis Tiao
-:organization: NICTA
-:date: 26 June 2015
+*TODO* High-level Summary
 
-Have a look at ``demos/alacarte_demo.py`` for how this compares to a normal GP.
-Have a go at tweaking the parameters of this script too.
+Quickstart
+----------
 
-To run the demo, just call ``alacarte_demo.py`` *if you have installed this
-package*. Otherwise, from the root directory of this package, run
-``demos/alacarte_demo.py``.
+To install, simply run ``setup.py``:
+
+.. code:: console
+
+   $ python setup.py install
+
+or install with ``pip``:
+
+.. code:: console
+
+   $ pip install git+https://github.com/nicta/pyalacarte.git@release
+
+Refer to `docs/installation.rst <docs/installation.rst>`_ for further 
+information.
 
 Links
 -----
@@ -29,39 +38,15 @@ Documentation
 Issue tracking
     https://github.com/nicta/pyalacarte/issues
 
-Dependencies
-------------
+Bugs & Feedback
+---------------
 
-pyalacarte is tested to work under Python 2.7 and Python 3.4.
-
-- NumPy >= 1.9
-- SciPy >= 0.15
-
-- NLopt 
-- bdkd-external (https://github.com/NICTA/bdkd-external) for the demo
-
-Installation
-------------
-
-Simply run:
-
-.. code:: console
-
-   $ python setup.py install
-
-or install with ``pip``:
-
-.. code:: console
-
-   $ pip install git+https://github.com/nicta/pyalacarte.git@release
-
-Please see `docs/installation.rst <docs/installation.rst>`_ for further 
-information.
+For bugs, questions and discussions, please use `Github Issues <https://github.com/NICTA/pyalacarte/issues>`_.
 
 Copyright & License
 -------------------
 
-Copyright 2014 National ICT Australia
+Copyright 2015 National ICT Australia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
