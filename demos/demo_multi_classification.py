@@ -2,14 +2,12 @@
 """ A La Carte GP Classification example on USPS digits dataset. """
 
 import os
-import wget
 import logging
 import numpy as np
-from subprocess import call
-from scipy.io import loadmat
 from sklearn.linear_model import LogisticRegression
 from pyalacarte import classification, bases
 from pyalacarte.validation import loglosscat, errrate
+from pyalacarte.utils.datasets import fetch_gpml_usps_resampled_data
 
 
 #
@@ -30,22 +28,13 @@ numdigits = 9
 #
 # Load data
 #
+usps_resampled = fetch_gpml_usps_resampled_data()
 
-# Pull this data down and process if not present
-dpath = 'usps_resampled/usps_resampled.mat'
-if not os.path.exists(dpath):
+X = usps_resampled.train.data
+Y = usps_resampled.train.targets
 
-    wget.download('http://www.gaussianprocess.org/gpml/data/usps_resampled'
-                  '.tar.bz2')
-    call(['tar', '-xjf', 'usps_resampled.tar.bz2'])
-
-# Extract data
-data = loadmat('usps_resampled/usps_resampled.mat')
-X = data['train_patterns'].T
-Y = np.asarray([np.argmax(y) for y in data['train_labels'].T])
-
-Xs = data['test_patterns'].T
-Ys = np.asarray([np.argmax(y) for y in data['test_labels'].T])
+Xs = usps_resampled.test.data
+Ys = usps_resampled.test.targets
 
 # Sort and Remove excess labels (specified by numdigits)
 sorted_idx = np.argsort(Y)

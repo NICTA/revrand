@@ -32,8 +32,10 @@ Have a look at some of the `demos <demos/>`_, e.g.:
 
    $ python demos/demo_alacarte.py
 
-Links
------
+*TODO* Super simple example here with maybe a plot of some kind.
+
+Useful Links
+------------
 
 Home Page
     http://github.com/nicta/pyalacarte
@@ -52,7 +54,7 @@ For bugs, questions and discussions, please use `Github Issues <https://github.c
 Copyright & License
 -------------------
 
-Copyright 2015 National ICT Australia
+Copyright 2015 National ICT Australia.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
