@@ -10,6 +10,7 @@ import requests
 import tarfile
 import os
 
+from six.moves import urllib
 from scipy.io import loadmat
 from io import BytesIO
 
@@ -42,6 +43,53 @@ def get_data_home(data_home=None):
     
     return data_home
 
+def fetch_gpml_sarcos_data(transpose_data=True, data_home=None):
+    """
+    TODO: Make a little bit more DRY...
+
+    >>> gpml_sarcos = fetch_gpml_sarcos_data()
+    
+    >>> gpml_sarcos.train.data.shape
+    (44484, 27)
+
+    >>> gpml_sarcos.train.targets.shape
+    (44484,)
+
+    >>> gpml_sarcos.train.targets.round(2) # doctest: +ELLIPSIS 
+    array([ 8.09,  7.76,  7.29, ...,  1.89,  2.49,  2.86])
+
+    >>> gpml_sarcos.test.data.shape
+    (4449, 27)
+
+    >>> gpml_sarcos.test.targets.shape
+    (4449,)
+    """
+    train_src_url = "http://www.gaussianprocess.org/gpml/data/sarcos_inv.mat"
+    test_src_url = ("http://www.gaussianprocess.org/gpml/data/sarcos_inv_test"
+                    ".mat")
+
+    data_home = get_data_home(data_home=data_home)
+
+    train_filename = os.path.join(data_home, 'sarcos_inv.mat')
+    test_filename  = os.path.join(data_home, 'sarcos_inv_test.mat')
+
+    if not os.path.exists(train_filename):
+        urllib.request.urlretrieve(train_src_url, train_filename)
+
+    if not os.path.exists(test_filename):
+        urllib.request.urlretrieve(test_src_url,  test_filename)
+
+    train_data = loadmat(train_filename).get('sarcos_inv')
+    test_data  = loadmat(test_filename).get('sarcos_inv_test')
+
+    train_bunch = Bunch(data=train_data[:, :-1], 
+                        targets=train_data[:, -1])
+
+    test_bunch = Bunch(data=test_data[:, :-1], 
+                       targets=test_data[:, -1])
+
+    return Bunch(train=train_bunch, test=test_bunch)
+
 def fetch_gpml_usps_resampled_data(transpose_data=True, data_home=None):
     """
     >>> usps_resampled = fetch_gpml_usps_resampled_data()
@@ -70,7 +118,6 @@ def fetch_gpml_usps_resampled_data(transpose_data=True, data_home=None):
     >>> usps_resampled = fetch_gpml_usps_resampled_data(transpose_data=False)
     >>> usps_resampled.train.data.shape
     (256, 4649)
-
     """
     data_home = get_data_home(data_home=data_home)
     data_filename = os.path.join(data_home, 'usps_resampled/usps_resampled.mat')
@@ -78,7 +125,7 @@ def fetch_gpml_usps_resampled_data(transpose_data=True, data_home=None):
     if not os.path.exists(data_filename):
 
         r = requests.get('http://www.gaussianprocess.org/gpml/data/usps_resampled'
-                         '.tar.bz2', stream=True)
+                         '.tar.bz2')
 
         with tarfile.open(fileobj=BytesIO(r.content)) as tar_infile:
             tar_infile.extract('usps_resampled/usps_resampled.mat', path=data_home) 

@@ -2,14 +2,13 @@
 """ A La Carte GP Application to SARCOS dataset. """
 
 import os
-import wget
 import logging
 import numpy as np
 import computers.gp as gp
-from scipy.io import loadmat
+
 from pyalacarte import regression, bases
 from pyalacarte.validation import smse, msll
-
+from pyalacarte.utils.datasets import fetch_gpml_sarcos_data
 
 #
 # Settings
@@ -37,26 +36,13 @@ diagcov = True
 # Load data
 #
 
-# Pull this down and process if not present
-if not os.path.exists('sarcos_test.npy') or \
-        not os.path.exists('sarcos_train.npy'):
+gpml_sarcos = fetch_gpml_sarcos_data()
 
-    wget.download('http://www.gaussianprocess.org/gpml/data/sarcos_inv.mat')
-    wget.download('http://www.gaussianprocess.org/gpml/data/sarcos_inv_test'
-                  '.mat')
-    sarcostrain = loadmat('sarcos_inv.mat')['sarcos_inv']
-    sarcostest = loadmat('sarcos_inv_test.mat')['sarcos_inv_test']
-    np.save('sarcos_train.npy', sarcostrain)
-    np.save('sarcos_test.npy', sarcostest)
-    del sarcostest, sarcostrain
+X_train = gpml_sarcos.train.data
+y_train = gpml_sarcos.train.targets
 
-sarcos_train = np.load('sarcos_train.npy')
-sarcos_test = np.load('sarcos_test.npy')
-
-X_train = sarcos_train[:, 0:21]
-X_test = sarcos_test[:, 0:21]
-y_train = sarcos_train[:, 21]
-y_test = sarcos_test[:, 21]
+X_test = gpml_sarcos.test.data
+y_test = gpml_sarcos.test.targets
 
 Ntrain, D = X_train.shape
 
