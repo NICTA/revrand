@@ -58,19 +58,19 @@ or install with ``pip``:
 Please see `docs/installation.rst <docs/installation.rst>`_ for further 
 information.
 
-License
--------
+Copyright & License
+-------------------
 
-Licensed under the Apache License, Version 2.0. Please see `LICENSE <LICENSE>`_.
+Copyright 2014 National ICT Australia
 
-Bug Reports
------------
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-
-References
-==========
-
-.. [#] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte -- Learning 
-       Fast Kernels". Proceedings of the Eighteenth International Conference on
-       Artificial Intelligence and Statistics, pp. 1098–1106, 2015.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
