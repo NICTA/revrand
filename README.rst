@@ -17,23 +17,15 @@ To run the demo, just call ``alacarte_demo.py`` *if you have installed this
 package*. Otherwise, from the root directory of this package, run
 ``demos/alacarte_demo.py``.
 
-Installation
-------------
+Links
+-----
 
-Simply run:
-
-.. code:: console
-
-   $ python setup.py install
-
-You can also install directly from Github:
-
-.. code:: console
-
-   $ pip install git+git://github.com/nicta/pyalacarte.git@release
-
-Please see `docs/installation.rst <docs/installation.rst>`_ for further 
-information.
+Source
+    http://github.com/nicta/pyalacarte
+Documentation
+    http://nicta.github.io/pyalacarte
+Issue tracking
+    https://github.com/nicta/pyalacarte/issues
 
 Dependencies
 ------------
@@ -43,8 +35,29 @@ pyalacarte is tested to work under Python 2.7 and Python 3.4.
 - NumPy >= 1.9
 - SciPy >= 0.15
 
+Optional
+++++++++
+
 - NLopt 
 - bdkd-external (https://github.com/NICTA/bdkd-external) for the demo
+
+Installation
+------------
+
+Simply run:
+
+.. code:: console
+
+   $ python setup.py install
+
+or install with ``pip``:
+
+.. code:: console
+
+   $ pip install git+https://github.com/nicta/pyalacarte.git@release
+
+Please see `docs/installation.rst <docs/installation.rst>`_ for further 
+information.
 
 License
 -------

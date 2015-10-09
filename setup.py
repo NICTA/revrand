@@ -18,10 +18,20 @@ setup(
         'wget >= 2.2',
         # NLopt >= 2.4.2
     ],
+    license = "Apache Software License 2.0",
     classifiers=[
         "Development Status :: 3 - Alpha",
+        "Operating System :: POSIX",
         "License :: OSI Approved :: Apache Software License",
+        "Natural Language :: English",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.4",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Scientific/Engineering :: Information Analysis",
     ]
 )
+
