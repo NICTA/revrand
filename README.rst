@@ -20,6 +20,10 @@ package*. Otherwise, from the root directory of this package, run
 Installation
 ------------
 
+.. code:: console
+
+   $ python setup.py
+
 Please see `docs/installation.rst <docs/installation.rst>`_.
 
 Dependencies
