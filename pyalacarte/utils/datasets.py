@@ -7,7 +7,6 @@ http://scikit-learn.org/stable/modules/classes.html#module-sklearn.datasets
 
 import numpy as np
 import requests
-import tempfile
 import tarfile
 import os
 
@@ -74,16 +73,17 @@ def fetch_gpml_usps_resampled_data(transpose_data=True, data_home=None):
 
     """
     data_home = get_data_home(data_home=data_home)
-    
-    r = requests.get('http://www.gaussianprocess.org/gpml/data/usps_resampled'
-                     '.tar.bz2', stream=True)
+    data_filename = os.path.join(data_home, 'usps_resampled/usps_resampled.mat')
 
-    with tempfile.NamedTemporaryFile() as temp_outfile:
+    if not os.path.exists(data_filename):
+
+        r = requests.get('http://www.gaussianprocess.org/gpml/data/usps_resampled'
+                         '.tar.bz2', stream=True)
+
         with tarfile.open(fileobj=BytesIO(r.content)) as tar_infile:
-            with tar_infile.extractfile('usps_resampled/usps_resampled.mat') \
-                as member_infile:
-                    temp_outfile.write(member_infile.read())
-        matlab_dict = loadmat(temp_outfile.name)
+            tar_infile.extract('usps_resampled/usps_resampled.mat', path=data_home) 
+
+    matlab_dict = loadmat(data_filename)
 
     train_data = matlab_dict['train_patterns']
     test_data  = matlab_dict['test_patterns']
