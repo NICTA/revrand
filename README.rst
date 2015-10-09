@@ -27,7 +27,7 @@ Documentation
     http://nicta.github.io/pyalacarte
 
 Issue tracking
-    https://github.com/nicta/pyalacart de/issues
+    https://github.com/nicta/pyalacarte/issues
 
 Dependencies
 ------------
