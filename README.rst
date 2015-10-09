@@ -20,7 +20,7 @@ package*. Otherwise, from the root directory of this package, run
 Links
 -----
 
-Source
+Home Page
     http://github.com/nicta/pyalacarte
 
 Documentation
