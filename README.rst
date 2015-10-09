@@ -26,6 +26,12 @@ or install with ``pip``:
 Refer to `docs/installation.rst <docs/installation.rst>`_ for further 
 information.
 
+Have a look at some of the `demos <demos/>`_, e.g.: 
+
+.. code:: console
+
+   $ python demos/demo_alacarte.py
+
 Links
 -----
 
