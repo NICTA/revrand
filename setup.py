@@ -17,5 +17,11 @@ setup(
         'numpy >= 1.8.2',
         'wget >= 2.2',
         # NLopt >= 2.4.2
+    ],
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "License :: OSI Approved :: Apache Software License",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Information Analysis",
     ]
 )

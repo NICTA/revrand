@@ -20,11 +20,20 @@ package*. Otherwise, from the root directory of this package, run
 Installation
 ------------
 
+Simply run:
+
 .. code:: console
 
-   $ python setup.py
+   $ python setup.py install
 
-Please see `docs/installation.rst <docs/installation.rst>`_.
+You can also install directly from Github:
+
+.. code:: console
+
+   $ pip install git+git://github.com/nicta/pyalacarte.git@release
+
+Please see `docs/installation.rst <docs/installation.rst>`_ for further 
+information.
 
 Dependencies
 ------------
