@@ -37,9 +37,6 @@ pyalacarte is tested to work under Python 2.7 and Python 3.4.
 - NumPy >= 1.9
 - SciPy >= 0.15
 
-Optional
-++++++++
-
 - NLopt 
 - bdkd-external (https://github.com/NICTA/bdkd-external) for the demo
 
