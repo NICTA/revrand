@@ -20,8 +20,7 @@ package*. Otherwise, from the root directory of this package, run
 Installation
 ------------
 
-Please see 
-
+Please see `docs/installation.rst <docs/installation.rst>`_.
 
 Dependencies
 ------------
