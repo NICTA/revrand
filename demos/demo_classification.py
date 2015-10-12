@@ -1,16 +1,16 @@
 #! /usr/bin/env python3
 """ A La Carte GP Classification example on USPS digits dataset. """
 
-import os
-import wget
-import logging
-import numpy as np
-from subprocess import call
-from scipy.io import loadmat
-from sklearn.linear_model import LogisticRegression
-from pyalacarte import classification, bases
+from pyalacarte.utils.datasets import fetch_gpml_usps_resampled_data
 from pyalacarte.validation import loglosscat, errrate
-
+from pyalacarte import classification, bases
+from sklearn.linear_model import LogisticRegression
+from scipy.io import loadmat
+from subprocess import call
+import numpy as np
+import logging
+import wget
+import os
 
 #
 # Settings
@@ -34,27 +34,29 @@ passes = 5000
 # Load data
 #
 
-# Pull this data down and process if not present
-dpath = 'usps_resampled/usps_resampled.mat'
-if not os.path.exists(dpath):
+usps_resampled = fetch_gpml_usps_resampled_data()
 
-    wget.download('http://www.gaussianprocess.org/gpml/data/usps_resampled'
-                  '.tar.bz2')
-    call(['tar', '-xjf', 'usps_resampled.tar.bz2'])
+# Training dataset
+ind1 = usps_resampled.train.targets == dig1
+ind2 = usps_resampled.train.targets == dig2 
 
-# Extract data
-data = loadmat('usps_resampled/usps_resampled.mat')
-ind1 = data['train_labels'][dig1, :] == 1
-ind2 = data['train_labels'][dig2, :] == 1
-X = np.hstack((data['train_patterns'][:, ind1],
-               data['train_patterns'][:, ind2])).T
-Y = np.concatenate((np.ones(ind1.sum()), np.zeros(ind2.sum())))
+X = usps_resampled.train.data[ind1 | ind2]
 
-ind1 = data['test_labels'][dig1, :] == 1
-ind2 = data['test_labels'][dig2, :] == 1
-Xs = np.hstack((data['test_patterns'][:, ind1],
-                data['test_patterns'][:, ind2])).T
-Ys = np.concatenate((np.ones(ind1.sum()), np.zeros(ind2.sum())))
+usps_resampled.train.targets[ind1] = 1
+usps_resampled.train.targets[ind2] = 0
+
+Y = usps_resampled.train.targets[ind1 | ind2]
+
+# Test dataset
+ind1 = usps_resampled.test.targets == dig1
+ind2 = usps_resampled.test.targets == dig2 
+
+Xs = usps_resampled.test.data[ind1 | ind2]
+
+usps_resampled.test.targets[ind1] = 1
+usps_resampled.test.targets[ind2] = 0
+
+Ys = usps_resampled.test.targets[ind1 | ind2]
 
 # Classify
 Phi = bases.RandomRBF(nbases, X.shape[1])
