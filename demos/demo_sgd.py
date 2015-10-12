@@ -5,7 +5,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 from pyalacarte.optimize import minimize, sgd
-from pyalacarte.bases import RadialBasis
+from pyalacarte.basis_functions import RadialBasis
 
 
 # Objective function

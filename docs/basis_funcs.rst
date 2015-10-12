@@ -1,7 +1,7 @@
 Basis Functions
 ===============
 
-.. automodule:: pyalacarte.bases
+.. automodule:: pyalacarte.basis_functions
    :members:
    :undoc-members:
    :show-inheritance:

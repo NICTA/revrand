@@ -10,6 +10,23 @@ class Bunch(dict):
     """
     Container object for datasets: dictionary-like object that exposes 
     its keys as attributes.
+
+    Examples
+    --------
+    >>> b = Bunch(foo=42, bar=10)
+    >>> b == {'foo': 42, 'bar': 10}
+    True
+    >>> b.foo
+    42
+    >>> b.bar
+    10
+    >>> b['foo']
+    42
+    >>> b.baz = 61
+    >>> b.baz
+    61
+    >>> b['baz']
+    61
     """
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
@@ -254,7 +271,7 @@ def nwise(iterable, n):
 
 pairwise = partial(nwise, n=2)
 
-
+# Python 3 only (variable length arguments before keyword arguments)
 def flatten(*arys, order='C', returns_shapes=True):
     """
     Flatten a variable number of ndarrays and/or numpy scalars (0darray) 

@@ -4,7 +4,7 @@
 import logging
 import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte import classification, bases
+from pyalacarte import classification, basis_functions
 # from pyalacarte.validation import logloss, errrate
 
 
@@ -41,7 +41,7 @@ Xs = np.linspace(-2.5 * np.pi, 2.5 * np.pi, Npred)[:, np.newaxis]
 
 
 # Train
-Phi = bases.RandomRBF(nbases, X.shape[1])
+Phi = basis_functions.RandomRBF(nbases, X.shape[1])
 if method == 'SGD':
     weights, l = classification.logistic_sgd(X, Y, Phi, (lenscale,),
                                              regulariser=reg, eta=eta,

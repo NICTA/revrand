@@ -5,19 +5,30 @@ from setuptools import setup
 
 setup(
     name='pyalacarte',
-    version='0.1',
+    version='0.1rc1',
     description='Implementation of the A la Carte approximation of Gaussian'
                 'processes, amongst other things.',
     author='Daniel Steinberg',
     author_email='daniel.steinberg@nicta.com.au',
-    url='',
+    url='http://github.com/nicta/pyalacarte',
     packages=['pyalacarte'],
+    scripts = [
+        'demos/demo_multi_classification.py',
+        'demos/demo_classify_simple.py',
+        'demos/demo_classification.py',
+        'demos/demo_alacarte.py',
+        'demos/demo_sarcos.py',
+        'demos/demo_sgd.py',
+    ],
     install_requires=[
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',
-        'wget >= 2.2',
         # NLopt >= 2.4.2
     ],
+    extras_require={
+        # 'nonlinear': ['NLopt'],
+        # 'demos': ['requests', 'bdkd-external'],
+    },
     license = "Apache Software License 2.0",
     classifiers=[
         "Development Status :: 3 - Alpha",

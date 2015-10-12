@@ -3,7 +3,7 @@
 
 from pyalacarte.utils.datasets import fetch_gpml_usps_resampled_data
 from pyalacarte.validation import loglosscat, errrate
-from pyalacarte import classification, bases
+from pyalacarte import classification, basis_functions
 from sklearn.linear_model import LogisticRegression
 from scipy.io import loadmat
 from subprocess import call
@@ -59,7 +59,7 @@ usps_resampled.test.targets[ind2] = 0
 Ys = usps_resampled.test.targets[ind1 | ind2]
 
 # Classify
-Phi = bases.RandomRBF(nbases, X.shape[1])
+Phi = basis_functions.RandomRBF(nbases, X.shape[1])
 if method == 'SGD':
     weights, labels = classification.logistic_sgd(X, Y, Phi, (lenscale,),
                                           regulariser=reg, passes = passes)

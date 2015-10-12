@@ -5,7 +5,7 @@ import os
 import logging
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from pyalacarte import classification, bases
+from pyalacarte import classification, basis_functions
 from pyalacarte.validation import loglosscat, errrate
 from pyalacarte.utils.datasets import fetch_gpml_usps_resampled_data
 
@@ -52,7 +52,7 @@ Ys = Ys[:end_id_s]
 
 
 # Classify
-Phi = bases.RandomRBF(nbases, X.shape[1])
+Phi = basis_functions.RandomRBF(nbases, X.shape[1])
 if method == 'SGD':
     weights, labels = classification.logistic_sgd(X, Y, Phi, (lenscale,),
                                           regulariser=reg)

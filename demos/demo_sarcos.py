@@ -6,7 +6,7 @@ import logging
 import numpy as np
 import computers.gp as gp
 
-from pyalacarte import regression, bases
+from pyalacarte import regression, basis_functions
 from pyalacarte.validation import smse, msll
 from pyalacarte.utils.datasets import fetch_gpml_sarcos_data
 
@@ -56,7 +56,7 @@ y_train_sub = y_train[train_ind]
 # Train A la Carte
 #
 
-base = bases.RandomRBF_ARD(nbases, D)
+base = basis_functions.RandomRBF_ARD(nbases, D)
 lenARD = lenscale * np.ones(D)
 
 if useSGD:

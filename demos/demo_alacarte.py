@@ -4,7 +4,7 @@
 import logging
 import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte import bases, regression
+from pyalacarte import basis_functions, regression
 from pyalacarte.validation import mll, smse
 from scipy.spatial.distance import cdist
 import computers.gp as gp
@@ -88,19 +88,19 @@ def main():
     #
 
     if basis == 'FF':
-        base = bases.FastFood(nbases, Xtrain.shape[1])
+        base = basis_functions.FastFood(nbases, Xtrain.shape[1])
     elif basis == 'RKS':
-        base = bases.RandomRBF(nbases, Xtrain.shape[1])
+        base = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
     elif basis == 'RBF':
-        base = bases.RadialBasis(Xtrain)
+        base = basis_functions.RadialBasis(Xtrain)
     elif basis == 'Linear':
-        base = bases.LinearBasis(onescol=True)
+        base = basis_functions.LinearBasis(onescol=True)
     elif basis == 'Poly':
-        base = bases.PolynomialBasis(order)
+        base = basis_functions.PolynomialBasis(order)
     elif basis == 'Combo':
-        base1 = bases.RandomRBF(nbases, Xtrain.shape[1])
-        base2 = bases.LinearBasis(onescol=True)
-        base3 = bases.FastFood(nbases, Xtrain.shape[1])
+        base1 = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
+        base2 = basis_functions.LinearBasis(onescol=True)
+        base3 = basis_functions.FastFood(nbases, Xtrain.shape[1])
         base = base1 + base2 + base3
     else:
         raise ValueError('Invalid basis!')
