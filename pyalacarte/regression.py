@@ -32,33 +32,36 @@ log = logging.getLogger(__name__)
 
 def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
                   ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
-    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
-        using the evidence lower bound (ELBO) on log-marginal likelihood.
+    """
+    Learn the parameters and hyperparameters of a Bayesian linear 
+    regressor using the evidence lower bound (ELBO) on log-marginal 
+    likelihood.
 
-        Arguments:
-            X: (N, d) array input dataset (N samples, d dimensions)
-            y: N array targets (N samples)
-            basis: A basis object, see bases.py
-            bparams: A sequence of parameters of the basis object
-            var, (float): observation variance initial guess
-            regulariser, (float): weight regulariser (variance) initial guess
-            diagcov, (bool): approximate posterior covariance with diagional
-                matrix.
-            verbose, (bool): log learning status
-            ftol, (float): optimiser function tolerance convergence criterion
-            maxit, (int): maximum number of iterations for the optimiser
-            usegradients, (bool): True for using gradients to optimize the
-                parameters, otherwise false uses BOBYQA (from nlopt)
+    Arguments:
+        X: (N, d) array input dataset (N samples, d dimensions)
+        y: N array targets (N samples)
+        basis: A basis object, see bases.py
+        bparams: A sequence of parameters of the basis object
+        var, (float): observation variance initial guess
+        regulariser, (float): weight regulariser (variance) initial 
+        guess diagcov, (bool): approximate posterior covariance with 
+        diagional matrix.
+        verbose, (bool): log learning status
+        ftol, (float): optimiser function tolerance convergence 
+        criterion 
+        maxit, (int): maximum number of iterations for the optimiser
+        usegradients, (bool): True for using gradients to optimize the
+            parameters, otherwise false uses BOBYQA (from nlopt)
 
-        Returns:
-            (tuple): with elements,
+    Returns:
+        (tuple): with elements,
 
-                m: (D,) array of posterior weight means (D is the dimension of
-                    the features)
-                C: (D,) array of posterior weight variances.
-                bparams, (list): learned sequence of basis object
-                    hyperparameters
-                (float): learned observation variance
+            m: (D,) array of posterior weight means (D is the dimension 
+                of the features)
+            C: (D,) array of posterior weight variances.
+            bparams, (list): learned sequence of basis object
+                hyperparameters
+            (float): learned observation variance
     """
 
     N, d = X.shape

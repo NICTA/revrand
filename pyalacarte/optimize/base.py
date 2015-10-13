@@ -2,7 +2,6 @@ import numpy as np
 
 from ..utils import flatten, unflatten
 
-from scipy.optimize import minimize as sp_min
 from six.moves import zip_longest
 from collections import Iterable
 from functools import partial
@@ -10,8 +9,29 @@ from itertools import repeat
 from warnings import warn
 from six import wraps
 
+MINIMIZER_BACKENDS = [
+    'scipy', 
+    'nlopt'
+]
+
+def get_minimizer(backend='scipy'):
+    """
+    >>> sp = get_minimizer()
+    >>> dir(sp)
+    """
+    if backend not in MINIMIZER_BACKENDS:
+        raise ValueError('backend "{}" not supported!'.format(backend))
+
+    if backend == 'scipy':
+        sp = __import__('scipy.optimize', globals(), locals(), ('minimize'))
+        return sp
+
+    if backend == 'nlopt':
+        nl = __import__('nlopt_wrap', globals(), locals(), ('minimize'), 1)
+        return nl
+
 def minimize(fun, x0, args=(), method=None, jac=True, bounds=None, 
-             constraints=[], use_nlopt=False, **options):
+             constraints=[], backend='scipy', **options):
     """
     Scipy.optimize.minimize-style wrapper for NLopt and scipy's minimize.
 
