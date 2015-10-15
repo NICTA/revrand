@@ -56,6 +56,10 @@ html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
+ghp: html
+	ghp-import -n -p $(BUILDDIR)/html
+	@echo "Deployment to Github Pages finished."
+
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo

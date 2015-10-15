@@ -9,26 +9,30 @@ from itertools import repeat
 from warnings import warn
 from six import wraps
 
-MINIMIZER_BACKENDS = [
-    'scipy', 
-    'nlopt'
+MINIMIZE_BACKENDS = [
+    'scipy',
+    'nlopt',
+#    'sgd'
 ]
 
-def get_minimizer(backend='scipy'):
+def get_minimize(backend='scipy'):
     """
-    >>> sp = get_minimizer()
-    >>> dir(sp)
+    >>> minimize = get_minimize() # doctest: +SKIP
+    >>> minimize = get_minimize('nlopt') # doctest: +SKIP
+    >>> minimize = get_minimize('foo') # doctest: +SKIP
     """
-    if backend not in MINIMIZER_BACKENDS:
-        raise ValueError('backend "{}" not supported!'.format(backend))
-
-    if backend == 'scipy':
-        sp = __import__('scipy.optimize', globals(), locals(), ('minimize'))
-        return sp
+    from .spopt_wrap import minimize
 
     if backend == 'nlopt':
-        nl = __import__('nlopt_wrap', globals(), locals(), ('minimize'), 1)
-        return nl
+        try:
+            from .nlopt_wrap import minimize
+        except ImportError:
+            warn('NLopt could not be imported. Defaulting to scipy.optimize')
+    else:
+        warn('Backend "{}" not recognized. Defaulting to scipy.optimize' \
+            .format(backend))
+
+    return minimize
 
 def minimize(fun, x0, args=(), method=None, jac=True, bounds=None, 
              constraints=[], backend='scipy', **options):
@@ -62,22 +66,18 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
             message, (str): Description of the cause of the termination (see
                 NLopts documentation for codes).
             fun, (float): Final value of objective function.
-    """
-    if use_nlopt:
-    
-        if bounds is None:
-            bounds = []
-    
-        try:
-            from .nlopt_wrap import minimize as nl_min
-        except ImportError:
-            warn("NLopt could not be imported. Defaulting to scipy.optimize")
-        else:
-            return nl_min(fun, x0, args=args, method=method, jac=jac, 
-                          bounds=bounds, constraints=constraints, **options)
 
-    return sp_min(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
-                  constraints=constraints, options=options)
+    Examples
+    --------
+    >>> from scipy.optimize import rosen, rosen_der
+    >>> x0 = np.array([ 0.875,  0.75 ])
+    >>> minimize(rosen, x0, method='LD_LBFGS', jac=rosen_der, backend='nlopt')
+    >>> minimize(rosen, x0, method='L-BFGS-B', jac=rosen_der)
+    """
+    min_ = get_minimize(backend)
+
+    return min_(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
+                constraints=constraints, **options)
 
 def candidate_start_points_random(bounds, n_candidates=1000):
     """

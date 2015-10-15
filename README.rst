@@ -23,8 +23,8 @@ or install with ``pip``:
 
    $ pip install git+https://github.com/nicta/pyalacarte.git@release
 
-Refer to `docs/installation.rst <docs/installation.rst>`_ for further 
-information.
+Refer to `docs/installation.rst <docs/installation.rst>`_ for advanced 
+installation instructions.
 
 Have a look at some of the `demos <demos/>`_, e.g.: 
 

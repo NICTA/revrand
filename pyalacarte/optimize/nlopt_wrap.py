@@ -1,7 +1,4 @@
-import numpy as np
 import nlopt
-
-from ..utils import couple
 
 from scipy.optimize import OptimizeResult
 from six.moves import filter
@@ -37,7 +34,7 @@ NLOPT_MESSAGES = {
                        "function or constraints."
 }
 
-def minimize(fun, x0, args=(), method=None, jac=None, bounds=[], 
+def minimize(fun, x0, args=(), method=None, jac=None, bounds=None, 
              constraints=[], **options):
     """
     Parameters

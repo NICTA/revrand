@@ -12,7 +12,7 @@ setup(
     author_email='daniel.steinberg@nicta.com.au',
     url='http://github.com/nicta/pyalacarte',
     packages=['pyalacarte'],
-    scripts = [
+    scripts=[
         'demos/demo_multi_classification.py',
         'demos/demo_classify_simple.py',
         'demos/demo_classification.py',
@@ -29,7 +29,7 @@ setup(
         # 'nonlinear': ['NLopt'],
         # 'demos': ['requests', 'bdkd-external'],
     },
-    license = "Apache Software License 2.0",
+    license="Apache Software License 2.0",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Operating System :: POSIX",
@@ -45,4 +45,3 @@ setup(
         "Topic :: Scientific/Engineering :: Information Analysis",
     ]
 )
-
