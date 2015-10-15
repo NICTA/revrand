@@ -8,7 +8,7 @@
     
     <title>Regression &mdash; pyalacarte 0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -26,9 +26,16 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
     <link rel="next" title="Optimization" href="optimize.html" />
-    <link rel="prev" title="Basis Functions" href="bases.html" /> 
+    <link rel="prev" title="Welcome to pyalacarte’s documentation!" href="index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
   </head>
   <body role="document">
+
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,41 +49,11 @@
           <a href="optimize.html" title="Optimization"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="bases.html" title="Basis Functions"
+          <a href="index.html" title="Welcome to pyalacarte’s documentation!"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
       </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="bases.html"
-                        title="previous chapter">Basis Functions</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="optimize.html"
-                        title="next chapter">Optimization</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/regression.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
@@ -142,8 +119,9 @@ D dimensions)</li>
 <dl class="function">
 <dt id="pyalacarte.regression.bayes_regress">
 <code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em>, <em>usegradients=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayes_regress" title="Permalink to this definition">¶</a></dt>
-<dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor
-using the evidence lower bound (ELBO) on log-marginal likelihood.</p>
+<dd><p>Learn the parameters and hyperparameters of a Bayesian linear
+regressor using the evidence lower bound (ELBO) on log-marginal
+likelihood.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -154,11 +132,12 @@ using the evidence lower bound (ELBO) on log-marginal likelihood.</p>
 <li><strong>basis</strong> &#8211; A basis object, see bases.py</li>
 <li><strong>bparams</strong> &#8211; A sequence of parameters of the basis object</li>
 <li><strong>var,</strong> (<em>float</em>) &#8211; observation variance initial guess</li>
-<li><strong>regulariser,</strong> (<em>float</em>) &#8211; weight regulariser (variance) initial guess</li>
-<li><strong>diagcov,</strong> (<em>bool</em>) &#8211; approximate posterior covariance with diagional
-matrix.</li>
+<li><strong>regulariser,</strong> (<em>float</em>) &#8211; weight regulariser (variance) initial</li>
+<li><strong>diagcov,</strong> (<em>guess</em>) &#8211; approximate posterior covariance with</li>
+<li><strong>matrix.</strong> (<em>diagional</em>) &#8211; </li>
 <li><strong>verbose,</strong> (<em>bool</em>) &#8211; log learning status</li>
-<li><strong>ftol,</strong> (<em>float</em>) &#8211; optimiser function tolerance convergence criterion</li>
+<li><strong>ftol,</strong> (<em>float</em>) &#8211; optimiser function tolerance convergence</li>
+<li><strong>criterion</strong> &#8211; </li>
 <li><strong>maxit,</strong> (<em>int</em>) &#8211; maximum number of iterations for the optimiser</li>
 <li><strong>usegradients,</strong> (<em>bool</em>) &#8211; True for using gradients to optimize the
 parameters, otherwise false uses BOBYQA (from nlopt)</li>
@@ -167,8 +146,8 @@ parameters, otherwise false uses BOBYQA (from nlopt)</li>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with elements,</p>
 <dl class="docutils">
-<dt>m: (D,) array of posterior weight means (D is the dimension of</dt>
-<dd><p class="first last">the features)</p>
+<dt>m: (D,) array of posterior weight means (D is the dimension</dt>
+<dd><p class="first last">of the features)</p>
 </dd>
 </dl>
 <p>C: (D,) array of posterior weight variances.
@@ -234,16 +213,33 @@ bparams, (list): learned sequence of basis object</p>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="pyalacarte.regression.make_elbo">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">make_elbo</code><span class="sig-paren">(</span><em>pcat</em>, <em>basis</em>, <em>X</em>, <em>D</em>, <em>y</em>, <em>diagcov</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.make_elbo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make Evidence lower bound objective function.</p>
-</dd></dl>
-
 </div>
 
 
           </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to pyalacarte&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="optimize.html"
+                        title="next chapter">Optimization</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -261,7 +257,7 @@ bparams, (list): learned sequence of basis object</p>
           <a href="optimize.html" title="Optimization"
              >next</a> |</li>
         <li class="right" >
-          <a href="bases.html" title="Basis Functions"
+          <a href="index.html" title="Welcome to pyalacarte’s documentation!"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
       </ul>

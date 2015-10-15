@@ -8,7 +8,7 @@
     
     <title>Demos &mdash; pyalacarte 0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -25,9 +25,16 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
-    <link rel="prev" title="Utilities" href="utils.html" /> 
+    <link rel="prev" title="Utilities" href="utils.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
   </head>
   <body role="document">
+
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,19 +49,31 @@
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
       </ul>
-    </div>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="demos">
+<h1>Demos<a class="headerlink" href="#demos" title="Permalink to this headline">¶</a></h1>
+<p>(<a class="reference external" href="./../demos/demo_alacarte.py">Source code</a>, <a class="reference external" href="./../demos/demo_alacarte.png">png</a>, <a class="reference external" href="./../demos/demo_alacarte.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_alacarte.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/demo_alacarte.png" src="_images/demo_alacarte.png" />
+</div>
+<p>(<a class="reference external" href="./../demos/demo_multi_classification.py">Source code</a>)</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="utils.html"
                         title="previous chapter">Utilities</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/demo.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -68,38 +87,6 @@
     </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <div class="section" id="demos">
-<h1>Demos<a class="headerlink" href="#demos" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="gp">   ...: </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="gp">   ...: </span>
-
-<span class="gp">In [2]: </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-
-<span class="gp">In [3]: </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>
-
-<span class="gp">In [4]: </span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="gp">   ...: </span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
-<span class="gp">   ...: </span><span class="n">axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
-<span class="gp">   ...: </span><span class="n">axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
-<span class="gp">   ...: </span><span class="n">axes</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">)</span>
-<span class="gp">   ...: </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">();</span>
-<span class="gp">   ...: </span>
-</pre></div>
-</div>
-<a class="reference internal image-reference" href="_images/plot.png"><img alt="_images/plot.png" src="_images/plot.png" style="width: 4in;" /></a>
-</div>
-
-
-          </div>
         </div>
       </div>
       <div class="clearer"></div>

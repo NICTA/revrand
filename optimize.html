@@ -8,7 +8,7 @@
     
     <title>Optimization &mdash; pyalacarte 0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -26,9 +26,16 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
     <link rel="next" title="Utilities" href="utils.html" />
-    <link rel="prev" title="Regression" href="regression.html" /> 
+    <link rel="prev" title="Regression" href="regression.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
   </head>
   <body role="document">
+
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -46,46 +53,74 @@
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
       </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="regression.html"
-                        title="previous chapter">Regression</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="utils.html"
-                        title="next chapter">Utilities</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/optimize.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-pyalacarte.optimize">
-<span id="optimization"></span><h1>Optimization<a class="headerlink" href="#module-pyalacarte.optimize" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference internal" href="#module-pyalacarte.optimize" title="pyalacarte.optimize"><code class="xref py py-mod docutils literal"><span class="pre">pyalacarte.optimize</span></code></a> module provides methods for optimization.</p>
+  <div class="section" id="optimization">
+<h1>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">scipy.optimize</th>
+<th class="head">NLopt</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Nelder-Mead</td>
+<td>LN_NELDERMEAD</td>
+</tr>
+<tr class="row-odd"><td>Powell</td>
+<td>?</td>
+</tr>
+<tr class="row-even"><td>CG</td>
+<td>?</td>
+</tr>
+<tr class="row-odd"><td>BFGS</td>
+<td>LD_LBFGS</td>
+</tr>
+<tr class="row-even"><td>Newton-CG</td>
+<td><div class="first last line-block">
+<div class="line"><strong>LD_TNEWTON_PRECOND_RESTART</strong></div>
+<div class="line">LD_TNEWTON_PRECOND</div>
+<div class="line">LD_TNEWTON_RESTART</div>
+<div class="line">LD_TNEWTON</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td>L-BFGS-B</td>
+<td>LD_LBFGS</td>
+</tr>
+<tr class="row-even"><td>TNC</td>
+<td><div class="first last line-block">
+<div class="line"><strong>LD_TNEWTON_PRECOND_RESTART</strong></div>
+<div class="line">LD_TNEWTON_PRECOND</div>
+<div class="line">LD_TNEWTON_RESTART</div>
+<div class="line">LD_TNEWTON</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td>COBYLA</td>
+<td>LN_COBYLA</td>
+</tr>
+<tr class="row-even"><td>SLSQP</td>
+<td>LD_SLSQP</td>
+</tr>
+<tr class="row-odd"><td>dogleg</td>
+<td><em>Requires second-order gradients</em></td>
+</tr>
+<tr class="row-even"><td>trust-ncg</td>
+<td><em>Requires second-order gradients</em></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-pyalacarte.optimize"></span><p>The <a class="reference internal" href="#module-pyalacarte.optimize" title="pyalacarte.optimize"><code class="xref py py-mod docutils literal"><span class="pre">pyalacarte.optimize</span></code></a> module provides methods for optimization.</p>
 <dl class="function">
 <dt id="pyalacarte.optimize.sgd">
 <code class="descclassname">pyalacarte.optimize.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>Data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.sgd" title="Permalink to this definition">¶</a></dt>
@@ -154,7 +189,7 @@ of objective function values is also returned.</li>
 
 <dl class="function">
 <dt id="pyalacarte.optimize.minimize">
-<code class="descclassname">pyalacarte.optimize.</code><code class="descname">minimize</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>args=()</em>, <em>method=None</em>, <em>jac=True</em>, <em>bounds=None</em>, <em>constraints=[]</em>, <em>use_nlopt=False</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.minimize" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyalacarte.optimize.</code><code class="descname">minimize</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>args=()</em>, <em>method=None</em>, <em>jac=True</em>, <em>bounds=None</em>, <em>constraints=[]</em>, <em>backend='scipy'</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.minimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scipy.optimize.minimize-style wrapper for NLopt and scipy&#8217;s minimize.</p>
 <blockquote>
 <div><dl class="docutils">
@@ -192,6 +227,13 @@ message, (str): Description of the cause of the termination (see</p>
 </dd>
 </dl>
 </div></blockquote>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">rosen</span><span class="p">,</span> <span class="n">rosen_der</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mf">0.875</span><span class="p">,</span>  <span class="mf">0.75</span> <span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minimize</span><span class="p">(</span><span class="n">rosen</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;LD_LBFGS&#39;</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">rosen_der</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s">&#39;nlopt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minimize</span><span class="p">(</span><span class="n">rosen</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;L-BFGS-B&#39;</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">rosen_der</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -325,7 +367,7 @@ message, (str): Description of the cause of the termination (see</p>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_grid</span><span class="p">([(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2, 25)</span>
+<span class="go">(2, 9)</span>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_grid</span><span class="p">([(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span> <span class="n">nums</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
@@ -379,7 +421,7 @@ hyperrectangle.</p>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2, 100)</span>
+<span class="go">(2, 1000)</span>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -415,6 +457,29 @@ hyperrectangle.</p>
 
 
           </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="regression.html"
+                        title="previous chapter">Regression</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="utils.html"
+                        title="next chapter">Utilities</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
