@@ -6,3 +6,14 @@ from . import classification
 from . import linalg
 from . import regression
 from . import validation
+
+__all__ = [
+    'optimize',
+    'utils',
+    'basis_functions',
+    'hadamard',
+    'classification',
+    'linalg',
+    'regression',
+    'validation'
+]
