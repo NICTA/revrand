@@ -207,6 +207,10 @@ def main():
     pl.legend(['Training', 'Truth', 'A la Carte (SGD)', 'A la Carte (ELBO)',
                'GP'])
 
+    pl.grid(True)
+    pl.title('Regression demo')
+    pl.ylabel('y')
+    pl.xlabel('x')
     pl.show()
 
 
