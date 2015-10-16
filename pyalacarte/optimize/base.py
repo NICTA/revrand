@@ -2,18 +2,16 @@ import numpy as np
 
 from ..utils import flatten, unflatten
 
-from six.moves import zip_longest
-from collections import Iterable
-from functools import partial
 from itertools import repeat
 from warnings import warn
 from six import wraps
 
-MINIMIZE_BACKENDS = [
-    'scipy',
-    'nlopt',
-#    'sgd'
-]
+# MINIMIZE_BACKENDS = [
+#     'scipy',
+#     'nlopt',
+#     'sgd'
+# ]
+
 
 def get_minimize(backend='scipy'):
     """
@@ -21,20 +19,20 @@ def get_minimize(backend='scipy'):
     >>> minimize = get_minimize('nlopt') # doctest: +SKIP
     >>> minimize = get_minimize('foo') # doctest: +SKIP
     """
-    from .spopt_wrap import minimize
+    from .spopt_wrap import minimize as minimize_
 
     if backend == 'nlopt':
         try:
-            from .nlopt_wrap import minimize
+            from .nlopt_wrap import minimize as minimize_
         except ImportError:
-            warn('NLopt could not be imported. Defaulting to scipy.optimize')
-    else:
-        warn('Backend "{}" not recognized. Defaulting to scipy.optimize' \
-            .format(backend))
+            warn('NLopt could not be imported.')
 
-    return minimize
+    warn('Defaulting to scipy.optimize')
 
-def minimize(fun, x0, args=(), method=None, jac=True, bounds=None, 
+    return minimize_
+
+
+def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
              constraints=[], backend='scipy', **options):
     """
     Scipy.optimize.minimize-style wrapper for NLopt and scipy's minimize.
@@ -80,18 +78,19 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
     return min_(fun, x0, args=args, method=method, jac=jac, bounds=bounds,
                 constraints=constraints, **options)
 
+
 def candidate_start_points_random(bounds, n_candidates=1000):
     """
-    Randomly generate candidate starting points uniformly within a 
+    Randomly generate candidate starting points uniformly within a
     hyperrectangle.
 
     Parameters
     ----------
     bounds : list of tuples (pairs)
         List of one or more bound pairs
-    
+
     n_candidates : int
-        Number of candidate starting points to generate         
+        Number of candidate starting points to generate
 
     Returns
     -------
@@ -103,7 +102,7 @@ def candidate_start_points_random(bounds, n_candidates=1000):
     Equivalent to::
 
         lambda bounds, n_candidates=100: np.random.uniform(*zip(*bounds), size=(n_candidates, len(bounds))).T
-    
+
     Examples
     --------
     >>> candidate_start_points_random([(-10., -3.5), (-1., 2.)], 
@@ -130,13 +129,13 @@ def candidate_start_points_random(bounds, n_candidates=1000):
 
     Uniformly sample from line segment:
 
-    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5) 
+    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5)
     ... # doctest: +SKIP
     array([[ 0.33371234,  1.52775115,  1.51805039,  0.32079371,  0.75478597]])
 
     Uniformly sample from hyperrectangle:
 
-    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.), (5., 7.), 
+    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.), (5., 7.),
     ... (2.71, 3.14)], n_candidates=5) # doctest: +SKIP
     array([[-8.65860645, -6.83830936, -6.66424853, -7.92209109, -8.87889632],
            [ 0.54385109,  0.63564042,  1.43670096, -0.56410552, -0.61085342],
@@ -146,6 +145,7 @@ def candidate_start_points_random(bounds, n_candidates=1000):
     low, high = zip(*bounds)
     n_dims = len(bounds)
     return np.random.uniform(low, high, (n_candidates, n_dims)).transpose()
+
 
 def candidate_start_points_grid(bounds, nums=3):
     """
@@ -160,17 +160,17 @@ def candidate_start_points_grid(bounds, nums=3):
     >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=[5, 3]).shape
     (2, 15)
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], 
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)],
     ...                             nums=[5, 10, 9]) # doctest: +ELLIPSIS
     array([[-1.   , -1.   , -1.   , ...,  1.5  ,  1.5  ,  1.5  ],
            [-1.5  , -1.5  , -1.5  , ...,  3.   ,  3.   ,  3.   ],
            [ 0.   ,  0.625,  1.25 , ...,  3.75 ,  4.375,  5.   ]])
-    
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], 
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)],
     ...                             nums=[5, 10, 9]).shape
     (3, 450)
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)], 
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
     ...                             nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
     array([[-1. , -1. , -1. , ...,  1.5,  1.5,  1.5],
            [-1.5, -1.5, -1.5, ...,  3. ,  3. ,  3. ],
@@ -290,16 +290,15 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
             return res
 
         return _minimize_bounded_start
-    
-    return minimize_bounded_start_dec
 
+    return minimize_bounded_start_dec
 
 def augment_minimizer(minimizer):
 
     def new_minimizer(fun, *ndarrays, **kwargs):
-        array1d, shapes = flatten_join(*ndarrays)
+        array1d, shapes = flatten(*ndarrays)
         result = minimizer(fun, array1d, **kwargs)
-        result['x'] = split_unflatten(result['x'], shapes)
+        result['x'] = unflatten(result['x'], shapes)
         return result
 
     return new_minimizer

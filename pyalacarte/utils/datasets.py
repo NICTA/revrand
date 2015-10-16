@@ -34,10 +34,8 @@ def get_data_home(data_home=None):
     """
     if data_home is None:
         data_home = os.environ.get('PYALACARTE_DATA',
-                                   os.path.join('~', 'pyalacarte_data'))
+                                   os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'demos', 'pyalacarte_data'))
 
-    data_home = os.path.expanduser(data_home)
-    
     if not os.path.exists(data_home):
         os.makedirs(data_home)
     
