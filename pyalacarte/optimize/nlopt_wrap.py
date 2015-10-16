@@ -6,19 +6,20 @@ from functools import partial
 from warnings import warn
 from re import search
 
-NLOPT_ALGORITHMS_KEYS = list(filter(partial(search, r'^[GL][ND]_'), dir(nlopt)))
-NLOPT_ALGORITHMS = {k:getattr(nlopt, k) for k in NLOPT_ALGORITHMS_KEYS}
+NLOPT_ALGORITHMS_KEYS = list(filter(partial(search, r'^[GL][ND]_'),
+                                    dir(nlopt)))
+NLOPT_ALGORITHMS = {k: getattr(nlopt, k) for k in NLOPT_ALGORITHMS_KEYS}
 NLOPT_MESSAGES = {
     nlopt.SUCCESS: 'Success',
     nlopt.STOPVAL_REACHED: 'Optimization stopped because stopval (above) '
                            'was reached.',
     nlopt.FTOL_REACHED: 'Optimization stopped because ftol_rel or ftol_abs '
                         '(above) was reached.',
-    nlopt.XTOL_REACHED: 'Optimization stopped because xtol_rel or xtol_abs ' 
+    nlopt.XTOL_REACHED: 'Optimization stopped because xtol_rel or xtol_abs '
                         '(above) was reached.',
     nlopt.MAXEVAL_REACHED: 'Optimization stopped because maxeval (above) '
                            'was reached.',
-    nlopt.MAXTIME_REACHED: 'Optimization stopped because maxtime (above) ' 
+    nlopt.MAXTIME_REACHED: 'Optimization stopped because maxtime (above) '
                            'was reached.',
     nlopt.FAILURE: 'Failure',
     nlopt.INVALID_ARGS: 'Invalid arguments (e.g. lower bounds are bigger '
@@ -28,22 +29,24 @@ NLOPT_MESSAGES = {
     nlopt.ROUNDOFF_LIMITED: 'Halted because roundoff errors limited progress. '
                             '(In this case, the optimization still typically '
                             'returns a useful result.)',
-    nlopt.FORCED_STOP: "Halted because of a forced termination: the user " 
+    nlopt.FORCED_STOP: "Halted because of a forced termination: the user "
                        "called nlopt_force_stop(opt) on the optimization's "
                        "nlopt_opt object opt from the user’s objective "
                        "function or constraints."
 }
 
-def minimize(fun, x0, args=(), method=None, jac=None, bounds=None, 
+
+def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
              constraints=[], **options):
     """
     Parameters
     ----------
     fun : callable
         Objective function
-    
+
     Examples
     --------
+    >>> import numpy as np
     >>> from scipy.optimize import rosen, rosen_der
     >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
     >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der)
@@ -56,7 +59,8 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
     >>> res.x
     array([ 1.,  1.,  1.,  1.,  1.])
 
-    >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der, ftol_abs=1e-5)
+    >>> res = minimize(rosen, x0, method='ld_lbfgs', jac=rosen_der,
+    ...                ftol_abs=1e-5)
     >>> res.success
     True
     >>> res.message
@@ -66,17 +70,17 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
     Traceback (most recent call last):
         ...
     ValueError: Parameter foo could not be recognized.
-    
+
     .. todo:: Some sensible way of testing this.
 
     >>> x0 = np.array([-1., 1.])
     >>> fun = lambda x: - 2*x[0]*x[1] - 2*x[0] + x[0]**2 + 2*x[1]**2
     >>> dfun = lambda x: np.array([2*x[0] - 2*x[1] - 2, - 2*x[0] + 4*x[1]])
-    >>> cons = [{'type': 'eq', 
+    >>> cons = [{'type': 'eq',
     ...           'fun': lambda x: x[0]**3 - x[1],
     ...           'jac': lambda x: np.array([3.*(x[0]**2.), -1.])},
-    ...         {'type': 'ineq', 
-    ...           'fun': lambda x: x[1] - 1, 
+    ...         {'type': 'ineq',
+    ...           'fun': lambda x: x[1] - 1,
     ...           'jac': lambda x: np.array([0., 1.])}]
     >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons)
     >>> res.success
@@ -86,11 +90,11 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
     >>> res.x.round(2)
     array([ 0.84,  0.6 ])
 
-    >>> cons = [{'type': 'some bogus type', 
+    >>> cons = [{'type': 'some bogus type',
     ...           'fun': lambda x: x[0]**3 - x[1],
     ...           'jac': lambda x: np.array([3.*(x[0]**2.), -1.])},
-    ...         {'type': 'ineq', 
-    ...           'fun': lambda x: x[1] - 1, 
+    ...         {'type': 'ineq',
+    ...           'fun': lambda x: x[1] - 1,
     ...           'jac': lambda x: np.array([0., 1.])}]
     >>> res = minimize(fun, x0, jac=dfun, method='LD_SLSQP', constraints=cons, ftol_abs=1e-20)
     Traceback (most recent call last):
@@ -169,19 +173,21 @@ def make_nlopt_fun(fun, jac=True, args=(), xs=None):
     are even *required* to have side effects since gradient arrays are
     required to be passed-by-reference and modifed in-place.
 
-    .. _`NLOpt Python interface`: 
+    .. _`NLOpt Python interface`:
        http://ab-initio.mit.edu/wiki/index.php/NLopt_Python_Reference#Objective_function
 
     Examples
     --------
 
-    .. todo:: 
+    .. todo::
 
        Only a few examples are needed here, the edge-cases, while
        useful for unit testing, is not particularly informative. Move
        to Sphinx documentation or unit tests.
 
+    >>> import numpy as np
     >>> from scipy.optimize import rosen, rosen_der
+    >>> from pyalacarte.utils import couple
     >>> rosen_couple = couple(rosen, rosen_der)
     >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
 
@@ -189,7 +195,7 @@ def make_nlopt_fun(fun, jac=True, args=(), xs=None):
 
     >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
     >>> obj_fun = make_nlopt_fun(rosen, jac=rosen_der)
-    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.set_min_objective(obj_fun)
     >>> opt.optimize(x0)
     array([ 1.,  1.,  1.,  1.,  1.])
     >>> np.isclose(opt.last_optimum_value(), 0)
@@ -197,26 +203,26 @@ def make_nlopt_fun(fun, jac=True, args=(), xs=None):
 
     >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
     >>> obj_fun = make_nlopt_fun(rosen_couple, jac=True)
-    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.set_min_objective(obj_fun)
     >>> opt.optimize(x0)
     array([ 1.,  1.,  1.,  1.,  1.])
     >>> np.isclose(opt.last_optimum_value(), 0)
     True
 
-    If a callable jacobian `jac` is specified, it will take precedence 
-    over the gradient given by a function that returns a tuple with the 
-    gradient as its second value.   
+    If a callable jacobian `jac` is specified, it will take precedence
+    over the gradient given by a function that returns a tuple with the
+    gradient as its second value.
 
     >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
     >>> obj_fun = make_nlopt_fun(couple(rosen, lambda x: 2*x), jac=rosen_der)
-    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.set_min_objective(obj_fun)
     >>> opt.optimize(x0)
     array([ 1.,  1.,  1.,  1.,  1.])
     >>> np.isclose(opt.last_optimum_value(), 0)
     True
 
     If you use a gradient-based optimization method with `jac=True` but
-    fail to supply any gradient information, you will receive a 
+    fail to supply any gradient information, you will receive a
     `RuntimeWarning` and terrible results.
 
     >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))

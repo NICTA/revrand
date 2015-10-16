@@ -72,11 +72,12 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
     >>> from scipy.optimize import rosen, rosen_der
     >>> x0 = np.array([ 0.875,  0.75 ])
     >>> minimize(rosen, x0, method='LD_LBFGS', jac=rosen_der, backend='nlopt')
-    >>> minimize(rosen, x0, method='L-BFGS-B', jac=rosen_der)
+    ... # doctest: +SKIP
+    >>> minimize(rosen, x0, method='L-BFGS-B', jac=rosen_der) # doctest: +SKIP
     """
     min_ = get_minimize(backend)
 
-    return min_(fun, x0, args=args, method=method, jac=jac, bounds=bounds, 
+    return min_(fun, x0, args=args, method=method, jac=jac, bounds=bounds,
                 constraints=constraints, **options)
 
 def candidate_start_points_random(bounds, n_candidates=1000):
