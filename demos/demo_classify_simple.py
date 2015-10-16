@@ -59,21 +59,19 @@ else:
 
 
 # Predict
-# import ipdb; ipdb.set_trace()
 if method != 'SVI':
     Ey = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
 else:
-    # Ey = classification.logistic_predict(Xs, weights, Phi, bparams)
     Ey = classification.logistic_mpredict(Xs, weights, C, Phi, bparams)
 
 
 # Plot
 pl.figure()
 ax = pl.subplot(111)
-pl.plot(X, Y, 'k--', linewidth=2, label='Training data')
-pl.plot(Xs, Ey, label='Prediction')
+pl.plot(Xs, Ey[:, 1], label='Prediction')
+pl.plot(X, Y, 'k.', linewidth=2, label='Training data')
 pl.grid(True)
-pl.title('Classification Test')
+pl.title('Simple Square Wave Classification Test')
 pl.xlabel('X')
 pl.ylabel('p(y* = 1)')
 ax.set_ylim(-0.05, 1.05)

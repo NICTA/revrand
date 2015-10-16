@@ -67,6 +67,7 @@ def sgd_demo():
     pl.plot(Xs, Ys, 'c-')
     pl.plot(Xs, Ys_grad, 'b-')
     pl.plot(Xs, Ys_sgd, 'g-')
+    pl.title('SGD Demo')
     pl.xlabel('x')
     pl.ylabel('y')
     pl.legend(['Training', 'Truth', 'Analytic', 'LBFGS', 'SGD'])
