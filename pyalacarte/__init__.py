@@ -1,6 +1,6 @@
 from . import optimize
 from . import utils
-from . import basis_functions as basis
+from . import basis_functions
 from . import hadamard
 from . import classification
 from . import linalg
