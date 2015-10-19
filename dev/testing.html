@@ -64,6 +64,29 @@
             
   <div class="section" id="testing">
 <h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h1>
+<p>Unit tests can be found in the <code class="docutils literal"><span class="pre">tests</span></code> directory. Most unit tests for
+functions/classes exist in the form of doctests under the <em>Examples</em> section of
+their respective docstrings.</p>
+<p>This project uses <a class="reference external" href="http://pytest.org/latest/">pytest</a> to collect and run tests, and <a class="reference external" href="https://tox.readthedocs.org/en/latest/">tox</a> to setup,
+manage and teardown <code class="docutils literal"><span class="pre">virtualenvs</span></code> to ensure the package installs correctly
+with different Python versions and interpreters.</p>
+<p><code class="docutils literal"><span class="pre">pytest</span></code> has been configured to collect and run unit tests and doctests
+together by simply running</p>
+<div class="code console highlight-python"><div class="highlight"><pre>$ py.test
+</pre></div>
+</div>
+<p>from the root of the project (same level as <code class="docutils literal"><span class="pre">setup.cfg</span></code>). Alternatively, you
+can also run <code class="docutils literal"><span class="pre">setup.py</span></code> with the <code class="docutils literal"><span class="pre">test</span></code> subcommand, as we have <a class="reference external" href="https://pytest.org/latest/goodpractises.html#integration-with-setuptools-test-commands">integrated
+pytest with setuptools</a>.</p>
+<div class="code console highlight-python"><div class="highlight"><pre>$ python setup.py test
+</pre></div>
+</div>
+<p>To test the package with different Python versions and interpreters, simply run</p>
+<div class="code console highlight-python"><div class="highlight"><pre>$ tox
+</pre></div>
+</div>
+<p>from the root of the project (same level as <code class="docutils literal"><span class="pre">tox.ini</span></code>), which will run
+<code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code> under the various virtual environments it creates.</p>
 </div>
 
 
