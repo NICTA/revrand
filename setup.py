@@ -12,14 +12,6 @@ setup(
     author_email='daniel.steinberg@nicta.com.au',
     url='http://github.com/nicta/pyalacarte',
     packages=['pyalacarte'],
-    scripts=[
-        'demos/demo_multi_classification.py',
-        'demos/demo_classify_simple.py',
-        'demos/demo_classification.py',
-        'demos/demo_alacarte.py',
-        'demos/demo_sarcos.py',
-        'demos/demo_sgd.py',
-    ],
     install_requires=[
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',

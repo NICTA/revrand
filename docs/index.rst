@@ -11,7 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   bases
+   installation
+   basis_funcs
    regression
    optimize
    utils

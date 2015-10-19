@@ -35,7 +35,7 @@ def get_data_home(data_home=None):
     If the folder does not already exist, it is automatically created.
     """
     data_home_default = Path(__file__).ancestor(3).child('demos',
-                                                         'pyalacarte_data')
+                                                         '_pyalacarte_data')
 
     if data_home is None:
         data_home = os.environ.get('PYALACARTE_DATA', data_home_default)
