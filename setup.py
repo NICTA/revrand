@@ -23,11 +23,16 @@ setup(
     install_requires=[
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',
+        'six >= 1.9.0',
         # NLopt >= 2.4.2
     ],
     extras_require={
         # 'nonlinear': ['NLopt'],
-        # 'demos': ['requests', 'bdkd-external'],
+        'demos': [
+            'unipath',
+            'requests',
+            # 'bdkd-external'
+        ],
     },
     license="Apache Software License 2.0",
     classifiers=[

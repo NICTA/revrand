@@ -15,5 +15,5 @@ __all__ = [
     'classification',
     'linalg',
     'regression',
-    'validation'
+    'validation',
 ]
