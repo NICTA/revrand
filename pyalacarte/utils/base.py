@@ -499,7 +499,7 @@ def custom_reshape(a, newshape, order='C'):
     Identical to `numpy.reshape` except in the case where `newshape` is
     the empty tuple, in which case we return a scalar instead of a
     0-dimensional array.
-    
+
     Examples
     --------
     >>> a = np.arange(6)
@@ -514,12 +514,11 @@ def custom_reshape(a, newshape, order='C'):
     """
     if newshape == ():
         return np.asscalar(a)
-    
+
     return np.reshape(a, newshape, order)
 
 
 def map_indices(fn, iterable, indices):
-    
     """
     Notes
     -----
@@ -537,10 +536,10 @@ def map_indices(fn, iterable, indices):
     [12, 6, 7, 3, 6, 24, 2]
 
     >>> b = [9., np.array([5., 6., 2.]), np.array([[5., 6., 2.], [2., 3., 9.]])]
-    
+
     >>> list(map_indices(np.log, b, [0, 2])) # doctest: +NORMALIZE_WHITESPACE
-    [2.1972245773362196, 
-     array([ 5.,  6.,  2.]), 
+    [2.1972245773362196,
+     array([ 5.,  6.,  2.]),
      array([[ 1.60943791,  1.79175947,  0.69314718],
             [ 0.69314718,  1.09861229,  2.19722458]])]
 
@@ -555,7 +554,6 @@ def map_indices(fn, iterable, indices):
      array([[ 5.,  6.,  2.],
             [ 2.,  3.,  9.]])]
     """
-
     index_set = set(indices)
     for i, arg in enumerate(iterable):
         if i in index_set:

@@ -36,6 +36,7 @@ def flatten_args(fn=None):
 
     return new_fn
 
+
 def vectorize_args(fn):
     """
     When defining functions of several variables, it is usually more 
