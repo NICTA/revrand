@@ -18,6 +18,7 @@ Contents:
    utils
    demo
 
+   dev/index.rst
 
 Indices and tables
 ==================
