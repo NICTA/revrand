@@ -6,9 +6,10 @@ from collections import namedtuple
 from functools import partial
 from itertools import tee
 
+
 class Bunch(dict):
     """
-    Container object for datasets: dictionary-like object that exposes 
+    Container object for datasets: dictionary-like object that exposes
     its keys as attributes.
 
     Examples
@@ -32,11 +33,12 @@ class Bunch(dict):
         dict.__init__(self, kwargs)
         self.__dict__ = self
 
+
 class Bound(namedtuple('Bound', ['lower', 'upper'])):
     """
     Define bounds on a variable for the optimiser. This defaults to all
     real values allowed (i.e. no bounds).
-    
+
     Parameters
     ----------
     lower : float
@@ -84,6 +86,7 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
 
         return super(Bound, cls).__new__(cls, lower, upper)
 
+
 class Positive(Bound):
     """
     Define a positive only bound for the optimiser. This may induce the
@@ -93,7 +96,7 @@ class Positive(Bound):
     Parameters
     ---------
     lower : float
-        The smallest value allowed for the optimiser to evaluate (if 
+        The smallest value allowed for the optimiser to evaluate (if
         not using the log trick).
 
     Examples
@@ -123,6 +126,7 @@ class Positive(Bound):
             raise ValueError('lower bound must be positive!')
 
         return super(Positive, cls).__new__(cls, lower, None)
+
 
 def checktypes(sequence, checktype):
     """ Check if all types are the same in a sequence.
@@ -172,10 +176,10 @@ def decouple(fn):
     --------
     >>> h = lambda x: (2*x**3, 6*x**2)
     >>> f, g = decouple(h)
-    
+
     >>> f(5)
     250
-    
+
     >>> g(5)
     150
     """
@@ -191,21 +195,21 @@ def decouple(fn):
 def nwise(iterable, n):
     """
     Iterator that acts like a sliding window of size `n`; slides over
-    some iterable `n` items at a time. If iterable has `m` elements, 
+    some iterable `n` items at a time. If iterable has `m` elements,
     this function will return an iterator over `m-n+1` tuples.
 
     Parameters
     ----------
     iterable : iterable
         An iterable object.
-    
+
     n : int
         Window size.
-    
+
     Returns
     -------
     iterator of tuples.
-        Iterator of size `n` tuples 
+        Iterator of size `n` tuples
 
     Notes
     -----
@@ -251,7 +255,7 @@ def nwise(iterable, n):
     []
 
     A sliding window of size `n` over a list of `m` elements
-    gives `m-n+1` windows 
+    gives `m-n+1` windows
 
     >>> len(a) - len(list(nwise(a, 2))) == 1
     True
@@ -271,48 +275,42 @@ def nwise(iterable, n):
 
 pairwise = partial(nwise, n=2)
 
-# Python 3 only (variable length arguments before keyword arguments)
-def flatten(*arys, order='C', returns_shapes=True):
+
+def flatten(arys, order='C', returns_shapes=True):
     """
-    Flatten a variable number of ndarrays and/or numpy scalars (0darray) 
-    of possibly heterogenous dimensions and shapes and concatenate them 
-    together into a flat (1d) array.
+    Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly
+    heterogenous dimensions and shapes and concatenate them together into a
+    flat (1d) array.
 
     .. note::
 
        Not to be confused with `np.ndarray.flatten()` (a more befitting
-       might be `chain` or `stack` or maybe something else entirely 
-       since this function is more than either `concatenate` or 
-       `np.flatten` itself. Rather, it is the composition of the former 
+       might be `chain` or `stack` or maybe something else entirely
+       since this function is more than either `concatenate` or
+       `np.flatten` itself. Rather, it is the composition of the former
        with the latter.
 
     Parameters
     ----------
-    arys1, arys2, ... : array_like
-        One or more input arrays of possibly heterogenous shapes and 
+    arys : list of array_like
+        One or more input arrays of possibly heterogenous shapes and
         sizes.
 
     order : {‘C’, ‘F’, ‘A’}, optional
-        Whether to flatten in C (row-major), Fortran (column-major) 
+        Whether to flatten in C (row-major), Fortran (column-major)
         order, or preserve the C/Fortran ordering. The default is ‘C’.
-    
-    returns_shapes : bool, optional 
-        Default is `True`. If `True`, the tuple `(flattened, shapes)` is 
+
+    returns_shapes : bool, optional
+        Default is `True`. If `True`, the tuple `(flattened, shapes)` is
         returned, otherwise only `flattened` is returned.
 
     Returns
     -------
 
-    .. todo:: 
-
-       For consistency, might consider keeping with the Python 3 theme 
-       of returning generators everywhere... Especially since most other 
-       functions here does...
-
     flattened,[shapes] : {1darray, list of tuples}
-        Return the flat (1d) array resulting from the concatenation of 
-        flattened ndarrays. When `returns_shapes` is `True`, return a 
-        list of tuples containing also the shapes of each array as the 
+        Return the flat (1d) array resulting from the concatenation of
+        flattened ndarrays. When `returns_shapes` is `True`, return a
+        list of tuples containing also the shapes of each array as the
         second element.
 
     See Also
@@ -323,7 +321,7 @@ def flatten(*arys, order='C', returns_shapes=True):
     -----
     Equivalent to::
 
-        lambda *arys, order='C', returns_shapes=True: (np.hstack(map(partial(np.ravel, order=order), ndarrays)), list(map(np.shape, ndarrays))) if returns_shapes else np.hstack(map(partial(np.ravel, order=order), ndarrays))
+        lambda arys, order='C', returns_shapes=True: (np.hstack(map(partial(np.ravel, order=order), ndarrays)), list(map(np.shape, ndarrays))) if returns_shapes else np.hstack(map(partial(np.ravel, order=order), ndarrays))
 
     This implementation relies on the fact that scalars are treated as
     0-dimensional arrays. That is,
@@ -347,8 +345,8 @@ def flatten(*arys, order='C', returns_shapes=True):
 
     .. important::
 
-       When 0-dimensional arrays of the latter form are flattened, 
-       *they  will be unflattened as a scalar*. (Because special cases 
+       When 0-dimensional arrays of the latter form are flattened,
+       *they  will be unflattened as a scalar*. (Because special cases
        aren't special enough to break the rules.)
 
     Examples
@@ -359,36 +357,36 @@ def flatten(*arys, order='C', returns_shapes=True):
     ...               [2, 6, 6]])
     >>> d = np.array([[[6, 5, 5],
     ...                [1, 6, 9]],
-    ...               [[3, 9, 1],  
+    ...               [[3, 9, 1],
     ...                [9, 4, 1]]])
-    
-    >>> flatten(a, b, c, d) # doctest: +NORMALIZE_WHITESPACE
-    (array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 
+
+    >>> flatten([a, b, c, d]) # doctest: +NORMALIZE_WHITESPACE
+    (array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,
             1, 9, 4, 1]), [(), (5,), (2, 3), (2, 2, 3)])
 
-    >>> flatten(a, b, c, d, order='F') 
+    >>> flatten([a, b, c, d], order='F')
     ... # doctest: +NORMALIZE_WHITESPACE
-    (array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 
+    (array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,
             5, 1, 9, 1]), [(), (5,), (2, 3), (2, 2, 3)])
 
-    Note that scalars and 0-dimensional arrays are treated differently 
+    Note that scalars and 0-dimensional arrays are treated differently
     from 1-dimensional singleton arrays.
 
-    >>> flatten(3.14, np.array(2.71), np.array([1.61])) 
+    >>> flatten([3.14, np.array(2.71), np.array([1.61])])
     ... # doctest: +NORMALIZE_WHITESPACE
     (array([ 3.14,  2.71,  1.61]), [(), (), (1,)])
 
-    >>> flatten(a, b, c, d, returns_shapes=False) 
+    >>> flatten([a, b, c, d], returns_shapes=False)
     ... # doctest: +NORMALIZE_WHITESPACE
-    array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9, 
+    array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,
            1, 9, 4, 1])
 
-    >>> flatten(a, b, c, d, order='F', returns_shapes=False) 
+    >>> flatten([a, b, c, d], order='F', returns_shapes=False)
     ... # doctest: +NORMALIZE_WHITESPACE
-    array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4, 
+    array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,
            5, 1, 9, 1])
 
-    >>> w, x, y, z = unflatten(*flatten(a, b, c, d))
+    >>> w, x, y, z = unflatten(*flatten([a, b, c, d]))
 
     >>> w == a
     True
@@ -407,31 +405,30 @@ def flatten(*arys, order='C', returns_shapes=True):
     flattened = np.hstack(map(ravel, arys))
 
     if returns_shapes:
-        # TODO: decide whether to return as list, or iterator?
         shapes = list(map(np.shape, arys))
         return flattened, shapes
-    
+
     return flattened
 
 
 def unflatten(ary, shapes, order='C'):
     """
-    Given a flat (1d) array, and a list of shapes (represented as 
-    tuples), return a list of ndarrays with the specified shapes.
+    Given a flat (1d) array, and a list of shapes (represented as tuples), 
+    return a list of ndarrays with the specified shapes.
 
     Parameters
     ----------
     ary : a 1d array
         A flat (1d) array.
-    
+
     shapes : list of tuples
         A list of ndarray shapes (tuple of array dimensions)
 
     order : {‘C’, ‘F’, ‘A’}, optional
-        Reshape array using index order: C (row-major), Fortran 
-        (column-major) order, or preserve the C/Fortran ordering. 
+        Reshape array using index order: C (row-major), Fortran
+        (column-major) order, or preserve the C/Fortran ordering.
         The default is ‘C’.
-    
+
     Returns
     -------
     list of ndarrays
@@ -457,34 +454,34 @@ def unflatten(ary, shapes, order='C'):
     [array([7]), array([4]), array([5, 8, 9, 1]), array([[4, 2, 5],
         [3, 4, 3]])]
 
-    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)])) 
+    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)]))
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
     Fortran-order:
 
-    >>> list(unflatten(a, [(1,), (1,), (4,), (2, 3)], order='F')) 
+    >>> list(unflatten(a, [(1,), (1,), (4,), (2, 3)], order='F'))
     ... # doctest: +NORMALIZE_WHITESPACE
     [array([7]), array([4]), array([5, 8, 9, 1]), array([[4, 5, 4],
         [2, 3, 3]])]
-    
-    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)], order='F')) 
+
+    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)], order='F'))
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
-    
-    >>> list(unflatten(a, [(), (1,), (3,), (2, 3)])) 
+
+    >>> list(unflatten(a, [(), (1,), (3,), (2, 3)]))
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9]), array([[1, 4, 2], [5, 3, 4]])]
 
-    >>> list(unflatten(a, [(), (1,), (5,), (2, 3)])) 
+    >>> list(unflatten(a, [(), (1,), (5,), (2, 3)]))
     ... # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
         ...
     ValueError: total size of new array must be unchanged
 
-    >>> flatten(*unflatten(a, [(), (1,), (4,), (2, 3)]))
+    >>> flatten(list(unflatten(a, [(), (1,), (4,), (2, 3)])))
     ... # doctest: +NORMALIZE_WHITESPACE
-    (array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]), 
+    (array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]),
         [(), (1,), (4,), (2, 3)])
     """
     # important to make sure dtype is int

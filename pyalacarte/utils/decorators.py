@@ -5,18 +5,19 @@ Reusable decorators
 from ..utils.base import flatten, unflatten
 from six import wraps
 
-import numpy as np 
+import numpy as np
+
 
 def flatten_args(fn=None):
     """
     Examples
-    --------    
+    --------
     >>> @flatten_args
     ... def f(x):
     ...     return 2*x
 
     >>> x, y, z = f(np.array([1., 2.]), 3., np.array([[1., 2.],[.5, .9]]))
-    
+
     >>> x
     array([ 2.,  4.])
 
@@ -29,7 +30,7 @@ def flatten_args(fn=None):
     """
     @wraps(fn)
     def new_fn(*args):
-        args_flat, shapes = flatten(*args)
+        args_flat, shapes = flatten(args)
         result = fn(args_flat)
         return unflatten(result, shapes=shapes)
 
