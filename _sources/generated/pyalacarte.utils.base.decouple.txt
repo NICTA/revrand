@@ -1,0 +1,6 @@
+pyalacarte.utils.base.decouple
+==============================
+
+.. currentmodule:: pyalacarte.utils.base
+
+.. autofunction:: decouple

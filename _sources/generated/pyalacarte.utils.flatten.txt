@@ -1,0 +1,6 @@
+pyalacarte.utils.flatten
+========================
+
+.. currentmodule:: pyalacarte.utils
+
+.. autofunction:: flatten

@@ -1,0 +1,6 @@
+pyalacarte.utils.base.nwise
+===========================
+
+.. currentmodule:: pyalacarte.utils.base
+
+.. autofunction:: nwise

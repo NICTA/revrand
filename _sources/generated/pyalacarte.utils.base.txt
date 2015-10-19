@@ -1,0 +1,46 @@
+pyalacarte.utils.base
+=====================
+
+.. automodule:: pyalacarte.utils.base
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      checktypes
+      couple
+      custom_reshape
+      decouple
+      flatten
+      list_to_params
+      map_indices
+      namedtuple
+      nwise
+      params_to_list
+      tee
+      unflatten
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Bound
+      Bunch
+      CatParameters
+      Positive
+      map
+      partial
+      range
+      zip
+   
+   
+
+   
+   
+   

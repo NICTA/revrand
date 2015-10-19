@@ -1,8 +1,15 @@
 Utilities
 =========
 
-.. automodule:: pyalacarte.utils
-   :members:
+.. currentmodule:: pyalacarte.utils
 
-.. automodule:: pyalacarte.utils.decorators
-   :members:
+.. autosummary::
+   :toctree: generated/
+
+   base
+   base.flatten
+   base.unflatten
+   base.couple
+   base.decouple 
+   base.nwise
+   base.map_indices

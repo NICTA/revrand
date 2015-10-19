@@ -25,7 +25,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
-    <link rel="prev" title="Utilities" href="utils.html" />
+    <link rel="next" title="Developer’s Guide" href="dev/index.html" />
+    <link rel="prev" title="pyalacarte.utils.base.map_indices" href="generated/pyalacarte.utils.base.map_indices.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -45,7 +46,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utils.html" title="Utilities"
+          <a href="dev/index.html" title="Developer’s Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/pyalacarte.utils.base.map_indices.html" title="pyalacarte.utils.base.map_indices"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -58,11 +62,90 @@
             
   <div class="section" id="demos">
 <h1>Demos<a class="headerlink" href="#demos" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="regression">
+<h2>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fitting-a-random-draw-from-a-gaussian-process">
+<h3>Fitting a random draw from a Gaussian process<a class="headerlink" href="#fitting-a-random-draw-from-a-gaussian-process" title="Permalink to this headline">¶</a></h3>
+<p>In this demo we compare various Gaussian process approximation methods provided
+by this library to a true Gaussian process at fitting a (noisy) random draw
+from a Gaussian process.</p>
 <p>(<a class="reference external" href="./../demos/demo_alacarte.py">Source code</a>, <a class="reference external" href="./../demos/demo_alacarte.png">png</a>, <a class="reference external" href="./../demos/demo_alacarte.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_alacarte.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/demo_alacarte.png" src="_images/demo_alacarte.png" />
 </div>
+</div>
+<div class="section" id="learning-the-sarcos-robot-arm-dynamics">
+<h3>Learning the SARCOS robot arm dynamics<a class="headerlink" href="#learning-the-sarcos-robot-arm-dynamics" title="Permalink to this headline">¶</a></h3>
+<p>Here we run a large scale Gaussian process approximation algorithm on the
+SARCOS robot arm dataset from <a class="footnote-reference" href="#id6" id="id1">[1]</a>. We compare against a Gaussian process only
+using a random subset of data.</p>
+<p>(<a class="reference external" href="./../demos/demo_sarcos.py">Source code</a>)</p>
+</div>
+</div>
+<div class="section" id="classification">
+<h2>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fit-a-square-wave">
+<h3>Fit a square wave<a class="headerlink" href="#fit-a-square-wave" title="Permalink to this headline">¶</a></h3>
+<p>This is a simple demo to test the logistic classifiers in this library with
+various learning algorithms on fitting a square wave.</p>
+<p>(<a class="reference external" href="./../demos/demo_classify_simple.py">Source code</a>, <a class="reference external" href="./../demos/demo_classify_simple.png">png</a>, <a class="reference external" href="./../demos/demo_classify_simple.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_classify_simple.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/demo_classify_simple.png" src="_images/demo_classify_simple.png" />
+</div>
+</div>
+<div class="section" id="classify-3-and-5-from-the-usps-digits-dataset">
+<h3>Classify <cite>3</cite> and <cite>5</cite> from the USPS digits dataset<a class="headerlink" href="#classify-3-and-5-from-the-usps-digits-dataset" title="Permalink to this headline">¶</a></h3>
+<p>In this demo the logistic classifiers implemented in this library are compared
+against a logistic classifier from <a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">scikit learn</a>
+for classifying digits <cite>3</cite> and <cite>5</cite> from the USPS handwritten digits experiment
+used in <a class="footnote-reference" href="#id6" id="id2">[1]</a>.</p>
+<p>(<a class="reference external" href="./../demos/demo_classification.py">Source code</a>)</p>
+</div>
+<div class="section" id="classify-all-digits-from-the-usps-digits-dataset">
+<h3>Classify all digits from the USPS digits dataset<a class="headerlink" href="#classify-all-digits-from-the-usps-digits-dataset" title="Permalink to this headline">¶</a></h3>
+<p>In this demo multiclass logistic classifiers implemented in this library
+(categorical likelihood, softmax transformation function) are compared against
+a multiclass logistic classifier from <a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">scikit learn</a>
+for classifying <cite>all</cite> digits from the USPS handwritten digits experiment used
+in <a class="footnote-reference" href="#id6" id="id4">[1]</a>.</p>
 <p>(<a class="reference external" href="./../demos/demo_multi_classification.py">Source code</a>)</p>
+</div>
+</div>
+<div class="section" id="stochastic-gradient-descent">
+<h2>Stochastic Gradient Descent<a class="headerlink" href="#stochastic-gradient-descent" title="Permalink to this headline">¶</a></h2>
+<p>In this demo we fit radial basis functions to a sine wave using a
+sum of squares objective. We compare three methods of solving for the radial
+basis function weights,</p>
+<blockquote>
+<div><ul class="simple">
+<li>Linear solve (analytic solution)</li>
+<li>L-BFGS</li>
+<li>Stochastic gradient descent (ADADELTA <a class="footnote-reference" href="#id7" id="id5">[2]</a>).</li>
+</ul>
+</div></blockquote>
+<p>We also plot the results of each iteration of stochasistic gradient descent.</p>
+<p>(<a class="reference external" href="./../demos/demo_sgd.py">Source code</a>, <a class="reference external" href="./../demos/demo_sgd.png">png</a>, <a class="reference external" href="./../demos/demo_sgd.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_sgd.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/demo_sgd.png" src="_images/demo_sgd.png" />
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> Carl Edward Rasmussen and Christopher KI Williams &#8220;Gaussian processes
+for machine learning.&#8221; the MIT Press 2.3 (2006): 4.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[2]</a></td><td>Matthew D. Zeiler, &#8220;ADADELTA: An adaptive learning rate method.&#8221; arXiv
+preprint arXiv:1212.5701 (2012).</td></tr>
+</tbody>
+</table>
+</div>
 </div>
 
 
@@ -71,9 +154,32 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Demos</a><ul>
+<li><a class="reference internal" href="#regression">Regression</a><ul>
+<li><a class="reference internal" href="#fitting-a-random-draw-from-a-gaussian-process">Fitting a random draw from a Gaussian process</a></li>
+<li><a class="reference internal" href="#learning-the-sarcos-robot-arm-dynamics">Learning the SARCOS robot arm dynamics</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#classification">Classification</a><ul>
+<li><a class="reference internal" href="#fit-a-square-wave">Fit a square wave</a></li>
+<li><a class="reference internal" href="#classify-3-and-5-from-the-usps-digits-dataset">Classify <cite>3</cite> and <cite>5</cite> from the USPS digits dataset</a></li>
+<li><a class="reference internal" href="#classify-all-digits-from-the-usps-digits-dataset">Classify all digits from the USPS digits dataset</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stochastic-gradient-descent">Stochastic Gradient Descent</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
-  <p class="topless"><a href="utils.html"
-                        title="previous chapter">Utilities</a></p>
+  <p class="topless"><a href="generated/pyalacarte.utils.base.map_indices.html"
+                        title="previous chapter">pyalacarte.utils.base.map_indices</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dev/index.html"
+                        title="next chapter">Developer&#8217;s Guide</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -101,7 +207,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utils.html" title="Utilities"
+          <a href="dev/index.html" title="Developer’s Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/pyalacarte.utils.base.map_indices.html" title="pyalacarte.utils.base.map_indices"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
       </ul>

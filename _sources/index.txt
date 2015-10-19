@@ -11,12 +11,14 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   bases
+   installation
+   basis_funcs
    regression
    optimize
    utils
    demo
 
+   dev/index.rst
 
 Indices and tables
 ==================

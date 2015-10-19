@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyalacarte.utils.base &mdash; pyalacarte 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pyalacarte 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Utilities" href="../utils.html" />
+    <link rel="next" title="pyalacarte.utils.base.flatten" href="pyalacarte.utils.base.flatten.html" />
+    <link rel="prev" title="pyalacarte.utils.base.map_indices" href="pyalacarte.utils.base.map_indices.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyalacarte.utils.base.flatten.html" title="pyalacarte.utils.base.flatten"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pyalacarte.utils.base.map_indices.html" title="pyalacarte.utils.base.map_indices"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pyalacarte 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pyalacarte.utils.base">
+<span id="pyalacarte-utils-base"></span><h1>pyalacarte.utils.base<a class="headerlink" href="#module-pyalacarte.utils.base" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">checktypes</span></code>(sequence,&nbsp;checktype)</td>
+<td>Check if all types are the same in a sequence.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyalacarte.utils.base.couple.html#pyalacarte.utils.base.couple" title="pyalacarte.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">couple</span></code></a>(f,&nbsp;g)</td>
+<td>Given a pair of functions that take the same arguments, return a single function that returns a pair consisting of the return values of each function.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">custom_reshape</span></code>(a,&nbsp;newshape[,&nbsp;order])</td>
+<td>Identical to <cite>numpy.reshape</cite> except in the case where <cite>newshape</cite> is the empty tuple, in which case we return a scalar instead of a 0-dimensional array.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyalacarte.utils.base.decouple.html#pyalacarte.utils.base.decouple" title="pyalacarte.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">decouple</span></code></a>(fn)</td>
+<td><p class="rubric">Examples</p>
+</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyalacarte.utils.base.flatten.html#pyalacarte.utils.base.flatten" title="pyalacarte.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code></a>(*arys[,&nbsp;order,&nbsp;returns_shapes])</td>
+<td>Flatten a variable number of ndarrays and/or numpy scalars (0darray) of possibly heterogenous dimensions and shapes and concatenate them together into a flat (1d) array.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">list_to_params</span></code>(params,&nbsp;flatlist)</td>
+<td>This will turn a flattened list of parameters into the original parameter argument list, given a template.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyalacarte.utils.base.map_indices.html#pyalacarte.utils.base.map_indices" title="pyalacarte.utils.base.map_indices"><code class="xref py py-obj docutils literal"><span class="pre">map_indices</span></code></a>(fn,&nbsp;iterable,&nbsp;indices)</td>
+<td><p class="rubric">Notes</p>
+</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyalacarte.utils.base.nwise.html#pyalacarte.utils.base.nwise" title="pyalacarte.utils.base.nwise"><code class="xref py py-obj docutils literal"><span class="pre">nwise</span></code></a>(iterable,&nbsp;n)</td>
+<td>Iterator that acts like a sliding window of size <cite>n</cite>; slides over some iterable <cite>n</cite> items at a time.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params_to_list</span></code>(params)</td>
+<td>This will take a list of parameters of scalars or arrays, and return a flattened array which is a concatenation of all of these parameters.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyalacarte.utils.base.unflatten.html#pyalacarte.utils.base.unflatten" title="pyalacarte.utils.base.unflatten"><code class="xref py py-obj docutils literal"><span class="pre">unflatten</span></code></a>(ary,&nbsp;shapes[,&nbsp;order])</td>
+<td>Given a flat (1d) array, and a list of shapes (represented as tuples), return a list of ndarrays with the specified shapes.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">Bound</span></code></td>
+<td>Define bounds on a variable for the optimiser.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">Bunch</span></code>(**kwargs)</td>
+<td>Container object for datasets: dictionary-like object that exposes its keys as attributes.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">CatParameters</span></code>(params[,&nbsp;log_indices])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">Positive</span></code></td>
+<td>Define a positive only bound for the optimiser.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pyalacarte.utils.base.map_indices.html"
+                        title="previous chapter">pyalacarte.utils.base.map_indices</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pyalacarte.utils.base.flatten.html"
+                        title="next chapter">pyalacarte.utils.base.flatten</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyalacarte.utils.base.flatten.html" title="pyalacarte.utils.base.flatten"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pyalacarte.utils.base.map_indices.html" title="pyalacarte.utils.base.map_indices"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pyalacarte 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
