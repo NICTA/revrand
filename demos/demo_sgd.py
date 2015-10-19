@@ -67,13 +67,14 @@ def sgd_demo():
     pl.plot(Xs, Ys, 'c-')
     pl.plot(Xs, Ys_grad, 'b-')
     pl.plot(Xs, Ys_sgd, 'g-')
-    pl.title('SGD Demo')
+    pl.title('Function fitting')
     pl.xlabel('x')
     pl.ylabel('y')
     pl.legend(['Training', 'Truth', 'Analytic', 'LBFGS', 'SGD'])
 
     ax = fig.add_subplot(122)
     pl.xlabel('iteration')
+    pl.title('SGD convergence')
     ax.plot(range(len(costs)), costs, 'b')
     ax.set_ylabel('cost', color='b')
     for t in ax.get_yticklabels():
