@@ -3,6 +3,27 @@
 
 from setuptools import setup
 
+from setuptools.command.test import test as TestCommand
+
+
+class PyTest(TestCommand):
+
+    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
+
+    def initialize_options(self):
+        super(PyTest, self).initialize_options()
+        self.pytest_args = []
+
+    def finalize_options(self):
+        super(PyTest, self).finalize_options()
+        self.test_suite = True
+        self.test_args = []
+
+    def run_tests(self):
+        # import here, cause outside the eggs aren't loaded
+        import pytest
+        exit(pytest.main(self.pytest_args))
+
 setup(
     name='pyalacarte',
     version='0.1rc1',
@@ -12,6 +33,10 @@ setup(
     author_email='daniel.steinberg@nicta.com.au',
     url='http://github.com/nicta/pyalacarte',
     packages=['pyalacarte'],
+    cmdclass={
+        'test': PyTest
+    },
+    tests_require=['pytest'],
     install_requires=[
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',
