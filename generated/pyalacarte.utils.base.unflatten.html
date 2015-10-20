@@ -67,8 +67,8 @@
 <dl class="function">
 <dt id="pyalacarte.utils.base.unflatten">
 <code class="descclassname">pyalacarte.utils.base.</code><code class="descname">unflatten</code><span class="sig-paren">(</span><em>ary</em>, <em>shapes</em>, <em>order='C'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.utils.base.unflatten" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a flat (1d) array, and a list of shapes (represented as
-tuples), return a list of ndarrays with the specified shapes.</p>
+<dd><p>Given a flat (1d) array, and a list of shapes (represented as tuples),
+return a list of ndarrays with the specified shapes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -141,7 +141,7 @@ The default is ‘C’.</li>
 <span class="gr">ValueError</span>: <span class="n">total size of new array must be unchanged</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">(</span><span class="o">*</span><span class="n">unflatten</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[(),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">unflatten</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[(),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])))</span>
 <span class="gp">... </span>
 <span class="go">(array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]),</span>
 <span class="go">    [(), (1,), (4,), (2, 3)])</span>

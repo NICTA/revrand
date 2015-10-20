@@ -66,10 +66,10 @@
 <h1>pyalacarte.utils.base.flatten<a class="headerlink" href="#pyalacarte-utils-base-flatten" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyalacarte.utils.base.flatten">
-<code class="descclassname">pyalacarte.utils.base.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>*arys</em>, <em>order='C'</em>, <em>returns_shapes=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.utils.base.flatten" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flatten a variable number of ndarrays and/or numpy scalars (0darray)
-of possibly heterogenous dimensions and shapes and concatenate them
-together into a flat (1d) array.</p>
+<code class="descclassname">pyalacarte.utils.base.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>arys</em>, <em>order='C'</em>, <em>returns_shapes=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.utils.base.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly
+heterogenous dimensions and shapes and concatenate them together into a
+flat (1d) array.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Not to be confused with <cite>np.ndarray.flatten()</cite> (a more befitting
@@ -83,7 +83,7 @@ with the latter.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>arys2, ...</strong> (<em>arys1,</em>) &#8211; One or more input arrays of possibly heterogenous shapes and
+<li><strong>arys</strong> (<em>list of array_like</em>) &#8211; One or more input arrays of possibly heterogenous shapes and
 sizes.</li>
 <li><strong>order</strong> (<em>{‘C’, ‘F’, ‘A’}, optional</em>) &#8211; Whether to flatten in C (row-major), Fortran (column-major)
 order, or preserve the C/Fortran ordering. The default is ‘C’.</li>
@@ -92,20 +92,14 @@ returned, otherwise only <cite>flattened</cite> is returned.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul>
-<li><p class="first"><strong>.. todo</strong> (<em>:</em>) &#8211;</p>
-<p>For consistency, might consider keeping with the Python 3 theme
-of returning generators everywhere... Especially since most other
-functions here does...</p>
-</li>
-<li><p class="first"><strong>flattened,[shapes]</strong> (<em>{1darray, list of tuples}</em>) &#8211;
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>flattened,[shapes]</strong> &#8211;
 Return the flat (1d) array resulting from the concatenation of
 flattened ndarrays. When <cite>returns_shapes</cite> is <cite>True</cite>, return a
 list of tuples containing also the shapes of each array as the
 second element.</p>
-</li>
-</ul>
-</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">{1darray, list of tuples}</p>
 </td>
 </tr>
 </tbody>
@@ -119,7 +113,7 @@ second element.</p>
 </div>
 <p class="rubric">Notes</p>
 <p>Equivalent to:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">lambda</span> <span class="o">*</span><span class="n">arys</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="bp">True</span><span class="p">:</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span> <span class="n">ndarrays</span><span class="p">)),</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">ndarrays</span><span class="p">)))</span> <span class="k">if</span> <span class="n">returns_shapes</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span> <span class="n">ndarrays</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">lambda</span> <span class="n">arys</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="bp">True</span><span class="p">:</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span> <span class="n">ndarrays</span><span class="p">)),</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">ndarrays</span><span class="p">)))</span> <span class="k">if</span> <span class="n">returns_shapes</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span> <span class="n">ndarrays</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>This implementation relies on the fact that scalars are treated as
@@ -160,12 +154,12 @@ aren&#8217;t special enough to break the rules.)</p>
 <span class="gp">... </span>               <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]])</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> 
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">])</span> 
 <span class="go">(array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,</span>
 <span class="go">        1, 9, 4, 1]), [(), (5,), (2, 3), (2, 2, 3)])</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">)</span>
 <span class="gp">... </span>
 <span class="go">(array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,</span>
 <span class="go">        5, 1, 9, 1]), [(), (5,), (2, 3), (2, 2, 3)])</span>
@@ -173,24 +167,24 @@ aren&#8217;t special enough to break the rules.)</p>
 </div>
 <p>Note that scalars and 0-dimensional arrays are treated differently
 from 1-dimensional singleton arrays.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">(</span><span class="mf">3.14</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.71</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.61</span><span class="p">]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="mf">3.14</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.71</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.61</span><span class="p">])])</span>
 <span class="gp">... </span>
 <span class="go">(array([ 3.14,  2.71,  1.61]), [(), (), (1,)])</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 <span class="gp">... </span>
 <span class="go">array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,</span>
 <span class="go">       1, 9, 4, 1])</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 <span class="gp">... </span>
 <span class="go">array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,</span>
 <span class="go">       5, 1, 9, 1])</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">unflatten</span><span class="p">(</span><span class="o">*</span><span class="n">flatten</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">unflatten</span><span class="p">(</span><span class="o">*</span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">]))</span>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">w</span> <span class="o">==</span> <span class="n">a</span>
