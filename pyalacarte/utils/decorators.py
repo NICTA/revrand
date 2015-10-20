@@ -3,9 +3,96 @@ Reusable decorators
 """
 
 from ..utils.base import flatten, unflatten
+from collections import OrderedDict
 from six import wraps
 
 import numpy as np
+
+
+class Memoize(dict):
+    """
+    Examples
+    --------
+    >>> @Memoize
+    ... def fib(n):
+    ...     if n < 2:
+    ...         return n
+    ...     return fib(n-2) + fib(n-1)
+
+    >>> fib(10)
+    55
+
+    >>> isinstance(fib, dict)
+    True
+
+    >>> fib == {
+    ...     (0,):  0,
+    ...     (1,):  1,
+    ...     (2,):  1,
+    ...     (3,):  2,
+    ...     (4,):  3,
+    ...     (5,):  5,
+    ...     (6,):  8,
+    ...     (7,):  13,
+    ...     (8,):  21,
+    ...     (9,):  34,
+    ...     (10,): 55,
+    ... }
+    True
+
+    Order is not necessarily maintained.
+
+    >>> sorted(fib.keys())
+    [(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,), (10,)]
+
+    >>> sorted(fib.values())
+    [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+    """
+    def __init__(self, func):
+        self.func = func
+        super(Memoize, self).__init__()
+
+    def __call__(self, *args):
+        return self[args]
+
+    def __missing__(self, key):
+        self[key] = self.func(*key)
+        return self[key]
+
+
+class OrderedMemoize(Memoize, OrderedDict):
+    """
+    Examples
+    --------
+    >>> @OrderedMemoize
+    ... def fib(n):
+    ...     if n < 2:
+    ...         return n
+    ...     return fib(n-2) + fib(n-1)
+
+    >>> fib(10)
+    55
+
+    >>> list(fib.keys())
+    [(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,), (10,)]
+
+    >>> list(fib.values())
+    [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+
+    >>> fib # doctest: +NORMALIZE_WHITESPACE
+    OrderedMemoize([((0,), 0),
+                    ((1,), 1),
+                    ((2,), 1),
+                    ((3,), 2),
+                    ((4,), 3),
+                    ((5,), 5),
+                    ((6,), 8),
+                    ((7,), 13),
+                    ((8,), 21),
+                    ((9,), 34),
+                    ((10,), 55)])
+    """
+    pass
 
 
 def flatten_args(fn=None):
