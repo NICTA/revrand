@@ -73,6 +73,8 @@ class OrderedMemoize(Memoize, OrderedDict):
     >>> fib(10)
     55
 
+    The arguments and values are cached in the order they were called.
+
     >>> list(fib.keys())
     [(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,), (10,)]
 
