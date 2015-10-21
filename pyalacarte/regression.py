@@ -30,38 +30,56 @@ from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
 log = logging.getLogger(__name__)
 
 
-def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-                  ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
+def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
+                ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
     """
-    Learn the parameters and hyperparameters of a Bayesian linear 
-    regressor using the evidence lower bound (ELBO) on log-marginal 
-    likelihood.
+    Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
-    Arguments:
-        X: (N, d) array input dataset (N samples, d dimensions)
-        y: N array targets (N samples)
-        basis: A basis object, see bases.py
-        bparams: A sequence of parameters of the basis object
-        var, (float): observation variance initial guess
-        regulariser, (float): weight regulariser (variance) initial 
-        guess diagcov, (bool): approximate posterior covariance with 
-        diagional matrix.
-        verbose, (bool): log learning status
-        ftol, (float): optimiser function tolerance convergence 
-        criterion 
-        maxit, (int): maximum number of iterations for the optimiser
-        usegradients, (bool): True for using gradients to optimize the
-            parameters, otherwise false uses BOBYQA (from nlopt)
+    Parameters
+    ----------
+        X: ndarray
+            (N, d) array input dataset (N samples, d dimensions).
+        y: ndarray
+            (N,) array targets (N samples)
+        basis: Basis
+            A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of parameters of the basis object.
+        var: float, optional
+            observation variance initial value.
+        regulariser: float, optional
+            weight regulariser (variance) initial value.
+        diagcov: bool, optional
+            approximate posterior covariance with diagional matrix.
+        verbose: bool, optional
+            log learning status.
+        ftol: float, optional
+            optimiser function tolerance convergence criterion.
+        maxit: int, optional
+            maximum number of iterations for the optimiser.
+        usegradients: bool, optional
+            True for using gradients to optimize the parameters, otherwise
+            false uses BOBYQA (from nlopt).
 
-    Returns:
-        (tuple): with elements,
+    Returns
+    -------
+        m: ndarray
+            (D,) array of posterior weight means (D is the dimension of the
+            features).
+        C: ndarray
+            (D,) array of posterior weight variances.
+        bparams: sequence
+            learned sequence of basis object hyperparameters.
+        float:
+            learned observation variance
 
-            m: (D,) array of posterior weight means (D is the dimension 
-                of the features)
-            C: (D,) array of posterior weight variances.
-            bparams, (list): learned sequence of basis object
-                hyperparameters
-            (float): learned observation variance
+    Notes
+    -----
+        This actually optimises the evidence lower bound on log marginal
+        likelihood, rather than log marginal likelihood directly. In the case
+        of a full posterior convariance matrix, this bound is tight and the
+        exact solution will be found (modulo local minima for the
+        hyperparameters).
     """
 
     N, d = X.shape
@@ -173,35 +191,57 @@ def bayes_regress(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     return mcache, Ccache, bparams, var
 
 
-def bayes_regress_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
-                      passes=10, rate=0.9, eta=1e-6, batchsize=100,
-                      verbose=True):
-    """ Learn the parameters and hyperparameters of a Bayesian linear regressor
-        using the evidence lower bound (ELBO) on log-marginal likelihood.
+def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
+                    passes=100, rate=0.9, eta=1e-6, batchsize=100,
+                    verbose=True):
+    """
+    Learn the parameters and hyperparameters of an approximate Bayesian linear
+    regressor using stochastic gradient descent for large scale problems.
 
-        Arguments:
-            X: Nxd array input dataset (N samples, d dimensions)
-            y: N array targets (N samples)
-            basis: A basis object, see bases.py
-            bparams: A sequence of parameters of the basis object
-            var, (float): observation variance initial guess
-            regulariser, (float): weight regulariser (variance) initial guess
-            gtol, (float): SGD tolerance convergence criterion
-            passes, (int): Number of complete passes through the data before
-                optimization terminates (unless it converges first).
-            rate, (float): SGD decay rate, must be [0, 1].
-            batchsize, (int): number of observations to use per SGD batch.
-            verbose, (float): log learning status
 
-        Returns:
-            (tuple): with elements,
+    Parameters
+    ----------
+        X: ndarray
+            (N, d) array input dataset (N samples, d dimensions).
+        y: ndarray
+            (N,) array targets (N samples)
+        basis: Basis
+            A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of parameters of the basis object.
+        var: float, optional
+            observation variance initial value.
+        regulariser: float, optional
+            weight regulariser (variance) initial value.
+        gtol: float,
+            SGD tolerance convergence criterion.
+        passes: int, optional
+            Number of complete passes through the data before optimization
+            terminates (unless it converges first).
+        rate: float, optional
+            SGD decay rate, must be [0, 1].
+        batchsize: int, optional
+            number of observations to use per SGD batch.
 
-                m: (D,) array of posterior weight means (D is the dimension of
-                    the features)
-                C: (D,) array of posterior weight variances.
-                bparams, (list): learned sequence of basis object
-                    hyperparameters
-                (float): learned observation variance
+        verbose, (float): log learning status
+
+    Returns
+    -------
+        m: ndarray
+            (D,) array of posterior weight means (D is the dimension of the
+            features).
+        C: ndarray
+            (D,) array of posterior weight variances.
+        bparams: sequence
+            learned sequence of basis object hyperparameters.
+        float:
+            learned observation variance
+
+    Notes
+    -----
+        This approximates the posterior over the weights with a diagonal
+        covariance to keep the parameter count small for SGD. As a consequence,
+        features with large dimensionality can be used.
     """
 
     N, d = X.shape
@@ -293,28 +333,37 @@ def bayes_regress_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
     return m, C, bparams, var
 
 
-def bayes_predict(X_star, basis, m, C, bparams, var):
-    """ Predict using Bayesian linear regression.
+def bayeslinear_predict(X_star, basis, m, C, bparams, var):
+    """
+    Predict using Bayesian linear regression.
 
-        Arguments:
-            X_star: (N_star,D) array query input dataset (N_star samples,
-                D dimensions)
-            m: (D,) array of regression weights (posterior)
-            C: (D,) or (D, D) array of regression weight covaariances
-               (posterior)
-            basis: A basis object, see bases.py
-            bparams: A sequence of hyperparameters of the basis object
-            var: observation variance
+    Parameters
+    ----------
+        X_star: ndarray
+            (N_star,D) array query input dataset (N_star samples, D
+            dimensions).
+        m: ndarray
+            (D,) array of regression weights (posterior).
+        C: ndarray
+            (D,) or (D, D) array of regression weight covariances (posterior).
+        basis: Basis
+            A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of hyperparameters of the basis object.
+        var: float
+            observation variance.
 
-        Returns:
-            (tuple): with elements:
-
-                Ey: The expected value of y_star for the query inputs, X_star
-                    of shape (N_star,)
-                Vf: The expected variance of f_star for the query inputs,
-                    X_star of shape (N_star,)
-                Vy: The expected variance of y_star for the query inputs,
-                    X_star of shape (N_star,)
+    Returns
+    -------
+        Ey: ndarray
+            The expected value of y_star for the query inputs, X_star
+            of shape (N_star,).
+        Vf: ndarray
+            The expected variance of f_star for the query inputs,
+            X_star of shape (N_star,).
+        Vy: ndarray
+            The expected variance of y_star for the query inputs,
+            X_star of shape (N_star,).
     """
 
     Phi_s = basis(X_star, *bparams)

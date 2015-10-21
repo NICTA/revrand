@@ -14,6 +14,7 @@ Contents:
    installation
    basis_funcs
    regression
+   classification
    optimize
    utils
    demo

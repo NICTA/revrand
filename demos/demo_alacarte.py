@@ -132,18 +132,19 @@ def main():
         raise ValueError('Invalid basis!')
 
     # Evidence lower-bound A la Carte learning
-    params_sgd = regression.bayes_regress_sgd(Xtrain, ytrain, base, hypers,
-                                              var=noise**2, rate=rate, eta=eta,
-                                              passes=passes, regulariser=reg,
-                                              batchsize=batchsize)
-    Ey_s, Vf_s, Vy_s = regression.bayes_predict(Xtest, base, *params_sgd)
+    params_sgd = regression.bayeslinear_sgd(Xtrain, ytrain, base, hypers,
+                                            var=noise**2, rate=rate, eta=eta,
+                                            passes=passes, regulariser=reg,
+                                            batchsize=batchsize)
+    Ey_s, Vf_s, Vy_s = regression.bayeslinear_predict(Xtest, base, *params_sgd)
     Sy_s = np.sqrt(Vy_s)
 
-    params_elbo = regression.bayes_regress(Xtrain, ytrain, base, hypers,
-                                           diagcov=diagcov,
-                                           usegradients=usegradients,
-                                           regulariser=reg, var=noise**2)
-    Ey_e, Vf_e, Vy_e = regression.bayes_predict(Xtest, base, *params_elbo)
+    params_elbo = regression.bayeslinear(Xtrain, ytrain, base, hypers,
+                                         diagcov=diagcov,
+                                         usegradients=usegradients,
+                                         regulariser=reg, var=noise**2)
+    Ey_e, Vf_e, Vy_e = regression.bayeslinear_predict(Xtest, base,
+                                                      *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
     #
