@@ -176,8 +176,8 @@ def candidate_start_points_grid(bounds, nums=3):
            [-1.5, -1.5, -1.5, ...,  3. ,  3. ,  3. ],
            [ 0. ,  0. ,  0. , ...,  5. ,  5. ,  5. ],
            [ 1. ,  3. ,  5. , ...,  1. ,  3. ,  5. ]])
-    
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)], 
+
+    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
     ...                             nums=[5, 10, 9, 3]).shape
     (4, 1350)
 
@@ -196,7 +196,7 @@ def candidate_start_points_grid(bounds, nums=3):
              0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
              0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
-    
+
     >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)]).shape
     (2, 9)
 
@@ -210,8 +210,8 @@ def candidate_start_points_grid(bounds, nums=3):
     if isinstance(nums, int):
         nums = repeat(nums)
 
-    linspaces = [np.linspace(start, end, num) for (start, end), num \
-        in zip(bounds, nums)]
+    linspaces = [np.linspace(start, end, num) for (start, end), num
+                 in zip(bounds, nums)]
     return np.vstack(a.flatten() for a in np.meshgrid(*linspaces))
 
 def minimize_bounded_start(candidates_func=candidate_start_points_random, 
@@ -245,7 +245,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
 
     >>> minimize_bounded_start_dec = minimize_bounded_start(n_candidates=250)
-    
+
     >>> @minimize_bounded_start_dec
     ... def my_min(fun, x0, *args, **kwargs):
     ...     return sp_min(fun, x0, *args, **kwargs)
@@ -253,7 +253,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
 
     >>> my_min = minimize_bounded_start_dec(sp_min)
     >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
-    
+
     >>> @minimize_bounded_start(candidate_start_points_grid, nums=[5, 9])
     ... def my_min(fun, x0, *args, **kwargs):
     ...     return sp_min(fun, x0, *args, **kwargs)
@@ -281,7 +281,8 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
         @wraps(minimize_func)
         def _minimize_bounded_start(fun, x0_bounds, *args, **kwargs):
             candidate_start_points = candidates_func(x0_bounds,
-                *candidates_func_args, **candidates_func_kwargs)
+                                                     *candidates_func_args,
+                                                     **candidates_func_kwargs)
             candidate_start_values = fun(candidate_start_points)
             min_start_point_ind = np.argmin(candidate_start_values)
             min_start_point = candidate_start_points[:, min_start_point_ind]
@@ -293,12 +294,43 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
 
     return minimize_bounded_start_dec
 
+
 def augment_minimizer(minimizer):
 
-    def new_minimizer(fun, *ndarrays, **kwargs):
-        array1d, shapes = flatten(*ndarrays)
+    """
+    Examples
+    --------
+    >>> from scipy.optimize import minimize as sp_min
+    >>> min_ = augment_minimizer(sp_min)
+
+    >>> def sphere(x):
+    ...     return x.dot(x)
+
+    >>> sphere(np.array([2., 5.]))
+    29.0
+
+    >>> res = min_(sphere, [np.array([2., 5.])])
+    >>> res.success
+    True
+    >>> len(res.x)
+    1
+
+    >>> def f(x):
+    ...     a = 3.5
+    ...     b = np.array([4.2, 3.6])
+    ...     c = 8.1
+    ...     return a * sphere(x) + b.dot(x) + c
+
+    >>> f(np.array([2., 5.]))
+    136.0
+
+    >>> _ = min_(f, [np.array([2., 5.])])
+    """
+
+    def new_minimizer(fun, ndarrays, **kwargs):
+        array1d, shapes = flatten(ndarrays)
         result = minimizer(fun, array1d, **kwargs)
-        result['x'] = unflatten(result['x'], shapes)
+        result['x'] = list(unflatten(result['x'], shapes))
         return result
 
     return new_minimizer
