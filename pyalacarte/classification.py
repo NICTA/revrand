@@ -12,22 +12,42 @@ from .optimize import minimize, sgd
 log = logging.getLogger(__name__)
 
 
-def logistic_map(X, y, basis, bparams, regulariser=1, balance=True, ftol=1e-6,
+def logistic_map(X, y, basis, bparams, regulariser=1., balance=True, ftol=1e-6,
                  maxit=1000, verbose=True):
-    """ Learn the weights of a logistic regressor using MAP inference.
+    """
+    Learn the weights of a multiclass logistic regressor using MAP inference.
 
-        Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
-            y: N array of boolean targets (N samples)
-            basis: A basis object, see bases.py
-            bparams: A sequence of parameters of the basis object
-            regulariser, (float): weight regulariser (variance) initial guess
-            ftol, (float): optimiser function tolerance convergence criterion
-            maxit, (int): maximum number of iterations for SGD
-            verbose, (float): log learning status
+    Parameters
+    ----------
+        X: ndarray
+            (N, D) array input dataset (N samples, D dimensions).
+        y: ndarray
+            (N,) array of integer targets (N samples).
+        basis: Basis
+            A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of parameters of the basis object.
+        regulariser: float, optional
+            weight regulariser (variance) initial values.
+        balance: bool, optional
+            Automatically accout for unbalanced classes, i.e. adjust the
+            contibution of the classes to the objective function accorging to
+            their size in the dataset.
+        ftol: float, optional
+            optimiser function tolerance convergence criterion.
+        maxit: int, optional
+            maximum number of iterations for the optimiser.
+        verbose: float, optional
+            log learning status.
 
-        Returns:
-            array: of learned weights, with the same dimension as the basis.
+    Returns
+    -------
+        weights: ndarray
+            learned weights, with the same dimension as the basis.
+        labels: sequence
+            the order of the class labels in this sequence is the same as they
+            will appear in the predictive output (which is a matrix of
+            probabilities).
     """
 
     # Parse input labels
@@ -49,27 +69,46 @@ def logistic_map(X, y, basis, bparams, regulariser=1, balance=True, ftol=1e-6,
 
 
 def logistic_sgd(X, y, basis, bparams, regulariser=1, balance=True, gtol=1e-4,
-                 passes=10, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
-    """ Learn the weights of a logistic regressor using MAP inference and SGD.
+                 passes=100, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
+    """
+    Learn the weights of a logistic regressor using MAP inference and SGD.
 
-        Arguments:
-            X: NxD array input dataset (N samples, D dimensions)
-            y: N array of boolean targets (N samples)
-            basis: A basis object, see bases.py
-            bparams: A sequence of parameters of the basis object
-            regulariser, (float): weight regulariser (variance) initial guess
-            gtol, (float): SGD tolerance convergence criterion
-            passes, (int): Number of complete passes through the data before
-                optimization terminates (unless it converges first).
-            rate, (float): SGD learing rate.
-            batchsize, (int): number of observations to use per SGD batch.
-            verbose, (float): log learning status
-            regulariser_bounds, (tuple): of (lower bound, upper bound) on the
-                regulariser parameter, None for unbounded (though it cannot be
-                <= 0)
+    Parameters
+    ----------
+        X: ndarray
+            (N, D) array input dataset (N samples, D dimensions).
+        y: ndarray
+            (N,) array of boolean targets (N samples).
+        basis: Basis
+            A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of parameters of the basis object.
+        regulariser: float, optional
+            weight regulariser (variance) initial values.
+        balance: bool, optional
+            Automatically accout for unbalanced classes, i.e. adjust the
+            contibution of the classes to the objective function accorging to
+            their size in the dataset.
+        gtol: float, optional
+            SGD tolerance convergence criterion.
+        passes: int, optional
+            Number of complete passes through the data before optimization
+            terminates (unless it converges first).
+        rate: float, optional
+            SGD learing rate.
+        batchsize: int, optional
+            number of observations to use per SGD batch.
+        verbose: float, optional
+            log learning status
 
-        Returns:
-            array: of learned weights, with the same dimension as the basis.
+    Returns
+    -------
+        weights: ndarray
+            learned weights, with the same dimension as the basis.
+        labels: sequence
+            the order of the class labels in this sequence is the same as they
+            will appear in the predictive output (which is a matrix of
+            probabilities).
     """
 
     # Parse input labels
@@ -92,12 +131,38 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, balance=True, gtol=1e-4,
 
 
 def logistic_predict(X_star, weights, basis, bparams):
+    """
+    Predict using multiclass logisitic regression (MAP).
 
-    # return logistic(basis(X_star, *bparams).dot(weights))
-    return softmax(basis(X_star, *bparams).dot(weights), axis=1)
+    Parameters
+    ----------
+        X_star: ndarray
+            (N_star, D) array query input dataset (N_star samples, D
+             dimensions).
+        weights: ndarray
+            (D', K) array of regression weights, where D' is the dimension of
+            the basis, and K is the number of classes.
+        basis: Basis
+            A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of hyperparameters of the basis object.
+
+    Returns
+    -------
+        Prob_y: ndarray
+            A (N_star, K) matrix of the probabilites of each query input
+            belonging to a particular class. The column orders corresponds to
+            the `label` order output by the learning function.
+    """
+
+    return _softmax(basis(X_star, *bparams).dot(weights), axis=1)
 
 
-def logistic(X):
+#
+# Private module functions
+#
+
+def _logistic(X):
     """ Pass X through a logistic sigmoid, 1 / (1 + exp(-X)), in a numerically
         stable way (using the log-sum-exp trick).
 
@@ -111,31 +176,31 @@ def logistic(X):
     N = X.shape[0]
 
     if X.ndim == 1:
-        return np.exp(-logsumexp(np.vstack((np.zeros(N), -X)).T, axis=1))
+        return np.exp(-_logsumexp(np.vstack((np.zeros(N), -X)).T, axis=1))
     elif X.ndim == 2:
         lgX = np.empty(X.shape, dtype=float)
         for d in range(X.shape[1]):
-            lgX[:, d] = np.exp(-logsumexp(np.vstack((np.zeros(N), -X[:, d])).T,
-                               axis=1))
+            lgX[:, d] = np.exp(-_logsumexp(np.vstack((np.zeros(N),
+                                                      -X[:, d])).T, axis=1))
         return lgX
     else:
         raise ValueError("This only works on up to 2D arrays.")
 
 
-def softmax(X, axis=0):
+def _softmax(X, axis=0):
     """ Pass X through a softmax function, exp(X) / sum(exp(X), axis=axis), in
         a numerically stable way using the log-sum-exp trick.
     """
 
     if axis == 1:
-        return np.exp(X - logsumexp(X, axis=1)[:, np.newaxis])
+        return np.exp(X - _logsumexp(X, axis=1)[:, np.newaxis])
     elif axis == 0:
-        return np.exp(X - logsumexp(X, axis=0))
+        return np.exp(X - _logsumexp(X, axis=0))
     else:
         raise ValueError("This only works on 2D arrays for now.")
 
 
-def logsumexp(X, axis=0):
+def _logsumexp(X, axis=0):
     """ Log-sum-exp trick for matrix X for summation along a specified axis """
 
     mx = X.max(axis=axis)
@@ -151,7 +216,7 @@ def _MAP(weights, data, regulariser, cweights, verbose, N=None):
     if cweights is None:
         cweights = np.ones(K)
 
-    sig = softmax(Phi.dot(weights), axis=1)
+    sig = _softmax(Phi.dot(weights), axis=1)
     grad = np.zeros_like(weights)
     MAP = 0
 
