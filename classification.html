@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Classification &mdash; pyalacarte 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
+    <link rel="next" title="Optimization" href="optimize.html" />
+    <link rel="prev" title="Regression" href="regression.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="optimize.html" title="Optimization"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="regression.html" title="Regression"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pyalacarte.classification">
+<span id="classification"></span><h1>Classification<a class="headerlink" href="#module-pyalacarte.classification" title="Permalink to this headline">¶</a></h1>
+<p>Various classification algorithms.</p>
+<dl class="function">
+<dt id="pyalacarte.classification.logistic_map">
+<code class="descclassname">pyalacarte.classification.</code><code class="descname">logistic_map</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1.0</em>, <em>balance=True</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.classification.logistic_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the weights of a multiclass logistic regressor using MAP inference.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, D) array input dataset (N samples, D dimensions).</li>
+<li><strong>y</strong> (<em>ndarray</em>) &#8211; (N,) array of integer targets (N samples).</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of parameters of the basis object.</li>
+<li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial values.</li>
+<li><strong>balance</strong> (<em>bool, optional</em>) &#8211; Automatically accout for unbalanced classes, i.e. adjust the
+contibution of the classes to the objective function accorging to
+their size in the dataset.</li>
+<li><strong>ftol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
+<li><strong>maxit</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
+<li><strong>verbose</strong> (<em>float, optional</em>) &#8211; log learning status.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>weights</strong> (<em>ndarray</em>) &#8211;
+learned weights, with the same dimension as the basis.</li>
+<li><strong>labels</strong> (<em>sequence</em>) &#8211;
+the order of the class labels in this sequence is the same as they
+will appear in the predictive output (which is a matrix of
+probabilities).</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalacarte.classification.logistic_predict">
+<code class="descclassname">pyalacarte.classification.</code><code class="descname">logistic_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>weights</em>, <em>basis</em>, <em>bparams</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.classification.logistic_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict using multiclass logisitic regression (MAP).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X_star</strong> (<em>ndarray</em>) &#8211; (N_star, D) array query input dataset (N_star samples, D
+dimensions).</li>
+<li><strong>weights</strong> (<em>ndarray</em>) &#8211; (D&#8217;, K) array of regression weights, where D&#8217; is the dimension of
+the basis, and K is the number of classes.</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Prob_y</strong> &#8211;
+A (N_star, K) matrix of the probabilites of each query input
+belonging to a particular class. The column orders corresponds to
+the <cite>label</cite> order output by the learning function.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalacarte.classification.logistic_sgd">
+<code class="descclassname">pyalacarte.classification.</code><code class="descname">logistic_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1</em>, <em>balance=True</em>, <em>gtol=0.0001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.classification.logistic_sgd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the weights of a logistic regressor using MAP inference and SGD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, D) array input dataset (N samples, D dimensions).</li>
+<li><strong>y</strong> (<em>ndarray</em>) &#8211; (N,) array of boolean targets (N samples).</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of parameters of the basis object.</li>
+<li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial values.</li>
+<li><strong>balance</strong> (<em>bool, optional</em>) &#8211; Automatically accout for unbalanced classes, i.e. adjust the
+contibution of the classes to the objective function accorging to
+their size in the dataset.</li>
+<li><strong>gtol</strong> (<em>float, optional</em>) &#8211; SGD tolerance convergence criterion.</li>
+<li><strong>passes</strong> (<em>int, optional</em>) &#8211; Number of complete passes through the data before optimization
+terminates (unless it converges first).</li>
+<li><strong>rate</strong> (<em>float, optional</em>) &#8211; SGD learing rate.</li>
+<li><strong>batchsize</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch.</li>
+<li><strong>verbose</strong> (<em>float, optional</em>) &#8211; log learning status</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>weights</strong> (<em>ndarray</em>) &#8211;
+learned weights, with the same dimension as the basis.</li>
+<li><strong>labels</strong> (<em>sequence</em>) &#8211;
+the order of the class labels in this sequence is the same as they
+will appear in the predictive output (which is a matrix of
+probabilities).</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="regression.html"
+                        title="previous chapter">Regression</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="optimize.html"
+                        title="next chapter">Optimization</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="optimize.html" title="Optimization"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="regression.html" title="Regression"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

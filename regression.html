@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
-    <link rel="next" title="Optimization" href="optimize.html" />
+    <link rel="next" title="Classification" href="classification.html" />
     <link rel="prev" title="Basis Functions" href="basis_funcs.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -46,7 +46,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="optimize.html" title="Optimization"
+          <a href="classification.html" title="Classification"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="basis_funcs.html" title="Basis Functions"
@@ -75,41 +75,84 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </tbody>
 </table>
 <dl class="function">
-<dt id="pyalacarte.regression.bayes_predict">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>bparams</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayes_predict" title="Permalink to this definition">¶</a></dt>
+<dt id="pyalacarte.regression.bayeslinear">
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayeslinear</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em>, <em>usegradients=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayeslinear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array input dataset (N samples, d dimensions).</li>
+<li><strong>y</strong> (<em>ndarray</em>) &#8211; (N,) array targets (N samples)</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of parameters of the basis object.</li>
+<li><strong>var</strong> (<em>float, optional</em>) &#8211; observation variance initial value.</li>
+<li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
+<li><strong>diagcov</strong> (<em>bool, optional</em>) &#8211; approximate posterior covariance with diagional matrix.</li>
+<li><strong>verbose</strong> (<em>bool, optional</em>) &#8211; log learning status.</li>
+<li><strong>ftol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
+<li><strong>maxit</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
+<li><strong>usegradients</strong> (<em>bool, optional</em>) &#8211; True for using gradients to optimize the parameters, otherwise
+false uses BOBYQA (from nlopt).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>m</strong> (<em>ndarray</em>) &#8211;
+(D,) array of posterior weight means (D is the dimension of the
+features).</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211;
+(D,) array of posterior weight variances.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211;
+learned sequence of basis object hyperparameters.</li>
+<li><em>float</em> &#8211;
+learned observation variance</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This actually optimises the evidence lower bound on log marginal
+likelihood, rather than log marginal likelihood directly. In the case
+of a full posterior convariance matrix, this bound is tight and the
+exact solution will be found (modulo local minima for the
+hyperparameters).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalacarte.regression.bayeslinear_predict">
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayeslinear_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>bparams</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayeslinear_predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict using Bayesian linear regression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X_star</strong> &#8211; (N_star,D) array query input dataset (N_star samples,
-D dimensions)</li>
-<li><strong>m</strong> &#8211; (D,) array of regression weights (posterior)</li>
-<li><strong>C</strong> &#8211; (D,) or (D, D) array of regression weight covaariances
-(posterior)</li>
-<li><strong>basis</strong> &#8211; A basis object, see bases.py</li>
-<li><strong>bparams</strong> &#8211; A sequence of hyperparameters of the basis object</li>
-<li><strong>var</strong> &#8211; observation variance</li>
+<li><strong>X_star</strong> (<em>ndarray</em>) &#8211; (N_star,D) array query input dataset (N_star samples, D
+dimensions).</li>
+<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
+<li><strong>var</strong> (<em>float</em>) &#8211; observation variance.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with elements:</p>
-<dl class="docutils">
-<dt>Ey: The expected value of y_star for the query inputs, X_star</dt>
-<dd><p class="first last">of shape (N_star,)</p>
-</dd>
-<dt>Vf: The expected variance of f_star for the query inputs,</dt>
-<dd><p class="first last">X_star of shape (N_star,)</p>
-</dd>
-<dt>Vy: The expected variance of y_star for the query inputs,</dt>
-<dd><p class="first last">X_star of shape (N_star,)</p>
-</dd>
-</dl>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Ey</strong> (<em>ndarray</em>) &#8211;
+The expected value of y_star for the query inputs, X_star
+of shape (N_star,).</li>
+<li><strong>Vf</strong> (<em>ndarray</em>) &#8211;
+The expected variance of f_star for the query inputs,
+X_star of shape (N_star,).</li>
+<li><strong>Vy</strong> (<em>ndarray</em>) &#8211;
+The expected variance of y_star for the query inputs,
+X_star of shape (N_star,).</li>
+</ul>
 </p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
 </td>
 </tr>
 </tbody>
@@ -117,100 +160,50 @@ D dimensions)</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyalacarte.regression.bayes_regress">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em>, <em>usegradients=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayes_regress" title="Permalink to this definition">¶</a></dt>
-<dd><p>Learn the parameters and hyperparameters of a Bayesian linear
-regressor using the evidence lower bound (ELBO) on log-marginal
-likelihood.</p>
+<dt id="pyalacarte.regression.bayeslinear_sgd">
+<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayeslinear_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>gtol=0.001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayeslinear_sgd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the parameters and hyperparameters of an approximate Bayesian linear
+regressor using stochastic gradient descent for large scale problems.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> &#8211; (N, d) array input dataset (N samples, d dimensions)</li>
-<li><strong>y</strong> &#8211; N array targets (N samples)</li>
-<li><strong>basis</strong> &#8211; A basis object, see bases.py</li>
-<li><strong>bparams</strong> &#8211; A sequence of parameters of the basis object</li>
-<li><strong>var,</strong> (<em>float</em>) &#8211; observation variance initial guess</li>
-<li><strong>regulariser,</strong> (<em>float</em>) &#8211; weight regulariser (variance) initial</li>
-<li><strong>diagcov,</strong> (<em>guess</em>) &#8211; approximate posterior covariance with</li>
-<li><strong>matrix.</strong> (<em>diagional</em>) &#8211; </li>
-<li><strong>verbose,</strong> (<em>bool</em>) &#8211; log learning status</li>
-<li><strong>ftol,</strong> (<em>float</em>) &#8211; optimiser function tolerance convergence</li>
-<li><strong>criterion</strong> &#8211; </li>
-<li><strong>maxit,</strong> (<em>int</em>) &#8211; maximum number of iterations for the optimiser</li>
-<li><strong>usegradients,</strong> (<em>bool</em>) &#8211; True for using gradients to optimize the
-parameters, otherwise false uses BOBYQA (from nlopt)</li>
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array input dataset (N samples, d dimensions).</li>
+<li><strong>y</strong> (<em>ndarray</em>) &#8211; (N,) array targets (N samples)</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of parameters of the basis object.</li>
+<li><strong>var</strong> (<em>float, optional</em>) &#8211; observation variance initial value.</li>
+<li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
+<li><strong>gtol</strong> (<em>float,</em>) &#8211; SGD tolerance convergence criterion.</li>
+<li><strong>passes</strong> (<em>int, optional</em>) &#8211; Number of complete passes through the data before optimization
+terminates (unless it converges first).</li>
+<li><strong>rate</strong> (<em>float, optional</em>) &#8211; SGD decay rate, must be [0, 1].</li>
+<li><strong>batchsize</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch.</li>
+<li><strong>(float)</strong> (<em>verbose,</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with elements,</p>
-<dl class="docutils">
-<dt>m: (D,) array of posterior weight means (D is the dimension</dt>
-<dd><p class="first last">of the features)</p>
-</dd>
-</dl>
-<p>C: (D,) array of posterior weight variances.
-bparams, (list): learned sequence of basis object</p>
-<blockquote>
-<div><p>hyperparameters</p>
-</div></blockquote>
-<p>(float): learned observation variance</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>m</strong> (<em>ndarray</em>) &#8211;
+(D,) array of posterior weight means (D is the dimension of the
+features).</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211;
+(D,) array of posterior weight variances.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211;
+learned sequence of basis object hyperparameters.</li>
+<li><em>float</em> &#8211;
+learned observation variance</li>
+</ul>
 </p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
 </td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyalacarte.regression.bayes_regress_sgd">
-<code class="descclassname">pyalacarte.regression.</code><code class="descname">bayes_regress_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.regression.bayes_regress_sgd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor
-using the evidence lower bound (ELBO) on log-marginal likelihood.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> &#8211; Nxd array input dataset (N samples, d dimensions)</li>
-<li><strong>y</strong> &#8211; N array targets (N samples)</li>
-<li><strong>basis</strong> &#8211; A basis object, see bases.py</li>
-<li><strong>bparams</strong> &#8211; A sequence of parameters of the basis object</li>
-<li><strong>var,</strong> (<em>float</em>) &#8211; observation variance initial guess</li>
-<li><strong>regulariser,</strong> (<em>float</em>) &#8211; weight regulariser (variance) initial guess</li>
-<li><strong>gtol,</strong> (<em>float</em>) &#8211; SGD tolerance convergence criterion</li>
-<li><strong>passes,</strong> (<em>int</em>) &#8211; Number of complete passes through the data before
-optimization terminates (unless it converges first).</li>
-<li><strong>rate,</strong> (<em>float</em>) &#8211; SGD decay rate, must be [0, 1].</li>
-<li><strong>batchsize,</strong> (<em>int</em>) &#8211; number of observations to use per SGD batch.</li>
-<li><strong>verbose,</strong> (<em>float</em>) &#8211; log learning status</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with elements,</p>
-<dl class="docutils">
-<dt>m: (D,) array of posterior weight means (D is the dimension of</dt>
-<dd><p class="first last">the features)</p>
-</dd>
-</dl>
-<p>C: (D,) array of posterior weight variances.
-bparams, (list): learned sequence of basis object</p>
-<blockquote>
-<div><p>hyperparameters</p>
-</div></blockquote>
-<p>(float): learned observation variance</p>
-</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
-</td>
-</tr>
-</tbody>
-</table>
+<p class="rubric">Notes</p>
+<p>This approximates the posterior over the weights with a diagonal
+covariance to keep the parameter count small for SGD. As a consequence,
+features with large dimensionality can be used.</p>
 </dd></dl>
 
 </div>
@@ -225,8 +218,8 @@ bparams, (list): learned sequence of basis object</p>
   <p class="topless"><a href="basis_funcs.html"
                         title="previous chapter">Basis Functions</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="optimize.html"
-                        title="next chapter">Optimization</a></p>
+  <p class="topless"><a href="classification.html"
+                        title="next chapter">Classification</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -254,7 +247,7 @@ bparams, (list): learned sequence of basis object</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="optimize.html" title="Optimization"
+          <a href="classification.html" title="Classification"
              >next</a> |</li>
         <li class="right" >
           <a href="basis_funcs.html" title="Basis Functions"
