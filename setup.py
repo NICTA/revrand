@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ Setup utility for the pyalacarte package. """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from setuptools.command.test import test as TestCommand
 
@@ -32,7 +32,7 @@ setup(
     author='Daniel Steinberg',
     author_email='daniel.steinberg@nicta.com.au',
     url='http://github.com/nicta/pyalacarte',
-    packages=['pyalacarte'],
+    packages=find_packages(),
     cmdclass={
         'test': PyTest
     },
