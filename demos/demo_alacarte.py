@@ -187,26 +187,26 @@ def main():
     Xpl_s = Xtest.flatten()
 
     # Training/Truth
-    pl.plot(Xpl_t, ytrain, 'k.', Xpl_s, ftest, 'k-')
+    pl.plot(Xpl_t, ytrain, 'k.', label='Training')
+    pl.plot(Xpl_s, ftest, 'k-', label='Truth')
 
     # SGD Regressor
-    pl.plot(Xpl_s, Ey_s, 'r-')
+    pl.plot(Xpl_s, Ey_s, 'r-', label='SGD Bayes linear reg.')
     pl.fill_between(Xpl_s, Ey_s - 2 * Sy_s, Ey_s + 2 * Sy_s, facecolor='none',
                     edgecolor='r', linestyle='--', label=None)
 
     # ELBO Regressor
-    pl.plot(Xpl_s, Ey_e, 'g-')
+    pl.plot(Xpl_s, Ey_e, 'g-', label='Bayes linear reg')
     pl.fill_between(Xpl_s, Ey_e - 2 * Sy_e, Ey_e + 2 * Sy_e, facecolor='none',
                     edgecolor='g', linestyle='--', label=None)
 
     # GP
-    pl.plot(Xpl_s, Ey_gp, 'b-')
+    pl.plot(Xpl_s, Ey_gp, 'b-', label='GP')
     pl.fill_between(Xpl_s, Ey_gp - 2 * Sy_gp, Ey_gp + 2 * Sy_gp,
                     facecolor='none', edgecolor='b', linestyle='--',
                     label=None)
 
-    pl.legend(['Training', 'Truth', 'A la Carte (SGD)', 'A la Carte (ELBO)',
-               'GP'])
+    pl.legend()
 
     pl.grid(True)
     pl.title('Regression demo')
