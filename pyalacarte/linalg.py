@@ -29,9 +29,9 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
     >>> jitchol(a, lower=True)
     array([[ 1.+0.j,  0.+0.j],
            [ 0.+2.j,  1.+0.j]])
-    >>> a
-    array([[ 1.+0.j, -0.-2.j],
-           [ 0.+2.j,  5.+0.j]])
+    >>> np.all(a == np.array([[1, -2j],
+    ...                       [2j, 5]]))
+    True
 
     >>> b = np.array([[ 2, -1,  0],
     ...               [-1,  2, -1],
@@ -53,10 +53,10 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
 
     >>> c = np.array([[1, 2],
     ...               [2, 1]])
-    >>> jitchol(c)
+    >>> jitchol(c) # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
-    numpy.linalg.linalg.LinAlgError: Exceeded maximum jitter limit, yet a is still not positive semidefinite!
+    LinAlgError: Exceeded maximum jitter limit, yet a is still not positive semidefinite!
     """
 
     try:
@@ -92,6 +92,28 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
                        overwrite_a=overwrite_a, check_finite=check_finite)
 
 
+def cho_log_det(c):
+    """
+    Compute the log of the determinant of `A`, given its (upper or lower)
+    Cholesky factorization `c`.
+
+    Examples
+    --------
+    >>> a = np.array([[ 2, -1,  0],
+    ...               [-1,  2, -1],
+    ...               [ 0, -1,  2]])
+
+    >>> u = cholesky(a)
+    >>> np.isclose(cho_log_det(u), np.log(np.linalg.det(a)))
+    True
+
+    >>> l = cholesky(a, lower=True)
+    >>> np.isclose(cho_log_det(l), np.log(np.linalg.det(a)))
+    True
+    """
+    return 2 * np.sum(np.log(c.diagonal()))
+
+# deprecated
 def logdet(L):
     """ Compute the log determinant of a matrix.
 
@@ -101,5 +123,4 @@ def logdet(L):
         Returns:
             The log determinant (scalar)
     """
-
-    return 2 * np.log(L.diagonal()).sum()
+    return cho_log_det(L)

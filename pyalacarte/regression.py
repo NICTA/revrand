@@ -21,7 +21,7 @@ import logging
 from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
-from .linalg import jitchol, logdet
+from .linalg import jitchol, cho_log_det
 from .optimize import minimize, sgd
 from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
     checktypes
@@ -108,7 +108,6 @@ def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         lower = False
         # Posterior Parameters
         LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var, lower)
-        print((LfullC, lower))
         m = cho_solve((LfullC, lower), Phi.T.dot(y)) / _var
 
         # Common calcs dependent on form of C
@@ -120,7 +119,7 @@ def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         else:
             C = cho_solve((LfullC, lower), np.eye(D))
             TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -logdet(LfullC)
+            logdetC = -cho_log_det(LfullC)
             TrC = np.trace(C)
 
         # Common computations

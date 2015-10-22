@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 
-class PyTest(TestCommand):
+class PyTest(TestCommand, object):
 
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
 

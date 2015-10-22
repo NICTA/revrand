@@ -102,17 +102,17 @@ class Positive(Bound):
     Examples
     --------
     >>> b = Positive()
-    >>> b
+    >>> b # doctest: +SKIP
     Positive(lower=1e-14, upper=None)
 
-    Since ``tuple`` (and by extension its descendents) are immutable, 
-    the lower bound for all instances of ``Positive`` are guaranteed to 
-    be positive. 
+    Since ``tuple`` (and by extension its descendents) are immutable,
+    the lower bound for all instances of ``Positive`` are guaranteed to
+    be positive.
 
-    .. admonition:: 
+    .. admonition::
 
-       Actually this is not totally true. Something like 
-       ``b._replace(lower=-42)`` would actually thwart this. Should 
+       Actually this is not totally true. Something like
+       ``b._replace(lower=-42)`` would actually thwart this. Should
        delete this method from ``namedtuple`` when inheriting.
 
     >>> c = Positive(lower=-10)
@@ -296,9 +296,9 @@ def flatten(arys, order='C', returns_shapes=True):
         One or more input arrays of possibly heterogenous shapes and
         sizes.
 
-    order : {‘C’, ‘F’, ‘A’}, optional
+    order : {'C', 'F', 'A'}, optional
         Whether to flatten in C (row-major), Fortran (column-major)
-        order, or preserve the C/Fortran ordering. The default is ‘C’.
+        order, or preserve the C/Fortran ordering. The default is 'C'.
 
     returns_shapes : bool, optional
         Default is `True`. If `True`, the tuple `(flattened, shapes)` is
@@ -424,10 +424,10 @@ def unflatten(ary, shapes, order='C'):
     shapes : list of tuples
         A list of ndarray shapes (tuple of array dimensions)
 
-    order : {‘C’, ‘F’, ‘A’}, optional
+    order : {'C', 'F', 'A'}, optional
         Reshape array using index order: C (row-major), Fortran
         (column-major) order, or preserve the C/Fortran ordering.
-        The default is ‘C’.
+        The default is 'C'.
 
     Returns
     -------
