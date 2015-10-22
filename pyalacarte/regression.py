@@ -105,9 +105,11 @@ def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         Phi = basis(X, *_theta)                      # N x D
         PhiPhi = Phi.T.dot(Phi)
 
+        lower = False
         # Posterior Parameters
-        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var), False
-        m = cho_solve(LfullC, Phi.T.dot(y)) / _var
+        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var, lower)
+        print((LfullC, lower))
+        m = cho_solve((LfullC, lower), Phi.T.dot(y)) / _var
 
         # Common calcs dependent on form of C
         if diagcov:
@@ -116,9 +118,9 @@ def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             logdetC = np.log(C).sum()
             TrC = C.sum()
         else:
-            C = cho_solve(LfullC, np.eye(D))
+            C = cho_solve((LfullC, lower), np.eye(D))
             TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -logdet(LfullC[0])
+            logdetC = -logdet(LfullC)
             TrC = np.trace(C)
 
         # Common computations
