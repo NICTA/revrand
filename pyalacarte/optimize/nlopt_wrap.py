@@ -164,9 +164,10 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
             success = opt.last_optimize_result() > 0,
         )
 
+
 def make_nlopt_fun(fun, jac=True, args=(), xs=None):
     """
-    Make NLOpt objective function (as specified by the the `NLOpt Python 
+    Make NLOpt objective function (as specified by the the `NLOpt Python
     interface`_), from SciPy-style objective functions.
 
     The NLOpt objective functions are far less pleasant to work with and
@@ -227,27 +228,27 @@ def make_nlopt_fun(fun, jac=True, args=(), xs=None):
 
     >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
     >>> obj_fun = make_nlopt_fun(rosen, jac=True)
-    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.set_min_objective(obj_fun)
     >>> opt.optimize(x0)
     array([ 1.3,  0.7,  0.8,  1.9,  1.2])
 
     Likewise, if you *do* supply gradient information, but set `jac=False`
-    you will be reminded of the fact that the gradient information is 
-    being ignored through a `RuntimeWarning`. 
+    you will be reminded of the fact that the gradient information is
+    being ignored through a `RuntimeWarning`.
 
     >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
     >>> obj_fun = make_nlopt_fun(rosen_couple, jac=False)
-    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.set_min_objective(obj_fun)
     >>> opt.optimize(x0)
     array([ 1.3,  0.7,  0.8,  1.9,  1.2])
 
-    Of course, you can use gradient-based optimization and not supply 
-    any gradient information at your own discretion. 
-    No warning are raised. 
+    Of course, you can use gradient-based optimization and not supply
+    any gradient information at your own discretion.
+    No warning are raised.
 
     >>> opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
     >>> obj_fun = make_nlopt_fun(rosen, jac=False)
-    >>> opt.set_min_objective(obj_fun)    
+    >>> opt.set_min_objective(obj_fun)
     >>> opt.optimize(x0)
     array([ 1.3,  0.7,  0.8,  1.9,  1.2])
 
@@ -385,9 +386,10 @@ def make_nlopt_fun(fun, jac=True, args=(), xs=None):
 
     return nlopt_fun
 
+
 def get_nlopt_enum_by_name(method_name=None, default=nlopt.LN_BOBYQA):
     """
-    Get NLOpt algorithm object by name. If the algorithm is not found, 
+    Get NLOpt algorithm object by name. If the algorithm is not found,
     defaults to `nlopt.LN_BOBYQA`.
 
     Notes
@@ -395,22 +397,22 @@ def get_nlopt_enum_by_name(method_name=None, default=nlopt.LN_BOBYQA):
 
     From http://ab-initio.mit.edu/wiki/index.php/NLopt_Algorithms#Nomenclature:
 
-        Each algorithm in NLopt is identified by a named constant, which 
-        is passed to the NLopt routines in the various languages in 
-        order to select a particular algorithm. These constants are 
-        mostly of the form `NLOPT_{G,L}{N,D}_xxxx`, where G/L denotes 
+        Each algorithm in NLopt is identified by a named constant, which
+        is passed to the NLopt routines in the various languages in
+        order to select a particular algorithm. These constants are
+        mostly of the form `NLOPT_{G,L}{N,D}_xxxx`, where G/L denotes
         global/local optimization and N/D denotes derivative-free/
         gradient-based algorithms, respectively.
 
-        For example, the NLOPT_LN_COBYLA constant refers to the COBYLA 
-        algorithm (described below), which is a local (L) 
+        For example, the NLOPT_LN_COBYLA constant refers to the COBYLA
+        algorithm (described below), which is a local (L)
         derivative-free (N) optimization algorithm.
 
-        Two exceptions are the MLSL and augmented Lagrangian algorithms, 
-        denoted by NLOPT_G_MLSL and NLOPT_AUGLAG, since whether or not 
-        they use derivatives (and whether or not they are global, in 
-        AUGLAG's case) is determined by what subsidiary optimization 
-        algorithm is specified. 
+        Two exceptions are the MLSL and augmented Lagrangian algorithms,
+        denoted by NLOPT_G_MLSL and NLOPT_AUGLAG, since whether or not
+        they use derivatives (and whether or not they are global, in
+        AUGLAG's case) is determined by what subsidiary optimization
+        algorithm is specified.
 
     Equivalent to::
 
