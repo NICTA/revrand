@@ -9,12 +9,13 @@ A library of scalable Bayesian generalised linear models with *fancy* features
 This library implements various Bayesian linear models (Bayesian linear
 regression) and genralised linear models (logistic regression). A few features
 of this library are:
+
 - A fancy basis functions/feature composition framework for combining basis
   functions like radial basis function, sigmoidal basis functions, polynomial
   basis functions etc.
 - Basis functions that can be used to approximate Gaussian processes with shift
-  invariant covariance functions (e.g. square exponential covariances) when
-  used with linear models [1]_, [2]_, [3]_.
+  invariant covariance functions (e.g. square exponential) when used with
+  linear models [1]_, [2]_, [3]_.
 - Large scale learning using stochastic gradient descent (ADADELTA).
 
 
@@ -54,10 +55,10 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
     import matplotlib.pyplot as pl
     import numpy as np
     from pyalacarte.basis_functions import LinearBasis, RandomRBF
-    from pyalacarte.regression import bayeslinear_sgd. bayeslinear_predict
+    from pyalacarte.regression import bayeslinear_sgd, bayeslinear_predict
     
     # Concatenate a linear basis and a Random radial basis (GP approx)
-    basis = LinearBasis(onescol=True) + RandomRBF(nbases=100, Xdim=X.shape[1])
+    basis = LinearBasis(onescol=True) + RandomRBF(nbases=300, Xdim=X.shape[1])
     init_lenscale = 1.0
 
     # Learn regression parameters and predict
