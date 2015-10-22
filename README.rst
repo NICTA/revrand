@@ -113,11 +113,9 @@ References
    Learning Fast Kernels". Proceedings of the Eighteenth International
    Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
    2015.
-
 .. [2] Le, Q., Sarlos, T., & Smola, A. "Fastfood-approximating kernel
    expansions in loglinear time." Proceedings of the international conference
    on machine learning. 2013.
-
 .. [3] Rahimi, A., & Recht, B. "Random features for large-scale kernel
    machines." Advances in neural information processing systems. 2007. 
 
