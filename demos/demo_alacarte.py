@@ -27,12 +27,13 @@ def main():
     noise = 1
     order = 5  # For polynomial basis
     rate = 0.9
-    eta = 1e-5
+    eta = 1e-6
     passes = 1000
     batchsize = 100
     reg = 1
     usegradients = True
     diagcov = False
+    rank = 0
 
     N = 500
     Ns = 250
@@ -135,7 +136,7 @@ def main():
     params_sgd = regression.bayeslinear_sgd(Xtrain, ytrain, base, hypers,
                                             var=noise**2, rate=rate, eta=eta,
                                             passes=passes, regulariser=reg,
-                                            batchsize=batchsize)
+                                            rank=rank, batchsize=batchsize)
     Ey_s, Vf_s, Vy_s = regression.bayeslinear_predict(Xtest, base, *params_sgd)
     Sy_s = np.sqrt(Vy_s)
 
@@ -213,6 +214,8 @@ def main():
     pl.ylabel('y')
     pl.xlabel('x')
     pl.show()
+
+    # import IPython; IPython.embed()
 
 
 if __name__ == "__main__":

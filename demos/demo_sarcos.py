@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 """ A La Carte GP Application to SARCOS dataset. """
 
-import os
 import logging
 import numpy as np
 import computers.gp as gp
@@ -27,6 +26,7 @@ passes = 25
 rate = 0.9
 eta = 1e-6
 batchsize = 100
+rank = 0
 
 useSGD = True
 diagcov = True
@@ -62,7 +62,7 @@ lenARD = lenscale * np.ones(D)
 if useSGD:
     log.info("Using SGD regressor")
     params = regression.bayeslinear_sgd(X_train, y_train, base, [lenARD],
-                                        rate=rate, var=noise**2,
+                                        rate=rate, var=noise**2, rank=rank,
                                         regulariser=regulariser, eta=eta,
                                         passes=passes, batchsize=batchsize)
 else:

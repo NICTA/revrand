@@ -192,7 +192,7 @@ def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     return mcache, Ccache, bparams, var
 
 
-def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=1,
+def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
                     gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
                     verbose=True):
     """
@@ -216,7 +216,8 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=1,
             weight regulariser (variance) initial value.
         rank: int, optional
             the rank of the off-diagonal covariance approximation, has to be
-            [0, D] where D is the dimension of the basis.
+            [0, D] where D is the dimension of the basis. None is the same as
+            setting rank = D.
         gtol: float,
             SGD tolerance convergence criterion.
         passes: int, optional
@@ -243,22 +244,38 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=1,
 
     Notes
     -----
-        This approximates the posterior over the weights with a diagonal
-        covariance to keep the parameter count small for SGD. As a consequence,
-        features with large dimensionality can be used.
+        This approximates the posterior covariance matrix over the weights with
+        a diagonal plus low rank matrix:
+
+        .. math ::
+
+            \mathbf{w} \sim \mathcal{N}(\mathbf{m}, \mathbf{C})
+
+        where,
+
+        .. math ::
+
+            \mathbf{C} = \mathbf{U}\mathbf{U}^{T} + \\text{diag}(\mathbf{s}),
+            \quad \mathbf{U} \in \mathbb{R}^{D\\times \\text{rank}},
+            \quad \mathbf{s} \in \mathbb{R}^{D}.
+
+        This is to allow for a reduced number of parameters to optimise with
+        SGD. As a consequence, features with large dimensionality can be used.
     """
 
     # Some consistency checking
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
 
+    if rank is None:
+        rank = D
     if (rank < 0) or (rank > D):
         raise ValueError("rank has to be in the range [0, {}]!".format(D))
 
     # Initialise parameters
     minit = np.random.randn(D)
     Sinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
-    Uinit = np.random.randn(D, rank) if rank > 0 else 0
+    Uinit = np.zeros((D, rank)) if rank > 0 else 0
 
     # Initial parameter vector
     vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
@@ -349,9 +366,6 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=1,
     # plate...
     bounds = [Bound()] * (2 * D + max(1, rank * D) + 2)
     bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    # res = minimize(ELBO, pcat.flatten(vparams), method='L-BFGS-B', jac=True,
-    #                bounds=bounds, ftol=1e-6, xtol=1e-8, maxiter=1000,
-    #                args=(np.hstack((y[:, np.newaxis], X))))
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
