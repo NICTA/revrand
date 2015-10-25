@@ -227,7 +227,7 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
             SGD decay rate, must be [0, 1].
         batchsize: int, optional
             number of observations to use per SGD batch.
-        verbose: bool,
+        verbose: bool, optional
             log the learning status.
 
     Returns
