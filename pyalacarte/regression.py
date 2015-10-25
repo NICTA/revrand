@@ -192,8 +192,8 @@ def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     return mcache, Ccache, bparams, var
 
 
-def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
-                    passes=100, rate=0.9, eta=1e-6, batchsize=100,
+def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=1,
+                    gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
                     verbose=True):
     """
     Learn the parameters and hyperparameters of an approximate Bayesian linear
@@ -214,6 +214,9 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
             observation variance initial value.
         regulariser: float, optional
             weight regulariser (variance) initial value.
+        rank: int, optional
+            the rank of the off-diagonal covariance approximation, has to be
+            [0, D] where D is the dimension of the basis.
         gtol: float,
             SGD tolerance convergence criterion.
         passes: int, optional
@@ -245,24 +248,29 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         features with large dimensionality can be used.
     """
 
+    # Some consistency checking
     N, d = X.shape
+    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+
+    if (rank < 0) or (rank > D):
+        raise ValueError("rank has to be in the range [0, {}]!".format(D))
 
     # Initialise parameters
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     minit = np.random.randn(D)
-    Cinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
+    Sinit = gamma.rvs(0.1, regulariser / 0.1, size=D)
+    Uinit = np.random.randn(D, rank) if rank > 0 else 0
 
     # Initial parameter vector
-    vparams = [minit, Cinit, var, regulariser, bparams]
+    vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
     posbounds = checktypes(basis.bounds, Positive)
-    pcat = CatParameters(vparams, log_indices=[1, 2, 3, 4] if posbounds
-                         else [1, 2, 3])
+    pcat = CatParameters(vparams, log_indices=[1, 3, 4, 5] if posbounds
+                         else [1, 3, 4])
 
     def ELBO(params, data):
 
         y, X = data[:, 0], data[:, 1:]
         uparams = pcat.unflatten(params)
-        m, C, _var, _lambda, _theta = uparams
+        m, S, U, _var, _lambda, _theta = uparams
 
         # Get Basis
         Phi = basis(X, *_theta)                      # Nb x D
@@ -272,16 +280,30 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
+        logdetC = np.log(S).sum()
+        iS = 1. / S
+
+        if rank == 0:
+            C = S
+            TrPhiPhiC = (PPdiag * C).sum()
+            TrC = C.sum()
+        else:
+            C = U.dot(U.T) + np.diag(S)
+            PhiPhi = Phi.T.dot(Phi)
+            TrPhiPhiC = np.sum(PhiPhi * C)
+            TrC = np.trace(C)
+            UiS = U.T * iS
+            LUSU = jitchol(np.eye(rank) + UiS.dot(U))
+            logdetC += cho_log_det(LUSU)
 
         # Calculate ELBO
         Nb = len(y)
-        TrPhiPhiC = (PPdiag * C).sum()
         ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
                        + Nb / N * (
-                           + (C.sum() + mm) / _lambda
-                           - np.log(C).sum()
+                           + (TrC + mm) / _lambda
+                           - logdetC
                            + D * np.log(_lambda)
                            - D))
 
@@ -293,38 +315,49 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., gtol=1e-3,
         dm = Err.dot(Phi) / _var - m * Nb / (_lambda * N)
 
         # Covariance gradient
-        dC = - 0.5 * (PPdiag / _var + Nb / N * (1. / _lambda - 1. / C))
+        if rank == 0:
+            iCdiag = iS
+            dU = 0
+        else:
+            iC = np.diag(iS) - UiS.T.dot(cho_solve((LUSU, False), UiS))
+            iCdiag = iC.diagonal()
+            dU = (Nb / N * (iC - np.eye(D) / _lambda) - PhiPhi / _var).dot(U)
+        dS = - 0.5 * (PPdiag / _var + Nb / N * (1. / _lambda - iCdiag))
 
         # Grad variance
         dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
-        dlambda = 0.5 * Nb / (_lambda * N) * ((C.sum() + mm) / _lambda - D)
+        dlambda = 0.5 * Nb / (_lambda * N) * ((TrC + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
-            dPhiPhidiag = (dPhi * Phi).sum(axis=0)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhidiag * C).sum()) / _var
+            dPhiPhi = dPhi.T.dot(Phi) if rank > 0 else (dPhi * Phi).sum(axis=0)
+            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(dt)
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
         dtheta = l2p(_theta, dtheta)
 
-        return -ELBO, -pcat.flatten_grads(uparams, [dm, dC, dvar, dlambda,
+        return -ELBO, -pcat.flatten_grads(uparams, [dm, dS, dU, dvar, dlambda,
                                                     dtheta])
 
     # NOTE: It would be nice if the optimizer knew how to handle Positive
     # bounds when the log trick is used, so we dont have to have this boiler
     # plate...
-    bounds = [Bound()] * (2 * D + 2)
+    bounds = [Bound()] * (2 * D + max(1, rank * D) + 2)
     bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
+    # res = minimize(ELBO, pcat.flatten(vparams), method='L-BFGS-B', jac=True,
+    #                bounds=bounds, ftol=1e-6, xtol=1e-8, maxiter=1000,
+    #                args=(np.hstack((y[:, np.newaxis], X))))
     res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
 
-    m, C, var, regulariser, bparams = pcat.unflatten(res['x'])
+    m, S, U, var, regulariser, bparams = pcat.unflatten(res.x)
+    C = S if rank == 0 else U.dot(U.T) + np.diag(S)
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
