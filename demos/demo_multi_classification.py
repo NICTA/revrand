@@ -1,13 +1,14 @@
 #! /usr/bin/env python3
 """ A La Carte GP Classification example on USPS digits dataset. """
 
-import os
-import logging
 import numpy as np
+import logging
+
 from sklearn.linear_model import LogisticRegression
-from pyalacarte import classification, basis_functions
-from pyalacarte.validation import loglosscat, errrate
-from pyalacarte.utils.datasets import fetch_gpml_usps_resampled_data
+
+from revrand.utils.datasets import fetch_gpml_usps_resampled_data
+from revrand import classification, basis_functions
+from revrand.validation import loglosscat, errrate
 
 
 #

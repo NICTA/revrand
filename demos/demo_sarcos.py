@@ -5,9 +5,9 @@ import logging
 import numpy as np
 import computers.gp as gp
 
-from pyalacarte import regression, basis_functions
-from pyalacarte.validation import smse, msll
-from pyalacarte.utils.datasets import fetch_gpml_sarcos_data
+from revrand import regression, basis_functions
+from revrand.validation import smse, msll
+from revrand.utils.datasets import fetch_gpml_sarcos_data
 
 #
 # Settings

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" Setup utility for the pyalacarte package. """
+""" Setup utility for the revrand package. """
 
 from setuptools import setup, find_packages
 
@@ -25,13 +25,13 @@ class PyTest(TestCommand, object):
         exit(pytest.main(self.pytest_args))
 
 setup(
-    name='pyalacarte',
+    name='revrand',
     version='0.1rc1',
     description='Implementation of the A la Carte approximation of Gaussian'
                 'processes, amongst other things.',
     author='Daniel Steinberg',
     author_email='daniel.steinberg@nicta.com.au',
-    url='http://github.com/nicta/pyalacarte',
+    url='http://github.com/nicta/revrand',
     packages=find_packages(),
     cmdclass={
         'test': PyTest

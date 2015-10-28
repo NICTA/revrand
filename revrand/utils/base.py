@@ -315,7 +315,7 @@ def flatten(arys, order='C', returns_shapes=True):
 
     See Also
     --------
-    pyalacarte.utils.unflatten : its inverse
+    revrand.utils.unflatten : its inverse
 
     Notes
     -----
@@ -436,7 +436,7 @@ def unflatten(ary, shapes, order='C'):
 
     See Also
     --------
-    pyalacarte.utils.flatten : its inverse
+    revrand.utils.flatten : its inverse
 
     Notes
     -----

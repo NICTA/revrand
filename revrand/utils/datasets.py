@@ -20,25 +20,25 @@ from .base import Bunch
 
 def get_data_home(data_home=None):
     """
-    Return the path of the pyalacarte data dir.
+    Return the path of the revrand data dir.
 
     This folder is used by some large dataset loaders to avoid
     downloading the data several times.
 
-    By default the data dir is set to a folder named 'pyalacarte_data'
+    By default the data dir is set to a folder named 'revrand_data'
     in the user home folder.
 
-    Alternatively, it can be set by the 'PYALACARTE_DATA' environment
+    Alternatively, it can be set by the 'REVRAND_DATA' environment
     variable or programmatically by giving an explicit folder path. The
     '~' symbol is expanded to the user home folder.
 
     If the folder does not already exist, it is automatically created.
     """
     data_home_default = Path(__file__).ancestor(3).child('demos',
-                                                         '_pyalacarte_data')
+                                                         '_revrand_data')
 
     if data_home is None:
-        data_home = os.environ.get('PYALACARTE_DATA', data_home_default)
+        data_home = os.environ.get('REVRAND_DATA', data_home_default)
 
     if not os.path.exists(data_home):
         os.makedirs(data_home)

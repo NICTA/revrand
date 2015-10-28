@@ -1,5 +1,5 @@
 """
-The :mod:`pyalacarte.basis_function` module implements basis functions
+The :mod:`revrand.basis_function` module implements basis functions
 and mechanisms for creating higher-order basis functions.
 """
 

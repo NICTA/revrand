@@ -67,9 +67,10 @@ Stochastic Gradient Descent
 In this demo we fit radial basis functions to a sine wave using a 
 sum of squares objective. We compare three methods of solving for the radial
 basis function weights,
-    - Linear solve (analytic solution)
-    - L-BFGS
-    - Stochastic gradient descent (ADADELTA [2]_).
+
+- Linear solve (analytic solution)
+- L-BFGS
+- Stochastic gradient descent (ADADELTA [2]_).
 
 We also plot the results of each iteration of stochasistic gradient descent.
 

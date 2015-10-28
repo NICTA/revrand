@@ -4,8 +4,8 @@
 import logging
 import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte import classification, basis_functions
-# from pyalacarte.validation import logloss, errrate
+from revrand import classification, basis_functions
+# from revrand.validation import logloss, errrate
 
 
 #

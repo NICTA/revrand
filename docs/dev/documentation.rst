@@ -9,6 +9,13 @@ We adopt the `NumPy/SciPy Documentation`_ convention for docstrings, although
 `Google Style Python Docstrings`_ are also acceptable if you're in a hurry and 
 don't have time to contribute extensive documentation.
 
+.. pull-quote::
+
+   The nice thing about standards is that there are so many of them to choose 
+   from.                                 
+
+   -- Andrew S. Tanenbaum
+
 The builtin Sphinx extension `Napoleon`_ is used to parse both NumPy and Google 
 style docstrings.
 
