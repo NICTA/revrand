@@ -1,5 +1,5 @@
 Classification
 ==============
 
-.. automodule:: pyalacarte.classification
+.. automodule:: revrand.classification
    :members:

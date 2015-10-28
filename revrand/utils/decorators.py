@@ -143,7 +143,7 @@ def vectorize_args(fn):
 
     See Also
     --------
-    pyalacarte.utils.decorators.unvectorize_args
+    revrand.utils.decorators.unvectorize_args
 
     Examples
     --------
@@ -206,7 +206,7 @@ def unvectorize_args(fn):
     """
     See Also
     --------
-    pyalacarte.utils.decorators.vectorize_args
+    revrand.utils.decorators.vectorize_args
 
     Examples
     --------

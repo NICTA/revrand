@@ -1,5 +1,5 @@
 Regression
 ==========
 
-.. automodule:: pyalacarte.regression
+.. automodule:: revrand.regression
    :members:

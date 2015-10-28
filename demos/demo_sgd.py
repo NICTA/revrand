@@ -4,8 +4,8 @@
 
 import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte.optimize import minimize, sgd
-from pyalacarte.basis_functions import RadialBasis
+from revrand.optimize import minimize, sgd
+from revrand.basis_functions import RadialBasis
 
 
 # Objective function

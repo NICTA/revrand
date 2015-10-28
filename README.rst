@@ -1,6 +1,6 @@
-==========
-pyalacarte 
-==========
+=======
+revrand 
+=======
 
 ------------------------------------------------------------------------------
 A library of scalable Bayesian generalised linear models with *fancy* features
@@ -32,7 +32,7 @@ or install with ``pip``:
 
 .. code:: console
 
-   $ pip install git+https://github.com/nicta/pyalacarte.git@release
+   $ pip install git+https://github.com/nicta/revrand.git@release
 
 Refer to `docs/installation.rst <docs/installation.rst>`_ for advanced 
 installation instructions.
@@ -54,8 +54,8 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
 
     import matplotlib.pyplot as pl
     import numpy as np
-    from pyalacarte.basis_functions import LinearBasis, RandomRBF
-    from pyalacarte.regression import bayeslinear_sgd, bayeslinear_predict
+    from revrand.basis_functions import LinearBasis, RandomRBF
+    from revrand.regression import bayeslinear_sgd, bayeslinear_predict
     
     # Concatenate a linear basis and a Random radial basis (GP approx)
     basis = LinearBasis(onescol=True) + RandomRBF(nbases=300, Xdim=X.shape[1])
@@ -92,18 +92,18 @@ Useful Links
 ------------
 
 Home Page
-    http://github.com/nicta/pyalacarte
+    http://github.com/nicta/revrand
 
 Documentation
-    http://nicta.github.io/pyalacarte
+    http://nicta.github.io/revrand
 
 Issue tracking
-    https://github.com/nicta/pyalacarte/issues
+    https://github.com/nicta/revrand/issues
 
 Bugs & Feedback
 ---------------
 
-For bugs, questions and discussions, please use `Github Issues <https://github.com/NICTA/pyalacarte/issues>`_.
+For bugs, questions and discussions, please use `Github Issues <https://github.com/NICTA/revrand/issues>`_.
 
 
 References

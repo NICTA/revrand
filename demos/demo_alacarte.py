@@ -1,13 +1,14 @@
 #! /usr/bin/env python3
 """ A La Carte GP and basis function demo. """
 
-import logging
-import numpy as np
 import matplotlib.pyplot as pl
-from pyalacarte import basis_functions, regression
-from pyalacarte.validation import mll, smse
-from scipy.spatial.distance import cdist
 import computers.gp as gp
+import numpy as np
+import logging
+
+from revrand import basis_functions, regression
+from revrand.validation import mll, smse
+from scipy.spatial.distance import cdist
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
