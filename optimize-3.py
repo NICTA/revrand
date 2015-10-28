@@ -3,8 +3,8 @@ import numpy as np
 
 from scipy.optimize import rosen
 from matplotlib.colors import LogNorm
-from pyalacarte.optimize import candidate_start_points_grid
-from pyalacarte.utils import unvectorize_args
+from revrand.optimize import candidate_start_points_grid
+from revrand.utils import unvectorize_args
 
 _rosen = unvectorize_args(rosen)
 

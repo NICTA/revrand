@@ -1,6 +1,0 @@
-pyalacarte.utils.base.map_indices
-=================================
-
-.. currentmodule:: pyalacarte.utils.base
-
-.. autofunction:: map_indices

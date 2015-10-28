@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D
-from pyalacarte.optimize import candidate_start_points_grid
+from revrand.optimize import candidate_start_points_grid
 
 fig = plt.figure()
 ax = plt.axes(projection='3d')

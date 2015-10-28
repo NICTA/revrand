@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Optimization &mdash; pyalacarte 0.1 documentation</title>
+    <title>Optimization &mdash; revrand 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.1 documentation" href="index.html" />
     <link rel="next" title="Utilities" href="utils.html" />
     <link rel="prev" title="Classification" href="classification.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="classification.html" title="Classification"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -125,7 +125,7 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 
 <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
-<span class="kn">from</span> <span class="nn">pyalacarte.optimize</span> <span class="kn">import</span> <span class="n">candidate_start_points_grid</span>
+<span class="kn">from</span> <span class="nn">revrand.optimize</span> <span class="kn">import</span> <span class="n">candidate_start_points_grid</span>
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
@@ -146,7 +146,7 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 
 <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
-<span class="kn">from</span> <span class="nn">pyalacarte.optimize</span> <span class="kn">import</span> <span class="n">candidate_start_points_random</span>
+<span class="kn">from</span> <span class="nn">revrand.optimize</span> <span class="kn">import</span> <span class="n">candidate_start_points_random</span>
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
@@ -169,8 +169,8 @@
 
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">rosen</span>
 <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
-<span class="kn">from</span> <span class="nn">pyalacarte.optimize</span> <span class="kn">import</span> <span class="n">candidate_start_points_grid</span>
-<span class="kn">from</span> <span class="nn">pyalacarte.utils</span> <span class="kn">import</span> <span class="n">unvectorize_args</span>
+<span class="kn">from</span> <span class="nn">revrand.optimize</span> <span class="kn">import</span> <span class="n">candidate_start_points_grid</span>
+<span class="kn">from</span> <span class="nn">revrand.utils</span> <span class="kn">import</span> <span class="n">unvectorize_args</span>
 
 <span class="n">_rosen</span> <span class="o">=</span> <span class="n">unvectorize_args</span><span class="p">(</span><span class="n">rosen</span><span class="p">)</span>
 
@@ -219,12 +219,12 @@
 <div class="figure">
 <img alt="_images/optimize-3.png" src="_images/optimize-3.png" />
 </div>
-<span class="target" id="module-pyalacarte.optimize"></span><p>The <a class="reference internal" href="#module-pyalacarte.optimize" title="pyalacarte.optimize"><code class="xref py py-mod docutils literal"><span class="pre">pyalacarte.optimize</span></code></a> module provides a standardized interface to
+<span class="target" id="module-revrand.optimize"></span><p>The <a class="reference internal" href="#module-revrand.optimize" title="revrand.optimize"><code class="xref py py-mod docutils literal"><span class="pre">revrand.optimize</span></code></a> module provides a standardized interface to
 popular optimization libraries and tools, such as NLopt and <code class="docutils literal"><span class="pre">scipy.optimize</span></code>,
 and also supports custom optimization methods.</p>
 <dl class="function">
-<dt id="pyalacarte.optimize.sgd">
-<code class="descclassname">pyalacarte.optimize.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>Data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.sgd" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.optimize.sgd">
+<code class="descclassname">revrand.optimize.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>Data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stochastic Gradient Descent, using ADADELTA for setting the learning
 rate.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -289,8 +289,8 @@ of objective function values is also returned.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyalacarte.optimize.minimize">
-<code class="descclassname">pyalacarte.optimize.</code><code class="descname">minimize</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>args=()</em>, <em>method=None</em>, <em>jac=True</em>, <em>bounds=None</em>, <em>constraints=[]</em>, <em>backend='scipy'</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.minimize" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.optimize.minimize">
+<code class="descclassname">revrand.optimize.</code><code class="descname">minimize</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>args=()</em>, <em>method=None</em>, <em>jac=True</em>, <em>bounds=None</em>, <em>constraints=[]</em>, <em>backend='scipy'</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.minimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scipy.optimize.minimize-style wrapper for NLopt and scipy&#8217;s minimize.</p>
 <blockquote>
 <div><dl class="docutils">
@@ -339,8 +339,8 @@ message, (str): Description of the cause of the termination (see</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyalacarte.optimize.minimize_bounded_start">
-<code class="descclassname">pyalacarte.optimize.</code><code class="descname">minimize_bounded_start</code><span class="sig-paren">(</span><em>candidates_func=&lt;function candidate_start_points_random&gt;</em>, <em>*candidates_func_args</em>, <em>**candidates_func_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.minimize_bounded_start" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.optimize.minimize_bounded_start">
+<code class="descclassname">revrand.optimize.</code><code class="descname">minimize_bounded_start</code><span class="sig-paren">(</span><em>candidates_func=&lt;function candidate_start_points_random&gt;</em>, <em>*candidates_func_args</em>, <em>**candidates_func_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.minimize_bounded_start" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span> <span class="k">as</span> <span class="n">sp_min</span><span class="p">,</span> <span class="n">rosen</span><span class="p">,</span> <span class="n">rosen_der</span>
 </pre></div>
@@ -413,8 +413,8 @@ message, (str): Description of the cause of the termination (see</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyalacarte.optimize.candidate_start_points_grid">
-<code class="descclassname">pyalacarte.optimize.</code><code class="descname">candidate_start_points_grid</code><span class="sig-paren">(</span><em>bounds</em>, <em>nums=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.candidate_start_points_grid" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.optimize.candidate_start_points_grid">
+<code class="descclassname">revrand.optimize.</code><code class="descname">candidate_start_points_grid</code><span class="sig-paren">(</span><em>bounds</em>, <em>nums=3</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.candidate_start_points_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_grid</span><span class="p">([(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span> <span class="n">nums</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 <span class="go">array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,</span>
@@ -483,8 +483,8 @@ message, (str): Description of the cause of the termination (see</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyalacarte.optimize.candidate_start_points_random">
-<code class="descclassname">pyalacarte.optimize.</code><code class="descname">candidate_start_points_random</code><span class="sig-paren">(</span><em>bounds</em>, <em>n_candidates=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.optimize.candidate_start_points_random" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.optimize.candidate_start_points_random">
+<code class="descclassname">revrand.optimize.</code><code class="descname">candidate_start_points_random</code><span class="sig-paren">(</span><em>bounds</em>, <em>n_candidates=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.candidate_start_points_random" title="Permalink to this definition">¶</a></dt>
 <dd><p>Randomly generate candidate starting points uniformly within a
 hyperrectangle.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -610,7 +610,7 @@ hyperrectangle.</p>
         <li class="right" >
           <a href="classification.html" title="Classification"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

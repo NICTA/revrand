@@ -1,0 +1,6 @@
+revrand.utils.base.nwise
+========================
+
+.. currentmodule:: revrand.utils.base
+
+.. autofunction:: nwise

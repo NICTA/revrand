@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pyalacarte.utils.base &mdash; pyalacarte 0.1 documentation</title>
+    <title>revrand.utils.base &mdash; revrand 0.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -24,10 +24,10 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="pyalacarte 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
-    <link rel="next" title="pyalacarte.utils.base.flatten" href="pyalacarte.utils.base.flatten.html" />
-    <link rel="prev" title="pyalacarte.utils.base.map_indices" href="pyalacarte.utils.base.map_indices.html" />
+    <link rel="next" title="revrand.utils.base.flatten" href="revrand.utils.base.flatten.html" />
+    <link rel="prev" title="revrand.utils.base.map_indices" href="revrand.utils.base.map_indices.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="pyalacarte.utils.base.flatten.html" title="pyalacarte.utils.base.flatten"
+          <a href="revrand.utils.base.flatten.html" title="revrand.utils.base.flatten"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="pyalacarte.utils.base.map_indices.html" title="pyalacarte.utils.base.map_indices"
+          <a href="revrand.utils.base.map_indices.html" title="revrand.utils.base.map_indices"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">pyalacarte 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -62,8 +62,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-pyalacarte.utils.base">
-<span id="pyalacarte-utils-base"></span><h1>pyalacarte.utils.base<a class="headerlink" href="#module-pyalacarte.utils.base" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-revrand.utils.base">
+<span id="revrand-utils-base"></span><h1>revrand.utils.base<a class="headerlink" href="#module-revrand.utils.base" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Functions</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -74,39 +74,33 @@
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">checktypes</span></code>(sequence,&nbsp;checktype)</td>
 <td>Check if all types are the same in a sequence.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyalacarte.utils.base.couple.html#pyalacarte.utils.base.couple" title="pyalacarte.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">couple</span></code></a>(f,&nbsp;g)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.couple.html#revrand.utils.base.couple" title="revrand.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">couple</span></code></a>(f,&nbsp;g)</td>
 <td>Given a pair of functions that take the same arguments, return a single function that returns a pair consisting of the return values of each function.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">custom_reshape</span></code>(a,&nbsp;newshape[,&nbsp;order])</td>
 <td>Identical to <cite>numpy.reshape</cite> except in the case where <cite>newshape</cite> is the empty tuple, in which case we return a scalar instead of a 0-dimensional array.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyalacarte.utils.base.decouple.html#pyalacarte.utils.base.decouple" title="pyalacarte.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">decouple</span></code></a>(fn)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.decouple.html#revrand.utils.base.decouple" title="revrand.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">decouple</span></code></a>(fn)</td>
 <td><p class="rubric">Examples</p>
 </td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyalacarte.utils.base.flatten.html#pyalacarte.utils.base.flatten" title="pyalacarte.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code></a>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.flatten.html#revrand.utils.base.flatten" title="revrand.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code></a>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
 <td>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly heterogenous dimensions and shapes and concatenate them together into a flat (1d) array.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">list_to_params</span></code>(params,&nbsp;flatlist)</td>
 <td>This will turn a flattened list of parameters into the original parameter argument list, given a template.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyalacarte.utils.base.map_indices.html#pyalacarte.utils.base.map_indices" title="pyalacarte.utils.base.map_indices"><code class="xref py py-obj docutils literal"><span class="pre">map_indices</span></code></a>(fn,&nbsp;iterable,&nbsp;indices)</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.map_indices.html#revrand.utils.base.map_indices" title="revrand.utils.base.map_indices"><code class="xref py py-obj docutils literal"><span class="pre">map_indices</span></code></a>(fn,&nbsp;iterable,&nbsp;indices)</td>
 <td><p class="rubric">Notes</p>
 </td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">namedtuple</span></code>(typename,&nbsp;field_names[,&nbsp;verbose,&nbsp;...])</td>
-<td>Returns a new subclass of tuple with named fields.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyalacarte.utils.base.nwise.html#pyalacarte.utils.base.nwise" title="pyalacarte.utils.base.nwise"><code class="xref py py-obj docutils literal"><span class="pre">nwise</span></code></a>(iterable,&nbsp;n)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.nwise.html#revrand.utils.base.nwise" title="revrand.utils.base.nwise"><code class="xref py py-obj docutils literal"><span class="pre">nwise</span></code></a>(iterable,&nbsp;n)</td>
 <td>Iterator that acts like a sliding window of size <cite>n</cite>; slides over some iterable <cite>n</cite> items at a time.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">params_to_list</span></code>(params)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params_to_list</span></code>(params)</td>
 <td>This will take a list of parameters of scalars or arrays, and return a flattened array which is a concatenation of all of these parameters.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">tee</span></code></td>
-<td>tee(iterable, n=2) &#8211;&gt; tuple of n independent iterators.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="pyalacarte.utils.base.unflatten.html#pyalacarte.utils.base.unflatten" title="pyalacarte.utils.base.unflatten"><code class="xref py py-obj docutils literal"><span class="pre">unflatten</span></code></a>(ary,&nbsp;shapes[,&nbsp;order])</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.unflatten.html#revrand.utils.base.unflatten" title="revrand.utils.base.unflatten"><code class="xref py py-obj docutils literal"><span class="pre">unflatten</span></code></a>(ary,&nbsp;shapes[,&nbsp;order])</td>
 <td>Given a flat (1d) array, and a list of shapes (represented as tuples), return a list of ndarrays with the specified shapes.</td>
 </tr>
 </tbody>
@@ -130,18 +124,6 @@
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">Positive</span></code></td>
 <td>Define a positive only bound for the optimiser.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">map</span></code></td>
-<td>map(func, <a href="#id1"><span class="problematic" id="id2">*</span></a>iterables) &#8211;&gt; map object</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">partial</span></code></td>
-<td>partial(func, <a href="#id3"><span class="problematic" id="id4">*</span></a>args, <a href="#id5"><span class="problematic" id="id6">**</span></a>keywords) - new function with partial application</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">range</span></code>((stop)&nbsp;-&gt;&nbsp;range&nbsp;object)</td>
-<td>range(start, stop[, step]) -&gt; range object</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">zip</span></code></td>
-<td>zip(iter1 [,iter2 [...]]) &#8211;&gt; zip object</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -153,11 +135,11 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="pyalacarte.utils.base.map_indices.html"
-                        title="previous chapter">pyalacarte.utils.base.map_indices</a></p>
+  <p class="topless"><a href="revrand.utils.base.map_indices.html"
+                        title="previous chapter">revrand.utils.base.map_indices</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="pyalacarte.utils.base.flatten.html"
-                        title="next chapter">pyalacarte.utils.base.flatten</a></p>
+  <p class="topless"><a href="revrand.utils.base.flatten.html"
+                        title="next chapter">revrand.utils.base.flatten</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -185,12 +167,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="pyalacarte.utils.base.flatten.html" title="pyalacarte.utils.base.flatten"
+          <a href="revrand.utils.base.flatten.html" title="revrand.utils.base.flatten"
              >next</a> |</li>
         <li class="right" >
-          <a href="pyalacarte.utils.base.map_indices.html" title="pyalacarte.utils.base.map_indices"
+          <a href="revrand.utils.base.map_indices.html" title="revrand.utils.base.map_indices"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">pyalacarte 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>

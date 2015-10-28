@@ -1,7 +1,7 @@
-pyalacarte.utils.base
-=====================
+revrand.utils.base
+==================
 
-.. automodule:: pyalacarte.utils.base
+.. automodule:: revrand.utils.base
 
    
    

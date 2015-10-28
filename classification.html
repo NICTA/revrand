@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Classification &mdash; pyalacarte 0.1 documentation</title>
+    <title>Classification &mdash; revrand 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="pyalacarte 0.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.1 documentation" href="index.html" />
     <link rel="next" title="Optimization" href="optimize.html" />
     <link rel="prev" title="Regression" href="regression.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="regression.html" title="Regression"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,12 +60,12 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-pyalacarte.classification">
-<span id="classification"></span><h1>Classification<a class="headerlink" href="#module-pyalacarte.classification" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-revrand.classification">
+<span id="classification"></span><h1>Classification<a class="headerlink" href="#module-revrand.classification" title="Permalink to this headline">¶</a></h1>
 <p>Various classification algorithms.</p>
 <dl class="function">
-<dt id="pyalacarte.classification.logistic_map">
-<code class="descclassname">pyalacarte.classification.</code><code class="descname">logistic_map</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1.0</em>, <em>balance=True</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.classification.logistic_map" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.classification.logistic_map">
+<code class="descclassname">revrand.classification.</code><code class="descname">logistic_map</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1.0</em>, <em>balance=True</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.classification.logistic_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the weights of a multiclass logistic regressor using MAP inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -102,8 +102,8 @@ probabilities).</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyalacarte.classification.logistic_predict">
-<code class="descclassname">pyalacarte.classification.</code><code class="descname">logistic_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>weights</em>, <em>basis</em>, <em>bparams</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.classification.logistic_predict" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.classification.logistic_predict">
+<code class="descclassname">revrand.classification.</code><code class="descname">logistic_predict</code><span class="sig-paren">(</span><em>X_star</em>, <em>weights</em>, <em>basis</em>, <em>bparams</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.classification.logistic_predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict using multiclass logisitic regression (MAP).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -133,8 +133,8 @@ the <cite>label</cite> order output by the learning function.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyalacarte.classification.logistic_sgd">
-<code class="descclassname">pyalacarte.classification.</code><code class="descname">logistic_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1</em>, <em>balance=True</em>, <em>gtol=0.0001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyalacarte.classification.logistic_sgd" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.classification.logistic_sgd">
+<code class="descclassname">revrand.classification.</code><code class="descname">logistic_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1</em>, <em>balance=True</em>, <em>gtol=0.0001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.classification.logistic_sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the weights of a logistic regressor using MAP inference and SGD.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -219,7 +219,7 @@ probabilities).</li>
         <li class="right" >
           <a href="regression.html" title="Regression"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pyalacarte 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

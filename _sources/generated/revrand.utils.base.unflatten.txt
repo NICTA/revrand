@@ -1,0 +1,6 @@
+revrand.utils.base.unflatten
+============================
+
+.. currentmodule:: revrand.utils.base
+
+.. autofunction:: unflatten

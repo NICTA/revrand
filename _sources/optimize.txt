@@ -32,7 +32,7 @@ Candidate Starting Points
    import matplotlib.pyplot as plt
 
    from mpl_toolkits.mplot3d import Axes3D
-   from pyalacarte.optimize import candidate_start_points_grid 
+   from revrand.optimize import candidate_start_points_grid 
 
    fig = plt.figure()
    ax = plt.axes(projection='3d')
@@ -51,7 +51,7 @@ Candidate Starting Points
    import matplotlib.pyplot as plt
 
    from mpl_toolkits.mplot3d import Axes3D
-   from pyalacarte.optimize import candidate_start_points_random
+   from revrand.optimize import candidate_start_points_random
 
    fig = plt.figure()
    ax = plt.axes(projection='3d')
@@ -72,8 +72,8 @@ Candidate Starting Points
 
    from scipy.optimize import rosen
    from matplotlib.colors import LogNorm
-   from pyalacarte.optimize import candidate_start_points_grid 
-   from pyalacarte.utils import unvectorize_args
+   from revrand.optimize import candidate_start_points_grid 
+   from revrand.utils import unvectorize_args
 
    _rosen = unvectorize_args(rosen)
 
@@ -117,5 +117,5 @@ Candidate Starting Points
 
    plt.show()
 
-.. automodule:: pyalacarte.optimize
+.. automodule:: revrand.optimize
    :members:

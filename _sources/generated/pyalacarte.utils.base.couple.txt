@@ -1,6 +1,0 @@
-pyalacarte.utils.base.couple
-============================
-
-.. currentmodule:: pyalacarte.utils.base
-
-.. autofunction:: couple
