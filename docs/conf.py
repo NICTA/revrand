@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# pyalacarte documentation build configuration file, created by
+# revrand documentation build configuration file, created by
 # sphinx-quickstart on Mon Jul 20 12:36:09 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -68,7 +68,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'pyalacarte'
+project = 'revrand'
 copyright = '2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid'
 author = 'Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid'
 
@@ -222,7 +222,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pyalacartedoc'
+htmlhelp_basename = 'revranddoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -244,7 +244,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'pyalacarte.tex', 'pyalacarte Documentation',
+  (master_doc, 'revrand.tex', 'revrand Documentation',
    'Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid', 'manual'),
 ]
 
@@ -274,7 +274,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pyalacarte', 'pyalacarte Documentation',
+    (master_doc, 'revrand', 'revrand Documentation',
      [author], 1)
 ]
 
@@ -288,8 +288,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'pyalacarte', 'pyalacarte Documentation',
-   author, 'pyalacarte', 'One line description of project.',
+  (master_doc, 'revrand', 'revrand Documentation',
+   author, 'revrand', 'One line description of project.',
    'Miscellaneous'),
 ]
 

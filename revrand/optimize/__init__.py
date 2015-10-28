@@ -1,5 +1,5 @@
 """
-The :mod:`pyalacarte.optimize` module provides a standardized interface to
+The :mod:`revrand.optimize` module provides a standardized interface to
 popular optimization libraries and tools, such as NLopt and ``scipy.optimize``,
 and also supports custom optimization methods.
 """

@@ -1,7 +1,7 @@
 Utilities
 =========
 
-.. currentmodule:: pyalacarte.utils
+.. currentmodule:: revrand.utils
 
 .. autosummary::
    :toctree: generated/

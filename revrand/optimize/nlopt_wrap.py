@@ -188,7 +188,7 @@ def make_nlopt_fun(fun, jac=True, args=(), xs=None):
 
     >>> import numpy as np
     >>> from scipy.optimize import rosen, rosen_der
-    >>> from pyalacarte.utils import couple
+    >>> from revrand.utils import couple
     >>> rosen_couple = couple(rosen, rosen_der)
     >>> x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
 

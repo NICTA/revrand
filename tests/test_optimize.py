@@ -1,7 +1,8 @@
 from __future__ import division
 import numpy as np
-from pyalacarte.optimize import sgd, minimize
-from pyalacarte.utils import CatParameters
+from revrand.optimize import sgd, minimize
+from revrand.utils import CatParameters
+
 
 def test_unbounded(make_quadratic):
 
