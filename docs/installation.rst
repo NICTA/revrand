@@ -1,7 +1,7 @@
 Installation
 ============
 
-Requirements
+Dependencies
 ------------
 
 Minimal
