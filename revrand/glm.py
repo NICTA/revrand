@@ -10,6 +10,7 @@ from __future__ import division
 
 import numpy as np
 import logging
+from scipy.stats.distributions import gamma
 
 from .optimize import minimize, sgd
 from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
@@ -25,24 +26,29 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
 
-    # TODO intialise m and C
-    minit = 
-    Cinit = 
+    # Intialise m and C
+    minit = np.random.randn(D, postcomp)  # TODO OR CLUSTER PHI?
+    Cinit = gamma.rvs(0.1, reg / 0.1, size=(D, postcomp))
 
     # Initial parameter vector
     vparams = [minit, Cinit, reg, lparams, bparams]
-    # TODO Sort this out
-    loginds = [0]
+    loginds = [1, 2]
     bpos, lpos = False, False
     if checktypes(likelihood.bounds, Positive):
-        loginds.append(1)
+        loginds.append(3)
         lpos = True
     if checktypes(basis.bounds, Positive):
-        loginds.append(2)
+        loginds.append(4)
         bpos = True
     pcat = CatParameters(vparams, log_indices=loginds)
 
-    def ELBO(params):
+    def L1(params):
+        # TODO argmax L1 w.r.t m_k i.e. for each component
+        # NOTE: Test this first independent of the covariances
+
+        pass
+
+    def L2(params):
 
         uparams = pcat.unflatten(params)
         _reg, _lparams, _bparams = uparams
@@ -50,25 +56,25 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Get Basis
         Phi = basis(X, *_bparams)                      # N x D
 
-        # Common calculation
+        # Common calculations
         logqk = qmatrix(m, C)
         logq = logsumexp(logqk, axis=1)
+        pz = np.exp(logqk - logq)
 
         if verbose:
-            log.info("ELBO = {}, reg = {}, bparams = {}, lparams = {},"
+            log.info("Objective = {}, reg = {}, bparams = {}, lparams = {},"
                      " MAP success: {}"
-                     .format(ELBO, _reg, _bparams, _lparams, res.success))
+                     .format(L2, _reg, _bparams, _lparams, res.success))
 
-        return -ELBO
+        return -L2
 
     # NOTE: It would be nice if the optimizer knew how to handle Positive
     # bounds when the log trick is used, so we dont have to have this boiler
     # plate...
-    # TODO Sort this out for m and C
-    bounds = [Bound()]
-    bounds += [Bound()] * len(basis.bounds) if bpos else basis.bounds
+    bounds = [Bound()] * (2 * D * postcomp + 1)
     bounds += [Bound()] * len(likelihood.bounds) if lpos else likelihood.bounds
-    res = minimize(ELBO, pcat.flatten(vparams), bounds=bounds, ftol=ftol,
+    bounds += [Bound()] * len(basis.bounds) if bpos else basis.bounds
+    res = minimize(L2, pcat.flatten(vparams), bounds=bounds, ftol=ftol,
                    maxiter=maxit, method='L-BFGS-B', backend='scipy')
     m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
