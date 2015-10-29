@@ -1,0 +1,106 @@
+"""
+Implementation of Bayesian GLMs with nonparametric variational inference [1_].
+
+.. [1] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
+       inference". arXiv preprint arXiv:1206.4665 (2012).
+"""
+
+
+from __future__ import division
+
+import numpy as np
+import logging
+
+from .optimize import minimize, sgd
+from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
+    checktypes
+
+# Set up logging
+log = logging.getLogger(__name__)
+
+
+def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
+              maxit=1000, ftol=1e-6, verbose=True):
+
+    N, d = X.shape
+    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+
+    # TODO intialise m and C
+    minit = 
+    Cinit = 
+
+    # Initial parameter vector
+    vparams = [minit, Cinit, reg, lparams, bparams]
+    # TODO Sort this out
+    loginds = [0]
+    bpos, lpos = False, False
+    if checktypes(likelihood.bounds, Positive):
+        loginds.append(1)
+        lpos = True
+    if checktypes(basis.bounds, Positive):
+        loginds.append(2)
+        bpos = True
+    pcat = CatParameters(vparams, log_indices=loginds)
+
+    def ELBO(params):
+
+        uparams = pcat.unflatten(params)
+        _reg, _lparams, _bparams = uparams
+
+        # Get Basis
+        Phi = basis(X, *_bparams)                      # N x D
+
+        # Common calculation
+        logqk = qmatrix(m, C)
+        logq = logsumexp(logqk, axis=1)
+
+        if verbose:
+            log.info("ELBO = {}, reg = {}, bparams = {}, lparams = {},"
+                     " MAP success: {}"
+                     .format(ELBO, _reg, _bparams, _lparams, res.success))
+
+        return -ELBO
+
+    # NOTE: It would be nice if the optimizer knew how to handle Positive
+    # bounds when the log trick is used, so we dont have to have this boiler
+    # plate...
+    # TODO Sort this out for m and C
+    bounds = [Bound()]
+    bounds += [Bound()] * len(basis.bounds) if bpos else basis.bounds
+    bounds += [Bound()] * len(likelihood.bounds) if lpos else likelihood.bounds
+    res = minimize(ELBO, pcat.flatten(vparams), bounds=bounds, ftol=ftol,
+                   maxiter=maxit, method='L-BFGS-B', backend='scipy')
+    m, C, reg, lparams, bparams = pcat.unflatten(res.x)
+
+    if verbose:
+        log.info("Finished! LML = {}, reg = {}, bparams = {}, lparams = {},"
+                 " Status: {}"
+                 .format(-res.fun, reg, bparams, lparams, res.message))
+
+    return m, C, reg, lparams, bparams
+
+
+#
+# Private module functions
+#
+
+def dgausll(x, mean, dcov):
+
+    D = len(x)
+    return - 0.5 * (D * np.log(2 * np.pi) + np.log(dcov).sum()
+                    + ((x - mean)**2 / dcov).sum())
+
+
+def qmatrix(m, C):
+
+    K = m.shape[1]
+    logq = [[dgausll(m[:, k], m[:, j], C[:, k] + C[:, j]) for k in range(K)]
+            for j in range(K)]
+    return np.array(logq)
+
+
+def logsumexp(X, axis=0):
+    """ Log-sum-exp trick for matrix X for summation along a specified axis """
+
+    mx = X.max(axis=axis)
+    return np.log(np.exp(X - mx[:, np.newaxis]).sum(axis=axis)) + mx
