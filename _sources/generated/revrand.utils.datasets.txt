@@ -1,0 +1,35 @@
+revrand.utils.datasets
+======================
+
+.. automodule:: revrand.utils.datasets
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      check_random_state
+      fetch_gpml_sarcos_data
+      fetch_gpml_usps_resampled_data
+      get_data_home
+      loadmat
+      make_regression
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Bunch
+      BytesIO
+      Path
+   
+   
+
+   
+   
+   
