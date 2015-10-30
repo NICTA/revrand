@@ -338,7 +338,7 @@ def augment_minimizer(minimizer):
 
     def new_minimizer(fun, ndarrays, **kwargs):
         array1d, shapes = flatten(ndarrays)
-        result = minimizer(fun, array1d, **kwargs)
+        result = minimizer((flatten_obj_func_grad(fun), array1d, **kwargs)
         result['x'] = list(unflatten(result['x'], shapes))
         return result
 
