@@ -295,6 +295,15 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     return minimize_bounded_start_dec
 
 
+def flatten_obj_func_grad(func):
+
+    def new_func(*args, **kwargs):
+        val, grad = func(*args, **kwargs)
+        return val, flatten(grad, returns_shapes=False)
+
+    return new_func
+
+
 def augment_minimizer(minimizer):
 
     """
