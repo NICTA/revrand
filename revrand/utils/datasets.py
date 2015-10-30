@@ -12,6 +12,7 @@ import os
 
 from six.moves import urllib
 from scipy.io import loadmat
+from scipy.spatial.distance import cdist
 from unipath import Path
 from io import BytesIO
 
@@ -158,3 +159,22 @@ def fetch_gpml_usps_resampled_data(transpose_data=True, data_home=None):
                        targets=test_targets)
 
     return Bunch(train=train_bunch, test=test_bunch)
+
+
+def gen_gausprocess_se(ntrain, ntest, noise=1., lenscale=1., scale=1.,
+                       xmin=-10, xmax=10):
+
+    Xtrain = np.linspace(xmin, xmax, ntrain)[:, np.newaxis]
+    Xtest = np.linspace(xmin, xmax, ntest)[:, np.newaxis]
+    Xcat = np.vstack((Xtrain, Xtest))
+
+    K = scale * np.exp(-cdist(Xcat, Xcat, metric='sqeuclidean') /
+                       (2 * lenscale**2))
+    U, S, V = np.linalg.svd(K)
+    L = U.dot(np.diag(np.sqrt(S))).dot(V)
+    f = np.random.randn(ntrain + ntest).dot(L)
+
+    ytrain = f[0:ntrain] + np.random.randn(ntrain) * noise
+    ftest = f[ntrain:]
+
+    return Xtrain, ytrain, Xtest, ftest

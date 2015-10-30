@@ -8,7 +8,7 @@ import logging
 
 from revrand import basis_functions, regression
 from revrand.validation import mll, smse
-from scipy.spatial.distance import cdist
+from revrand.utils.datasets import gen_gausprocess_se
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -68,19 +68,8 @@ def main():
     # Random RBF GP
     elif dataset == 'gp1D':
 
-        X = np.linspace(-2 * np.pi, 2 * np.pi, N)
-        Xtrain = X[:, np.newaxis]
-        Xtest = np.linspace(-2 * np.pi, 2 * np.pi, Ns)[:, np.newaxis]
-        Xcat = np.vstack((Xtrain, Xtest))
-
-        K = np.exp(-cdist(Xcat, Xcat, metric='sqeuclidean') /
-                   (2 * lenscale_true**2))
-        U, S, V = np.linalg.svd(K)
-        L = U.dot(np.diag(np.sqrt(S))).dot(V)
-        f = np.random.randn(N + Ns).dot(L)
-
-        ytrain = f[0:N] + np.random.randn(N) * noise_true
-        ftest = f[N:]
+        Xtrain, ytrain, Xtest, ftest = \
+            gen_gausprocess_se(N, Ns, lenscale=lenscale_true, noise=noise_true)
 
     else:
         raise ValueError('Invalid dataset!')
@@ -215,8 +204,6 @@ def main():
     pl.ylabel('y')
     pl.xlabel('x')
     pl.show()
-
-    # import IPython; IPython.embed()
 
 
 if __name__ == "__main__":
