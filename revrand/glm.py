@@ -32,16 +32,16 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     Cinit = gamma.rvs(0.1, reg / 0.1, size=(D, K))
 
     # Initial parameter vector
-    vparams = [minit, Cinit, reg, lparams, bparams]
-    loginds = [1, 2]
-    bpos, lpos = False, False
-    if checktypes(likelihood.bounds, Positive):
-        loginds.append(3)
-        lpos = True
-    if checktypes(basis.bounds, Positive):
-        loginds.append(4)
-        bpos = True
-    pcat = CatParameters(vparams, log_indices=loginds)
+    # vparams = [minit, Cinit, reg, lparams, bparams]
+    # loginds = [1, 2]
+    # bpos, lpos = False, False
+    # if checktypes(likelihood.bounds, Positive):
+    #     loginds.append(3)
+    #     lpos = True
+    # if checktypes(basis.bounds, Positive):
+    #     loginds.append(4)
+    #     bpos = True
+    # pcat = CatParameters(vparams, log_indices=loginds)
 
     def L1(mk, m, k, C, _reg, _lparams, _bparams):
 
@@ -94,8 +94,6 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                        + 0.5 * (C * H).sum()
                        - logqk.sum()) + np.log(K)
 
-        print(L2)
-
         # Covariance gradients
         pz = np.exp(logqkk - logqk)
         dC = np.zeros_like(C)
@@ -108,35 +106,30 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         return -L2, -dC.flatten()
 
     obj = np.finfo(float).min
-    i = 0
     C = np.ones_like(Cinit)
     m = minit
 
-    while i < 3:
+    for i in range(maxit):
 
-        # objo = obj
-        # obj = 0
+        objo = obj
 
         for k in range(K):
             res = minimize(L1, m[:, k], ftol=ftol, maxiter=100,
                            args=(m, k, C, reg, lparams, bparams),
                            method='L-BFGS-B')
             m[:, k] = res.x
-            # obj -= res.fun
 
-        # obj, dC = L2(C, m, reg, lparams, bparams)
         res = minimize(L2, C.flatten(), ftol=ftol, maxiter=100,
                        args=(m, reg, lparams, bparams), method='L-BFGS-B',
                        bounds=[Positive()] * np.prod(C.shape))
+        obj = -res.fun
         C = np.reshape(res.x, m.shape)
 
         if verbose:
             log.info("Iter: {}, Objective = {}".format(i, res.fun))
 
-        i += 1
-        # print(objo, obj, (objo - obj) / objo)
-        # if ((objo - obj) / objo < ftol) or (i >= maxit):
-        #     break
+        if ((objo - obj) / objo < ftol):
+            break
 
 
     # NOTE: It would be nice if the optimizer knew how to handle Positive

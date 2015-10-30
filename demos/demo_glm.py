@@ -79,4 +79,19 @@ pl.grid(True)
 pl.title('Regression demo')
 pl.ylabel('y')
 pl.xlabel('x')
+
+m, C = params[0:2]
+pl.figure()
+K = m.shape[1]
+cols = pl.cm.jet(np.linspace(0, 1, K))
+for mk, Ck, c in zip(m.T, C.T, cols):
+    pl.plot(range(len(mk)), mk, color=c)
+    pl.fill_between(range(len(mk)), mk - 2 * np.sqrt(Ck), mk + 2 * np.sqrt(Ck),
+                    alpha=0.1, edgecolor='none', facecolor=c, label=None)
+
+pl.grid(True)
+pl.title('Weight Posterior')
+pl.ylabel('w')
+pl.xlabel('basis index')
+
 pl.show()
