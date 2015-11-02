@@ -17,6 +17,39 @@ from unipath import Path
 from io import BytesIO
 
 from .base import Bunch
+from ..externals import check_random_state
+
+
+def make_regression(func, n_samples=100, n_features=1, bias=0.0, noise=0.0,
+                    random_state=None):
+    """
+    Examples
+    --------
+    >>> f = lambda x: 0.5*x + np.sin(2*x)
+    >>> X, y = make_regression(f, bias=.5, noise=1., random_state=1)
+    >>> X.shape
+    (100, 1)
+    >>> y.shape
+    (100,)
+    >>> X[:5].round(2)
+    array([[ 1.62],
+           [-0.61],
+           [-0.53],
+           [-1.07],
+           [ 0.87]])
+    >>> y[:5].round(2)
+    array([ 0.76,  0.48, -0.23, -0.28,  0.83])
+    """
+    generator = check_random_state(random_state)
+
+    X = generator.randn(n_samples, n_features)
+    # unpack the columns of X
+    y = func(*X.T) + bias
+
+    if noise > 0.0:
+        y += generator.normal(scale=noise, size=y.shape)
+
+    return X, y
 
 
 def get_data_home(data_home=None):
