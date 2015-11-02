@@ -37,4 +37,4 @@ class Bernoulli():
 
     def loglike(self, y, f):
 
-        pass
+        return
