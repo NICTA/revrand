@@ -13,19 +13,22 @@ from revrand.utils.datasets import gen_gausprocess_se
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
+
 #
 # Settings
 #
 
 # Algorithmic properties
 nbases = 100
-lenscale = 0.7  # For all basis functions that take lengthscales
+# lenscale = 0.7  # For all basis functions that take lengthscales
+lenscale = 0.3  # For all basis functions that take lengthscales
 noise = 0.2
 # rate = 0.9
 # eta = 1e-6
 # passes = 1000
 # batchsize = 100
-reg = 1
+reg = 0.01
 
 N = 500
 Ns = 250
@@ -34,18 +37,37 @@ Ns = 250
 lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
+# Likelihood
+# like = 'Gaussian'
+like = 'Bernoulli'
+
 #
 # Make Data
 #
 
+lnoise = noise_true if like == 'Gaussian' else 0
+
 Xtrain, ytrain, Xtest, ftest = \
-    gen_gausprocess_se(N, Ns, lenscale=lenscale_true, noise=noise_true)
+    gen_gausprocess_se(N, Ns, lenscale=lenscale_true, noise=lnoise)
+
+if like == 'Bernoulli':
+
+    ytrain = ytrain > 0
+    ftest = ftest > 0
 
 #
 # Make Bases and Likelihood
 #
 
-llhood = likelihoods.Gaussian()
+if like == 'Gaussian':
+    llhood = likelihoods.Gaussian()
+    lparams = [noise**2]
+elif like == 'Bernoulli':
+    llhood = likelihoods.Bernoulli()
+    lparams = []
+else:
+    raise ValueError("Invalid likelihood, {}!".format(like))
+
 basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 
 
@@ -53,7 +75,7 @@ basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 # Inference
 #
 
-params = glm.glm_learn(ytrain, Xtrain, llhood, [noise**2], basis, [lenscale])
+params = glm.glm_learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale])
 Ey_s = glm.glm_predict(Xtest, llhood, basis, *params)
 
 

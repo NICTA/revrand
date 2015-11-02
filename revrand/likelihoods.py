@@ -4,6 +4,7 @@ Likelihood objects for inference within the GLM framework.
 
 import numpy as np
 from .utils import Positive
+from .transforms import logistic
 
 
 class Gaussian():
@@ -37,4 +38,18 @@ class Bernoulli():
 
     def loglike(self, y, f):
 
-        return
+        sig = logistic(f)
+        return y * np.log(sig) + (1 - y) * np.log(1 - sig)
+
+    def Ey(self, f):
+
+        return logistic(f)
+
+    def df(self, y, f):
+
+        return y - logistic(f)
+
+    def d2f(self, y, f):
+
+        sig = logistic(f)
+        return (sig - 1) * sig

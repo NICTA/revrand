@@ -12,6 +12,7 @@ import numpy as np
 import logging
 from scipy.stats.distributions import gamma
 
+from .transforms import logsumexp
 from .optimize import minimize, sgd
 from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
     checktypes
@@ -67,7 +68,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # print(k, L1)
 
-        # import IPython; IPython.embed();
+        import IPython; IPython.embed();
 
         return -L1, -dmk
 
@@ -187,13 +188,3 @@ def qmatrix(m, C, k=None):
         logq = [dgausll(m[:, k], m[:, j], C[:, k] + C[:, j]) for j in range(K)]
 
     return np.array(logq)
-
-
-def logsumexp(X, axis=0):
-    """ Log-sum-exp trick for matrix X for summation along a specified axis """
-
-    mx = X.max(axis=axis)
-    if (X.ndim > 1):
-        mx = mx[:, np.newaxis]
-
-    return np.log(np.exp(X - mx).sum(axis=axis)) + mx
