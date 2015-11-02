@@ -14,9 +14,7 @@ class Gaussian():
 
     def loglike(self, y, f, var):
 
-        N = len(f)
-
-        return -0.5 * (N * np.log(2 * np.pi * var) + ((y - f)**2).sum() / var)
+        return -0.5 * (np.log(2 * np.pi * var) + (y - f)**2 / var)
 
     def Ey(self, f, var):
 
@@ -29,3 +27,14 @@ class Gaussian():
     def d2f(self, y, f, var):
 
         return - 1. / var * np.ones_like(f)
+
+
+class Bernoulli():
+
+    def __init__(self):
+
+        self.bounds = []
+
+    def loglike(self, y, f):
+
+        pass
