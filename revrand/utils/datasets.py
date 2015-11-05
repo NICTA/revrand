@@ -22,6 +22,8 @@ from ..externals import check_random_state
 def make_regression(func, n_samples=100, n_features=1, bias=0.0, noise=0.0,
                     random_state=None):
     """
+    Make dataset for a regression problem.
+
     Examples
     --------
     >>> f = lambda x: 0.5*x + np.sin(2*x)
@@ -47,6 +49,27 @@ def make_regression(func, n_samples=100, n_features=1, bias=0.0, noise=0.0,
 
     if noise > 0.0:
         y += generator.normal(scale=noise, size=y.shape)
+
+    return X, y
+
+
+def make_polynomial(degree=3, n_samples=100, bias=0.0, noise=0.0,
+                    return_coefs=False, random_state=None):
+    """
+    Examples
+    --------
+    >>> make_polynomial()
+    """
+    generator = check_random_state(random_state)
+
+    # TODO: Add arguments to support other priors
+    coefs = generator.randn(degree + 1)
+    pows = np.arange(degree + 1)
+    poly = np.vectorize(lambda x: np.sum(coefs * x ** pows))
+    X, y = make_regression(poly, n_samples=n_samples, bias=bias, noise=noise,
+                           random_state=random_state)
+    if return_coefs:
+        return X, y, coefs
 
     return X, y
 
