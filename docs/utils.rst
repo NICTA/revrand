@@ -15,3 +15,4 @@ Utilities
    base.map_indices
 
    datasets.make_regression
+   datasets.make_polynomial
