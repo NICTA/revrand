@@ -13,9 +13,8 @@ import logging
 from scipy.stats.distributions import gamma
 
 from .transforms import logsumexp
-from .optimize import minimize, sgd
-from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
-    checktypes
+from .optimize import minimize
+from .utils import CatParameters, Bound
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -29,23 +28,11 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     K = postcomp
 
     # Intialise m and C
-    minit = np.random.randn(D, K)  # TODO OR CLUSTER PHI?
-    Cinit = gamma.rvs(1, reg / 1, size=(D, K))
-    # Cinit = gamma.rvs(1, reg / 1, size=(K,))
+    m = np.random.randn(D, K)  # TODO OR CLUSTER PHI?
+    C = gamma.rvs(1, reg / 1, size=(D, K))
 
-    # Initial parameter vector
-    # vparams = [minit, Cinit, reg, lparams, bparams]
-    # loginds = [1, 2]
-    # bpos, lpos = False, False
-    # if checktypes(likelihood.bounds, Positive):
-    #     loginds.append(3)
-    #     lpos = True
-    # if checktypes(basis.bounds, Positive):
-    #     loginds.append(4)
-    #     bpos = True
-    # pcat = CatParameters(vparams, log_indices=loginds)
-
-    def L1(mk, m, k, C, _reg, _lparams, _bparams):
+    # Objective function for means, m
+    def L1(mk, k, _reg, _lparams, _bparams):
 
         m[:, k] = mk
         Phi = basis(X, *_bparams)                      # N x D
@@ -67,20 +54,18 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                         - m[:, k] / _reg
                         + (pz * (m[:, k:k + 1] - m)).sum(axis=1))
 
-        # print(k, L1)
-
-        # import IPython; IPython.embed();
-
         return -L1, -dmk
 
-    def L2(C, m, _reg, _lparams, _bparams):
+    # Objective function for covariances, C
+    # TODO: Incoporate the hyperparameter optimisation in this closure!
+    def L2(_C, _reg, _lparams, _bparams):
 
-        C = C.reshape(m.shape)
+        _C = pcat.unflatten(_C)[0]
         Phi = basis(X, *_bparams)  # N x D
         f = Phi.dot(m)  # N x K
 
         # Posterior responsability terms
-        logqkk = qmatrix(m, C)
+        logqkk = qmatrix(m, _C)
         logqk = logsumexp(logqkk, axis=1)  # log term of Eq. 7 from [1]
 
         # Common likelihood calculations
@@ -93,23 +78,22 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         L2 = 1. / K * (np.sum(ll)
                        - 0.5 * D * K * np.log(2 * np.pi * _reg)
                        - 0.5 * (m**2).sum() / _reg
-                       + 0.5 * (C * H).sum()
+                       + 0.5 * (_C * H).sum()
                        - logqk.sum()) + np.log(K)
 
         # Covariance gradients
         pz = np.exp(logqkk - logqk)
-        dC = np.zeros_like(C)
+        dC = np.zeros_like(_C)
         for k in range(K):
-            iCkCj = 1 / (C[:, k:k + 1] + C)
+            iCkCj = 1 / (_C[:, k:k + 1] + _C)
             dC[:, k] = - ((m[:, k:k + 1] - m)**2 * iCkCj**2 - iCkCj).dot(pz[k])
 
         dC = 0.5 / K * (H + dC)
 
-        return -L2, -dC.flatten()
+        return -L2, -pcat.flatten_grads([_C], [dC])
 
     obj = np.finfo(float).min
-    C = Cinit
-    m = minit
+    pcat = CatParameters([C], log_indices=[0])
 
     for i in range(maxit):
 
@@ -117,33 +101,21 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         for k in range(K):
             res = minimize(L1, m[:, k], ftol=ftol, maxiter=100,
-                           args=(m, k, C, reg, lparams, bparams),
+                           args=(k, reg, lparams, bparams),
                            method='L-BFGS-B')
             m[:, k] = res.x
 
-        res = minimize(L2, C.flatten(), ftol=ftol, maxiter=100,
-                       args=(m, reg, lparams, bparams), method='L-BFGS-B',
-                       bounds=[Positive()] * np.prod(C.shape))
+        res = minimize(L2, pcat.flatten([C]), ftol=ftol, maxiter=100,
+                       args=(reg, lparams, bparams), method='L-BFGS-B',
+                       bounds=[Bound()] * np.prod(C.shape))
         obj = -res.fun
-        C = np.reshape(res.x, m.shape)
-        # C = np.ones_like(m) * res.x
+        C = pcat.unflatten(res.x)[0]
 
         if verbose:
-            log.info("Iter: {}, Objective = {}".format(i, res.fun))
+            log.info("Iter: {}, Objective = {}".format(i, obj))
 
         if ((objo - obj) / objo < ftol):
             break
-
-
-    # NOTE: It would be nice if the optimizer knew how to handle Positive
-    # bounds when the log trick is used, so we dont have to have this boiler
-    # plate...
-    # bounds = [Bound()] * (2 * D * postcomp + 1)
-    # bounds += [Bound()] * len(likelihood.bounds) if lpos else likelihood.bounds
-    # bounds += [Bound()] * len(basis.bounds) if bpos else basis.bounds
-    # res = minimize(L2, pcat.flatten(vparams), bounds=bounds, ftol=ftol,
-    #                maxiter=maxit, method='L-BFGS-B', backend='scipy')
-    # m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, bparams = {}, "
