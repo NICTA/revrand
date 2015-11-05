@@ -26,7 +26,7 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
-    <link rel="next" title="Demos" href="../demo.html" />
+    <link rel="next" title="revrand.utils.datasets.make_polynomial" href="revrand.utils.datasets.make_polynomial.html" />
     <link rel="prev" title="revrand.utils.base.map_indices" href="revrand.utils.base.map_indices.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,7 +47,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../demo.html" title="Demos"
+          <a href="revrand.utils.datasets.make_polynomial.html" title="revrand.utils.datasets.make_polynomial"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="revrand.utils.base.map_indices.html" title="revrand.utils.base.map_indices"
@@ -67,7 +67,8 @@
 <dl class="function">
 <dt id="revrand.utils.datasets.make_regression">
 <code class="descclassname">revrand.utils.datasets.</code><code class="descname">make_regression</code><span class="sig-paren">(</span><em>func</em>, <em>n_samples=100</em>, <em>n_features=1</em>, <em>bias=0.0</em>, <em>noise=0.0</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.datasets.make_regression" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Examples</p>
+<dd><p>Make dataset for a regression problem.</p>
+<p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_regression</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">bias</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="o">.</span><span class="n">shape</span>
@@ -170,8 +171,8 @@
   <p class="topless"><a href="revrand.utils.base.map_indices.html"
                         title="previous chapter">revrand.utils.base.map_indices</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../demo.html"
-                        title="next chapter">Demos</a></p>
+  <p class="topless"><a href="revrand.utils.datasets.make_polynomial.html"
+                        title="next chapter">revrand.utils.datasets.make_polynomial</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -199,7 +200,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../demo.html" title="Demos"
+          <a href="revrand.utils.datasets.make_polynomial.html" title="revrand.utils.datasets.make_polynomial"
              >next</a> |</li>
         <li class="right" >
           <a href="revrand.utils.base.map_indices.html" title="revrand.utils.base.map_indices"
