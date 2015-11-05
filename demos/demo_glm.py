@@ -20,17 +20,17 @@ log = logging.getLogger(__name__)
 #
 
 # Algorithmic properties
-nbases = 100
-# lenscale = 0.7  # For all basis functions that take lengthscales
-lenscale = 0.3  # For all basis functions that take lengthscales
-noise = 0.2
+nbases = 200
+lenscale = 0.7  # For all basis functions that take lengthscales
+noise = 0.1
 # rate = 0.9
 # eta = 1e-6
 # passes = 1000
 # batchsize = 100
-reg = 0.01
+reg = 1
+postcomp = 10
 
-N = 500
+N = 1000
 Ns = 250
 
 # Dataset properties
@@ -38,8 +38,8 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
-like = 'Bernoulli'
+like = 'Gaussian'
+# like = 'Bernoulli'
 
 #
 # Make Data
@@ -75,7 +75,8 @@ basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 # Inference
 #
 
-params = glm.glm_learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale])
+params = glm.glm_learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale],
+                       postcomp=postcomp)
 Ey_s = glm.glm_predict(Xtest, llhood, basis, *params)
 
 
@@ -87,7 +88,8 @@ Xpl_t = Xtrain.flatten()
 Xpl_s = Xtest.flatten()
 
 # Regressor
-pl.plot(Xpl_s, Ey_s, 'r-', label='SGD Bayes linear reg.')
+pl.plot(Xpl_s, Ey_s, 'r-', label='NPV draws.')
+pl.plot(Xpl_s, Ey_s.mean(axis=1), 'b-', label='NPV mean.')
 # pl.fill_between(Xpl_s, Ey_s - 2 * Sy_s, Ey_s + 2 * Sy_s, facecolor='none',
 #                 edgecolor='r', linestyle='--', label=None)
 

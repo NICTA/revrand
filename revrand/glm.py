@@ -30,7 +30,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
     # Intialise m and C
     minit = np.random.randn(D, K)  # TODO OR CLUSTER PHI?
-    Cinit = gamma.rvs(0.1, reg / 0.1, size=(D, K))
+    Cinit = gamma.rvs(1, reg / 1, size=(D, K))
+    # Cinit = gamma.rvs(1, reg / 1, size=(K,))
 
     # Initial parameter vector
     # vparams = [minit, Cinit, reg, lparams, bparams]
@@ -68,7 +69,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # print(k, L1)
 
-        import IPython; IPython.embed();
+        # import IPython; IPython.embed();
 
         return -L1, -dmk
 
@@ -83,7 +84,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         logqk = logsumexp(logqkk, axis=1)  # log term of Eq. 7 from [1]
 
         # Common likelihood calculations
-        ll = [likelihood.loglike(y, fk, *_lparams) for fk in f.T]
+        ll = [likelihood.loglike(y, fk, *_lparams).sum() for fk in f.T]
         d2ll = [likelihood.d2f(y, fk, *_lparams) for fk in f.T]
         H = np.array([(d2llk[:, np.newaxis] * Phi**2).sum(axis=0)
                       for d2llk in d2ll]).T - 1. / _reg
@@ -107,7 +108,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         return -L2, -dC.flatten()
 
     obj = np.finfo(float).min
-    C = np.ones_like(Cinit)
+    C = Cinit
     m = minit
 
     for i in range(maxit):
@@ -125,6 +126,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                        bounds=[Positive()] * np.prod(C.shape))
         obj = -res.fun
         C = np.reshape(res.x, m.shape)
+        # C = np.ones_like(m) * res.x
 
         if verbose:
             log.info("Iter: {}, Objective = {}".format(i, res.fun))
