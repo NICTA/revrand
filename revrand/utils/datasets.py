@@ -58,7 +58,8 @@ def make_polynomial(degree=3, n_samples=100, bias=0.0, noise=0.0,
     """
     Examples
     --------
-    >>> make_polynomial()
+    >>> X, y, coefs = make_polynomial(degree=3, n_samples=200, noise=.5,
+    ...                               return_coefs=True, random_state=1)
     """
     generator = check_random_state(random_state)
 
