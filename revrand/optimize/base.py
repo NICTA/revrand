@@ -295,8 +295,37 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     return minimize_bounded_start_dec
 
 
-def flatten_obj_func_grad(func):
+def flatten_func_grad(func):
+    """
+    Examples
+    --------
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, [lambda_ * w, .5 * sq_norm]
+    >>> val, grad = cost(np.array([.5, .1, -.2]), .25)
 
+    >>> np.isclose(val, 0.0375)
+    True
+
+    >>> len(grad)
+    2
+    >>> grad_w, grad_lambda = grad
+    >>> np.shape(grad_w)
+    (3,)
+    >>> np.shape(grad_lambda)
+    ()
+    >>> grad_w
+    array([ 0.125,  0.025, -0.05 ])
+    >>> np.isclose(grad_lambda, 0.15)
+    True
+
+    >>> cost_new = flatten_func_grad(cost)
+    >>> val_new, grad_new = cost_new(np.array([.5, .1, -.2]), .25)
+    >>> val == val_new
+    True
+    >>> grad_new
+    array([ 0.125,  0.025, -0.05 ,  0.15 ])
+    """
     def new_func(*args, **kwargs):
         val, grad = func(*args, **kwargs)
         return val, flatten(grad, returns_shapes=False)
@@ -309,36 +338,11 @@ def augment_minimizer(minimizer):
     """
     Examples
     --------
-    >>> from scipy.optimize import minimize as sp_min
-    >>> min_ = augment_minimizer(sp_min)
-
-    >>> def sphere(x):
-    ...     return x.dot(x)
-
-    >>> sphere(np.array([2., 5.]))
-    29.0
-
-    >>> res = min_(sphere, [np.array([2., 5.])])
-    >>> res.success
-    True
-    >>> len(res.x)
-    1
-
-    >>> def f(x):
-    ...     a = 3.5
-    ...     b = np.array([4.2, 3.6])
-    ...     c = 8.1
-    ...     return a * sphere(x) + b.dot(x) + c
-
-    >>> f(np.array([2., 5.]))
-    136.0
-
-    >>> _ = min_(f, [np.array([2., 5.])])
     """
 
     def new_minimizer(fun, ndarrays, **kwargs):
         array1d, shapes = flatten(ndarrays)
-        result = minimizer(flatten_obj_func_grad(fun), array1d, **kwargs)
+        result = minimizer(flatten_func_grad(fun), array1d, **kwargs)
         result['x'] = list(unflatten(result['x'], shapes))
         return result
 
