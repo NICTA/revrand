@@ -9,6 +9,7 @@ import logging
 from revrand import basis_functions, glm, likelihoods
 from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
+from revrand.transforms import softplus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -21,13 +22,13 @@ log = logging.getLogger(__name__)
 
 # Algorithmic properties
 nbases = 100
-lenscale = 0.7  # For all basis functions that take lengthscales
+lenscale = 0.3  # For all basis functions that take lengthscales
 noise = 0.1
 # rate = 0.9
 # eta = 1e-6
 # passes = 1000
 # batchsize = 100
-reg = 1
+reg = 1000
 postcomp = 10
 
 N = 1000
@@ -39,7 +40,8 @@ noise_true = 0.1
 
 # Likelihood
 # like = 'Gaussian'
-like = 'Bernoulli'
+# like = 'Bernoulli'
+like = 'Poisson'
 
 #
 # Make Data
@@ -55,6 +57,11 @@ if like == 'Bernoulli':
     ytrain = ytrain > 0
     ftest = ftest > 0
 
+elif like == 'Poisson':
+
+    ytrain = np.round(10 * np.exp(ytrain))
+    ftest = np.round(10 * np.exp(ftest))
+
 #
 # Make Bases and Likelihood
 #
@@ -64,6 +71,9 @@ if like == 'Gaussian':
     lparams = [noise**2]
 elif like == 'Bernoulli':
     llhood = likelihoods.Bernoulli()
+    lparams = []
+elif like == 'Poisson':
+    llhood = likelihoods.Poisson()
     lparams = []
 else:
     raise ValueError("Invalid likelihood, {}!".format(like))
