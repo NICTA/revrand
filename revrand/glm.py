@@ -14,7 +14,7 @@ from scipy.stats.distributions import gamma
 
 from .transforms import logsumexp
 from .optimize import minimize
-from .utils import CatParameters, Bound
+from .utils import CatParameters, Bound, Positive
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     m = np.random.randn(D, K)  # TODO OR CLUSTER PHI?
     C = gamma.rvs(1, reg / 1, size=(D, K))
 
-    # Objective function for means, m
+    # Objective function for means, m, Eq. 11 from [1]
     def L1(mk, k, _reg, _lparams, _bparams):
 
         m[:, k] = mk
@@ -56,11 +56,12 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         return -L1, -dmk
 
-    # Objective function for covariances, C
+    # Objective function for covariances, C, Eq. 10 from [1]
     # TODO: Incoporate the hyperparameter optimisation in this closure!
-    def L2(_C, _reg, _lparams, _bparams):
+    def L2(params, _lparams, _bparams):
 
-        _C = pcat.unflatten(_C)[0]
+        uparams = pcat.unflatten(params)
+        _C, _reg = uparams
         Phi = basis(X, *_bparams)  # N x D
         f = Phi.dot(m)  # N x K
 
@@ -90,10 +91,14 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         dC = 0.5 / K * (H + dC)
 
-        return -L2, -pcat.flatten_grads([_C], [dC])
+        # Regulariser gradient
+        dreg = (((m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
+        # dreg = 0.0
+
+        return -L2, -pcat.flatten_grads(uparams, [dC, dreg])
 
     obj = np.finfo(float).min
-    pcat = CatParameters([C], log_indices=[0])
+    pcat = CatParameters([C, reg], log_indices=[0, 1])
 
     for i in range(maxit):
 
@@ -105,14 +110,14 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                            method='L-BFGS-B')
             m[:, k] = res.x
 
-        res = minimize(L2, pcat.flatten([C]), ftol=ftol, maxiter=100,
-                       args=(reg, lparams, bparams), method='L-BFGS-B',
-                       bounds=[Bound()] * np.prod(C.shape))
+        res = minimize(L2, pcat.flatten([C, reg]), ftol=ftol, maxiter=100,
+                       args=(lparams, bparams), method='L-BFGS-B',
+                       bounds=[Bound()] * (np.prod(C.shape) + 1))
         obj = -res.fun
-        C = pcat.unflatten(res.x)[0]
+        C, reg = pcat.unflatten(res.x)
 
         if verbose:
-            log.info("Iter: {}, Objective = {}".format(i, obj))
+            log.info("Iter: {}, Objective = {}, reg = {}".format(i, obj, reg))
 
         if ((objo - obj) / objo < ftol):
             break
@@ -121,10 +126,10 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         log.info("Finished! Objective = {}, reg = {}, bparams = {}, "
                  "lparams = {}.".format(obj, reg, bparams, lparams))
 
-    return m, C, reg, lparams, bparams
+    return m, C, lparams, bparams
 
 
-def glm_predict(Xs, likelihood, basis, m, C, reg, lparams, bparams,
+def glm_predict(Xs, likelihood, basis, m, C, lparams, bparams,
                 nsamples=100):
 
     D, K = m.shape

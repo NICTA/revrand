@@ -9,7 +9,6 @@ import logging
 from revrand import basis_functions, glm, likelihoods
 from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
-from revrand.transforms import softplus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -22,13 +21,13 @@ log = logging.getLogger(__name__)
 
 # Algorithmic properties
 nbases = 100
-lenscale = 0.3  # For all basis functions that take lengthscales
+lenscale = 0.7  # For all basis functions that take lengthscales
 noise = 0.1
 # rate = 0.9
 # eta = 1e-6
 # passes = 1000
 # batchsize = 100
-reg = 1000
+reg = 100
 postcomp = 10
 
 N = 1000
@@ -40,8 +39,8 @@ noise_true = 0.1
 
 # Likelihood
 # like = 'Gaussian'
-# like = 'Bernoulli'
-like = 'Poisson'
+like = 'Bernoulli'
+# like = 'Poisson'
 
 #
 # Make Data
@@ -86,7 +85,7 @@ basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 #
 
 params = glm.glm_learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale],
-                       postcomp=postcomp)
+                       postcomp=postcomp, reg=reg)
 Ey_s = glm.glm_predict(Xtest, llhood, basis, *params)
 
 
