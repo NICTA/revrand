@@ -14,7 +14,7 @@ from scipy.stats.distributions import gamma
 
 from .transforms import logsumexp
 from .optimize import minimize
-from .utils import CatParameters, Bound, Positive
+from .utils import CatParameters, Bound
 
 # Set up logging
 log = logging.getLogger(__name__)

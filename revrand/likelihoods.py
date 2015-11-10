@@ -7,6 +7,14 @@ from scipy.special import gammaln
 from .utils import Positive
 from .transforms import logistic
 
+# Module constants
+tiny = np.finfo(float).tiny
+resol = np.finfo(float).resolution
+
+
+#
+# Likelihood classes
+#
 
 class Bernoulli():
 
@@ -37,7 +45,7 @@ class Bernoulli():
     def loglike(self, y, f):
 
         sig = logistic(f)
-        return y * np.log(sig) + (1 - y) * np.log(1 - sig)
+        return y * _safelog(sig) + (1 - y) * _safelog(1 - sig)
 
     def Ey(self, f):
 
@@ -93,3 +101,14 @@ class Poisson(Bernoulli):
     def d2f(self, y, f):
 
         return - np.exp(f)
+
+
+#
+# Private module utils
+#
+
+def _safelog(x):
+
+    cx = x.copy()
+    cx[cx < tiny] = tiny
+    return np.log(cx)
