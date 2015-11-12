@@ -58,10 +58,10 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
     # Objective function for covariances, C, Eq. 10 from [1]
     # TODO: Incoporate the hyperparameter optimisation in this closure!
-    def L2(params, _lparams, _bparams):
+    def L2(params, _bparams):
 
         uparams = pcat.unflatten(params)
-        _C, _reg = uparams
+        _C, _reg, _lparams = uparams
         Phi = basis(X, *_bparams)  # N x D
         f = Phi.dot(m)  # N x K
 
@@ -93,12 +93,22 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # Regulariser gradient
         dreg = (((m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
-        # dreg = 0.0
 
-        return -L2, -pcat.flatten_grads(uparams, [dC, dreg])
+        # Likelihood parameter gradients
+        dlp = [np.zeros_like(p) for p in _lparams]
+        if len(_lparams) > 0:
+            for k in range(K):
+                dp = likelihood.dp(y, f[:, k], *_lparams)
+                dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
+                for l in range(len(_lparams)):
+                    dpHk = (dp2df[l][:, np.newaxis] * Phi**2).sum(axis=0)
+                    dlp[l] += (dp[l].sum() + 0.5 * (_C[:, k] * dpHk).sum()) / K
+
+        return -L2, -pcat.flatten_grads(uparams, [dC, dreg, dlp])
 
     obj = np.finfo(float).min
-    pcat = CatParameters([C, reg], log_indices=[0, 1])
+    pcat = CatParameters([C, reg, lparams], log_indices=[0, 1])
+    bounds = [Bound()] * (np.prod(C.shape) + 1) + likelihood.bounds
 
     for i in range(maxit):
 
@@ -110,14 +120,15 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                            method='L-BFGS-B')
             m[:, k] = res.x
 
-        res = minimize(L2, pcat.flatten([C, reg]), ftol=ftol, maxiter=100,
-                       args=(lparams, bparams), method='L-BFGS-B',
-                       bounds=[Bound()] * (np.prod(C.shape) + 1))
+        res = minimize(L2, pcat.flatten([C, reg, lparams]), ftol=ftol,
+                       maxiter=100, args=(bparams,), method='L-BFGS-B',
+                       bounds=bounds)
         obj = -res.fun
-        C, reg = pcat.unflatten(res.x)
+        C, reg, lparams = pcat.unflatten(res.x)
 
         if verbose:
-            log.info("Iter: {}, Objective = {}, reg = {}".format(i, obj, reg))
+            log.info("Iter: {}, Objective = {}, reg = {}, lparams = {}"
+                     .format(i, obj, reg, lparams))
 
         if ((objo - obj) / objo < ftol):
             break
