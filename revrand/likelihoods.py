@@ -60,6 +60,11 @@ class Bernoulli():
         sig = logistic(f)
         return (sig - 1) * sig
 
+    def d3f(self, y, f):
+
+        sig = logistic(f)
+        return 3 * sig**2 - 2 * sig**3 - sig
+
     def dp(self, y, f):
 
         return []
@@ -91,6 +96,10 @@ class Gaussian(Bernoulli):
 
         return - np.ones_like(f) / var
 
+    def d3f(self, y, f, var):
+
+        return np.zeros_like(f)
+
     def dp(self, y, f, var):
 
         return [((y - f)**2 - var) / (2 * var**2)]
@@ -117,6 +126,10 @@ class Poisson(Bernoulli):
     def d2f(self, y, f):
 
         return - np.exp(f)
+
+    def d3f(self, y, f):
+
+        return self.d2f(y, f)
 
 
 #

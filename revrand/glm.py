@@ -27,115 +27,85 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     K = postcomp
 
-    # Intialise m and C
-    m = np.random.randn(D, K)  # TODO OR CLUSTER PHI?
-    C = gamma.rvs(1, reg / 1, size=(D, K))
-
-    # Objective function for means, m, Eq. 11 from [1]
-    def L1(mk, k, _reg, _lparams, _bparams):
-
-        m[:, k] = mk
-        Phi = basis(X, *_bparams)                      # N x D
-        fk = Phi.dot(m[:, k])
-
-        # Posterior responsability terms
-        logqkk = qmatrix(m, C, k)
-        logqk = logsumexp(logqkk)  # log term of Eq. 7 from [1]
-        pz = np.exp(logqkk - logqk)
-
-        # Objective sans trace term, Eq. 11 from [1]
-        L1 = 1. / K * (likelihood.loglike(y, fk, *_lparams).sum()
-                       - D / 2 * np.log(2 * np.pi * _reg)
-                       - 0.5 * (m[:, k]**2).sum() / _reg
-                       - logqk + np.log(K))
-
-        # Gradient of posterior mean of component k
-        dmk = 1. / K * (likelihood.df(y, fk, *_lparams).dot(Phi)
-                        - m[:, k] / _reg
-                        + (pz * (m[:, k:k + 1] - m)).sum(axis=1))
-
-        return -L1, -dmk
-
     # Objective function for covariances, C, Eq. 10 from [1]
     # TODO: Incoporate the hyperparameter optimisation in this closure!
     def L2(params, _bparams):
 
         uparams = pcat.unflatten(params)
-        _C, _reg, _lparams = uparams
+        _m, _C, _reg, _lparams = uparams
         Phi = basis(X, *_bparams)  # N x D
-        f = Phi.dot(m)  # N x K
+        Phi2 = Phi**2
+        f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
-        logqkk = qmatrix(m, _C)
+        logqkk = qmatrix(_m, _C)
         logqk = logsumexp(logqkk, axis=1)  # log term of Eq. 7 from [1]
 
         # Common likelihood calculations
         ll = [likelihood.loglike(y, fk, *_lparams).sum() for fk in f.T]
         d2ll = [likelihood.d2f(y, fk, *_lparams) for fk in f.T]
-        H = np.array([(d2llk[:, np.newaxis] * Phi**2).sum(axis=0)
+        H = np.array([(d2llk[:, np.newaxis] * Phi2).sum(axis=0)
                       for d2llk in d2ll]).T - 1. / _reg
 
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (np.sum(ll)
                        - 0.5 * D * K * np.log(2 * np.pi * _reg)
-                       - 0.5 * (m**2).sum() / _reg
+                       - 0.5 * (_m**2).sum() / _reg
                        + 0.5 * (_C * H).sum()
                        - logqk.sum()) + np.log(K)
 
-        # Covariance gradients
+        if verbose:
+            log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
+                     .format(L2, _reg, _lparams, _bparams))
+
+        # mean and Covariance gradients
         pz = np.exp(logqkk - logqk)
+        dm = np.zeros_like(_m)
         dC = np.zeros_like(_C)
         for k in range(K):
+            imjm = _m[:, k:k + 1] - _m
             iCkCj = 1 / (_C[:, k:k + 1] + _C)
-            dC[:, k] = - ((m[:, k:k + 1] - m)**2 * iCkCj**2 - iCkCj).dot(pz[k])
+            df = likelihood.df(y, f[:, k], *_lparams)
+            d3f = likelihood.d3f(y, f[:, k], *_lparams)
+            dC[:, k] = - (imjm**2 * iCkCj**2 - iCkCj).dot(pz[k])
+            dm[:, k] = df.dot(Phi) + _C[:, k] * d3f.dot(Phi) / 2 \
+                + (pz[k] * imjm).sum(axis=1)
 
+        dm = (dm - _m / reg) / K
         dC = 0.5 / K * (H + dC)
 
         # Regulariser gradient
-        dreg = (((m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
+        dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
 
         # Likelihood parameter gradients
+        # TODO: Profile and simplify!
         dlp = [np.zeros_like(p) for p in _lparams]
         if len(_lparams) > 0:
             for k in range(K):
                 dp = likelihood.dp(y, f[:, k], *_lparams)
                 dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
                 for l in range(len(_lparams)):
-                    dpHk = (dp2df[l][:, np.newaxis] * Phi**2).sum(axis=0)
+                    dpHk = (dp2df[l][:, np.newaxis] * Phi2).sum(axis=0)
                     dlp[l] += (dp[l].sum() + 0.5 * (_C[:, k] * dpHk).sum()) / K
 
-        return -L2, -pcat.flatten_grads(uparams, [dC, dreg, dlp])
+        return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp])
 
-    obj = np.finfo(float).min
-    pcat = CatParameters([C, reg, lparams], log_indices=[0, 1])
-    bounds = [Bound()] * (np.prod(C.shape) + 1) + likelihood.bounds
+    # Intialise m and C
+    m = np.random.randn(D, K)  # TODO OR CLUSTER PHI?
+    C = gamma.rvs(1, reg / 1, size=(D, K))
 
-    for i in range(maxit):
+    # TODO: Log trick for lparams and bparams
+    pcat = CatParameters([m, C, reg, lparams], log_indices=[1, 2])
+    bounds = [Bound()] * (2 * np.prod(m.shape) + 1) + likelihood.bounds
 
-        objo = obj
-
-        for k in range(K):
-            res = minimize(L1, m[:, k], ftol=ftol, maxiter=100,
-                           args=(k, reg, lparams, bparams),
-                           method='L-BFGS-B')
-            m[:, k] = res.x
-
-        res = minimize(L2, pcat.flatten([C, reg, lparams]), ftol=ftol,
-                       maxiter=100, args=(bparams,), method='L-BFGS-B',
-                       bounds=bounds)
-        obj = -res.fun
-        C, reg, lparams = pcat.unflatten(res.x)
-
-        if verbose:
-            log.info("Iter: {}, Objective = {}, reg = {}, lparams = {}"
-                     .format(i, obj, reg, lparams))
-
-        if ((objo - obj) / objo < ftol):
-            break
+    res = minimize(L2, pcat.flatten([m, C, reg, lparams]), ftol=ftol,
+                   maxiter=maxit, args=(bparams,), method='L-BFGS-B',
+                   bounds=bounds)
+    m, C, reg, lparams = pcat.unflatten(res.x)
 
     if verbose:
-        log.info("Finished! Objective = {}, reg = {}, bparams = {}, "
-                 "lparams = {}.".format(obj, reg, bparams, lparams))
+        log.info("Finished! Objective = {}, reg = {}, lparams = {}, "
+                 "bparams = {}.".format(-res.fun, reg, lparams, bparams))
 
     return m, C, lparams, bparams
 
