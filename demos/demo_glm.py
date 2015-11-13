@@ -21,13 +21,13 @@ log = logging.getLogger(__name__)
 
 # Algorithmic properties
 nbases = 100
-lenscale = 0.7  # For all basis functions that take lengthscales
+lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
 # rate = 0.9
 # eta = 1e-6
 # passes = 1000
 # batchsize = 100
-reg = 100
+reg = 1
 postcomp = 10
 
 N = 1000
@@ -38,9 +38,9 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
+like = 'Gaussian'
 # like = 'Bernoulli'
-like = 'Poisson'
+# like = 'Poisson'
 
 #
 # Make Data
@@ -58,8 +58,8 @@ if like == 'Bernoulli':
 
 elif like == 'Poisson':
 
-    ytrain = np.round(10 * np.exp(ytrain))
-    ftest = np.round(10 * np.exp(ftest))
+    ytrain = np.round(np.exp(ytrain))
+    ftest = np.round(np.exp(ftest))
 
 #
 # Make Bases and Likelihood

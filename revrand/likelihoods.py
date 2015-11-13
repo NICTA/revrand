@@ -69,7 +69,7 @@ class Bernoulli():
 
         return []
 
-    def dpd2f(self, y, f, var):
+    def dpd2f(self, y, f):
 
         return []
 
