@@ -40,8 +40,8 @@ noise_true = 0.1
 
 # Likelihood
 # like = 'Gaussian'
-# like = 'Bernoulli'
-like = 'Poisson'
+like = 'Bernoulli'
+# like = 'Poisson'
 
 #
 # Make Data
