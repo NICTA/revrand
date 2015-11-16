@@ -7,8 +7,10 @@ from scipy.special import gammaln
 from .utils import Positive
 from .transforms import logistic, softplus
 
+
 # Module constants
 tiny = np.finfo(float).tiny
+small = 1e-300
 resol = np.finfo(float).resolution
 
 
@@ -124,7 +126,7 @@ class Poisson(Bernoulli):
             return y * f - gammaln(y + 1) - np.exp(f)
         else:
             g = softplus(f)
-            return y * np.log(g) - gammaln(y + 1) - g
+            return y * _safelog(g) - gammaln(y + 1) - g
 
     def Ey(self, f):
 
@@ -135,14 +137,14 @@ class Poisson(Bernoulli):
         if self.tranfcn == 'exp':
             return y - np.exp(f)
         else:
-            return logistic(f) * (y / softplus(f) - 1)
+            return logistic(f) * (y / _safesoftplus(f) - 1)
 
     def d2f(self, y, f):
 
         if self.tranfcn == 'exp':
             return - np.exp(f)
         else:
-            g = softplus(f)
+            g = _safesoftplus(f)
             gp = logistic(f)
             g2p = gp * (1 - gp)
             return (y - g) * g2p / g - y * (gp / g)**2
@@ -152,7 +154,7 @@ class Poisson(Bernoulli):
         if self.tranfcn == 'exp':
             return self.d2f(y, f)
         else:
-            g = softplus(f)
+            g = _safesoftplus(f)
             gp = logistic(f)
             g2p = gp * (1 - gp)
             g3p = g2p * (1 - 2 * gp)
@@ -161,7 +163,7 @@ class Poisson(Bernoulli):
 
 
 #
-# Private module utils
+# Safe numerical operations
 #
 
 def _safelog(x):
@@ -169,3 +171,10 @@ def _safelog(x):
     cx = x.copy()
     cx[cx < tiny] = tiny
     return np.log(cx)
+
+
+def _safesoftplus(x):
+
+    g = softplus(x)
+    g[g < small] = small  # hack to avoid instability
+    return g
