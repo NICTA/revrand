@@ -5,7 +5,7 @@ Likelihood objects for inference within the GLM framework.
 import numpy as np
 from scipy.special import gammaln
 from .utils import Positive
-from .transforms import logistic
+from .transforms import logistic, softplus
 
 # Module constants
 tiny = np.finfo(float).tiny
@@ -111,25 +111,53 @@ class Gaussian(Bernoulli):
 
 class Poisson(Bernoulli):
 
+    def __init__(self, tranfcn='softplus'):
+
+        if tranfcn == 'exp' or tranfcn == 'softplus':
+            self.tranfcn = tranfcn
+        else:
+            raise ValueError('Invalid transformation function specified!')
+
     def loglike(self, y, f):
 
-        return y * f - gammaln(y + 1) - np.exp(f)
+        if self.tranfcn == 'exp':
+            return y * f - gammaln(y + 1) - np.exp(f)
+        else:
+            g = softplus(f)
+            return y * np.log(g) - gammaln(y + 1) - g
 
     def Ey(self, f):
 
-        return np.exp(f)
+        return np.exp(f) if self.tranfcn == 'exp' else softplus(f)
 
     def df(self, y, f):
 
-        return y - np.exp(f)
+        if self.tranfcn == 'exp':
+            return y - np.exp(f)
+        else:
+            return logistic(f) * (y / softplus(f) - 1)
 
     def d2f(self, y, f):
 
-        return - np.exp(f)
+        if self.tranfcn == 'exp':
+            return - np.exp(f)
+        else:
+            g = softplus(f)
+            gp = logistic(f)
+            g2p = gp * (1 - gp)
+            return (y - g) * g2p / g - y * (gp / g)**2
 
     def d3f(self, y, f):
 
-        return self.d2f(y, f)
+        if self.tranfcn == 'exp':
+            return self.d2f(y, f)
+        else:
+            g = softplus(f)
+            gp = logistic(f)
+            g2p = gp * (1 - gp)
+            g3p = g2p * (1 - 2 * gp)
+            return g3p * (y - g) / g + 2 * y * (gp / g)**3 \
+                - 3 * y * gp * g3p / g**2
 
 
 #

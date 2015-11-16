@@ -5,8 +5,9 @@ import matplotlib.pyplot as pl
 # import computers.gp as gp
 import numpy as np
 import logging
+from scipy.stats import poisson, bernoulli
 
-from revrand import basis_functions, glm, likelihoods
+from revrand import basis_functions, glm, likelihoods, transforms
 from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 
@@ -20,7 +21,7 @@ log = logging.getLogger(__name__)
 #
 
 # Algorithmic properties
-nbases = 100
+nbases = 200
 lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
 # rate = 0.9
@@ -53,13 +54,13 @@ Xtrain, ytrain, Xtest, ftest = \
 
 if like == 'Bernoulli':
 
-    ytrain = ytrain > 0
-    ftest = ftest > 0
+    ytrain = bernoulli.rvs(transforms.logistic(20 * ytrain))
+    ftest = transforms.logistic(20 * ftest)
 
 elif like == 'Poisson':
 
-    ytrain = np.round(np.exp(ytrain))
-    ftest = np.round(np.exp(ftest))
+    ytrain = poisson.rvs(transforms.softplus(5 * ytrain))
+    ftest = transforms.softplus(5 * ftest)
 
 #
 # Make Bases and Likelihood

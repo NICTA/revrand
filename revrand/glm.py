@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
-              maxit=1000, ftol=1e-6, verbose=True):
+              maxit=1000, ftol=1e-7, verbose=True):
 
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
@@ -98,7 +98,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
     # Intialise m and C
     m = np.random.randn(D, K)
-    C = gamma.rvs(1, reg / 1, size=(D, K))
+    C = gamma.rvs(1, scale=0.1, size=(D, K))
 
     # Optimiser boiler plate for bounds, log trick, etc
     # NOTE: It would be nice if the optimizer knew how to handle Positive
