@@ -81,14 +81,14 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             dp = likelihood.dp(y, f[:, k], *_lparams)
             dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
             for l in range(len(_lparams)):
-                dpHk = (dp2df[l][:, np.newaxis] * Phi2).sum(axis=0)
-                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpHk).sum()) / K
+                dpH = dp2df[l].dot(Phi2)
+                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
             for l in range(len(_bparams)):
                 dPhiH = 2 * d2f.dot(dPhis[l] * Phi) + d3f.dot(Phi2)
                 dbp[l] += (_m[:, k].T.dot(df.dot(dPhis[l]))
-                           + (_C[:, k] * dPhiH).sum() / 2) / K
+                           + 0.5 * (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
