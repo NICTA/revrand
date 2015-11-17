@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils import flatten, unflatten
+from ..utils import flatten, unflatten, vectorize_args, unvectorize_args
 
 from itertools import repeat
 from warnings import warn
@@ -333,17 +333,86 @@ def flatten_func_grad(func):
     return new_func
 
 
-def augment_minimizer(minimizer):
-
+def flatten_args(shapes, order='C'):
     """
     Examples
     --------
-    """
+    >>> @flatten_args([(5,), ()])
+    ... def f(w, lambda_):
+    ...     return .5 * lambda_ * w.T.dot(w)
+    >>> np.isclose(f(np.array([2., .5, .6, -.2, .9, .2])), .546)
+    True
 
-    def new_minimizer(fun, ndarrays, **kwargs):
+    >>> w = np.array([2., .5, .6, -.2, .9])
+    >>> lambda_ = .2
+    >>> np.isclose(.5 * lambda_ * w.T.dot(w), .546)
+    True
+
+    Some other curious applications
+
+    >>> from operator import mul
+    >>> flatten_args_dec = flatten_args([(), (3,)])
+    >>> func = flatten_args_dec(mul)
+    >>> func(np.array([3.1, .6, 1.71, -1.2]))
+    array([ 1.86 ,  5.301, -3.72 ])
+    >>> 3.1 * np.array([.6, 1.71, -1.2])
+    array([ 1.86 ,  5.301, -3.72 ])
+
+    >>> flatten_args_dec = flatten_args([(9,), (15,)])
+    >>> func = flatten_args_dec(np.meshgrid)
+    >>> x, y = func(np.arange(-5, 7, .5)) # 7 - (-5) / 0.5 = 24 = 9 + 15
+    >>> x.shape
+    (15, 9)
+    >>> x[0, :]
+    array([-5. , -4.5, -4. , -3.5, -3. , -2.5, -2. , -1.5, -1. ])
+    >>> y.shape
+    (15, 9)
+    >>> y[:, 0]
+    array([-0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5,  3. ,  3.5,  4. ,  4.5,
+            5. ,  5.5,  6. ,  6.5])
+    """
+    def flatten_args_dec(func):
+
+        @wraps(func)
+        def new_func(array1d):
+            args = unflatten(array1d, shapes, order)
+            return func(*args)
+
+        return new_func
+
+    return flatten_args_dec
+
+
+def augment_minimizer(minimizer):
+    """
+    Examples
+    --------
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, [lambda_ * w, .5 * sq_norm]
+    >>> from scipy.optimize import minimize as sp_min
+    >>> new_min = augment_minimizer(sp_min)
+    >>> new_min(cost, [np.array([.5, .1, -.2]), .25], method='L-BFGS-B',
+    ...         jac=True)
+    """
+    def new_minimizer(fun, ndarrays, jac=True, **kwargs):
+
         array1d, shapes = flatten(ndarrays)
-        result = minimizer(flatten_func_grad(fun), array1d, **kwargs)
+
+        flatten_args_dec = flatten_args(shapes)
+        fun = flatten_args_dec(fun)
+
+        if callable(jac):
+            jac = lambda *jac_args, **jac_kwargs: flatten(jac(*jac_args,
+                                                              **jac_kwargs),
+                                                          returns_shapes=False)
+        else:
+            if bool(jac):
+                fun = flatten_func_grad(fun)
+
+        result = minimizer(fun, array1d, jac=jac, **kwargs)
         result['x'] = list(unflatten(result['x'], shapes))
+        result['jac'] = list(unflatten(result['jac'], shapes))
         return result
 
     return new_minimizer
