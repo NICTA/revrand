@@ -13,7 +13,7 @@ import logging
 from scipy.stats.distributions import gamma
 
 from .transforms import logsumexp
-from .optimize import minimize
+from .optimize import minimize, sgd
 from .utils import CatParameters, Bound, Positive, checktypes
 
 # Set up logging
@@ -28,10 +28,19 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     K = postcomp
 
     # Objective function Eq. 10 from [1], and gradients of ALL params
-    def L2(params):
+    def L2(params, data):
 
+        # Extract data, parameters, etc
+        y, X = data[:, 0], data[:, 1:]
         uparams = pcat.unflatten(params)
         _m, _C, _reg, _lparams, _bparams = uparams
+
+        # Dimensions
+        M, d = X.shape
+        D, K = _m.shape
+        B = N / M
+
+        # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
         dPhis = basis.grad(X, *_bparams)
@@ -53,10 +62,10 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         for k in range(K):
 
             # Common likelihood calculations
-            ll += likelihood.loglike(y, f[:, k], *_lparams).sum()
-            df = likelihood.df(y, f[:, k], *_lparams)
-            d2f = likelihood.d2f(y, f[:, k], *_lparams)
-            d3f = likelihood.d3f(y, f[:, k], *_lparams)
+            ll += B * likelihood.loglike(y, f[:, k], *_lparams).sum()
+            df = B * likelihood.df(y, f[:, k], *_lparams)
+            d2f = B * likelihood.d2f(y, f[:, k], *_lparams)
+            d3f = B * likelihood.d3f(y, f[:, k], *_lparams)
             H[:, k] = d2f.dot(Phi2) - 1. / _reg
 
             # Posterior mean and covariance gradients
@@ -72,7 +81,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
             for l in range(len(_lparams)):
                 dpHk = (dp2df[l][:, np.newaxis] * Phi2).sum(axis=0)
-                dlp[l] += (dp[l].sum() + 0.5 * (_C[:, k] * dpHk).sum()) / K
+                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpHk).sum()) / K
 
             # Basis function parameter gradients
             for l in range(len(_bparams)):
@@ -118,14 +127,19 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         bounds += basis.bounds
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
-    res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]), ftol=ftol,
-                   maxiter=maxit, method='L-BFGS-B', bounds=bounds)
+    # res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]), ftol=ftol,
+    #                maxiter=maxit, method='L-BFGS-B', bounds=bounds,
+    #                args=(np.hstack((y[:, np.newaxis], X)),))
+    res = sgd(L2, pcat.flatten([m, C, reg, lparams, bparams]),
+              np.hstack((y[:, np.newaxis], X)), rate=0.9, eta=1e-6,
+              bounds=bounds, gtol=1e-4, passes=300, batchsize=100,
+              eval_obj=True)
     m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "
                  "bparams = {}, success: {}."
-                 .format(-res.fun, reg, lparams, bparams, res.success))
+                 .format(-res.fun, reg, lparams, bparams, True))#res.success))
 
     return m, C, lparams, bparams
 
