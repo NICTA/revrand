@@ -21,15 +21,16 @@ log = logging.getLogger(__name__)
 #
 
 # Algorithmic properties
-nbases = 50
-lenscale = 1  # For all basis functions that take lengthscales
+nbases = 200
+lenscale = 0.7  # For all basis functions that take lengthscales
 noise = 1
-# rate = 0.9
-# eta = 1e-6
-# passes = 1000
-# batchsize = 100
+rate = 0.9
+eta = 1e-5
+passes = 500
+batchsize = 100
 reg = 1
 postcomp = 10
+use_sgd = False
 
 N = 1000
 Ns = 250
@@ -39,8 +40,8 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
-like = 'Bernoulli'
+like = 'Gaussian'
+# like = 'Bernoulli'
 # like = 'Poisson'
 
 #
@@ -86,7 +87,8 @@ basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 #
 
 params = glm.glm_learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale],
-                       postcomp=postcomp, reg=reg)
+                       postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
+                       eta=eta, batchsize=batchsize, maxit=passes)
 Ey_s = glm.glm_predict(Xtest, llhood, basis, *params)
 
 

@@ -21,7 +21,8 @@ log = logging.getLogger(__name__)
 
 
 def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
-              maxit=1000, ftol=1e-7, verbose=True):
+              use_sgd=False, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
+              eta=1e-5, verbose=True):
 
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
@@ -127,19 +128,21 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         bounds += basis.bounds
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
-    # res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]), ftol=ftol,
-    #                maxiter=maxit, method='L-BFGS-B', bounds=bounds,
-    #                args=(np.hstack((y[:, np.newaxis], X)),))
-    res = sgd(L2, pcat.flatten([m, C, reg, lparams, bparams]),
-              np.hstack((y[:, np.newaxis], X)), rate=0.9, eta=1e-6,
-              bounds=bounds, gtol=1e-4, passes=300, batchsize=100,
-              eval_obj=True)
+    if use_sgd is False:
+        res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
+                       ftol=tol, maxiter=maxit, method='L-BFGS-B',
+                       bounds=bounds, args=(np.hstack((y[:, np.newaxis], X)),))
+    else:
+        res = sgd(L2, pcat.flatten([m, C, reg, lparams, bparams]),
+                  np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
+                  bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
+                  eval_obj=True)
     m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "
-                 "bparams = {}, success: {}."
-                 .format(-res.fun, reg, lparams, bparams, True))#res.success))
+                 "bparams = {}, message: {}."
+                 .format(-res.fun, reg, lparams, bparams, res.message))
 
     return m, C, lparams, bparams
 
