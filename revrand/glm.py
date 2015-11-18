@@ -1,5 +1,6 @@
 """
-Implementation of Bayesian GLMs with nonparametric variational inference [1_].
+Implementation of Bayesian GLMs with nonparametric variational inference [1_],
+with a few modifications and tweaks.
 
 .. [1] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
        inference". arXiv preprint arXiv:1206.4665 (2012).
@@ -44,7 +45,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
-        dPhis = basis.grad(X, *_bparams)
+        dPhi = basis.grad(X, *_bparams)
+        dPhiPhi = [dP * Phi for dP in dPhi]
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -86,9 +88,10 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
             # Basis function parameter gradients
             for l in range(len(_bparams)):
-                dPhiH = 2 * d2f.dot(dPhis[l] * Phi) + d3f.dot(Phi2)
-                dbp[l] += (_m[:, k].T.dot(df.dot(dPhis[l]))
-                           + 0.5 * (_C[:, k] * dPhiH).sum()) / K
+                dPhiH = d2f.dot(dPhiPhi[l]) \
+                    + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
+                dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
+                           + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
@@ -108,7 +111,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
     # Intialise m and C
     m = np.random.randn(D, K)
-    C = gamma.rvs(1, scale=0.1, size=(D, K))
+    C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     # Optimiser boiler plate for bounds, log trick, etc
     # NOTE: It would be nice if the optimizer knew how to handle Positive
@@ -137,6 +140,10 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                   np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
                   eval_obj=True)
+        import matplotlib.pyplot as pl
+    pl.plot(range(len(res.objs)), res.objs, 'b', range(len(res.norms)),
+            res.norms, 'r')
+    pl.show()
     m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
     if verbose:
