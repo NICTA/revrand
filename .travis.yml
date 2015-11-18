@@ -8,8 +8,7 @@ before_install:
   - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
 
 install: 
-  - unipath
-  - requests
+  - pip install unipath requests 
   - python setup.py install
 
 # command to run tests
