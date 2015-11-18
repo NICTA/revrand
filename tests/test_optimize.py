@@ -2,57 +2,6 @@ from __future__ import division
 import numpy as np
 from revrand.optimize import sgd, minimize
 from revrand.utils import CatParameters
-from sklearn.base import BaseEstimator, RegressorMixin
-
-
-class SumSquareDiff:
-
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
-
-    def __call__(self, w):
-        return 0.5 * np.sum((self.X.dot(w) - self.y) ** 2)
-
-    def grad_w(self, w):
-        return - self.X.T.dot(self.y - self.X.dot(w))
-
-
-class LogLikelihood:
-
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
-        self.n_samples, self.n_features = X.shape
-        self.ssd = SumSquareDiff(X, y)
-
-    def __call__(self, w, beta):
-        return .5 * self.n_samples * np.log(.5 * beta / np.pi) - beta * self.ssd(w)
-
-    def grad_w(self, w, beta):
-        return - beta * self.ssd.grad_w(w)
-
-    def grad_beta(self, w, beta):
-        return .5 * self.n_samples / beta - self.ssd(w)
-
-
-class LinearRegression(BaseEstimator, RegressorMixin):
-
-    def fit(self, X, y):
-
-        log_likelihood = make_log_likelihood(X, y)
-
-
-
-        self.coef_, self.residues_, self.rank_, self.singular_ = \
-            np.linalg.lstsq(X, y)
-        return self
-
-    def predict(self, X):
-        return self._decision_function(X)
-
-    def _decision_function(self, X):
-        return X.dot(self.coef_)
 
 
 def test_unbounded(make_quadratic):
