@@ -11,5 +11,4 @@ install:
   - pip install unipath requests 
   - python setup.py install
 
-# command to run tests
 script: py.test --ignore=revrand/optimize/nlopt_wrap.py
