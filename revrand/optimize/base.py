@@ -411,7 +411,6 @@ def augment_minimizer(minimizer):
 
     >>> res = new_min(cost, (w_0, lambda_0), method='L-BFGS-B', jac=True)
     >>> res_w, res_lambda = res.x
-    >>> cost(res_w, res_lambda)
     """
 
     @wraps(minimizer)
