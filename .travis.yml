@@ -7,7 +7,10 @@ python:
 before_install:
   - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
 
-install: python setup.py install
+install: 
+  - unipath
+  - requests
+  - python setup.py install
 
 # command to run tests
 script: py.test --ignore=revrand/optimize/nlopt_wrap.py
