@@ -214,8 +214,9 @@ def candidate_start_points_grid(bounds, nums=3):
                  in zip(bounds, nums)]
     return np.vstack(a.flatten() for a in np.meshgrid(*linspaces))
 
-def minimize_bounded_start(candidates_func=candidate_start_points_random, 
-    *candidates_func_args, **candidates_func_kwargs):
+
+def minimize_bounded_start(candidates_func=candidate_start_points_random,
+                           *candidates_func_args, **candidates_func_kwargs):
     """
     Examples
     --------
@@ -326,6 +327,7 @@ def flatten_func_grad(func):
     >>> grad_new
     array([ 0.125,  0.025, -0.05 ,  0.15 ])
     """
+    @wraps(func)
     def new_func(*args, **kwargs):
         val, grad = func(*args, **kwargs)
         return val, flatten(grad, returns_shapes=False)
@@ -387,20 +389,37 @@ def augment_minimizer(minimizer):
     """
     Examples
     --------
+    >>> from scipy.optimize import minimize as sp_min
+
+    Define a cost function that returns a pair. The first element is the cost
+    value and the second element is the gradient represented by a tuple. Even
+    if the cost is a function of a single variable, the gradient must be a
+    tuple containing one element.
+
     >>> def cost(w, lambda_):
     ...     sq_norm = w.T.dot(w)
-    ...     return .5 * lambda_ * sq_norm, [lambda_ * w, .5 * sq_norm]
-    >>> from scipy.optimize import minimize as sp_min
+    ...     return .5 * lambda_ * sq_norm, (lambda_ * w, .5 * sq_norm)
+
+    Augment the Scipy optimizer to take structured inputs
+
     >>> new_min = augment_minimizer(sp_min)
-    >>> new_min(cost, [np.array([.5, .1, -.2]), .25], method='L-BFGS-B',
-    ...         jac=True)
+
+    Initial values
+
+    >>> w_0 = np.array([.5, .1, .2])
+    >>> lambda_0 = .25
+
+    >>> res = new_min(cost, (w_0, lambda_0), method='L-BFGS-B', jac=True)
+    >>> res_w, res_lambda = res.x
     """
-    def new_minimizer(fun, ndarrays, jac=True, **kwargs):
+
+    @wraps(minimizer)
+    def new_minimizer(fun, ndarrays, jac=True, **minimizer_kwargs):
 
         array1d, shapes = flatten(ndarrays)
-
         flatten_args_dec = flatten_args(shapes)
-        fun = flatten_args_dec(fun)
+
+        new_fun = flatten_args_dec(fun)
 
         if callable(jac):
             jac = lambda *jac_args, **jac_kwargs: flatten(jac(*jac_args,
@@ -408,11 +427,11 @@ def augment_minimizer(minimizer):
                                                           returns_shapes=False)
         else:
             if bool(jac):
-                fun = flatten_func_grad(fun)
+                new_fun = flatten_func_grad(new_fun)
 
-        result = minimizer(fun, array1d, jac=jac, **kwargs)
-        result['x'] = list(unflatten(result['x'], shapes))
-        result['jac'] = list(unflatten(result['jac'], shapes))
+        result = minimizer(new_fun, array1d, jac=jac, **minimizer_kwargs)
+        result['x'] = tuple(unflatten(result['x'], shapes))
+        result['jac'] = tuple(unflatten(result['jac'], shapes))
         return result
 
     return new_minimizer
