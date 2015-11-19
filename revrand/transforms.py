@@ -8,7 +8,7 @@ def logsumexp(X, axis=0):
 
     mx = X.max(axis=axis)
     if (X.ndim > 1):
-        mx = np.atleast_2d(mx).T
+        mx = np.atleast_2d(mx).T if axis == 1 else np.atleast_2d(mx)
 
     return np.log(np.exp(X - mx).sum(axis=axis)) + np.ravel(mx)
 
