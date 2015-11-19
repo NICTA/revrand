@@ -76,8 +76,13 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             iCkCj = 1 / (_C[:, k:k + 1] + _C)
             dC[:, k] = (H[:, k] - (imjm**2 * iCkCj**2 - iCkCj).dot(pz[k])) \
                 / (2 * K)
-            dm[:, k] = (df.dot(Phi) + _C[:, k] * d3f.dot(Phi) / 2
+            plpp = np.zeros(D)
+            for n in range(M):
+                plpp += np.outer(Phi[n, :] * d3f[n], Phi[n, :]).dot(Phi[n, :])
+            dm[:, k] = (df.dot(Phi) + _C[:, k] * plpp / 2
                         + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
+            # dm[:, k] = (df.dot(Phi) + _C[:, k] * d3f.dot(Phi) / 2
+            #             + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
             dp = likelihood.dp(y, f[:, k], *_lparams)
@@ -107,6 +112,9 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
                      .format(L2, _reg, _lparams, _bparams))
 
+        # print('dreg = ', dreg, 'dm = ', np.linalg.norm(dm.flatten()),
+        #       'dC = ', np.linalg.norm(dC.flatten()))
+
         return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
 
     # Intialise m and C
@@ -132,8 +140,12 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
     if use_sgd is False:
+        # res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
+        #                ftol=tol, maxeval=maxit, method=None,
+        #                bounds=bounds, args=(np.hstack((y[:, np.newaxis], X)),),
+        #                jac=False, xtol=1e-8)
         res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
-                       ftol=tol, maxiter=maxit, method='L-BFGS-B',
+                       ftol=tol, maxiter=maxit, method='L-BFGS-B', jac=True,
                        bounds=bounds, args=(np.hstack((y[:, np.newaxis], X)),))
     else:
         res = sgd(L2, pcat.flatten([m, C, reg, lparams, bparams]),
@@ -141,10 +153,10 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
                   eval_obj=True)
         import matplotlib.pyplot as pl
-    pl.plot(range(len(res.objs)), res.objs, 'b', range(len(res.norms)),
-            res.norms, 'r')
-    pl.show()
-    m, C, reg, lparams, bparams = pcat.unflatten(res.x)
+        pl.plot(range(len(res.objs)), res.objs, 'b', range(len(res.norms)),
+                res.norms, 'r')
+        pl.show()
+        m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "
