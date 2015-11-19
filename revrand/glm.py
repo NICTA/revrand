@@ -76,10 +76,9 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             iCkCj = 1 / (_C[:, k:k + 1] + _C)
             dC[:, k] = (H[:, k] - (imjm**2 * iCkCj**2 - iCkCj).dot(pz[k])) \
                 / (2 * K)
-            plpp = np.zeros(D)
-            for n in range(M):
-                plpp += np.outer(Phi[n, :] * d3f[n], Phi[n, :]).dot(Phi[n, :])
-            dm[:, k] = (df.dot(Phi) + _C[:, k] * plpp / 2
+            PP = np.einsum('ij...,i...->ij...', Phi * d3f[:, np.newaxis], Phi)
+            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k]
+                        * (PP * Phi[:, :, np.newaxis]).sum(axis=0).sum(axis=0)
                         + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
             # dm[:, k] = (df.dot(Phi) + _C[:, k] * d3f.dot(Phi) / 2
             #             + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
