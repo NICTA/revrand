@@ -45,10 +45,9 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
-        dPhi = basis.grad(X, *_bparams)
+        # dPhi = basis.grad(X, *_bparams)
         # dPhiPhi = [dP * Phi for dP in dPhi]
-        # NOTE: SLOWSLOWSLOW
-        PPP = np.einsum('ij...,i...->ij...', Phi, Phi) * Phi[:, :, np.newaxis]
+        PPP = [np.outer(p, p).dot(p) for p in Phi]
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -78,9 +77,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             iCkCj = 1 / (_C[:, k:k + 1] + _C)
             dC[:, k] = (H[:, k] - ((mkmj * iCkCj)**2 - iCkCj).dot(pz[k])) \
                 / (2 * K)
-            PPPL = (PPP * d3f[:, np.newaxis, np.newaxis]).sum(axis=0)\
-                .sum(axis=0)  # NOTE: SLOW SLOW SLOW!!
-            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * PPPL
+            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(PPP)
                         - 2 * (pz[k] * iCkCj * mkmj).sum(axis=1)
                         - _m[:, k] / _reg) / K
 
