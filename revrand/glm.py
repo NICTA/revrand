@@ -45,8 +45,9 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
-        dPhi = basis.grad(X, *_bparams)
-        dPhiPhi = [dP * Phi for dP in dPhi]
+        # dPhi = basis.grad(X, *_bparams)
+        # dPhiPhi = [dP * Phi for dP in dPhi]
+        PP = np.einsum('ij...,i...->ij...', Phi, Phi)
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -73,12 +74,12 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
             # Posterior mean and covariance gradients
             imjm = _m[:, k:k + 1] - _m
-            iCkCj = 1 / (_C[:, k:k + 1] + _C)
-            dC[:, k] = (H[:, k] - (imjm**2 * iCkCj**2 - iCkCj).dot(pz[k])) \
-                / (2 * K)
-            PP = np.einsum('ij...,i...->ij...', Phi * d3f[:, np.newaxis], Phi)
-            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k]
-                        * (PP * Phi[:, :, np.newaxis]).sum(axis=0).sum(axis=0)
+            # iCkCj = 1 / (_C[:, k:k + 1] + _C)
+            # dC[:, k] = (H[:, k] - (imjm**2 * iCkCj**2 - iCkCj).dot(pz[k])) \
+            #     / (2 * K)
+            PPLP = (PP * (Phi * d3f[:, np.newaxis])[:, :, np.newaxis]) \
+                .sum(axis=0).sum(axis=0)
+            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * PPLP
                         + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
             # dm[:, k] = (df.dot(Phi) + _C[:, k] * d3f.dot(Phi) / 2
             #             + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
@@ -91,14 +92,15 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
-            for l in range(len(_bparams)):
-                dPhiH = d2f.dot(dPhiPhi[l]) \
-                    + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
-                dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
-                           + (_C[:, k] * dPhiH).sum()) / K
+            # for l in range(len(_bparams)):
+            #     dPhiH = d2f.dot(dPhiPhi[l]) \
+            #         + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
+            #     dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
+            #                + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
-        dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
+        # dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
+        dreg = 0.0
 
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (np.sum(ll)
@@ -118,7 +120,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
     # Intialise m and C
     m = np.random.randn(D, K)
-    C = gamma.rvs(2, scale=0.5, size=(D, K))
+    # C = gamma.rvs(2, scale=0.5, size=(D, K))
+    C = gamma.rvs(1, scale=0.1, size=(D, K))
 
     # Optimiser boiler plate for bounds, log trick, etc
     # NOTE: It would be nice if the optimizer knew how to handle Positive
