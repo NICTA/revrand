@@ -47,7 +47,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         Phi2 = Phi**2
         # dPhi = basis.grad(X, *_bparams)
         # dPhiPhi = [dP * Phi for dP in dPhi]
-        PP = np.einsum('ij...,i...->ij...', Phi, Phi)
+        # NOTE: SLOWSLOWSLOW
+        PPP = np.einsum('ij...,i...->ij...', Phi, Phi) * Phi[:, :, np.newaxis]
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -73,23 +74,22 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             H[:, k] = d2f.dot(Phi2) - 1. / _reg
 
             # Posterior mean and covariance gradients
-            imjm = _m[:, k:k + 1] - _m
-            # iCkCj = 1 / (_C[:, k:k + 1] + _C)
-            # dC[:, k] = (H[:, k] - (imjm**2 * iCkCj**2 - iCkCj).dot(pz[k])) \
+            mkmj = _m[:, k:k + 1] - _m
+            iCkCj = 1 / (_C[:, k:k + 1] + _C)
+            # dC[:, k] = (H[:, k] - (mkmj**2 * iCkCj**2 - iCkCj).dot(pz[k])) \
             #     / (2 * K)
-            PPLP = (PP * (Phi * d3f[:, np.newaxis])[:, :, np.newaxis]) \
-                .sum(axis=0).sum(axis=0)
-            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * PPLP
-                        + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
-            # dm[:, k] = (df.dot(Phi) + _C[:, k] * d3f.dot(Phi) / 2
-            #             + (pz[k] * imjm).sum(axis=1) - _m[:, k] / _reg) / K
+            PPPL = (PPP * d3f[:, np.newaxis, np.newaxis]).sum(axis=0)\
+                .sum(axis=0)  # NOTE: SLOW SLOW SLOW!!
+            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * PPPL
+                        - 2 * (pz[k] * iCkCj * mkmj).sum(axis=1)
+                        - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
-            dp = likelihood.dp(y, f[:, k], *_lparams)
-            dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
-            for l in range(len(_lparams)):
-                dpH = dp2df[l].dot(Phi2)
-                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
+            # dp = likelihood.dp(y, f[:, k], *_lparams)
+            # dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
+            # for l in range(len(_lparams)):
+            #     dpH = dp2df[l].dot(Phi2)
+            #     dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
             # for l in range(len(_bparams)):
@@ -99,8 +99,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             #                + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
-        # dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
-        dreg = 0.0
+        dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
+        # dreg = 0.0
 
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (np.sum(ll)

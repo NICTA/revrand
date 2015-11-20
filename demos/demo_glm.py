@@ -22,15 +22,15 @@ log = logging.getLogger(__name__)
 
 # Algorithmic properties
 nbases = 100
-lenscale = 1  # For all basis functions that take lengthscales
-noise = 1
+lenscale = 0.7  # For all basis functions that take lengthscales
+noise = 0.1
 rate = 0.9
 eta = 1e-5
 passes = 100
 batchsize = 100
 reg = 1
 postcomp = 5
-use_sgd = False
+use_sgd = True
 
 N = 1000
 Ns = 250
@@ -40,8 +40,8 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
-like = 'Bernoulli'
+like = 'Gaussian'
+# like = 'Bernoulli'
 # like = 'Poisson'
 
 #
