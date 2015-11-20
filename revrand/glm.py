@@ -45,8 +45,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
-        # dPhi = basis.grad(X, *_bparams)
-        # dPhiPhi = [dP * Phi for dP in dPhi]
+        dPhi = basis.grad(X, *_bparams)
+        dPhiPhi = [dP * Phi for dP in dPhi]
         PPP = [np.outer(p, p).dot(p) for p in Phi]
         f = Phi.dot(_m)  # N x K
 
@@ -82,18 +82,18 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                         - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
-            # dp = likelihood.dp(y, f[:, k], *_lparams)
-            # dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
-            # for l in range(len(_lparams)):
-            #     dpH = dp2df[l].dot(Phi2)
-            #     dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
+            dp = likelihood.dp(y, f[:, k], *_lparams)
+            dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
+            for l in range(len(_lparams)):
+                dpH = dp2df[l].dot(Phi2)
+                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
             # for l in range(len(_bparams)):
-            #     dPhiH = d2f.dot(dPhiPhi[l]) \
-            #         + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
-            #     dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
-            #                + (_C[:, k] * dPhiH).sum()) / K
+                # dPhiH = d2f.dot(dPhiPhi[l]) \
+                #     + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
+                # dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
+                #            + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
