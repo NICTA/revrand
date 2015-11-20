@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 # Algorithmic properties
 nbases = 100
 lenscale = 0.7  # For all basis functions that take lengthscales
-noise = 1
+noise = 0.1
 rate = 0.9
 eta = 1e-5
 passes = 200

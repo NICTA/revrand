@@ -45,8 +45,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
-        dPhi = basis.grad(X, *_bparams)
-        dPhiPhi = [dP * Phi for dP in dPhi]
+        # dPhi = basis.grad(X, *_bparams)
+        # dPhiPhi = [dP * Phi for dP in dPhi]
         PPP = [np.outer(p, p).dot(p) for p in Phi]
         f = Phi.dot(_m)  # N x K
 
@@ -82,18 +82,18 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                         - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
-            dp = likelihood.dp(y, f[:, k], *_lparams)
-            dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
-            for l in range(len(_lparams)):
-                dpH = dp2df[l].dot(Phi2)
-                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
+            # dp = likelihood.dp(y, f[:, k], *_lparams)
+            # dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
+            # for l in range(len(_lparams)):
+            #     dpH = dp2df[l].dot(Phi2)
+            #     dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
             # for l in range(len(_bparams)):
-                # dPhiH = d2f.dot(dPhiPhi[l]) \
-                #     + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
-                # dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
-                #            + (_C[:, k] * dPhiH).sum()) / K
+            #     dPhiH = d2f.dot(dPhiPhi[l]) \
+            #         + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
+            #     dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
+            #                + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
@@ -110,13 +110,11 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
                      .format(L2, _reg, _lparams, _bparams))
 
-
         return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
 
     # Intialise m and C
     m = np.random.randn(D, K)
-    # C = gamma.rvs(2, scale=0.5, size=(D, K))
-    C = gamma.rvs(1, scale=0.1, size=(D, K))
+    C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     # Optimiser boiler plate for bounds, log trick, etc
     # NOTE: It would be nice if the optimizer knew how to handle Positive
@@ -137,10 +135,6 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
     if use_sgd is False:
-        # res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
-        #                ftol=tol, maxeval=maxit, method=None,
-        #                bounds=bounds, args=(np.hstack((y[:, np.newaxis], X)),),
-        #                jac=False, xtol=1e-8)
         res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
                        ftol=tol, maxiter=maxit, method='L-BFGS-B', jac=True,
                        bounds=bounds, args=(np.hstack((y[:, np.newaxis], X)),))
