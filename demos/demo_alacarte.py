@@ -2,7 +2,7 @@
 """ A La Carte GP and basis function demo. """
 
 import matplotlib.pyplot as pl
-import computers.gp as gp
+import dora.regressors.gp as gp
 import numpy as np
 import logging
 

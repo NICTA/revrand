@@ -48,7 +48,7 @@ setup(
         'demos': [
             'unipath',
             'requests',
-            # 'bdkd-external'
+            # 'dora'
         ],
     },
     license="Apache Software License 2.0",

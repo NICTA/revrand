@@ -3,7 +3,7 @@
 
 import logging
 import numpy as np
-import computers.gp as gp
+import dora.regressors.gp as gp
 
 from revrand import regression, basis_functions
 from revrand.validation import smse, msll
