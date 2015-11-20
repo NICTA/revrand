@@ -45,7 +45,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
-        # dPhi = basis.grad(X, *_bparams)
+        dPhi = basis.grad(X, *_bparams)
         # dPhiPhi = [dP * Phi for dP in dPhi]
         # NOTE: SLOWSLOWSLOW
         PPP = np.einsum('ij...,i...->ij...', Phi, Phi) * Phi[:, :, np.newaxis]
@@ -76,8 +76,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             # Posterior mean and covariance gradients
             mkmj = _m[:, k:k + 1] - _m
             iCkCj = 1 / (_C[:, k:k + 1] + _C)
-            # dC[:, k] = (H[:, k] - (mkmj**2 * iCkCj**2 - iCkCj).dot(pz[k])) \
-            #     / (2 * K)
+            dC[:, k] = (H[:, k] - ((mkmj * iCkCj)**2 - iCkCj).dot(pz[k])) \
+                / (2 * K)
             PPPL = (PPP * d3f[:, np.newaxis, np.newaxis]).sum(axis=0)\
                 .sum(axis=0)  # NOTE: SLOW SLOW SLOW!!
             dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * PPPL
@@ -113,8 +113,6 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
                      .format(L2, _reg, _lparams, _bparams))
 
-        # print('dreg = ', dreg, 'dm = ', np.linalg.norm(dm.flatten()),
-        #       'dC = ', np.linalg.norm(dC.flatten()))
 
         return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
 
