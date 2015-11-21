@@ -65,7 +65,7 @@ class Bernoulli():
     def d3f(self, y, f):
 
         sig = logistic(f)
-        return 3 * sig**2 - 2 * sig**3 - sig
+        return (2 * sig - 1) * (1 - sig) * sig
 
     def dp(self, y, f):
 
@@ -104,7 +104,7 @@ class Gaussian(Bernoulli):
 
     def dp(self, y, f, var):
 
-        return [((y - f)**2 - var) / (2 * var**2)]
+        return [0.5 * (((y - f) / var)**2 - 1. / var)]
 
     def dpd2f(self, y, f, var):
 

@@ -82,11 +82,11 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                         - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
-            # dp = likelihood.dp(y, f[:, k], *_lparams)
-            # dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
-            # for l in range(len(_lparams)):
-            #     dpH = dp2df[l].dot(Phi2)
-            #     dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
+            dp = likelihood.dp(y, f[:, k], *_lparams)
+            dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
+            for l in range(len(_lparams)):
+                dpH = dp2df[l].dot(Phi2)
+                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
             # for l in range(len(_bparams)):
@@ -96,8 +96,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             #                + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
-        dreg = (((_m**2).sum() + _C.sum()) / (_reg * K) - D) / (2 * _reg)
-        # dreg = 0.0
+        dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
 
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (np.sum(ll)
