@@ -32,7 +32,7 @@ def mll(y_true, y_predict, y_var):
 
 
 def msll(y_true, y_predict, y_var, y_train):
-    """ Mean standardise log likelihood.
+    """ Mean standardised log likelihood.
 
         TODO:
     """

@@ -29,6 +29,11 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     K = postcomp
 
+    # Pre-allocate here
+    dm = np.empty((D, K))
+    dC = np.empty((D, K))
+    H = np.empty((D, K))
+
     # Objective function Eq. 10 from [1], and gradients of ALL params
     def L2(params, data):
 
@@ -44,8 +49,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
-        dPhi = basis.grad(X, *_bparams)
         Phi2 = Phi**2
+        dPhi = basis.grad(X, *_bparams)
         dPhiPhi = [dP * Phi for dP in dPhi]
         PPP = [np.outer(p, p).dot(p) for p in Phi]
         f = Phi.dot(_m)  # N x K
@@ -57,9 +62,6 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # Big loop though posterior mixtures for calculating stuff
         ll = 0
-        dm = np.empty_like(_m)
-        dC = np.empty_like(_C)
-        H = np.empty_like(_C)
         dlp = [np.zeros_like(p) for p in _lparams]
         dbp = [np.zeros_like(p) for p in _bparams]
 
@@ -89,10 +91,12 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
-            # for l in range(len(_bparams)):
-                # dPhimk = dPhi[l].dot(_m[:, k])
-                # dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
-                # dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+            for l in range(len(_bparams)):
+                dPhimk = dPhi[l].dot(_m[:, k])
+                dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
+                dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+
+            import IPython; IPython.embed(); exit()
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)

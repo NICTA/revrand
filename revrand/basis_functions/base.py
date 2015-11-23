@@ -476,9 +476,9 @@ class RandomRBF(RadialBasis):
         self._checkD(D)
 
         WX = np.dot(X, self.W / lenscale)
-        dWX = - WX / lenscale
+        dWX = WX / lenscale
 
-        return [np.hstack((-dWX * np.sin(WX), dWX * np.cos(WX)))
+        return [np.hstack((dWX * np.sin(WX), -dWX * np.cos(WX)))
                 / np.sqrt(self.n)]
 
     def _checkD(self, D):
