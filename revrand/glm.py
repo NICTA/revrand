@@ -44,9 +44,9 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
+        dPhi = basis.grad(X, *_bparams)
         Phi2 = Phi**2
-        # dPhi = basis.grad(X, *_bparams)
-        # dPhiPhi = [dP * Phi for dP in dPhi]
+        dPhiPhi = [dP * Phi for dP in dPhi]
         PPP = [np.outer(p, p).dot(p) for p in Phi]
         f = Phi.dot(_m)  # N x K
 
@@ -90,16 +90,15 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
             # Basis function parameter gradients
             # for l in range(len(_bparams)):
-            #     dPhiH = d2f.dot(dPhiPhi[l]) \
-            #         + 0.5 * (d3f * dPhi[l].dot(_m[:, k])).dot(Phi2)
-            #     dbp[l] += (df.dot(dPhi[l].dot(_m[:, k]))
-            #                + (_C[:, k] * dPhiH).sum()) / K
+                # dPhimk = dPhi[l].dot(_m[:, k])
+                # dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
+                # dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
 
         # Objective, Eq. 10 in [1]
-        L2 = 1. / K * (np.sum(ll)
+        L2 = 1. / K * (ll
                        - 0.5 * D * K * np.log(2 * np.pi * _reg)
                        - 0.5 * (_m**2).sum() / _reg
                        + 0.5 * (_C * H).sum()
@@ -146,7 +145,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         pl.plot(range(len(res.objs)), res.objs, 'b', range(len(res.norms)),
                 res.norms, 'r')
         pl.show()
-        m, C, reg, lparams, bparams = pcat.unflatten(res.x)
+
+    m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "

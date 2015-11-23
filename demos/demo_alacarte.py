@@ -34,7 +34,7 @@ def main():
     reg = 1
     usegradients = True
     diagcov = False
-    rank = 0
+    rank = 5
 
     N = 500
     Ns = 250

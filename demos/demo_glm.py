@@ -26,11 +26,11 @@ lenscale = 0.7  # For all basis functions that take lengthscales
 noise = 1
 rate = 0.9
 eta = 1e-5
-passes = 200
+passes = 500
 batchsize = 100
-reg = 1
+reg = 1000
 postcomp = 10
-use_sgd = True
+use_sgd = False
 
 N = 1000
 Ns = 250
@@ -40,9 +40,9 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
+like = 'Gaussian'
 # like = 'Bernoulli'
-like = 'Poisson'
+# like = 'Poisson'
 
 #
 # Make Data
