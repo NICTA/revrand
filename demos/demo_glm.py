@@ -22,15 +22,15 @@ log = logging.getLogger(__name__)
 
 # Algorithmic properties
 nbases = 100
-lenscale = 1  # For all basis functions that take lengthscales
+lenscale = 0.7  # For all basis functions that take lengthscales
 noise = 1
 rate = 0.9
 eta = 1e-5
 passes = 500
 batchsize = 100
 reg = 1
-postcomp = 1
-use_sgd = True
+postcomp = 10
+use_sgd = False
 
 N = 1000
 Ns = 250

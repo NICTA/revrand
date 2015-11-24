@@ -50,8 +50,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
-        dPhi = basis.grad(X, *_bparams)
-        dPhiPhi = [dP * Phi for dP in dPhi]
+        # dPhi = basis.grad(X, *_bparams)
+        # dPhiPhi = [dP * Phi for dP in dPhi]
         PPP = [np.outer(p, p).dot(p) for p in Phi]
         f = Phi.dot(_m)  # N x K
 
@@ -91,12 +91,12 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
-            for l in range(len(_bparams)):
-                dPhimk = dPhi[l].dot(_m[:, k])
-                dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
-                dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+            # for l in range(len(_bparams)):
+            #     dPhimk = dPhi[l].dot(_m[:, k])
+            #     dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
+            #     dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
 
-            import IPython; IPython.embed(); exit()
+        print(_bparams, dbp)
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
@@ -129,11 +129,11 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         bounds += [Bound()] * len(likelihood.bounds)
     else:
         bounds += likelihood.bounds
-    if checktypes(basis.bounds, Positive):
-        loginds.append(4)
-        bounds += [Bound()] * len(basis.bounds)
-    else:
-        bounds += basis.bounds
+    # if checktypes(basis.bounds, Positive):
+    #     loginds.append(4)
+    #     bounds += [Bound()] * len(basis.bounds)
+    # else:
+    bounds += basis.bounds
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
     if use_sgd is False:

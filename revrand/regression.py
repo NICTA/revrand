@@ -275,7 +275,7 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     # Initialise parameters
     minit = np.random.randn(D)
     Sinit = gamma.rvs(1, scale=0.1, size=D)
-    Uinit = np.zeros((D, rank)) if rank > 0 else 0
+    Uinit = np.random.randn((D, rank)) if rank > 0 else 0
 
     # Initial parameter vector
     vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
