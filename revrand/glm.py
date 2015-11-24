@@ -96,7 +96,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             #     dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
             #     dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
 
-        print(_bparams, dbp)
+        # print(_bparams, dbp)
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
@@ -129,11 +129,11 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         bounds += [Bound()] * len(likelihood.bounds)
     else:
         bounds += likelihood.bounds
-    # if checktypes(basis.bounds, Positive):
-    #     loginds.append(4)
-    #     bounds += [Bound()] * len(basis.bounds)
-    # else:
-    bounds += basis.bounds
+    if checktypes(basis.bounds, Positive):
+        loginds.append(4)
+        bounds += [Bound()] * len(basis.bounds)
+    else:
+        bounds += basis.bounds
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
     if use_sgd is False:

@@ -23,13 +23,13 @@ def main():
 
     # Algorithmic properties
     nbases = 300
-    lenscale = 1  # For all basis functions that take lengthscales
+    lenscale = 0.1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
     order = 5  # For polynomial basis
     rate = 0.9
-    eta = 1e-6
-    passes = 1000
+    eta = 1e-5
+    passes = 500
     batchsize = 100
     reg = 1
     usegradients = True
@@ -131,6 +131,8 @@ def main():
                                             rank=rank, batchsize=batchsize)
     Ey_s, Vf_s, Vy_s = regression.bayeslinear_predict(Xtest, base, *params_sgd)
     Sy_s = np.sqrt(Vy_s)
+
+    print('--------', hypers)
 
     params_elbo = regression.bayeslinear(Xtrain, ytrain, base, hypers,
                                          diagcov=diagcov,
