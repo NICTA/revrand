@@ -34,7 +34,9 @@ def main():
     reg = 1
     usegradients = True
     diagcov = False
-    rank = 5
+    rank = 10
+
+    # np.random.seed(100)
 
     N = 500
     Ns = 250
