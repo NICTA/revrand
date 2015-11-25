@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils import flatten, unflatten
+from ..utils import flatten, unflatten, vectorize_args, unvectorize_args
 
 from itertools import repeat
 from warnings import warn
@@ -214,8 +214,9 @@ def candidate_start_points_grid(bounds, nums=3):
                  in zip(bounds, nums)]
     return np.vstack(a.flatten() for a in np.meshgrid(*linspaces))
 
-def minimize_bounded_start(candidates_func=candidate_start_points_random, 
-    *candidates_func_args, **candidates_func_kwargs):
+
+def minimize_bounded_start(candidates_func=candidate_start_points_random,
+                           *candidates_func_args, **candidates_func_kwargs):
     """
     Examples
     --------
@@ -295,42 +296,142 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     return minimize_bounded_start_dec
 
 
-def augment_minimizer(minimizer):
+def flatten_func_grad(func):
+    """
+    Examples
+    --------
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, [lambda_ * w, .5 * sq_norm]
+    >>> val, grad = cost(np.array([.5, .1, -.2]), .25)
 
+    >>> np.isclose(val, 0.0375)
+    True
+
+    >>> len(grad)
+    2
+    >>> grad_w, grad_lambda = grad
+    >>> np.shape(grad_w)
+    (3,)
+    >>> np.shape(grad_lambda)
+    ()
+    >>> grad_w
+    array([ 0.125,  0.025, -0.05 ])
+    >>> np.isclose(grad_lambda, 0.15)
+    True
+
+    >>> cost_new = flatten_func_grad(cost)
+    >>> val_new, grad_new = cost_new(np.array([.5, .1, -.2]), .25)
+    >>> val == val_new
+    True
+    >>> grad_new
+    array([ 0.125,  0.025, -0.05 ,  0.15 ])
+    """
+    @wraps(func)
+    def new_func(*args, **kwargs):
+        val, grad = func(*args, **kwargs)
+        return val, flatten(grad, returns_shapes=False)
+
+    return new_func
+
+
+def flatten_args(shapes, order='C'):
+    """
+    Examples
+    --------
+    >>> @flatten_args([(5,), ()])
+    ... def f(w, lambda_):
+    ...     return .5 * lambda_ * w.T.dot(w)
+    >>> np.isclose(f(np.array([2., .5, .6, -.2, .9, .2])), .546)
+    True
+
+    >>> w = np.array([2., .5, .6, -.2, .9])
+    >>> lambda_ = .2
+    >>> np.isclose(.5 * lambda_ * w.T.dot(w), .546)
+    True
+
+    Some other curious applications
+
+    >>> from operator import mul
+    >>> flatten_args_dec = flatten_args([(), (3,)])
+    >>> func = flatten_args_dec(mul)
+    >>> func(np.array([3.1, .6, 1.71, -1.2]))
+    array([ 1.86 ,  5.301, -3.72 ])
+    >>> 3.1 * np.array([.6, 1.71, -1.2])
+    array([ 1.86 ,  5.301, -3.72 ])
+
+    >>> flatten_args_dec = flatten_args([(9,), (15,)])
+    >>> func = flatten_args_dec(np.meshgrid)
+    >>> x, y = func(np.arange(-5, 7, .5)) # 7 - (-5) / 0.5 = 24 = 9 + 15
+    >>> x.shape
+    (15, 9)
+    >>> x[0, :]
+    array([-5. , -4.5, -4. , -3.5, -3. , -2.5, -2. , -1.5, -1. ])
+    >>> y.shape
+    (15, 9)
+    >>> y[:, 0]
+    array([-0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5,  3. ,  3.5,  4. ,  4.5,
+            5. ,  5.5,  6. ,  6.5])
+    """
+    def flatten_args_dec(func):
+
+        @wraps(func)
+        def new_func(array1d):
+            args = unflatten(array1d, shapes, order)
+            return func(*args)
+
+        return new_func
+
+    return flatten_args_dec
+
+
+def augment_minimizer(minimizer):
     """
     Examples
     --------
     >>> from scipy.optimize import minimize as sp_min
-    >>> min_ = augment_minimizer(sp_min)
 
-    >>> def sphere(x):
-    ...     return x.dot(x)
+    Define a cost function that returns a pair. The first element is the cost
+    value and the second element is the gradient represented by a tuple. Even
+    if the cost is a function of a single variable, the gradient must be a
+    tuple containing one element.
 
-    >>> sphere(np.array([2., 5.]))
-    29.0
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, (lambda_ * w, .5 * sq_norm)
 
-    >>> res = min_(sphere, [np.array([2., 5.])])
-    >>> res.success
-    True
-    >>> len(res.x)
-    1
+    Augment the Scipy optimizer to take structured inputs
 
-    >>> def f(x):
-    ...     a = 3.5
-    ...     b = np.array([4.2, 3.6])
-    ...     c = 8.1
-    ...     return a * sphere(x) + b.dot(x) + c
+    >>> new_min = augment_minimizer(sp_min)
 
-    >>> f(np.array([2., 5.]))
-    136.0
+    Initial values
 
-    >>> _ = min_(f, [np.array([2., 5.])])
+    >>> w_0 = np.array([.5, .1, .2])
+    >>> lambda_0 = .25
+
+    >>> res = new_min(cost, (w_0, lambda_0), method='L-BFGS-B', jac=True)
+    >>> res_w, res_lambda = res.x
     """
 
-    def new_minimizer(fun, ndarrays, **kwargs):
+    @wraps(minimizer)
+    def new_minimizer(fun, ndarrays, jac=True, **minimizer_kwargs):
+
         array1d, shapes = flatten(ndarrays)
-        result = minimizer(fun, array1d, **kwargs)
-        result['x'] = list(unflatten(result['x'], shapes))
+        flatten_args_dec = flatten_args(shapes)
+
+        new_fun = flatten_args_dec(fun)
+
+        if callable(jac):
+            jac = lambda *jac_args, **jac_kwargs: flatten(jac(*jac_args,
+                                                              **jac_kwargs),
+                                                          returns_shapes=False)
+        else:
+            if bool(jac):
+                new_fun = flatten_func_grad(new_fun)
+
+        result = minimizer(new_fun, array1d, jac=jac, **minimizer_kwargs)
+        result['x'] = tuple(unflatten(result['x'], shapes))
+        result['jac'] = tuple(unflatten(result['jac'], shapes))
         return result
 
     return new_minimizer

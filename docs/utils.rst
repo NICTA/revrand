@@ -13,3 +13,6 @@ Utilities
    base.decouple 
    base.nwise
    base.map_indices
+
+   datasets.make_regression
+   datasets.make_polynomial

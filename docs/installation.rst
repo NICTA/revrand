@@ -13,6 +13,9 @@ Minimal
 Optional
 ********
 
+Benchmarking
+  - scikit-learn 
+
 Nonlinear Optimization (mainly for `BOBYCA`)
   - nlopt
 

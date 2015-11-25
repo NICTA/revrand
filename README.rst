@@ -2,12 +2,15 @@
 revrand 
 =======
 
+.. image:: https://travis-ci.org/NICTA/revrand.svg?branch=master
+   :target: https://travis-ci.org/NICTA/revrand
+
 ------------------------------------------------------------------------------
 A library of scalable Bayesian generalised linear models with *fancy* features
 ------------------------------------------------------------------------------
 
 This library implements various Bayesian linear models (Bayesian linear
-regression) and genralised linear models (logistic regression). A few features
+regression) and generalised linear models (logistic regression). A few features
 of this library are:
 
 - A fancy basis functions/feature composition framework for combining basis
