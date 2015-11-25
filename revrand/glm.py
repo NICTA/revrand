@@ -77,11 +77,13 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             # Posterior mean and covariance gradients
             mkmj = _m[:, k:k + 1] - _m
             iCkCj = 1 / (_C[:, k:k + 1] + _C)
-            dC[:, k] = (H[:, k] - ((mkmj * iCkCj)**2 - iCkCj).dot(pz[k])) \
+            dC[:, k] = (H[:, k] - ((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[k])) \
                 / (2 * K)
             dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(PPP)
-                        - 2 * (pz[k] * iCkCj * mkmj).sum(axis=1)
+                        - (pz[k] * iCkCj * mkmj).sum(axis=1)
                         - _m[:, k] / _reg) / K
+            print(k, pz[k], mkmj.sum())
+            # import IPython; IPython.embed(); exit()
 
             # Likelihood parameter gradients
             dp = likelihood.dp(y, f[:, k], *_lparams)
