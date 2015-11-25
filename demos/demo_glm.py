@@ -42,8 +42,8 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
-like = 'Bernoulli'
+like = 'Gaussian'
+# like = 'Bernoulli'
 # like = 'Poisson'
 
 #
