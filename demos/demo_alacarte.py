@@ -23,7 +23,7 @@ def main():
 
     # Algorithmic properties
     nbases = 300
-    lenscale = 0.1  # For all basis functions that take lengthscales
+    lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
     order = 5  # For polynomial basis
@@ -34,7 +34,7 @@ def main():
     reg = 1
     usegradients = True
     diagcov = False
-    rank = 10
+    rank = 0
 
     # np.random.seed(100)
 
