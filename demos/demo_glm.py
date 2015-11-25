@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 np.random.seed(10)
 
 # Algorithmic properties
-nbases = 200
+nbases = 50
 lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
 rate = 0.9
@@ -42,8 +42,8 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-like = 'Gaussian'
-# like = 'Bernoulli'
+# like = 'Gaussian'
+like = 'Bernoulli'
 # like = 'Poisson'
 
 #

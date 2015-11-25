@@ -97,8 +97,7 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
-        # dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
-        dreg = 0.0
+        dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
 
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (ll
