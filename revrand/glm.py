@@ -30,8 +30,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     K = postcomp
 
     # Pre-allocate here
-    dm = np.empty((D, K))
-    dC = np.empty((D, K))
+    dm = np.zeros((D, K))
+    dC = np.zeros((D, K))
     H = np.empty((D, K))
 
     # Objective function Eq. 10 from [1], and gradients of ALL params
@@ -58,7 +58,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Posterior responsability terms
         logqkk = qmatrix(_m, _C)
         logqk = logsumexp(logqkk, axis=1)  # log term of Eq. 7 from [1]
-        pz = np.exp(logqkk - logqk)
+        pz = np.exp(logqkk - logqk[:, np.newaxis])
+        # import IPython; IPython.embed(); exit()
 
         # Big loop though posterior mixtures for calculating stuff
         ll = 0
@@ -75,14 +76,15 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             H[:, k] = d2f.dot(Phi2) - 1. / _reg
 
             # Posterior mean and covariance gradients
-            mkmj = _m[:, k:k + 1] - _m
-            iCkCj = 1 / (_C[:, k:k + 1] + _C)
-            dC[:, k] = (H[:, k] - ((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[k])) \
-                / (2 * K)
+            mkmj = _m[:, k][:, np.newaxis] - _m
+            iCkCj = 1 / (_C[:, k][:, np.newaxis] + _C)
+            iCkCj[:, k] *= 2
+            dC[:, k] = (-((mkmj * iCkCj)**2 - iCkCj).dot(pz[k, :])
+                        + H[:, k]) / (2 * K)
             dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(PPP)
-                        - (pz[k] * iCkCj * mkmj).sum(axis=1)
+                        - (pz[k, :] * iCkCj * mkmj).sum(axis=1)
                         - _m[:, k] / _reg) / K
-            print(k, pz[k], mkmj.sum())
+            # print(k, pz[k], mkmj.sum())
             # import IPython; IPython.embed(); exit()
 
             # Likelihood parameter gradients

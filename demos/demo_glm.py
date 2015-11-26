@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 # Settings
 #
 
-# np.random.seed(10)
+np.random.seed(10)
 
 # Algorithmic properties
 nbases = 200
@@ -31,7 +31,7 @@ eta = 1e-5
 passes = 300
 batchsize = 100
 reg = 1
-postcomp = 1
+postcomp = 10
 use_sgd = True
 
 N = 1000
