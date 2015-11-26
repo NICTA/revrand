@@ -20,10 +20,10 @@ log = logging.getLogger(__name__)
 # Settings
 #
 
-np.random.seed(10)
+# np.random.seed(10)
 
 # Algorithmic properties
-nbases = 200
+nbases = 100
 lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
 rate = 0.9
@@ -31,10 +31,10 @@ eta = 1e-5
 passes = 300
 batchsize = 100
 reg = 1
-postcomp = 10
+postcomp = 5
 use_sgd = True
 
-N = 1000
+N = 500
 Ns = 250
 
 # Dataset properties

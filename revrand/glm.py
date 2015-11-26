@@ -33,6 +33,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     dm = np.zeros((D, K))
     dC = np.zeros((D, K))
     H = np.empty((D, K))
+    ob = []
+    gnorm = []
 
     # Objective function Eq. 10 from [1], and gradients of ALL params
     def L2(params, data):
@@ -57,9 +59,8 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # Posterior responsability terms
         logqkk = qmatrix(_m, _C)
-        logqk = logsumexp(logqkk, axis=1)  # log term of Eq. 7 from [1]
-        pz = np.exp(logqkk - logqk[:, np.newaxis])
-        # import IPython; IPython.embed(); exit()
+        logqk = logsumexp(logqkk, axis=0)  # log term of Eq. 7 from [1]
+        pz = np.exp(logqkk - logqk)
 
         # Big loop though posterior mixtures for calculating stuff
         ll = 0
@@ -77,15 +78,12 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
             # Posterior mean and covariance gradients
             mkmj = _m[:, k][:, np.newaxis] - _m
-            iCkCj = 1 / (_C[:, k][:, np.newaxis] + _C)
-            iCkCj[:, k] *= 2
-            dC[:, k] = (-((mkmj * iCkCj)**2 - iCkCj).dot(pz[k, :])
+            iCkCj = 2 / (_C[:, k][:, np.newaxis] + _C)  # TODO: this correct?
+            dC[:, k] = (-((mkmj * iCkCj)**2 - iCkCj).dot(pz[:, k])
                         + H[:, k]) / (2 * K)
             dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(PPP)
-                        - (pz[k, :] * iCkCj * mkmj).sum(axis=1)
+                        - (pz[:, k] * iCkCj * mkmj).sum(axis=1)
                         - _m[:, k] / _reg) / K
-            # print(k, pz[k], mkmj.sum())
-            # import IPython; IPython.embed(); exit()
 
             # Likelihood parameter gradients
             dp = likelihood.dp(y, f[:, k], *_lparams)
@@ -114,10 +112,14 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
                      .format(L2, _reg, _lparams, _bparams))
 
-        return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
+        ob.append(L2)
+        grads = pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
+        gnorm.append(np.linalg.norm(grads))
+
+        return -L2, -grads
 
     # Intialise m and C
-    m = np.random.randn(D, K)
+    m = np.random.randn(D, K) + (np.arange(K) - K / 2)
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     # Optimiser boiler plate for bounds, log trick, etc
@@ -147,10 +149,10 @@ def glm_learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                   np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
                   eval_obj=True)
-        import matplotlib.pyplot as pl
-        pl.plot(range(len(res.norms)), res.norms, 'r', range(len(res.objs)),
-                res.objs, 'b')
-        pl.show()
+
+    import matplotlib.pyplot as pl
+    pl.plot(range(len(gnorm)), gnorm, 'r', range(len(ob)), ob, 'b')
+    pl.show()
 
     m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
