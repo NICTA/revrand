@@ -43,8 +43,8 @@ noise_true = 0.1
 
 # Likelihood
 # like = 'Gaussian'
-like = 'Bernoulli'
-# like = 'Poisson'
+# like = 'Bernoulli'
+like = 'Poisson'
 
 #
 # Make Data
@@ -88,10 +88,12 @@ basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 # Inference
 #
 
-params = glm.glm_learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale],
-                       postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
-                       eta=eta, batchsize=batchsize, maxit=passes)
-Ey_s = glm.glm_predict(Xtest, llhood, basis, *params)
+params = glm.learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale],
+                   postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
+                   eta=eta, batchsize=batchsize, maxit=passes)
+Ey, Eyn, Eyx = glm.predict_mean(Xtest, llhood, basis, *params)
+plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
+y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
 
 
 #
@@ -102,17 +104,21 @@ Xpl_t = Xtrain.flatten()
 Xpl_s = Xtest.flatten()
 
 # Regressor
-pl.plot(Xpl_s, Ey_s, 'r-', label='NPV draws.')
-pl.plot(Xpl_s, Ey_s.mean(axis=1), 'b-', label='NPV mean.')
-# pl.fill_between(Xpl_s, Ey_s - 2 * Sy_s, Ey_s + 2 * Sy_s, facecolor='none',
-#                 edgecolor='r', linestyle='--', label=None)
+pl.plot(Xpl_s, Ey, 'b-', label='NPV mean.')
+pl.fill_between(Xpl_s, Eyn, Eyx, facecolor='b', edgecolor='none', label=None,
+                alpha=0.3)
+pl.fill_between(Xpl_s, y95n, y95x, facecolor='none', edgecolor='b', label=None,
+                linestyle='--')
+
+pl.plot(Xpl_s, 1 - plt1, 'r-', label='NPV p(y >= 0).')
+pl.fill_between(Xpl_s, 1 - plt1n, 1 - plt1x, facecolor='r', edgecolor='none',
+                label=None, alpha=0.3)
 
 # Training/Truth
 pl.plot(Xpl_t, ytrain, 'k.', label='Training')
 pl.plot(Xpl_s, ftest, 'k-', label='Truth')
 
-# pl.legend()
-
+pl.legend()
 pl.grid(True)
 pl.title('Regression demo')
 pl.ylabel('y')

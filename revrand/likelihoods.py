@@ -3,7 +3,8 @@ Likelihood objects for inference within the GLM framework.
 """
 
 import numpy as np
-from scipy.special import gammaln
+# from scipy.special import gammaln
+from scipy.stats import bernoulli, poisson, norm
 from .utils import Positive
 from .transforms import logistic, softplus
 
@@ -46,8 +47,7 @@ class Bernoulli():
 
     def loglike(self, y, f):
 
-        sig = logistic(f)
-        return y * _safelog(sig) + (1 - y) * _safelog(1 - sig)
+        return bernoulli.logpmf(y, logistic(f))
 
     def Ey(self, f):
 
@@ -75,6 +75,14 @@ class Bernoulli():
 
         return []
 
+    def cdf(self, y, f):
+
+        return bernoulli.cdf(y, logistic(f))
+
+    def interval(self, alpha, f):
+
+        return bernoulli.interval(alpha, logistic(f))
+
 
 class Gaussian(Bernoulli):
 
@@ -84,7 +92,7 @@ class Gaussian(Bernoulli):
 
     def loglike(self, y, f, var):
 
-        return -0.5 * (np.log(2 * np.pi * var) + (y - f)**2 / var)
+        return norm.logpdf(y, loc=f, scale=np.sqrt(var))
 
     def Ey(self, f, var):
 
@@ -110,6 +118,14 @@ class Gaussian(Bernoulli):
 
         return [np.ones_like(f) / var**2]
 
+    def cdf(self, y, f, var):
+
+        return norm.cdf(y, logistic(f), scale=np.sqrt(var))
+
+    def interval(self, alpha, f, var):
+
+        return norm.interval(alpha, loc=f, scale=np.sqrt(var))
+
 
 class Poisson(Bernoulli):
 
@@ -122,11 +138,8 @@ class Poisson(Bernoulli):
 
     def loglike(self, y, f):
 
-        if self.tranfcn == 'exp':
-            return y * f - gammaln(y + 1) - np.exp(f)
-        else:
-            g = softplus(f)
-            return y * _safelog(g) - gammaln(y + 1) - g
+        g = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
+        return poisson.logpmf(y, g)
 
     def Ey(self, f):
 
@@ -160,6 +173,14 @@ class Poisson(Bernoulli):
             g3p = g2p * (1 - 2 * gp)
             return g3p * (y - g) / g + 2 * y * (gp / g)**3 \
                 - 3 * y * gp * g3p / g**2
+
+    def cdf(self, y, f):
+
+        return poisson.cdf(y, _safesoftplus(f))
+
+    def interval(self, alpha, f):
+
+        return poisson.interval(alpha, _safesoftplus(f))
 
 
 #
