@@ -6,7 +6,7 @@ import dora.regressors.gp as gp
 import numpy as np
 import logging
 
-from revrand import basis_functions, regression
+from revrand import basis_functions, regression, glm, likelihoods
 from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 
@@ -22,7 +22,7 @@ def main():
     #
 
     # Algorithmic properties
-    nbases = 300
+    nbases = 100
     lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
@@ -125,22 +125,34 @@ def main():
         raise ValueError('Invalid basis!')
 
     # Evidence lower-bound A la Carte learning
-    params_sgd = regression.bayeslinear_sgd(Xtrain, ytrain, base, hypers,
-                                            var=noise**2, rate=rate, eta=eta,
-                                            passes=passes, regulariser=reg,
-                                            rank=rank, batchsize=batchsize)
-    Ey_s, Vf_s, Vy_s = regression.bayeslinear_predict(Xtest, base, *params_sgd)
+    params_sgd = regression.learn_sgd(Xtrain, ytrain, base, hypers,
+                                      var=noise**2, rate=rate, eta=eta,
+                                      passes=passes, regulariser=reg,
+                                      rank=rank, batchsize=batchsize)
+    Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
     Sy_s = np.sqrt(Vy_s)
 
-    print('--------', hypers)
-
-    params_elbo = regression.bayeslinear(Xtrain, ytrain, base, hypers,
-                                         diagcov=diagcov,
-                                         usegradients=usegradients,
-                                         regulariser=reg, var=noise**2)
-    Ey_e, Vf_e, Vy_e = regression.bayeslinear_predict(Xtest, base,
-                                                      *params_elbo)
+    params_elbo = regression.learn(Xtrain, ytrain, base, hypers,
+                                   diagcov=diagcov, var=noise**2,
+                                   usegradients=usegradients, regulariser=reg)
+    Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
+
+    #
+    # Nonparametric variational inference GLM
+    #
+
+    llhood = likelihoods.Gaussian()
+    lparams = [noise**2]
+    params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, [lenscale],
+                           reg=reg, use_sgd=False, rate=rate, postcomp=5,
+                           eta=eta, batchsize=batchsize, maxit=passes)
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
+                                               *params_glm)
+    Vy_g = Vf_g + params_glm[2][0]
+    Sy_g = np.sqrt(Vy_g)
+    # plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
+    # y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, base, *params_glm)
 
     #
     # Learn GP and predict
@@ -162,9 +174,11 @@ def main():
     LL_sgd = mll(ftest, Ey_s, Vf_s)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
+    LL_g = mll(ftest, Ey_g, Vf_g)
     smse_sgd = smse(ftest, Ey_s)
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
+    smse_glm = smse(ftest, Ey_g)
 
     log.info("A la Carte (SGD), LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_sgd, smse_sgd, np.sqrt(params_sgd[3]), params_sgd[2]))
@@ -173,6 +187,9 @@ def main():
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
+    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+                     params_glm[3]))
 
     #
     # Plot
@@ -200,6 +217,11 @@ def main():
     pl.fill_between(Xpl_s, Ey_gp - 2 * Sy_gp, Ey_gp + 2 * Sy_gp,
                     facecolor='none', edgecolor='b', linestyle='--',
                     label=None)
+
+    # GLM Regressor
+    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+                    edgecolor='m', linestyle='--', label=None)
 
     pl.legend()
 

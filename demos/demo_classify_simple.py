@@ -5,7 +5,6 @@ import logging
 import numpy as np
 import matplotlib.pyplot as pl
 from revrand import classification, basis_functions
-# from revrand.validation import logloss, errrate
 
 
 #
@@ -20,9 +19,8 @@ logging.basicConfig(level=logging.INFO)
 nbases = 500
 lenscale = 0.2
 reg = 1000
-method = 'SGD'
-# method = 'SVI'
-# method = 'MAP'
+# method = 'SGD'
+method = 'MAP'
 batchsize = 100
 rate = 0.9
 eta = 1e-6
@@ -43,26 +41,19 @@ Xs = np.linspace(-2.5 * np.pi, 2.5 * np.pi, Npred)[:, np.newaxis]
 # Train
 Phi = basis_functions.RandomRBF(nbases, X.shape[1])
 if method == 'SGD':
-    weights, l = classification.logistic_sgd(X, Y, Phi, (lenscale,),
-                                             regulariser=reg, eta=eta,
-                                             batchsize=batchsize, rate=rate,
-                                             passes=passes)
+    weights, l = classification.learn_sgd(X, Y, Phi, (lenscale,),
+                                          regulariser=reg, eta=eta,
+                                          batchsize=batchsize, rate=rate,
+                                          passes=passes)
 elif method == 'MAP':
-    weights, l = classification.logistic_map(X, Y, Phi, (lenscale,),
-                                             regulariser=reg)
-elif method == 'SVI':
-    params = classification.logistic_svi(X, Y, Phi, (lenscale,), passes=passes,
-                                         regulariser=reg)
-    weights, C, bparams, l = params
+    weights, l = classification.learn_map(X, Y, Phi, (lenscale,),
+                                          regulariser=reg)
 else:
     raise ValueError("Invalid method chosen!")
 
 
 # Predict
-if method != 'SVI':
-    Ey = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
-else:
-    Ey = classification.logistic_mpredict(Xs, weights, C, Phi, bparams)
+Ey = classification.predict(Xs, weights, Phi, (lenscale,))
 
 
 # Plot

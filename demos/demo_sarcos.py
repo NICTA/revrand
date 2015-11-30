@@ -61,15 +61,15 @@ lenARD = lenscale * np.ones(D)
 
 if useSGD:
     log.info("Using SGD regressor")
-    params = regression.bayeslinear_sgd(X_train, y_train, base, [lenARD],
-                                        rate=rate, var=noise**2, rank=rank,
-                                        regulariser=regulariser, eta=eta,
-                                        passes=passes, batchsize=batchsize)
+    params = regression.learn_sgd(X_train, y_train, base, [lenARD],
+                                  rate=rate, var=noise**2, rank=rank,
+                                  regulariser=regulariser, eta=eta,
+                                  passes=passes, batchsize=batchsize)
 else:
     log.info("Using full variational regressor")
-    params = regression.bayeslinear(X_train, y_train, base, [lenARD],
-                                    var=noise**2, diagcov=diagcov,
-                                    regulariser=regulariser)
+    params = regression.learn(X_train, y_train, base, [lenARD],
+                              var=noise**2, diagcov=diagcov,
+                              regulariser=regulariser)
 
 #
 # Train GP
@@ -106,7 +106,7 @@ Sy_gp = np.sqrt(Vy_gp)
 # Predict A la Carte
 #
 
-Ey, Vf, Vy = regression.bayeslinear_predict(X_test, base, *params)
+Ey, Vf, Vy = regression.predict(X_test, base, *params)
 Sy = np.sqrt(Vy)
 
 

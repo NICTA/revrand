@@ -13,8 +13,8 @@ from .transforms import softmax
 log = logging.getLogger(__name__)
 
 
-def logistic_map(X, y, basis, bparams, regulariser=1., balance=True, ftol=1e-6,
-                 maxit=1000, verbose=True):
+def learn_map(X, y, basis, bparams, regulariser=1., balance=True, ftol=1e-6,
+              maxit=1000, verbose=True):
     """
     Learn the weights of a multiclass logistic regressor using MAP inference.
 
@@ -69,8 +69,8 @@ def logistic_map(X, y, basis, bparams, regulariser=1., balance=True, ftol=1e-6,
     return res.x.reshape((D, K)), labels
 
 
-def logistic_sgd(X, y, basis, bparams, regulariser=1, balance=True, gtol=1e-4,
-                 passes=100, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
+def learn_sgd(X, y, basis, bparams, regulariser=1, balance=True, gtol=1e-4,
+              passes=100, rate=0.9, eta=1e-6, batchsize=100, verbose=True):
     """
     Learn the weights of a logistic regressor using MAP inference and SGD.
 
@@ -131,7 +131,7 @@ def logistic_sgd(X, y, basis, bparams, regulariser=1, balance=True, gtol=1e-4,
     return res.x.reshape((D, K)), labels
 
 
-def logistic_predict(X_star, weights, basis, bparams):
+def predict(X_star, weights, basis, bparams):
     """
     Predict using multiclass logisitic regression (MAP).
 

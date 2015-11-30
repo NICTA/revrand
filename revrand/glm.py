@@ -21,7 +21,7 @@ from .utils import CatParameters, Bound, Positive, checktypes
 log = logging.getLogger(__name__)
 
 
-def learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
+def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
           use_sgd=False, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
           eta=1e-5, verbose=True):
 
@@ -113,7 +113,8 @@ def learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
 
     # Intialise m and C
-    m = np.random.randn(D, K) + (np.arange(K) - K / 2)
+    # m = np.random.randn(D, K) + (np.arange(K) - K / 2)
+    m = np.random.randn(D, K)
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     # Optimiser boiler plate for bounds, log trick, etc
@@ -154,11 +155,14 @@ def learn(y, X, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     return m, C, lparams, bparams
 
 
-def predict_mean(Xs, likelihood, basis, m, C, lparams, bparams, nsamples=100):
+def predict_meanvar(Xs, likelihood, basis, m, C, lparams, bparams,
+                    nsamples=100):
 
     f = _sample_func(Xs, basis, m, C, bparams, nsamples)
-    Eys = likelihood.Ey(f, *lparams)
-    return Eys.mean(axis=1), Eys.min(axis=1), Eys.max(axis=1)
+    ys = likelihood.Ey(f, *lparams)
+    Ey = ys.mean(axis=1)
+    Vy = ((ys - Ey[:, np.newaxis])**2).sum(axis=1) / nsamples
+    return Ey, Vy, ys.min(axis=1), ys.max(axis=1)
 
 
 def predict_cdf(quantile, Xs, likelihood, basis, m, C, lparams, bparams,

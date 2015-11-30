@@ -30,8 +30,8 @@ from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
 log = logging.getLogger(__name__)
 
 
-def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-                ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
+def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
+          ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
@@ -192,9 +192,9 @@ def bayeslinear(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     return mcache, Ccache, bparams, var
 
 
-def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
-                    gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
-                    verbose=True):
+def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
+              gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
+              verbose=True):
     """
     Learn the parameters and hyperparameters of an approximate Bayesian linear
     regressor using stochastic gradient descent for large scale problems.
@@ -381,7 +381,7 @@ def bayeslinear_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     return m, C, bparams, var
 
 
-def bayeslinear_predict(X_star, basis, m, C, bparams, var):
+def predict(X_star, basis, m, C, bparams, var):
     """
     Predict using Bayesian linear regression.
 

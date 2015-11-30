@@ -32,7 +32,7 @@ passes = 300
 batchsize = 100
 reg = 1
 postcomp = 5
-use_sgd = True
+use_sgd = False
 
 N = 500
 Ns = 250
@@ -42,9 +42,9 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
+like = 'Gaussian'
 # like = 'Bernoulli'
-like = 'Poisson'
+# like = 'Poisson'
 
 #
 # Make Data
@@ -88,12 +88,17 @@ basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 # Inference
 #
 
-params = glm.learn(ytrain, Xtrain, llhood, lparams, basis, [lenscale],
+params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, [lenscale],
                    postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
                    eta=eta, batchsize=batchsize, maxit=passes)
-Ey, Eyn, Eyx = glm.predict_mean(Xtest, llhood, basis, *params)
+Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
 plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
 y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
+
+if like == 'Gaussian':
+    Sy2 = 2 * np.sqrt(Vy + params[2][0])
+else:
+    Sy2 = 2 * np.sqrt(Vy)
 
 
 #
@@ -105,8 +110,10 @@ Xpl_s = Xtest.flatten()
 
 # Regressor
 pl.plot(Xpl_s, Ey, 'b-', label='NPV mean.')
-pl.fill_between(Xpl_s, Eyn, Eyx, facecolor='b', edgecolor='none', label=None,
-                alpha=0.3)
+pl.fill_between(Xpl_s, Ey - Sy2, Ey + Sy2, facecolor='b', edgecolor='none',
+                label=None, alpha=0.3)
+# pl.fill_between(Xpl_s, Eyn, Eyx, facecolor='b', edgecolor='none', label=None,
+#                 alpha=0.3)
 pl.fill_between(Xpl_s, y95n, y95x, facecolor='none', edgecolor='b', label=None,
                 linestyle='--')
 
