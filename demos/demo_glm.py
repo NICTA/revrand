@@ -32,7 +32,7 @@ passes = 300
 batchsize = 100
 reg = 1
 postcomp = 5
-use_sgd = False
+use_sgd = True
 
 N = 500
 Ns = 250
