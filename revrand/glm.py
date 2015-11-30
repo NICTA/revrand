@@ -15,7 +15,8 @@ from scipy.stats.distributions import gamma
 
 from .transforms import logsumexp
 from .optimize import minimize, sgd
-from .utils import CatParameters, Bound, Positive, checktypes
+from .utils import CatParameters, Bound, Positive, checktypes, \
+    list_to_params as l2p
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -63,7 +64,8 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Big loop though posterior mixtures for calculating stuff
         ll = 0
         dlp = [np.zeros_like(p) for p in _lparams]
-        dbp = [np.zeros_like(p) for p in _bparams]
+        # dbp = [np.zeros_like(p) for p in _bparams]
+        dbp = np.zeros(len(dPhi))
 
         for k in range(K):
 
@@ -91,10 +93,14 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
-            for l in range(len(_bparams)):
+            # for l in range(len(_bparams)):
+            for l in range(len(dPhi)):
                 dPhimk = dPhi[l].dot(_m[:, k])
                 dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
                 dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+
+        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
+        dbp = l2p(_bparams, dbp)
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)

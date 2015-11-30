@@ -11,7 +11,7 @@ from .transforms import logistic, softplus
 
 # Module constants
 tiny = np.finfo(float).tiny
-small = 1e-300
+small = 1e-100
 resol = np.finfo(float).resolution
 
 

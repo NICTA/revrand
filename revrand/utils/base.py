@@ -661,7 +661,7 @@ def params_to_list(params):
     for p in params:
         vec.extend(np.atleast_1d(p).flatten())
 
-    return vec
+    return np.asarray(vec)
 
 
 def list_to_params(params, flatlist):
