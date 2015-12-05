@@ -32,7 +32,7 @@ passes = 300
 batchsize = 100
 reg = 1
 postcomp = 5
-use_sgd = True
+use_sgd = False
 
 N = 500
 Ns = 250
@@ -65,6 +65,11 @@ elif like == 'Poisson':
     ytrain = poisson.rvs(transforms.softplus(5 * ytrain))
     ftest = transforms.softplus(5 * ftest)
 
+    # mask = (ytrain - 1) >= 1
+    # ytrain = np.ones(sum(mask))
+    # Xtrain = Xtrain[mask, :]
+    # ftest[ftest >= 1] = 1
+
 #
 # Make Bases and Likelihood
 #
@@ -76,12 +81,13 @@ elif like == 'Bernoulli':
     llhood = likelihoods.Bernoulli()
     lparams = []
 elif like == 'Poisson':
-    llhood = likelihoods.Poisson()
+    llhood = likelihoods.Poisson(tranfcn='exp')
     lparams = []
 else:
     raise ValueError("Invalid likelihood, {}!".format(like))
 
 basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
+    # + basis_functions.LinearBasis(onescol=True)
 
 
 #

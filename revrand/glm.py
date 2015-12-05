@@ -25,6 +25,74 @@ log = logging.getLogger(__name__)
 def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
           use_sgd=False, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
           eta=1e-5, verbose=True):
+    """
+    Learn the parameters and hyperparameters of an Bayesian generalised linear
+    model (GLM) using nonparametric variational inference, and optionally
+    stochastic gradients.
+
+    Parameters
+    ----------
+        X: ndarray
+            (N, d) array input dataset (N samples, d dimensions).
+        y: ndarray
+            (N,) array targets (N samples)
+        likelihood: 
+        basis: Basis
+            A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of parameters of the basis object.
+        var: float, optional
+            observation variance initial value.
+        regulariser: float, optional
+            weight regulariser (variance) initial value.
+        rank: int, optional
+            the rank of the off-diagonal covariance approximation, has to be
+            [0, D] where D is the dimension of the basis. None is the same as
+            setting rank = D.
+        gtol: float,
+            SGD tolerance convergence criterion.
+        passes: int, optional
+            Number of complete passes through the data before optimization
+            terminates (unless it converges first).
+        rate: float, optional
+            SGD decay rate, must be [0, 1].
+        batchsize: int, optional
+            number of observations to use per SGD batch.
+        verbose: bool, optional
+            log the learning status.
+
+    Returns
+    -------
+        m: ndarray
+            (D,) array of posterior weight means (D is the dimension of the
+            features).
+        C: ndarray
+            (D,) array of posterior weight variances.
+        bparams: sequence
+            learned sequence of basis object hyperparameters.
+        float:
+            learned observation variance
+
+    Notes
+    -----
+        This approximates the posterior covariance matrix over the weights with
+        a diagonal plus low rank matrix:
+
+        .. math ::
+
+            \mathbf{w} \sim \mathcal{N}(\mathbf{m}, \mathbf{C})
+
+        where,
+
+        .. math ::
+
+            \mathbf{C} = \mathbf{U}\mathbf{U}^{T} + \\text{diag}(\mathbf{s}),
+            \quad \mathbf{U} \in \mathbb{R}^{D\\times \\text{rank}},
+            \quad \mathbf{s} \in \mathbb{R}^{D}.
+
+        This is to allow for a reduced number of parameters to optimise with
+        SGD. As a consequence, features with large dimensionality can be used.
+    """
 
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]

@@ -1,10 +1,12 @@
 #! /usr/bin/env python3
 """ A La Carte GP Classification example on USPS digits dataset. """
 
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+
 from revrand.utils.datasets import fetch_gpml_usps_resampled_data
 from revrand.validation import loglosscat, errrate
-from revrand import classification, basis_functions
-from sklearn.linear_model import LogisticRegression
+from revrand import classification, basis_functions, glm, likelihoods
 
 import logging
 
@@ -19,12 +21,13 @@ dig1 = 3
 dig2 = 5
 
 # A la Carte classifier setting
-nbases = 2000
+nbases = 300
 lenscale = 5
 reg = 1e3
-doSGD = False
-method = 'MAP'
-passes = 5000
+doSGD = True
+method = 'GLM'
+passes = 300
+K = 5
 
 #
 # Load data
@@ -63,19 +66,28 @@ if method == 'SGD':
 elif method == 'MAP':
     weights, labels = classification.learn_map(X, Y, Phi, (lenscale,),
                                                regulariser=reg)
+elif method == 'GLM':
+    llhood = likelihoods.Bernoulli()
+    lparams = []
+    params = glm.learn(X, Y, llhood, lparams, Phi, [lenscale], reg=reg,
+                       use_sgd=doSGD, maxit=passes, postcomp=K)
 else:
     raise ValueError("Invalid method chosen!")
 
-lreg = LogisticRegression(penalty='l2')
-lreg.fit(X, Y)
+lreg = LogisticRegression(penalty='l2', class_weight='balanced', C=reg)
+lreg.fit(Phi(X, lenscale), Y)
 
 
 # Predict
-pys_l = classification.logistic_predict(Xs, weights, Phi, (lenscale,))
+if method == 'GLM':
+    pys_l, Vpy, Epn, Epx = glm.predict_meanvar(Xs, llhood, Phi, *params)
+    pys_l = np.vstack((1 - pys_l, pys_l)).T
+else:
+    pys_l = classification.predict(Xs, weights, Phi, (lenscale,))
 
-print("Logistic A La Carte: av nll = {:.6f}, error rate = {:.6f}"
-      .format(loglosscat(Ys, pys_l), errrate(Ys, pys_l)))
+print("Logistic {}: av nll = {:.6f}, error rate = {:.6f}"
+      .format(method, loglosscat(Ys, pys_l), errrate(Ys, pys_l)))
 
-pys_r = lreg.predict_proba(Xs)
+pys_r = lreg.predict_proba(Phi(Xs, lenscale))
 print("Logistic Scikit: av nll = {:.6f}, error rate = {:.6f}"
       .format(loglosscat(Ys, pys_r), errrate(Ys, pys_r)))
