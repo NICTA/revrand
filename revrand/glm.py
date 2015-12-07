@@ -36,62 +36,72 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             (N, d) array input dataset (N samples, d dimensions).
         y: ndarray
             (N,) array targets (N samples)
-        likelihood: 
+        likelihood: Object
+            A likelihood object, see the likelihoods module.
+        lparams: sequence
+            a sequence of parameters for the likelihood object, e.g. the
+            likelihoods.Gaussian object takes a variance parameter, so this
+            should be :code:`[var]`.
         basis: Basis
             A basis object, see the basis_functions module.
         bparams: sequence
             A sequence of parameters of the basis object.
-        var: float, optional
-            observation variance initial value.
-        regulariser: float, optional
+        reg: float, optional
             weight regulariser (variance) initial value.
-        rank: int, optional
-            the rank of the off-diagonal covariance approximation, has to be
-            [0, D] where D is the dimension of the basis. None is the same as
-            setting rank = D.
-        gtol: float,
-            SGD tolerance convergence criterion.
-        passes: int, optional
-            Number of complete passes through the data before optimization
-            terminates (unless it converges first).
-        rate: float, optional
-            SGD decay rate, must be [0, 1].
+        postcomp: int, optional
+            Number of diagonal Gaussian components to use to approximate the
+            posterior distribution.
+        tol: float,
+           Optimiser relative tolerance convergence criterion.
+        use_sgd: bool, optional
+            If `True` then use SGD (Adadelta) optimisation instead of L-BFGS.
+        maxit: int, optional
+            Maximum number of iterations of the optimiser to run. If
+            :code:`use_sgd` is `True` then this is the number of complete
+            passes through the data before optimization terminates (unless it
+            converges first).
         batchsize: int, optional
-            number of observations to use per SGD batch.
+            number of observations to use per SGD batch. Ignored if
+            `use_sgd=False`.
+        rate: float, optional
+            SGD decay rate, must be [0, 1]. Ignored if `use_sgd=False`.
+        eta: float, optional
+
         verbose: bool, optional
             log the learning status.
 
     Returns
     -------
         m: ndarray
-            (D,) array of posterior weight means (D is the dimension of the
-            features).
+            (D, postcomp) array of posterior weight means (D is the dimension
+            of the features).
         C: ndarray
-            (D,) array of posterior weight variances.
+            (D, postcomp) array of posterior weight variances.
+        lparams: sequence
+            learned sequence of likelihood object hyperparameters.
         bparams: sequence
             learned sequence of basis object hyperparameters.
-        float:
-            learned observation variance
 
     Notes
     -----
-        This approximates the posterior covariance matrix over the weights with
-        a diagonal plus low rank matrix:
+        This approximates the posterior distribution over the weights with
+        a mixture of Gaussians:
 
         .. math ::
 
-            \mathbf{w} \sim \mathcal{N}(\mathbf{m}, \mathbf{C})
+            \mathbf{w} \sim \frac{1}{K} \sum^K_{k=1}
+                \mathcal{N}(\mathbf{m_k}, \boldsymbo{\Psi}_k)
 
         where,
 
         .. math ::
 
-            \mathbf{C} = \mathbf{U}\mathbf{U}^{T} + \\text{diag}(\mathbf{s}),
-            \quad \mathbf{U} \in \mathbb{R}^{D\\times \\text{rank}},
-            \quad \mathbf{s} \in \mathbb{R}^{D}.
+            \boldsymbol{\Psi}_k = \\text{diag}([\Psi_1, \ldots, \Psi_D]).
 
-        This is to allow for a reduced number of parameters to optimise with
-        SGD. As a consequence, features with large dimensionality can be used.
+        This is so arbitrary likelihoods can be used with this algorithm, while
+        still mainting flexible and tractable non-Gaussian posteriors.
+        Additionaly this has the benefit that we have a reduced number of
+        parameters to optimise (compared with full covariance Gaussians).
     """
 
     N, d = X.shape
@@ -187,7 +197,6 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
 
     # Intialise m and C
-    # m = np.random.randn(D, K) + (np.arange(K) - K / 2)
     m = np.random.randn(D, K)
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 

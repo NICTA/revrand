@@ -11,7 +11,7 @@ In this demo we compare various Gaussian process approximation methods provided
 by this library to a true Gaussian process at fitting a (noisy) random draw
 from a Gaussian process. 
 
-.. plot:: ../demos/demo_alacarte.py
+.. plot:: ../demos/demo_regression.py
 
 
 Learning the SARCOS robot arm dynamics
