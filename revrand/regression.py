@@ -225,6 +225,8 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
             terminates (unless it converges first).
         rate: float, optional
             SGD decay rate, must be [0, 1].
+        eta: float, optional
+            Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
         batchsize: int, optional
             number of observations to use per SGD batch.
         verbose: bool, optional
@@ -381,21 +383,20 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     return m, C, bparams, var
 
 
-def predict(X_star, basis, m, C, bparams, var):
+def predict(Xs, basis, m, C, bparams, var):
     """
     Predict using Bayesian linear regression.
 
     Parameters
     ----------
-        X_star: ndarray
-            (N_star,D) array query input dataset (N_star samples, D
-            dimensions).
+        Xs: ndarray
+            (Ns,d) array query input dataset (Ns samples, d dimensions).
+        basis: Basis
+            A basis object, see the basis_functions module.
         m: ndarray
             (D,) array of regression weights (posterior).
         C: ndarray
             (D,) or (D, D) array of regression weight covariances (posterior).
-        basis: Basis
-            A basis object, see the basis_functions module.
         bparams: sequence
             A sequence of hyperparameters of the basis object.
         var: float
@@ -414,7 +415,7 @@ def predict(X_star, basis, m, C, bparams, var):
             X_star of shape (N_star,).
     """
 
-    Phi_s = basis(X_star, *bparams)
+    Phi_s = basis(Xs, *bparams)
 
     Ey = Phi_s.dot(m)
     if C.ndim == 2:

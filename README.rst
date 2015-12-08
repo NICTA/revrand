@@ -10,8 +10,7 @@ A library of scalable Bayesian generalised linear models with *fancy* features
 ------------------------------------------------------------------------------
 
 This library implements various Bayesian linear models (Bayesian linear
-regression) and generalised linear models (logistic regression). A few features
-of this library are:
+regression) and generalised linear models. A few features of this library are:
 
 - A fancy basis functions/feature composition framework for combining basis
   functions like radial basis function, sigmoidal basis functions, polynomial
@@ -19,6 +18,9 @@ of this library are:
 - Basis functions that can be used to approximate Gaussian processes with shift
   invariant covariance functions (e.g. square exponential) when used with
   linear models [1]_, [2]_, [3]_.
+- Non-Gaussian likelihoods with Bayesian generalised linear models using a
+  modified version of the nonparametric variational inference algorithm
+  presented in [4]_.
 - Large scale learning using stochastic gradient descent (ADADELTA).
 
 
@@ -106,7 +108,8 @@ Issue tracking
 Bugs & Feedback
 ---------------
 
-For bugs, questions and discussions, please use `Github Issues <https://github.com/NICTA/revrand/issues>`_.
+For bugs, questions and discussions, please use 
+`Github Issues <https://github.com/NICTA/revrand/issues>`_.
 
 
 References
@@ -121,6 +124,8 @@ References
    on machine learning. 2013.
 .. [3] Rahimi, A., & Recht, B. "Random features for large-scale kernel
    machines." Advances in neural information processing systems. 2007. 
+.. [4] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
+   inference". arXiv preprint arXiv:1206.4665 (2012).
 
 Copyright & License
 -------------------

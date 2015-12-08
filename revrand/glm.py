@@ -26,9 +26,10 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
           use_sgd=False, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
           eta=1e-5, verbose=True):
     """
-    Learn the parameters and hyperparameters of an Bayesian generalised linear
-    model (GLM) using nonparametric variational inference, and optionally
-    stochastic gradients.
+    Learn the parameters of a Bayesian generalised linear model (GLM).
+
+    The learning algorithm uses nonparametric variational inference [1]_, and
+    optionally stochastic gradients.
 
     Parameters
     ----------
@@ -51,22 +52,23 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         postcomp: int, optional
             Number of diagonal Gaussian components to use to approximate the
             posterior distribution.
-        tol: float,
+        tol: float, optional
            Optimiser relative tolerance convergence criterion.
         use_sgd: bool, optional
-            If `True` then use SGD (Adadelta) optimisation instead of L-BFGS.
+            If :code:`True` then use SGD (Adadelta) optimisation instead of
+            L-BFGS.
         maxit: int, optional
             Maximum number of iterations of the optimiser to run. If
-            :code:`use_sgd` is `True` then this is the number of complete
+            :code:`use_sgd` is :code:`True` then this is the number of complete
             passes through the data before optimization terminates (unless it
             converges first).
         batchsize: int, optional
             number of observations to use per SGD batch. Ignored if
-            `use_sgd=False`.
+            :code:`use_sgd=False`.
         rate: float, optional
-            SGD decay rate, must be [0, 1]. Ignored if `use_sgd=False`.
+            SGD decay rate, must be [0, 1]. Ignored if :code:`use_sgd=False`.
         eta: float, optional
-
+            Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
         verbose: bool, optional
             log the learning status.
 
@@ -89,14 +91,15 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         .. math ::
 
-            \mathbf{w} \sim \frac{1}{K} \sum^K_{k=1}
-                \mathcal{N}(\mathbf{m_k}, \boldsymbo{\Psi}_k)
+            \mathbf{w} \sim \\frac{1}{K} \sum^K_{k=1}
+                \mathcal{N}(\mathbf{m_k}, \\boldsymbol{\Psi}_k)
 
         where,
 
         .. math ::
 
-            \boldsymbol{\Psi}_k = \\text{diag}([\Psi_1, \ldots, \Psi_D]).
+            \\boldsymbol{\Psi}_k = \\text{diag}([\Psi_{k,1}, \ldots,
+                \Psi_{k,D}]).
 
         This is so arbitrary likelihoods can be used with this algorithm, while
         still mainting flexible and tractable non-Gaussian posteriors.
@@ -197,7 +200,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
 
     # Intialise m and C
-    m = np.random.randn(D, K)
+    m = np.random.randn(D, K) + np.arange(K) - K / 2
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     # Optimiser boiler plate for bounds, log trick, etc
@@ -240,6 +243,43 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
 def predict_meanvar(Xs, likelihood, basis, m, C, lparams, bparams,
                     nsamples=100):
+    """
+    Predictive mean and variance of a Bayesian GLM.
+
+    Parameters
+    ----------
+        Xs: ndarray
+            (Ns,d) array query input dataset (Ns samples, D dimensions).
+        likelihood: Object
+            A likelihood object, see the likelihoods module.
+        basis: Basis
+            A basis object, see the basis_functions module.
+        m: ndarray
+            (D,) array of regression weights (posterior).
+        C: ndarray
+            (D,) or (D, D) array of regression weight covariances (posterior).
+        lparams: sequence
+            a sequence of parameters for the likelihood object, e.g. the
+            likelihoods.Gaussian object takes a variance parameter, so this
+            should be :code:`[var]`.
+        bparams: sequence
+            A sequence of hyperparameters of the basis object.
+        nsamples: int, optional
+            The number of samples to draw from the posterior in order to
+            approximate the predictive mean and variance.
+
+    Returns
+    -------
+        Ey: ndarray
+            The expected value of ys for the query inputs, Xs of shape (Ns,).
+        Vy: ndarray
+            The expected variance of ys (excluding likelihood noise terms) for
+            the query inputs, Xs of shape (Ns,).
+        Ey_min: ndarray
+            The minimum sampled values of the predicted mean (same shape as Ey)
+        Ey_max: ndarray
+            The maximum sampled values of the predicted mean (same shape as Ey)
+    """
 
     f = _sample_func(Xs, basis, m, C, bparams, nsamples)
     ys = likelihood.Ey(f, *lparams)
@@ -250,6 +290,46 @@ def predict_meanvar(Xs, likelihood, basis, m, C, lparams, bparams,
 
 def predict_cdf(quantile, Xs, likelihood, basis, m, C, lparams, bparams,
                 nsamples=100):
+    """
+    Predictive cumulative density function of a Bayesian GLM.
+
+    Parameters
+    ----------
+        quantile: float
+            The predictive probability, :math:`p(y^* \leq \\text{quantile} |
+            \mathbf{X}, y)`.
+        Xs: ndarray
+            (Ns,d) array query input dataset (Ns samples, D dimensions).
+        likelihood: Object
+            A likelihood object, see the likelihoods module.
+        basis: Basis
+            A basis object, see the basis_functions module.
+        m: ndarray
+            (D,) array of regression weights (posterior).
+        C: ndarray
+            (D,) or (D, D) array of regression weight covariances (posterior).
+        lparams: sequence
+            a sequence of parameters for the likelihood object, e.g. the
+            likelihoods.Gaussian object takes a variance parameter, so this
+            should be :code:`[var]`.
+        bparams: sequence
+            A sequence of hyperparameters of the basis object.
+        nsamples: int, optional
+            The number of samples to draw from the posterior in order to
+            approximate the predictive mean and variance.
+
+    Returns
+    -------
+        p: ndarray
+           The probability of ys <= quantile for the query inputs, Xs of shape
+           (Ns,).
+        p_min: ndarray
+            The minimum sampled values of the predicted probability (same shape
+            as p)
+        p_max: ndarray
+            The maximum sampled values of the predicted probability (same shape
+            as p)
+    """
 
     f = _sample_func(Xs, basis, m, C, bparams, nsamples)
     ps = likelihood.cdf(quantile, f, *lparams)
@@ -258,6 +338,41 @@ def predict_cdf(quantile, Xs, likelihood, basis, m, C, lparams, bparams,
 
 def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
                      nsamples=100):
+    """
+    Predictive percentile interval (upper and lower quantiles) for a Bayesian
+    GLM with equal area about the median.
+
+    Parameters
+    ----------
+        alpha: float
+            The percentile confidence interval (e.g. 95%) to return.
+        Xs: ndarray
+            (Ns,d) array query input dataset (Ns samples, D dimensions).
+        likelihood: Object
+            A likelihood object, see the likelihoods module.
+        basis: Basis
+            A basis object, see the basis_functions module.
+        m: ndarray
+            (D,) array of regression weights (posterior).
+        C: ndarray
+            (D,) or (D, D) array of regression weight covariances (posterior).
+        lparams: sequence
+            a sequence of parameters for the likelihood object, e.g. the
+            likelihoods.Gaussian object takes a variance parameter, so this
+            should be :code:`[var]`.
+        bparams: sequence
+            A sequence of hyperparameters of the basis object.
+        nsamples: int, optional
+            The number of samples to draw from the posterior in order to
+            approximate the predictive mean and variance.
+
+    Returns
+    -------
+        a: ndarray
+            The lower end point of the interval with shape (Ns,)
+        b: ndarray
+            The upper end point of the interval with shape (Ns,)
+    """
 
     f = _sample_func(Xs, basis, m, C, bparams, nsamples)
     a, b = likelihood.interval(alpha, f, *lparams)

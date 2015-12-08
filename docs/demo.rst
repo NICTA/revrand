@@ -14,6 +14,18 @@ from a Gaussian process.
 .. plot:: ../demos/demo_regression.py
 
 
+Generalised Linear Models
+.........................
+
+This is similar to the previous demo, where we fit a draw from a Gaussian
+process, but now the sample is passed through a transformation function and is
+given noise from a non-Gaussian likelihood function. The noiseless transformed 
+sample is then estimated using revrand's generlised linear model (which is a
+modification of the GLM presented in [3]_).
+
+.. plot:: ../demos/demo_glm.py
+
+
 Learning the SARCOS robot arm dynamics
 ......................................
 
@@ -84,3 +96,5 @@ References
        for machine learning." the MIT Press 2.3 (2006): 4.
 .. [2] Matthew D. Zeiler, "ADADELTA: An adaptive learning rate method." arXiv
        preprint arXiv:1212.5701 (2012).
+.. [3] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
+       inference". arXiv preprint arXiv:1206.4665 (2012).

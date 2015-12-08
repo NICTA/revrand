@@ -32,7 +32,7 @@ passes = 300
 batchsize = 100
 reg = 1
 postcomp = 5
-use_sgd = False
+use_sgd = True
 
 N = 500
 Ns = 250
@@ -42,9 +42,9 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-like = 'Gaussian'
+# like = 'Gaussian'
 # like = 'Bernoulli'
-# like = 'Poisson'
+like = 'Poisson'
 
 #
 # Make Data

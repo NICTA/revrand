@@ -1,15 +1,21 @@
 """
 Likelihood objects for inference within the GLM framework.
+
 """
 
+from __future__ import division
+
 import numpy as np
-# from scipy.special import gammaln
 from scipy.stats import bernoulli, poisson, norm
+
 from .utils import Positive
 from .transforms import logistic, softplus
 
 
+#
 # Module constants
+#
+
 tiny = np.finfo(float).tiny
 small = 1e-100
 resol = np.finfo(float).resolution

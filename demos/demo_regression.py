@@ -145,14 +145,12 @@ def main():
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
     params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, [lenscale],
-                           reg=reg, use_sgd=True, rate=rate, postcomp=5,
+                           reg=reg, use_sgd=True, rate=rate, postcomp=10,
                            eta=eta, batchsize=batchsize, maxit=passes)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]
     Sy_g = np.sqrt(Vy_g)
-    # plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
-    # y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, base, *params_glm)
 
     #
     # Learn GP and predict
@@ -174,7 +172,7 @@ def main():
     LL_sgd = mll(ftest, Ey_s, Vf_s)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
-    LL_g = mll(ftest, Ey_g, Vf_g)
+    LL_g = mll(ftest, Ey_g, Vy_g)
     smse_sgd = smse(ftest, Ey_s)
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)

@@ -72,7 +72,7 @@ class Basis:
         return X
 
     def grad(self, X):
-        """ Return the gradient of the basis function w.r.t. each of the
+        """ Return the gradient of the basis function w.r.t.\ each of the
             parameters.
 
             Arguments:
@@ -132,7 +132,7 @@ class Basis:
         return self(X)
 
     def grad_from_vector(self, X, vec):
-        """ Return the gradient of the basis function w.r.t. each of the
+        """ Return the gradient of the basis function w.r.t.\ each of the
             parameters, but like from_vector, instead of being given parameter
             arguments, this function is given a flat list of all of the
             parameters.
@@ -296,7 +296,7 @@ class RadialBasis(Basis):
 
     def grad(self, X, lenscale):
         """
-        Get the gradients of this basis w.r.t. the length scale.
+        Get the gradients of this basis w.r.t.\ the length scale.
 
         Arguments:
             X:  (N, d) array of observations where N is the number of
@@ -376,7 +376,7 @@ class SigmoidalBasis(Basis):
         return expit(cdist(X, self.C, 'seuclidean') / lenscale)
 
     def grad(self, X, lenscale):
-        r"""Get the gradients of this basis w.r.t. the length scale.
+        r"""Get the gradients of this basis w.r.t.\ the length scale.
 
         .. math::
 
@@ -459,7 +459,7 @@ class RandomRBF(RadialBasis):
 
     def grad(self, X, lenscale):
         """
-        Get the gradients of this basis w.r.t. the length scale.
+        Get the gradients of this basis w.r.t.\ the length scale.
 
         Arguments:
             X:  (N, d) array of observations where N is the number of
@@ -528,7 +528,7 @@ class RandomRBF_ARD(RandomRBF):
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
     def grad(self, X, lenscales):
-        """ Get the gradients of this basis w.r.t. the length scales.
+        """ Get the gradients of this basis w.r.t.\ the length scales.
 
             Arguments:
                 X: (N, d) array of observations where N is the number of
@@ -631,7 +631,7 @@ class FastFood(RandomRBF):
 
     def grad(self, X, lenscale):
         """
-        Get the gradients of this basis w.r.t. the length scale.
+        Get the gradients of this basis w.r.t.\ the length scale.
 
         Arguments:
             X:  (N, d) array of observations where N is the number of
