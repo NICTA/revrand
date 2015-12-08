@@ -46,8 +46,17 @@ Have a look at some of the `demos <demos/>`_, e.g.:
 
 .. code:: console
 
-   $ python demos/demo_alacarte.py
+   $ python demos/demo_regression.py
 
+Or,
+
+.. code:: console
+
+   $ python demos/demo_glm.py
+
+
+Bayesian Linear Regression Example
+..................................
 
 Here is a very quick example of how to use Bayesian linear regression with SGD
 optimisation of the likelihood noise, regulariser and basis function
@@ -60,15 +69,17 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
     import matplotlib.pyplot as pl
     import numpy as np
     from revrand.basis_functions import LinearBasis, RandomRBF
-    from revrand.regression import bayeslinear_sgd, bayeslinear_predict
+    from revrand.regression import learn_sgd, predict
+
+    ...
     
     # Concatenate a linear basis and a Random radial basis (GP approx)
     basis = LinearBasis(onescol=True) + RandomRBF(nbases=300, Xdim=X.shape[1])
     init_lenscale = 1.0
 
     # Learn regression parameters and predict
-    params = bayeslinear_sgd(X, y, basis, [init_lenscale])
-    Eys, Vfs, Vys = bayeslinear_predict(Xs, basis, *params) 
+    params = learn_sgd(X, y, basis, [init_lenscale])
+    Eys, Vfs, Vys = predict(Xs, basis, *params) 
 
     # Training/Truth
     pl.plot(X, y, 'k.', label='Training')
@@ -91,6 +102,58 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
 This script will output something like the following,
 
 .. image:: blr_sgd_demo.png
+
+
+Bayesian Generalised Linear Model Example
+.........................................
+
+This example is very similar to that above, but now let's assume our targets
+``y`` are drawn from a Poisson likelihood, or observation, distribution which
+is a function of the inputs, ``X``. The task here is to predict the mean of the
+Poisson distribution for query inputs ``Xs``, as well as the uncertainty
+associated with the prediction.
+
+.. code:: python
+
+    import matplotlib.pyplot as pl
+    import numpy as np
+    from revrand.basis_functions import RandomRBF
+    from revrand.glm import learn, predict_meanvar, predict_interval
+
+    ...
+    
+    # Random radial basis (GP approx)
+    basis = RandomRBF(nbases=100, Xdim=X.shape[1])
+    init_lenscale = 1.0
+
+    # Set up the likelihood of the GLM
+    llhood = likelihoods.Poisson(tranfcn='exp')  # log link
+
+    # Learn regression parameters and predict
+    params = learn(X, y, llhood, [], basis, [init_lenscale])
+    Eys, _, _, _ = predict_meanvar(Xs, llhood, basis, *params) 
+    y95n, y95x = glm.predict_interval(0.95, Xs, llhood, basis, *params)
+
+    # Training/Truth
+    pl.plot(X, y, 'k.', label='Training')
+    pl.plot(Xs, f, 'k-', label='Truth')
+
+    # GLM SGD Regressor
+    pl.plot(Xs, Eys, 'b-', label='GLM mean.')
+    pl.fill_between(Xs, y95n, y95x, facecolor='none',
+                    edgecolor='b', linestyle='--', label=None)
+
+    pl.legend()
+
+    pl.grid(True)
+    pl.title('Regression demo')
+    pl.ylabel('y')
+    pl.xlabel('x')
+    pl.show()
+
+This script will output something like the following,
+
+.. image:: glm_sgd_demo.png
 
 
 Useful Links

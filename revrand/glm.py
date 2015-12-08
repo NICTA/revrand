@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
-          use_sgd=False, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
+          use_sgd=True, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
           eta=1e-5, verbose=True):
     """
     Learn the parameters of a Bayesian generalised linear model (GLM).

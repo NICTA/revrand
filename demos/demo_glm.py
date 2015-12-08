@@ -115,11 +115,11 @@ Xpl_t = Xtrain.flatten()
 Xpl_s = Xtest.flatten()
 
 # Regressor
-pl.plot(Xpl_s, Ey, 'b-', label='NPV mean.')
-pl.fill_between(Xpl_s, Ey - Sy2, Ey + Sy2, facecolor='b', edgecolor='none',
-                label=None, alpha=0.3)
-# pl.fill_between(Xpl_s, Eyn, Eyx, facecolor='b', edgecolor='none', label=None,
-#                 alpha=0.3)
+pl.plot(Xpl_s, Ey, 'b-', label='GLM mean.')
+# pl.fill_between(Xpl_s, Ey - Sy2, Ey + Sy2, facecolor='b', edgecolor='none',
+#                 label=None, alpha=0.3)
+pl.fill_between(Xpl_s, Eyn, Eyx, facecolor='b', edgecolor='none', label=None,
+                alpha=0.3)
 pl.fill_between(Xpl_s, y95n, y95x, facecolor='none', edgecolor='b', label=None,
                 linestyle='--')
 
