@@ -65,3 +65,6 @@ target/
 .ipynb_checkpoints/
 
 .DS_Store
+
+# Demos
+demos/_revrand_data/
