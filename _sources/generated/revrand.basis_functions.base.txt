@@ -1,0 +1,40 @@
+revrand.basis_functions.base
+============================
+
+.. automodule:: revrand.basis_functions.base
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      cdist
+      hadamard
+      norm
+      params_to_list
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Basis
+      BasisCat
+      FastFood
+      LinearBasis
+      PolynomialBasis
+      Positive
+      RadialBasis
+      RandomRBF
+      RandomRBF_ARD
+      SigmoidalBasis
+   
+   
+
+   
+   
+   

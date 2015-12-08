@@ -15,6 +15,8 @@ Contents:
    basis_funcs
    regression
    classification
+   glm
+   likelihoods
    optimize
    utils
    demo

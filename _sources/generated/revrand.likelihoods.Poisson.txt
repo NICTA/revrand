@@ -1,0 +1,37 @@
+revrand.likelihoods.Poisson
+===========================
+
+.. currentmodule:: revrand.likelihoods
+
+.. autoclass:: Poisson
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Poisson.Ey
+      ~Poisson.__init__
+      ~Poisson.cdf
+      ~Poisson.d2f
+      ~Poisson.d3f
+      ~Poisson.df
+      ~Poisson.dp
+      ~Poisson.dpd2f
+      ~Poisson.interval
+      ~Poisson.loglike
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Poisson.bounds
+   
+   

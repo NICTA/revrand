@@ -1,0 +1,31 @@
+revrand.basis_functions.base.RandomRBF
+======================================
+
+.. currentmodule:: revrand.basis_functions.base
+
+.. autoclass:: RandomRBF
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RandomRBF.__init__
+      ~RandomRBF.from_vector
+      ~RandomRBF.grad
+      ~RandomRBF.grad_from_vector
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RandomRBF.bounds
+   
+   

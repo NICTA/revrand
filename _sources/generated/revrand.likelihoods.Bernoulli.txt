@@ -1,0 +1,37 @@
+revrand.likelihoods.Bernoulli
+=============================
+
+.. currentmodule:: revrand.likelihoods
+
+.. autoclass:: Bernoulli
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Bernoulli.Ey
+      ~Bernoulli.__init__
+      ~Bernoulli.cdf
+      ~Bernoulli.d2f
+      ~Bernoulli.d3f
+      ~Bernoulli.df
+      ~Bernoulli.dp
+      ~Bernoulli.dpd2f
+      ~Bernoulli.interval
+      ~Bernoulli.loglike
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Bernoulli.bounds
+   
+   

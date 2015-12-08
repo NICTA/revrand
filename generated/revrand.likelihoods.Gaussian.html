@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>revrand.likelihoods.Gaussian &mdash; revrand 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Likelihood Classes" href="../likelihoods.html" />
+    <link rel="next" title="revrand.likelihoods.Poisson" href="revrand.likelihoods.Poisson.html" />
+    <link rel="prev" title="revrand.likelihoods.Bernoulli" href="revrand.likelihoods.Bernoulli.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.likelihoods.Poisson.html" title="revrand.likelihoods.Poisson"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="revrand.likelihoods.Bernoulli.html" title="revrand.likelihoods.Bernoulli"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../likelihoods.html" accesskey="U">Likelihood Classes</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="revrand-likelihoods-gaussian">
+<h1>revrand.likelihoods.Gaussian<a class="headerlink" href="#revrand-likelihoods-gaussian" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="revrand.likelihoods.Gaussian">
+<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>var_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>A univariate Gaussian likelihood for general regression tasks.</p>
+<p>No transformation function is needed since this is conjugate to the GLM
+prior.</p>
+<dl class="method">
+<dt id="revrand.likelihoods.Gaussian.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>var_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an instance of the Gaussian likelihood class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var_bounds</strong> (<em>tuple, optional</em>) &#8211; A tuple of (upper, lower) bounds of the variance.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.Ey" title="revrand.likelihoods.Gaussian.Ey"><code class="xref py py-obj docutils literal"><span class="pre">Ey</span></code></a>(f,&nbsp;var)</td>
+<td>Expected value of the Gaussian likelihood.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Gaussian.__init__" title="revrand.likelihoods.Gaussian.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([var_bounds,&nbsp;upper])</td>
+<td>Construct an instance of the Gaussian likelihood class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.cdf" title="revrand.likelihoods.Gaussian.cdf"><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
+<td>Cumulative density function of the likelihood.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.d2f" title="revrand.likelihoods.Gaussian.d2f"><code class="xref py py-obj docutils literal"><span class="pre">d2f</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
+<td>Second derivative of Gaussian log likelihood w.r.t. f.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.d3f" title="revrand.likelihoods.Gaussian.d3f"><code class="xref py py-obj docutils literal"><span class="pre">d3f</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
+<td>Third derivative of Gaussian log likelihood w.r.t. f.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.df" title="revrand.likelihoods.Gaussian.df"><code class="xref py py-obj docutils literal"><span class="pre">df</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
+<td>Derivative of Gaussian log likelihood w.r.t. f.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.dp" title="revrand.likelihoods.Gaussian.dp"><code class="xref py py-obj docutils literal"><span class="pre">dp</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
+<td>Derivative of Gaussian log likelihood w.r.t. the parameters, <span class="math">\(\theta\)</span>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.dpd2f" title="revrand.likelihoods.Gaussian.dpd2f"><code class="xref py py-obj docutils literal"><span class="pre">dpd2f</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
+<td>Partial derivative of Gaussian log likelihood, <span class="math">\(\partial h(f, \theta) / \partial \theta\)</span> where <span class="math">\(h(f, \theta) = \partial^2 \log p(y|f, \theta)/ \partial f^2\)</span>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.interval" title="revrand.likelihoods.Gaussian.interval"><code class="xref py py-obj docutils literal"><span class="pre">interval</span></code></a>(alpha,&nbsp;f,&nbsp;var)</td>
+<td>Confidence interval with equal areas around the median.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.loglike" title="revrand.likelihoods.Gaussian.loglike"><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
+<td>Gaussian log likelihood.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">bounds</span></code></td>
+<td>Get this object&#8217;s parameter bounds.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="revrand.likelihoods.Bernoulli.html"
+                        title="previous chapter">revrand.likelihoods.Bernoulli</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="revrand.likelihoods.Poisson.html"
+                        title="next chapter">revrand.likelihoods.Poisson</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.likelihoods.Poisson.html" title="revrand.likelihoods.Poisson"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="revrand.likelihoods.Bernoulli.html" title="revrand.likelihoods.Bernoulli"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../likelihoods.html" >Likelihood Classes</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>revrand.basis_functions.base &mdash; revrand 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
+    <link rel="next" title="revrand.basis_functions.base.Basis" href="revrand.basis_functions.base.Basis.html" />
+    <link rel="prev" title="revrand.basis_functions.base.SigmoidalBasis" href="revrand.basis_functions.base.SigmoidalBasis.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.basis_functions.base.Basis.html" title="revrand.basis_functions.base.Basis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-revrand.basis_functions.base">
+<span id="revrand-basis-functions-base"></span><h1>revrand.basis_functions.base<a class="headerlink" href="#module-revrand.basis_functions.base" title="Permalink to this headline">¶</a></h1>
+<p>Various basis function objects specialised for parameter learning.</p>
+<p>To make a new basis object, see the documentation of the Basis class.</p>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cdist</span></code>(XA,&nbsp;XB[,&nbsp;metric,&nbsp;p,&nbsp;V,&nbsp;VI,&nbsp;w])</td>
+<td>Computes distance between each pair of the two collections of inputs.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">hadamard</span></code>(Y[,&nbsp;ordering])</td>
+<td><em>Very fast</em> Hadamard transform for single vector at a time</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">norm</span></code>(a[,&nbsp;ord])</td>
+<td>Matrix or vector norm.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">params_to_list</span></code>(params)</td>
+<td>This will take a list of parameters of scalars or arrays, and return a flattened array which is a concatenation of all of these parameters.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><code class="xref py py-obj docutils literal"><span class="pre">Basis</span></code></a>()</td>
+<td>The base Basis class.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">BasisCat</span></code>(basis_list)</td>
+<td>A class that implements concatenation of bases.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.FastFood.html#revrand.basis_functions.base.FastFood" title="revrand.basis_functions.base.FastFood"><code class="xref py py-obj docutils literal"><span class="pre">FastFood</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_bounds,&nbsp;upper])</td>
+<td>Fast Food basis function, which is an approximation of the random radial basis function for a large number of bases.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="revrand.basis_functions.base.LinearBasis.html#revrand.basis_functions.base.LinearBasis" title="revrand.basis_functions.base.LinearBasis"><code class="xref py py-obj docutils literal"><span class="pre">LinearBasis</span></code></a>([onescol])</td>
+<td>Linear basis class, basically this just prepending a columns of ones onto X.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.PolynomialBasis.html#revrand.basis_functions.base.PolynomialBasis" title="revrand.basis_functions.base.PolynomialBasis"><code class="xref py py-obj docutils literal"><span class="pre">PolynomialBasis</span></code></a>(order[,&nbsp;include_bias])</td>
+<td>Polynomial basis class, this essentially creates the concatenation, Phi = [X^0, X^1, ..., X^p] where p is specified in the constructor.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">Positive</span></code></td>
+<td>Define a positive only bound for the optimiser.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.RadialBasis.html#revrand.basis_functions.base.RadialBasis" title="revrand.basis_functions.base.RadialBasis"><code class="xref py py-obj docutils literal"><span class="pre">RadialBasis</span></code></a>(centres[,&nbsp;lenscale_bounds,&nbsp;upper])</td>
+<td>Radial basis class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="revrand.basis_functions.base.RandomRBF.html#revrand.basis_functions.base.RandomRBF" title="revrand.basis_functions.base.RandomRBF"><code class="xref py py-obj docutils literal"><span class="pre">RandomRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_bounds,&nbsp;upper])</td>
+<td>Random RBF Basis, otherwise known as Random Kitchen Sinks.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.RandomRBF_ARD.html#revrand.basis_functions.base.RandomRBF_ARD" title="revrand.basis_functions.base.RandomRBF_ARD"><code class="xref py py-obj docutils literal"><span class="pre">RandomRBF_ARD</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;...])</td>
+<td>Random RBF Basis, otherwise known as Random Kitchen Sinks, with automatic relevance determination (ARD).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="revrand.basis_functions.base.SigmoidalBasis.html#revrand.basis_functions.base.SigmoidalBasis" title="revrand.basis_functions.base.SigmoidalBasis"><code class="xref py py-obj docutils literal"><span class="pre">SigmoidalBasis</span></code></a>(centres[,&nbsp;lenscale_bounds,&nbsp;upper])</td>
+<td>Sigmoidal Basis</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="revrand.basis_functions.base.SigmoidalBasis.html"
+                        title="previous chapter">revrand.basis_functions.base.SigmoidalBasis</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="revrand.basis_functions.base.Basis.html"
+                        title="next chapter">revrand.basis_functions.base.Basis</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.basis_functions.base.Basis.html" title="revrand.basis_functions.base.Basis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.3.
+    </div>
+  </body>
+</html>

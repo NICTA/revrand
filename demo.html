@@ -69,15 +69,32 @@
 <p>In this demo we compare various Gaussian process approximation methods provided
 by this library to a true Gaussian process at fitting a (noisy) random draw
 from a Gaussian process.</p>
-<p>(<a class="reference external" href="./../demos/demo_alacarte.py">Source code</a>, <a class="reference external" href="./../demos/demo_alacarte.png">png</a>, <a class="reference external" href="./../demos/demo_alacarte.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_alacarte.pdf">pdf</a>)</p>
+<p>(<a class="reference external" href="./../demos/demo_regression.py">Source code</a>, <a class="reference external" href="./../demos/demo_regression.png">png</a>, <a class="reference external" href="./../demos/demo_regression.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_regression.pdf">pdf</a>)</p>
 <div class="figure">
-<img alt="_images/demo_alacarte.png" src="_images/demo_alacarte.png" />
+<img alt="_images/demo_regression.png" src="_images/demo_regression.png" />
+</div>
+</div>
+<div class="section" id="generalised-linear-models">
+<h3>Generalised Linear Models<a class="headerlink" href="#generalised-linear-models" title="Permalink to this headline">¶</a></h3>
+<p>This is similar to the previous demo, where we fit a draw from a Gaussian
+process, but now the sample is passed through a transformation function and is
+given noise from a non-Gaussian likelihood function. The noiseless transformed
+sample is then estimated using revrand&#8217;s generlised linear model (which is a
+modification of the GLM presented in <a class="footnote-reference" href="#id9" id="id1">[3]</a>).</p>
+<p>(<a class="reference external" href="./../demos/demo_glm.py">Source code</a>)</p>
+<div class="figure" id="id10">
+<img alt="_images/demo_glm_00.png" src="_images/demo_glm_00.png" />
+<p class="caption"><span class="caption-text">(<a class="reference external" href="./../demos/demo_glm_00.png">png</a>, <a class="reference external" href="./../demos/demo_glm_00.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_glm_00.pdf">pdf</a>)</span></p>
+</div>
+<div class="figure" id="id11">
+<img alt="_images/demo_glm_01.png" src="_images/demo_glm_01.png" />
+<p class="caption"><span class="caption-text">(<a class="reference external" href="./../demos/demo_glm_01.png">png</a>, <a class="reference external" href="./../demos/demo_glm_01.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_glm_01.pdf">pdf</a>)</span></p>
 </div>
 </div>
 <div class="section" id="learning-the-sarcos-robot-arm-dynamics">
 <h3>Learning the SARCOS robot arm dynamics<a class="headerlink" href="#learning-the-sarcos-robot-arm-dynamics" title="Permalink to this headline">¶</a></h3>
 <p>Here we run a large scale Gaussian process approximation algorithm on the
-SARCOS robot arm dataset from <a class="footnote-reference" href="#id6" id="id1">[1]</a>. We compare against a Gaussian process only
+SARCOS robot arm dataset from <a class="footnote-reference" href="#id7" id="id2">[1]</a>. We compare against a Gaussian process only
 using a random subset of data.</p>
 <p>(<a class="reference external" href="./../demos/demo_sarcos.py">Source code</a>)</p>
 </div>
@@ -98,7 +115,7 @@ various learning algorithms on fitting a square wave.</p>
 <p>In this demo the logistic classifiers implemented in this library are compared
 against a logistic classifier from <a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">scikit learn</a>
 for classifying digits <cite>3</cite> and <cite>5</cite> from the USPS handwritten digits experiment
-used in <a class="footnote-reference" href="#id6" id="id2">[1]</a>.</p>
+used in <a class="footnote-reference" href="#id7" id="id3">[1]</a>.</p>
 <p>(<a class="reference external" href="./../demos/demo_classification.py">Source code</a>)</p>
 </div>
 <div class="section" id="classify-all-digits-from-the-usps-digits-dataset">
@@ -107,7 +124,7 @@ used in <a class="footnote-reference" href="#id6" id="id2">[1]</a>.</p>
 (categorical likelihood, softmax transformation function) are compared against
 a multiclass logistic classifier from <a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">scikit learn</a>
 for classifying <cite>all</cite> digits from the USPS handwritten digits experiment used
-in <a class="footnote-reference" href="#id6" id="id4">[1]</a>.</p>
+in <a class="footnote-reference" href="#id7" id="id5">[1]</a>.</p>
 <p>(<a class="reference external" href="./../demos/demo_multi_classification.py">Source code</a>)</p>
 </div>
 </div>
@@ -119,7 +136,7 @@ basis function weights,</p>
 <ul class="simple">
 <li>Linear solve (analytic solution)</li>
 <li>L-BFGS</li>
-<li>Stochastic gradient descent (ADADELTA <a class="footnote-reference" href="#id7" id="id5">[2]</a>).</li>
+<li>Stochastic gradient descent (ADADELTA <a class="footnote-reference" href="#id8" id="id6">[2]</a>).</li>
 </ul>
 <p>We also plot the results of each iteration of stochasistic gradient descent.</p>
 <p>(<a class="reference external" href="./../demos/demo_sgd.py">Source code</a>, <a class="reference external" href="./../demos/demo_sgd.png">png</a>, <a class="reference external" href="./../demos/demo_sgd.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_sgd.pdf">pdf</a>)</p>
@@ -129,18 +146,25 @@ basis function weights,</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> Carl Edward Rasmussen and Christopher KI Williams &#8220;Gaussian processes
-for machine learning.&#8221; the MIT Press 2.3 (2006): 4.</td></tr>
-</tbody>
-</table>
 <table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[2]</a></td><td>Matthew D. Zeiler, &#8220;ADADELTA: An adaptive learning rate method.&#8221; arXiv
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id5">3</a>)</em> Carl Edward Rasmussen and Christopher KI Williams &#8220;Gaussian processes
+for machine learning.&#8221; the MIT Press 2.3 (2006): 4.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[2]</a></td><td>Matthew D. Zeiler, &#8220;ADADELTA: An adaptive learning rate method.&#8221; arXiv
 preprint arXiv:1212.5701 (2012).</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id9" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[3]</a></td><td>Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
+inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </tbody>
 </table>
 </div>
@@ -157,6 +181,7 @@ preprint arXiv:1212.5701 (2012).</td></tr>
 <li><a class="reference internal" href="#">Demos</a><ul>
 <li><a class="reference internal" href="#regression">Regression</a><ul>
 <li><a class="reference internal" href="#fitting-a-random-draw-from-a-gaussian-process">Fitting a random draw from a Gaussian process</a></li>
+<li><a class="reference internal" href="#generalised-linear-models">Generalised Linear Models</a></li>
 <li><a class="reference internal" href="#learning-the-sarcos-robot-arm-dynamics">Learning the SARCOS robot arm dynamics</a></li>
 </ul>
 </li>
@@ -215,7 +240,7 @@ preprint arXiv:1212.5701 (2012).</td></tr>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.3.
     </div>
   </body>
 </html>

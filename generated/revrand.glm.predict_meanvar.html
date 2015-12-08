@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.datasets &mdash; revrand 0.1 documentation</title>
+    <title>revrand.glm.predict_meanvar &mdash; revrand 0.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -52,44 +52,49 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-revrand.utils.datasets">
-<span id="revrand-utils-datasets"></span><h1>revrand.utils.datasets<a class="headerlink" href="#module-revrand.utils.datasets" title="Permalink to this headline">¶</a></h1>
-<p>Dataset loading utilities</p>
-<p>Portions of this module derived from
-<a class="reference external" href="http://scikit-learn.org/stable/modules/classes.html#module-sklearn.datasets">http://scikit-learn.org/stable/modules/classes.html#module-sklearn.datasets</a></p>
-<p class="rubric">Functions</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
+  <div class="section" id="revrand-glm-predict-meanvar">
+<h1>revrand.glm.predict_meanvar<a class="headerlink" href="#revrand-glm-predict-meanvar" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="revrand.glm.predict_meanvar">
+<code class="descclassname">revrand.glm.</code><code class="descname">predict_meanvar</code><span class="sig-paren">(</span><em>Xs</em>, <em>likelihood</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>lparams</em>, <em>bparams</em>, <em>nsamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.predict_meanvar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predictive mean and variance of a Bayesian GLM.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">fetch_gpml_sarcos_data</span></code>([transpose_data,&nbsp;...])</td>
-<td>TODO: Make a little bit more DRY...</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fetch_gpml_usps_resampled_data</span></code>([...])</td>
-<td><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span> <span class="o">=</span> <span class="n">fetch_gpml_usps_resampled_data</span><span class="p">()</span>
-</pre></div>
-</div>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
+<li><strong>basis</strong> (<a class="reference internal" href="revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
+<li><strong>lparams</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
+likelihoods.Gaussian object takes a variance parameter, so this
+should be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
+approximate the predictive mean and variance.</li>
+</ul>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_data_home</span></code>([data_home])</td>
-<td>Return the path of the revrand data dir.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.utils.datasets.make_regression.html#revrand.utils.datasets.make_regression" title="revrand.utils.datasets.make_regression"><code class="xref py py-obj docutils literal"><span class="pre">make_regression</span></code></a>(func[,&nbsp;n_samples,&nbsp;...])</td>
-<td>Make dataset for a regression problem.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Ey</strong> (<em>ndarray</em>) &#8211;
+The expected value of ys for the query inputs, Xs of shape (Ns,).</li>
+<li><strong>Vy</strong> (<em>ndarray</em>) &#8211;
+The expected variance of ys (excluding likelihood noise terms) for
+the query inputs, Xs of shape (Ns,).</li>
+<li><strong>Ey_min</strong> (<em>ndarray</em>) &#8211;
+The minimum sampled values of the predicted mean (same shape as Ey)</li>
+<li><strong>Ey_max</strong> (<em>ndarray</em>) &#8211;
+The maximum sampled values of the predicted mean (same shape as Ey)</li>
+</ul>
+</p>
+</td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Classes</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-</tbody>
-</table>
+</dd></dl>
+
 </div>
 
 
@@ -129,7 +134,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.3.
     </div>
   </body>
 </html>
