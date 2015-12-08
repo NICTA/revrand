@@ -15,8 +15,3 @@ Basis Functions
    base.RandomRBF_ARD
    base.FastFood
    base.SigmoidalBasis
-
-.. .. automodule:: revrand.basis_functions.base
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:

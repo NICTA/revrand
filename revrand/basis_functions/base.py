@@ -13,6 +13,7 @@ from scipy.spatial.distance import cdist
 from ..utils import params_to_list, Positive
 from ..hadamard import hadamard
 
+
 #
 # Basis objects
 #
