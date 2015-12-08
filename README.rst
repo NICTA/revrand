@@ -132,7 +132,7 @@ associated with the prediction.
     # Learn regression parameters and predict
     params = learn(X, y, llhood, [], basis, [init_lenscale])
     Eys, _, _, _ = predict_meanvar(Xs, llhood, basis, *params) 
-    y95n, y95x = glm.predict_interval(0.95, Xs, llhood, basis, *params)
+    y95n, y95x = predict_interval(0.95, Xs, llhood, basis, *params)
 
     # Training/Truth
     pl.plot(X, y, 'k.', label='Training')
