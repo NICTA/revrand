@@ -171,8 +171,8 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
             # Posterior mean and covariance gradients
             mkmj = _m[:, k][:, np.newaxis] - _m
-            iCkCj = 2 / (_C[:, k][:, np.newaxis] + _C)  # TODO: this correct?
-            dC[:, k] = (-((mkmj * iCkCj)**2 - iCkCj).dot(pz[:, k])
+            iCkCj = 1 / (_C[:, k][:, np.newaxis] + _C)
+            dC[:, k] = (-((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[:, k])
                         + H[:, k]) / (2 * K)
             dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(PPP)
                         - (pz[:, k] * iCkCj * mkmj).sum(axis=1)
@@ -242,6 +242,11 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                   np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
                   eval_obj=True)
+
+        # import matplotlib.pyplot as plt
+        # niters = len(res.objs)
+        # plt.plot(range(niters), res.norms, 'r', range(niters), res.objs, 'b')
+        # plt.show()
 
     m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
