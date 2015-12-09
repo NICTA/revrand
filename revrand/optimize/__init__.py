@@ -5,6 +5,7 @@ and also supports custom optimization methods.
 """
 
 from .sgd import sgd
+from .sgd_spark import sgd_spark
 from .base import (minimize,
                    minimize_bounded_start,
                    candidate_start_points_lattice,
