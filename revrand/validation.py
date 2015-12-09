@@ -53,16 +53,15 @@ def normll(y_true, y_predict, y_var):
 
 
 def logloss(ys, pys):
-    pys1 = pys[:,1]
+    pys1 = pys[:, 1]
     return -(ys * np.log(pys1) + (1 - ys) * np.log(1 - pys1)).mean()
 
+
 def loglosscat(ys, pys):
-    # import ipdb; ipdb.set_trace()
     ys_onehot = np.zeros(pys.shape)
     ys_onehot[np.arange(pys.shape[0]), ys.astype(int)] = 1
     return -(np.log(pys[ys_onehot.astype(bool)])).mean()
 
 
-
 def errrate(ys, pys):
-    return float((ys != np.argmax(pys,axis=1)).sum()) / ys.shape[0]
+    return float((ys != np.argmax(pys, axis=1)).sum()) / ys.shape[0]

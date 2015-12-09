@@ -12,7 +12,7 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
     """
     Do cholesky decomposition with a bit of diagonal jitter if needs be.
 
-    Aarguments:
+    Arguments:
         A: a [NxN] positive definite symmetric matrix to be decomposed as
             A = L.dot(L.T).
         lower: Return lower triangular factor, default False (upper).
