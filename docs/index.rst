@@ -17,6 +17,7 @@ Contents:
    classification
    glm
    likelihoods
+   transforms
    optimize
    utils
    demo
