@@ -105,6 +105,18 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         still mainting flexible and tractable non-Gaussian posteriors.
         Additionaly this has the benefit that we have a reduced number of
         parameters to optimise (compared with full covariance Gaussians).
+
+        The main differences between this implementation and the GLM in [1]_
+        are:
+            - We use diagonal mixtures, as opposed to isotropic.
+            - We do not cycle between optimising eq. 10 and 11 (objectives L1
+              and L2) in the paper. We use the full objective L2 for
+              everything, including the posterior means, and we optimise all
+              parameters together.
+
+        Even though these changes make learning a little slower, and require
+        third derivatives of the likelihoods, we obtain better results and we
+        can use SGD straight-forwardly.
     """
 
     N, d = X.shape
