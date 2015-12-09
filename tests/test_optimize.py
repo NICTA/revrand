@@ -1,5 +1,7 @@
 from __future__ import division
+
 import numpy as np
+
 from revrand.optimize import sgd, minimize
 from revrand.utils import CatParameters
 
