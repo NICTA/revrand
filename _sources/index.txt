@@ -18,6 +18,7 @@ Contents:
    glm
    likelihoods
    transforms
+   linalg
    hadamard
    optimize
    utils
