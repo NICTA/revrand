@@ -6,14 +6,14 @@ import numpy as np
 from scipy.optimize import OptimizeResult
 import logging
 
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
-def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
-        eta=1e-5, gtol=1e-3, passes=10, eval_obj=False):
+def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
+        eta=1e-6, gtol=1e-3, passes=10, eval_obj=False):
+
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
         rate.
 
@@ -24,7 +24,7 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
                 be returned by `fun`.
             x0: a sequence/1D array of initial values for the parameters to
                 learn.
-            Data: an Spark RDD representing  data to input into `fun`. This
+            Data: a Spark RDD representing data to input into `fun`. This
                 will be split along the first axis (axis=0), and then input
                 into `fun`.
             args: an optional sequence of arguments to give to fun.
@@ -61,13 +61,11 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
     """
 
     N = Data.count()
-    miniBatchFrac = batchsize/N
-    P = Data.getNumPartitions()
-    Np = N//P
+    q = Data.getNumPartitions()
+    M = N//q
+    batchsize /= q
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
-    batchsize = Np
-    passes = 1000
 
     if rate < 0 or rate > 1:
         raise ValueError("rate must be between 0 and 1!")
@@ -76,8 +74,8 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
         raise ValueError("eta must be > 0!")
 
     # Make sure we have a valid batch size
-    if Np < batchsize:
-        batchsize = Np
+    if M < batchsize:
+        batchsize = M
 
     # Process bounds
     if bounds is not None:
@@ -87,7 +85,8 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
         if len(lower) != D:
             raise ValueError("The dimension of the bounds does not match x0!")
 
-    log.info("##### N={}, P={}, Np={}, batchsize={}, passes={}, miniBatchFrac={}".format(N,P,Np,batchsize,passes,miniBatchFrac))
+    log.info("##### N={}, q={}, M={}, batchsize={}, passes={}"
+            .format(N,q,M,batchsize,passes))
 
     # Initialise
     gnorm = np.inf
@@ -100,39 +99,38 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
     norms = []
     allpasses = True
 
+    # Workers should cache the RDD
     Data.cache()
+
+    # Broadcast additional arguments to 'fun'
     bcArgs = Data.context.broadcast(args)
 
-    i = 0
     for p in range(passes):
-        for ind in _sgd_pass(Np, batchsize):
+        for ind in _sgd_pass(M, batchsize):
             
+            # Broadcast the sample indices and the current parameter values
             bcInd = Data.context.broadcast(ind)
             bcX   = Data.context.broadcast(x)
 
+            # Map
+            # Sample the RDD partition a evaluate the objective function gradient
             def fgrad(it):
-                yield fun( bcX.value, np.vstack(it), *bcArgs.value)
-
-            def fgrad2(it):
                 sample = np.vstack([s for i,s in enumerate(it) if i in bcInd.value])
                 yield fun( bcX.value, sample, *bcArgs.value)
 
+            # Reduce
+            # Join together results from multiple partitions
             def join1(a,b): return a + b
-
             def join2(a,b): return (a[0] + b[0], a[1] + b[1])
                     
             if not eval_obj:
-                grad = Data.mapPartitions(fgrad2).reduce(join1)
+                grad = Data.mapPartitions(fgrad).reduce(join1)
             else:
-                #obj, grad = Data.mapPartitions(fgrad2).reduce(join2)
-                obj, grad = Data.sample(False,miniBatchFrac,42+i).mapPartitions(fgrad).reduce(join2)
-                obj /= P
+                obj, grad = Data.mapPartitions(fgrad).reduce(join2)
+                obj /= q
 
-            grad /= P
+            grad /= q
 
-            i += 1
-
-            
             # Truncate gradients if bounded
             if bounds is not None:
                 xlower = x <= lower
@@ -159,7 +157,10 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
                 allpasses = False
                 break
 
-    log.info("##### End: gnorm={}, allpasses={}, p={}".format(gnorm,allpasses,p))
+    obj_stri = "" 
+    if eval_obj:
+        obj_str = ", Obj = {}".format(objs[-5:])
+    log.info("##### End: gnorm={}, allpasses={}, p={}{}".format(gnorm,allpasses,p,obj_str))
 
     # Format results
     res = OptimizeResult(

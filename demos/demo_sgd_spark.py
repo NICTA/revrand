@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-""" A Small demo to try out SGD on a Maximum likelihood regression problem. """
+""" A Small demo to try out SGD using Spark on a Maximum likelihood regression problem. """
 
 import numpy as np
 import matplotlib.pyplot as pl
@@ -36,7 +36,7 @@ def sgd_demo():
     nQueries = 500
     passes = 200
     min_grad_norm = 0.01
-    rate = 0.99
+    rate = 0.95
     eta = 1e-6
     rdd_partitions = 10
 
