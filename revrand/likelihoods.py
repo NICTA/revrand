@@ -217,27 +217,6 @@ class Bernoulli():
 
         return bernoulli.cdf(y, logistic(f))
 
-    def interval(self, alpha, f):
-        """ Confidence interval with equal areas around the median.
-
-        Parameters
-        ----------
-            alpha: array_like of float
-                Probability that a random variable will be drawn from the
-                returned range. Each value should be in [0, 1].
-            f: array_like
-                latent function from the GLM prior
-
-        Returns
-        -------
-        a, b: ndarray of float
-            end-points of range that contain 100 * alpha % of the random
-            variable's possible values.
-
-        """
-
-        return bernoulli.interval(alpha, logistic(f))
-
 
 class Gaussian(Bernoulli):
     """
@@ -431,30 +410,7 @@ class Gaussian(Bernoulli):
                 Cumulative density function evaluated at y.
         """
 
-        return norm.cdf(y, logistic(f), scale=np.sqrt(var))
-
-    def interval(self, alpha, f, var):
-        """ Confidence interval with equal areas around the median.
-
-        Parameters
-        ----------
-            alpha: array_like of float
-                Probability that a random variable will be drawn from the
-                returned range. Each value should be in [0, 1].
-            f: array_like
-                latent function from the GLM prior
-            var: float, array_like
-                The variance of the distribution
-
-        Returns
-        -------
-        a, b: ndarray of float
-            end-points of range that contain 100 * alpha % of the random
-            variable's possible values.
-
-        """
-
-        return norm.interval(alpha, loc=f, scale=np.sqrt(var))
+        return norm.cdf(y, loc=f, scale=np.sqrt(var))
 
 
 class Poisson(Bernoulli):
@@ -612,28 +568,8 @@ class Poisson(Bernoulli):
                 Cumulative density function evaluated at y.
         """
 
-        return poisson.cdf(y, _safesoftplus(f))
-
-    def interval(self, alpha, f):
-        """ Confidence interval with equal areas around the median.
-
-        Parameters
-        ----------
-            alpha: array_like of float
-                Probability that a random variable will be drawn from the
-                returned range. Each value should be in [0, 1].
-            f: array_like
-                latent function from the GLM prior
-
-        Returns
-        -------
-        a, b: ndarray of float
-            end-points of range that contain 100 * alpha % of the random
-            variable's possible values.
-
-        """
-
-        return poisson.interval(alpha, _safesoftplus(f))
+        mu = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
+        return poisson.cdf(y, mu=mu)
 
 
 #

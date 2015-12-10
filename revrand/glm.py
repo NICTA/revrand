@@ -11,7 +11,9 @@ from __future__ import division
 
 import numpy as np
 import logging
+from multiprocessing import Pool
 from scipy.stats.distributions import gamma
+from scipy.optimize import brentq
 
 from .transforms import logsumexp
 from .optimize import minimize, sgd
@@ -392,13 +394,44 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
     """
 
     f = _sample_func(Xs, basis, m, C, bparams, nsamples)
-    a, b = likelihood.interval(alpha, f, *lparams)
-    return a.mean(axis=1), b.mean(axis=1)
+    work = ((fn, likelihood, lparams, alpha) for fn in f)
+
+    pool = Pool()
+    res = pool.starmap(_rootfinding, work)
+    pool.close()
+    pool.join()
+    # res = [_rootfinding(*w) for w in work]
+
+    ql, qu = zip(*res)
+
+    return np.array(ql), np.array(qu)
 
 
 #
-# Private module functions
+#  Internal Module Utilities
 #
+
+def _rootfinding(fn, likelihood, lparams, alpha):
+
+    # CDF minus percentile for quantile root finding
+    predCDF = lambda q, fs, percent: \
+        (likelihood.cdf(q, fs, *lparams)).mean() - percent
+
+    lpercent = (1 - alpha) / 2
+    upercent = 1 - lpercent
+    Eyn = likelihood.Ey(fn, *lparams).mean()
+    lb, ub = -100 * max(Eyn, 1), 100 * max(Eyn, 1)
+
+    qln = brentq(predCDF, a=lb, b=ub, args=(fn, lpercent))
+    qun = brentq(predCDF, a=lb, b=ub, args=(fn, upercent))
+
+    # try:
+    #     qun = brentq(predCDF, a=qln, b=ub, args=(fn, upercentile))
+    # except ValueError:
+    #     qun = np.nan
+
+    return qln, qun
+
 
 def _sample_func(Xs, basis, m, C, bparams, nsamples):
 
