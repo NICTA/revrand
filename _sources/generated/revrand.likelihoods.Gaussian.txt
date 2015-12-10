@@ -21,7 +21,6 @@ revrand.likelihoods.Gaussian
       ~Gaussian.df
       ~Gaussian.dp
       ~Gaussian.dpd2f
-      ~Gaussian.interval
       ~Gaussian.loglike
    
    

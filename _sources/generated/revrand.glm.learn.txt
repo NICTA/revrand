@@ -1,6 +1,0 @@
-revrand.glm.learn
-=================
-
-.. currentmodule:: revrand.glm
-
-.. autofunction:: learn

@@ -21,7 +21,6 @@ revrand.likelihoods.Poisson
       ~Poisson.df
       ~Poisson.dp
       ~Poisson.dpd2f
-      ~Poisson.interval
       ~Poisson.loglike
    
    

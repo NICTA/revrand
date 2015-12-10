@@ -21,7 +21,6 @@ revrand.likelihoods.Bernoulli
       ~Bernoulli.df
       ~Bernoulli.dp
       ~Bernoulli.dpd2f
-      ~Bernoulli.interval
       ~Bernoulli.loglike
    
    

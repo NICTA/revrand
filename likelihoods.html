@@ -68,13 +68,13 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.likelihoods.Bernoulli" title="revrand.likelihoods.Bernoulli"><code class="xref py py-obj docutils literal"><span class="pre">Bernoulli</span></code></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.likelihoods.Bernoulli.html#revrand.likelihoods.Bernoulli" title="revrand.likelihoods.Bernoulli"><code class="xref py py-obj docutils literal"><span class="pre">Bernoulli</span></code></a>()</td>
 <td>Bernoulli likelihood class for (binary) classification tasks.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Gaussian" title="revrand.likelihoods.Gaussian"><code class="xref py py-obj docutils literal"><span class="pre">Gaussian</span></code></a>([var_bounds,&nbsp;upper])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.likelihoods.Gaussian.html#revrand.likelihoods.Gaussian" title="revrand.likelihoods.Gaussian"><code class="xref py py-obj docutils literal"><span class="pre">Gaussian</span></code></a>([var_bounds,&nbsp;upper])</td>
 <td>A univariate Gaussian likelihood for general regression tasks.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.likelihoods.Poisson" title="revrand.likelihoods.Poisson"><code class="xref py py-obj docutils literal"><span class="pre">Poisson</span></code></a>([tranfcn])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.likelihoods.Poisson.html#revrand.likelihoods.Poisson" title="revrand.likelihoods.Poisson"><code class="xref py py-obj docutils literal"><span class="pre">Poisson</span></code></a>([tranfcn])</td>
 <td>A Poisson likelihood, useful for various Poisson process tasks.</td>
 </tr>
 </tbody>
@@ -264,33 +264,6 @@ the derivative of the likelihood Hessian w.r.t.                <span class="math
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="revrand.likelihoods.Bernoulli.interval">
-<code class="descname">interval</code><span class="sig-paren">(</span><em>alpha</em>, <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Bernoulli.interval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Confidence interval with equal areas around the median.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>alpha</strong> (<em>array_like of float</em>) &#8211; Probability that a random variable will be drawn from the
-returned range. Each value should be in [0, 1].</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>a, b</strong> &#8211;
-end-points of range that contain 100 * alpha % of the random
-variable&#8217;s possible values.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray of float</p>
 </td>
 </tr>
 </tbody>
@@ -520,34 +493,6 @@ the derivative of the likelihood Hessian w.r.t.                <span class="math
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.likelihoods.Gaussian.interval">
-<code class="descname">interval</code><span class="sig-paren">(</span><em>alpha</em>, <em>f</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian.interval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Confidence interval with equal areas around the median.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>alpha</strong> (<em>array_like of float</em>) &#8211; Probability that a random variable will be drawn from the
-returned range. Each value should be in [0, 1].</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
-<li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>a, b</strong> &#8211;
-end-points of range that contain 100 * alpha % of the random
-variable&#8217;s possible values.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray of float</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="revrand.likelihoods.Gaussian.loglike">
 <code class="descname">loglike</code><span class="sig-paren">(</span><em>y</em>, <em>f</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian.loglike" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gaussian log likelihood.</p>
@@ -697,33 +642,6 @@ the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="revrand.likelihoods.Poisson.interval">
-<code class="descname">interval</code><span class="sig-paren">(</span><em>alpha</em>, <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Poisson.interval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Confidence interval with equal areas around the median.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>alpha</strong> (<em>array_like of float</em>) &#8211; Probability that a random variable will be drawn from the
-returned range. Each value should be in [0, 1].</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>a, b</strong> &#8211;
-end-points of range that contain 100 * alpha % of the random
-variable&#8217;s possible values.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray of float</p>
 </td>
 </tr>
 </tbody>
