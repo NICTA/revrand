@@ -356,7 +356,7 @@ def predict_cdf(quantile, Xs, likelihood, basis, m, C, lparams, bparams,
 
 
 def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
-                     nsamples=100):
+                     nsamples=100, multiproc=True):
     """
     Predictive percentile interval (upper and lower quantiles) for a Bayesian
     GLM.
@@ -384,6 +384,8 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
         nsamples: int, optional
             The number of samples to draw from the posterior in order to
             approximate the predictive mean and variance.
+        multiproc: bool, optional
+            Use multiprocessing to paralellise this prediction computation.
 
     Returns
     -------
@@ -396,12 +398,13 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
     f = _sample_func(Xs, basis, m, C, bparams, nsamples)
     work = ((fn, likelihood, lparams, alpha) for fn in f)
 
-    pool = Pool()
-    res = pool.starmap(_rootfinding, work)
-    pool.close()
-    pool.join()
-    # res = [_rootfinding(*w) for w in work]
-
+    if multiproc:
+        pool = Pool()
+        res = pool.starmap(_rootfinding, work)
+        pool.close()
+        pool.join()
+    else:
+        res = [_rootfinding(*w) for w in work]
     ql, qu = zip(*res)
 
     return np.array(ql), np.array(qu)

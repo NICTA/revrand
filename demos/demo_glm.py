@@ -42,9 +42,9 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-# like = 'Gaussian'
+like = 'Gaussian'
 # like = 'Bernoulli'
-like = 'Poisson'
+# like = 'Poisson'
 
 #
 # Make Data
@@ -64,11 +64,6 @@ elif like == 'Poisson':
 
     ytrain = poisson.rvs(transforms.softplus(5 * ytrain))
     ftest = transforms.softplus(5 * ftest)
-
-    # mask = (ytrain - 1) >= 1
-    # ytrain = np.ones(sum(mask))
-    # Xtrain = Xtrain[mask, :]
-    # ftest[ftest >= 1] = 1
 
 #
 # Make Bases and Likelihood
