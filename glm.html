@@ -62,12 +62,12 @@
             
   <div class="section" id="module-revrand.glm">
 <span id="generalised-linear-models"></span><h1>Generalised Linear Models<a class="headerlink" href="#module-revrand.glm" title="Permalink to this headline">¶</a></h1>
-<p>Implementation of Bayesian GLMs with nonparametric variational inference [<a class="reference internal" href="#id1">1</a>],
+<p>Implementation of Bayesian GLMs with nonparametric variational inference <a class="footnote-reference" href="#id2" id="id1">[1]</a>,
 with a few modifications and tweaks.</p>
-<table class="docutils footnote" frame="void" id="id1" rules="none">
+<table class="docutils footnote" frame="void" id="id2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
 inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </tbody>
 </table>
@@ -75,7 +75,7 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 <dt id="revrand.glm.learn">
 <code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>lparams</em>, <em>basis</em>, <em>bparams</em>, <em>reg=1.0</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters of a Bayesian generalised linear model (GLM).</p>
-<p>The learning algorithm uses nonparametric variational inference <a class="footnote-reference" href="#id1" id="id2">[1]</a>, and
+<p>The learning algorithm uses nonparametric variational inference <a class="footnote-reference" href="#id2" id="id3">[1]</a>, and
 optionally stochastic gradients.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -138,7 +138,7 @@ a mixture of Gaussians:</p>
 still mainting flexible and tractable non-Gaussian posteriors.
 Additionaly this has the benefit that we have a reduced number of
 parameters to optimise (compared with full covariance Gaussians).</p>
-<p>The main differences between this implementation and the GLM in <a class="footnote-reference" href="#id1" id="id3">[1]</a>
+<p>The main differences between this implementation and the GLM in <a class="footnote-reference" href="#id2" id="id4">[1]</a>
 are:</p>
 <blockquote>
 <div><ul class="simple">
@@ -199,9 +199,9 @@ as p)</li>
 
 <dl class="function">
 <dt id="revrand.glm.predict_interval">
-<code class="descclassname">revrand.glm.</code><code class="descname">predict_interval</code><span class="sig-paren">(</span><em>alpha</em>, <em>Xs</em>, <em>likelihood</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>lparams</em>, <em>bparams</em>, <em>nsamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.predict_interval" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.glm.</code><code class="descname">predict_interval</code><span class="sig-paren">(</span><em>alpha</em>, <em>Xs</em>, <em>likelihood</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>lparams</em>, <em>bparams</em>, <em>nsamples=100</em>, <em>multiproc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.predict_interval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive percentile interval (upper and lower quantiles) for a Bayesian
-GLM with equal area about the median.</p>
+GLM.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -219,6 +219,7 @@ should be <code class="code docutils literal"><span class="pre">[var]</span></co
 <li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
 approximate the predictive mean and variance.</li>
+<li><strong>multiproc</strong> (<em>bool, optional</em>) &#8211; Use multiprocessing to paralellise this prediction computation.</li>
 </ul>
 </td>
 </tr>
