@@ -359,7 +359,7 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
                      nsamples=100):
     """
     Predictive percentile interval (upper and lower quantiles) for a Bayesian
-    GLM with equal area about the median.
+    GLM.
 
     Parameters
     ----------
@@ -422,13 +422,15 @@ def _rootfinding(fn, likelihood, lparams, alpha):
     Eyn = likelihood.Ey(fn, *lparams).mean()
     lb, ub = -100 * max(Eyn, 1), 100 * max(Eyn, 1)
 
-    qln = brentq(predCDF, a=lb, b=ub, args=(fn, lpercent))
-    qun = brentq(predCDF, a=lb, b=ub, args=(fn, upercent))
+    try:
+        qln = brentq(predCDF, a=lb, b=ub, args=(fn, lpercent))
+    except ValueError:
+        qln = np.nan
 
-    # try:
-    #     qun = brentq(predCDF, a=qln, b=ub, args=(fn, upercentile))
-    # except ValueError:
-    #     qun = np.nan
+    try:
+        qun = brentq(predCDF, a=lb, b=ub, args=(fn, upercent))
+    except ValueError:
+        qun = np.nan
 
     return qln, qun
 
