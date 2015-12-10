@@ -71,3 +71,6 @@ demos/_revrand_data/
 
 # vim
 *.swp
+
+# pycharm
+.idea/
