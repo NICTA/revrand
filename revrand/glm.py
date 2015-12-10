@@ -1,5 +1,5 @@
 """
-Implementation of Bayesian GLMs with nonparametric variational inference [1_],
+Implementation of Bayesian GLMs with nonparametric variational inference [1]_,
 with a few modifications and tweaks.
 
 .. [1] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
