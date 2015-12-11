@@ -4,9 +4,10 @@ Stochastic Gradient Descent
 
 import numpy as np
 from scipy.optimize import OptimizeResult
+from revrand.optimize.sgd_updater import (AdaDelta)
 
-def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
-        eta=1e-5, gtol=1e-3, passes=10, eval_obj=False):
+def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100,
+        gtol=1e-3, passes=10, eval_obj=False, rate=0.95, eta=1e-6):
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
         rate.
 
@@ -52,16 +53,21 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
                 'fun' (float): the final objective function evaluation if
                     `eval_obj` is True.
     """
+    updater = AdaDelta(rate, eta)
+    return sgd_u(fun, x0, Data, args, updater, bounds,
+                 batchsize, gtol, passes, eval_obj)
+
+
+def sgd_u(fun, x0, Data, args=(), updater=AdaDelta(), bounds=None,
+        batchsize=100, gtol=1e-3, passes=10, eval_obj=False):
+    """
+        Stochastic Gradient Descent, using provided 'updater' for setting
+        the learning rate. Defaults to ADADELTA.
+    """
 
     N = Data.shape[0]
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
-
-    if rate < 0 or rate > 1:
-        raise ValueError("rate must be between 0 and 1!")
-
-    if eta <= 0:
-        raise ValueError("eta must be > 0!")
 
     # Make sure we have a valid batch size
     if N < batchsize:
@@ -74,11 +80,6 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
 
         if len(lower) != D:
             raise ValueError("The dimension of the bounds does not match x0!")
-
-    # Initialise
-    gnorm = np.inf
-    Eg2 = 0
-    Edx2 = 0
 
     # Learning Records
     obj = None
@@ -101,13 +102,10 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
                 xupper = x >= upper
                 grad[xupper] = np.maximum(grad[xupper], 0)
 
-            # ADADELTA
-            Eg2 = rate * Eg2 + (1 - rate) * grad**2
-            dx = - grad * np.sqrt(Edx2 + eta) / np.sqrt(Eg2 + eta)
-            Edx2 = rate * Edx2 + (1 - rate) * dx**2
-            x += dx
+            # perform update
+            x = updater(x, grad)
 
-            # Trucate steps if bounded
+            # Truncate steps if bounded
             if bounds is not None:
                 x = np.minimum(np.maximum(x, lower), upper)
 

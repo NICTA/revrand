@@ -3,7 +3,8 @@
 
 import numpy as np
 import matplotlib.pyplot as pl
-from revrand.optimize import minimize, sgd, sgd_spark
+from revrand.optimize import (minimize, sgd_u, sgd_u_spark)
+from revrand.optimize.sgd_updater import (AdaGrad, AdaDelta, Momentum)
 from revrand.basis_functions import RadialBasis
 import logging
 
@@ -11,13 +12,19 @@ import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-from pyspark import SparkConf, SparkContext
-conf = (SparkConf()
+hasSparkContext = False
+try:
+    from pyspark import SparkConf, SparkContext
+    conf = (SparkConf()
          .setMaster("local[4]")
          .setAppName("Spark SGD Demo")
          .set("spark.executor.memory", "1g"))
-sc = SparkContext(conf = conf)
-sc.addPyFile(__file__)
+    sc = SparkContext(conf = conf)
+    sc.addPyFile(__file__)
+    hasSparkContext = True
+except ImportError:
+    pass
+
 
 # Objective function
 def f(w, Data, sigma=1.0):
@@ -59,51 +66,102 @@ def sgd_demo():
     w_grad = results['x']
     Ys_grad = Phi_s.dot(w_grad)
 
-    # SGD for learning w
+    # SGD for learning w (AdaDelta)
     w0 = np.random.randn(Phi.shape[1])
-    results = sgd(f, w0, train_dat, passes=passes, batchsize=batchsize,
-                  eval_obj=True, gtol=min_grad_norm, rate=rate, eta=eta)
-    w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
+    results = sgd_u(f, w0, train_dat, updater=AdaDelta(), passes=passes,
+                  batchsize=batchsize, eval_obj=True, gtol=min_grad_norm)
+    w_sgd_ad, gnorms_ad, costs_ad = results['x'], results['norms'], results['objs']
+    Ys_sgd_ad = Phi_s.dot(w_sgd_ad)
 
-    Ys_sgd = Phi_s.dot(w_sgd)
+    # SGD for learning w (AdaGrad)
+    w0 = np.random.randn(Phi.shape[1])
+    results = sgd_u(f, w0, train_dat, updater=AdaGrad(np.shape(w)), passes=passes,
+                  batchsize=batchsize, eval_obj=True, gtol=min_grad_norm)
+    w_sgd_ag, gnorms_ag, costs_ag = results['x'], results['norms'], results['objs']
+    Ys_sgd_ag = Phi_s.dot(w_sgd_ag)
 
-    # SGD for learning w (with spark)
-    rdd = sc.parallelize(train_dat,rdd_partitions)
-    results = sgd_spark(f, w0, rdd, passes=passes, batchsize=batchsize,
-                  eval_obj=True, gtol=min_grad_norm, rate=rate, eta=eta)
-    w_sgds, gnormss, costss = results['x'], results['norms'], results['objs']
+    # SGD for learning w (Momentum)
+    w0 = np.random.randn(Phi.shape[1])
+    results = sgd_u(f, w0, train_dat, updater=Momentum(np.shape(w)), passes=passes,
+                  batchsize=batchsize, eval_obj=True, gtol=min_grad_norm)
+    w_sgd_m, gnorms_m, costs_m = results['x'], results['norms'], results['objs']
+    Ys_sgd_m = Phi_s.dot(w_sgd_m)
 
-    Ys_sgds = Phi_s.dot(w_sgds)
+    if hasSparkContext:
+        # Distributed SGD for learning w (AdaDelta)
+        w0 = np.random.randn(Phi.shape[1])
+        rdd = sc.parallelize(train_dat, rdd_partitions)
+        results = sgd_u_spark(f, w0, rdd, updater=AdaDelta(), passes=passes,
+                            batchsize=batchsize, eval_obj=True, gtol=min_grad_norm)
+        w_sgd_dad, gnorms_dad, costs_dad = results['x'], results['norms'], results['objs']
+        Ys_sgd_dad = Phi_s.dot(w_sgd_dad)
+
+        # Distributed SGD for learning w (AdaGrad)
+        w0 = np.random.randn(Phi.shape[1])
+        rdd = sc.parallelize(train_dat, rdd_partitions)
+        results = sgd_u_spark(f, w0, rdd, updater=AdaGrad(np.shape(w)), passes=passes,
+                            batchsize=batchsize, eval_obj=True, gtol=min_grad_norm)
+        w_sgd_dag, gnorms_dag, costs_dag = results['x'], results['norms'], results['objs']
+        Ys_sgd_dag = Phi_s.dot(w_sgd_dag)
+
+    # Print results
+    def print_res(method, cost):
+        print("{0: >20}: {1}".format(method,cost))
+
+    print_res("AdaDelta", costs_ad[-1])
+    print_res("AdaGrad", costs_ag[-1])
+    print_res("Momentum", costs_m[-1])
+    if hasSparkContext:
+        print_res("Dist. AdaDelta", costs_dad[-1])
+        print_res("Dist. AdaGrad", costs_dag[-1])
 
     # Visualise results
     fig = pl.figure()
     ax = fig.add_subplot(121)
     # truth
-    pl.plot(X, Y, 'r.', Xs, Yt, 'k-')
+    pl.plot(X, Y, 'k.', Xs, Yt, 'k-', markersize=1)
     # exact weights
     pl.plot(Xs, Ys, 'c-')
     pl.plot(Xs, Ys_grad, 'b-')
-    pl.plot(Xs, Ys_sgd, 'g-')
-    pl.plot(Xs, Ys_sgds, 'y-')
+    pl.plot(Xs, Ys_sgd_ad, 'g-')
+    pl.plot(Xs, Ys_sgd_ag, 'r-')
+    pl.plot(Xs, Ys_sgd_m, 'y-')
+    labels = ['Training', 'Truth', 'Analytic', 'LBFGS', 'AdaDelta', 'AdaGrad', 'Momentum']
+    if hasSparkContext:
+        pl.plot(Xs, Ys_sgd_dad, 'g--')
+        pl.plot(Xs, Ys_sgd_dag, 'r--')
+        labels += [ 'Dist. AdaDelta', 'Dist. AdaGrad']
+
     pl.title('Function fitting')
     pl.xlabel('x')
     pl.ylabel('y')
-    pl.legend(['Training', 'Truth', 'Analytic', 'LBFGS', 'SGD','SGD Spark'])
+    pl.legend(labels)
 
-    ax = fig.add_subplot(122)
+    ax = fig.add_subplot(222)
     pl.xlabel('iteration')
     pl.title('SGD convergence')
-    ax.plot(range(len(costs)), costs, 'b')
-    ax.plot(range(len(costss)), costss, 'c')
-    ax.set_ylabel('cost', color='b')
-    for t in ax.get_yticklabels():
-        t.set_color('b')
-    ax2 = ax.twinx()
-    ax2.plot(range(len(gnorms)), gnorms, 'r')
-    ax2.plot(range(len(gnormss)), gnormss, 'y')
-    ax2.set_ylabel('gradient norms', color='r')
-    for t in ax2.get_yticklabels():
-        t.set_color('r')
+    ax.plot(range(len(costs_ad)), costs_ad, 'g')
+    ax.plot(range(len(costs_ag)), costs_ag, 'r')
+    labels = ['AdaDelta', 'AdaGrad']
+    if hasSparkContext:
+        ax.plot(range(len(costs_dad)), costs_dad, 'g--')
+        ax.plot(range(len(costs_dag)), costs_dag, 'r--')
+        labels += [ 'Dist. AdaDelta', 'Dist. AdaGrad']
+    ax.set_ylabel('cost')
+    pl.legend(labels)
+
+    ax = fig.add_subplot(224)
+    pl.xlabel('iteration')
+    pl.title('SGD convergence')
+    ax.plot(range(len(gnorms_ad)), gnorms_ad, 'g')
+    ax.plot(range(len(gnorms_ag)), gnorms_ag, 'r')
+    labels = ['AdaDelta', 'AdaGrad']
+    if hasSparkContext:
+        ax.plot(range(len(gnorms_dad)), gnorms_dad, 'g--')
+        ax.plot(range(len(gnorms_dag)), gnorms_dag, 'r--')
+        labels += [ 'Dist. AdaDelta', 'Dist. AdaGrad']
+    ax.set_ylabel('gradient norms')
+    pl.legend(labels)
 
     pl.show()
 

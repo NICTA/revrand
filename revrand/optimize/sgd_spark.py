@@ -5,17 +5,18 @@ Distributed Stochastic Gradient Descent using Apache Spark
 import numpy as np
 from scipy.optimize import OptimizeResult
 import logging
+from revrand.optimize.sgd_updater import AdaDelta
+from revrand.optimize.sgd import _sgd_pass
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
+def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100,
+        gtol=1e-3, passes=10, eval_obj=False, rate=0.95, eta=1e-6):
 
-def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
-        eta=1e-6, gtol=1e-3, passes=10, eval_obj=False):
-
-    """ Stochastic Gradient Descent, using ADADELTA for setting the learning
-        rate.
+    """ Distributed Stochastic Gradient Descent using Spark.
+        ADADELTA is used for setting the learning rate.
 
         Arguments:
             fun: the function to evaluate, this must have the signature
@@ -60,18 +61,24 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
                     `eval_obj` is True.
     """
 
+    updater = AdaDelta(rate, eta)
+    return sgd_u_spark(fun, x0, Data, args, updater, bounds,
+                       batchsize, gtol, passes, eval_obj)
+
+
+def sgd_u_spark(fun, x0, Data, args=(), updater=AdaDelta(), bounds=None,
+              batchsize=100, gtol=1e-3, passes=10, eval_obj=False):
+    """
+        Stochastic Gradient Descent, using provided 'updater' for setting
+        the learning rate. Defaults to ADADELTA.
+    """
+
     N = Data.count()
     q = Data.getNumPartitions()
     M = N//q
     batchsize /= q
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
-
-    if rate < 0 or rate > 1:
-        raise ValueError("rate must be between 0 and 1!")
-
-    if eta <= 0:
-        raise ValueError("eta must be > 0!")
 
     # Make sure we have a valid batch size
     if M < batchsize:
@@ -86,12 +93,7 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
             raise ValueError("The dimension of the bounds does not match x0!")
 
     log.info("##### N={}, q={}, M={}, batchsize={}, passes={}"
-            .format(N,q,M,batchsize,passes))
-
-    # Initialise
-    gnorm = np.inf
-    Eg2 = 0
-    Edx2 = 0
+             .format(N,q,M,batchsize,passes))
 
     # Learning Records
     obj = None
@@ -107,7 +109,7 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
 
     for p in range(passes):
         for ind in _sgd_pass(M, batchsize):
-            
+
             # Broadcast the sample indices and the current parameter values
             bcInd = Data.context.broadcast(ind)
             bcX   = Data.context.broadcast(x)
@@ -120,14 +122,13 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
 
             # Reduce
             # Join together results from multiple partitions
-            def join1(a,b): return a + b
-            def join2(a,b): return (a[0] + b[0], a[1] + b[1])
-                    
+            join1 = lambda a, b: a + b
+            join2 = lambda a, b: (a[0] + b[0], a[1] + b[1])
+
             if not eval_obj:
                 grad = Data.mapPartitions(fgrad).reduce(join1)
             else:
                 obj, grad = Data.mapPartitions(fgrad).reduce(join2)
-                obj /= q
 
             grad /= q
 
@@ -138,13 +139,9 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
                 xupper = x >= upper
                 grad[xupper] = np.maximum(grad[xupper], 0)
 
-            # ADADELTA
-            Eg2 = rate * Eg2 + (1 - rate) * grad**2
-            dx = - grad * np.sqrt(Edx2 + eta) / np.sqrt(Eg2 + eta)
-            Edx2 = rate * Edx2 + (1 - rate) * dx**2
-            x += dx
+            x = updater(x, grad)
 
-            # Trucate steps if bounded
+            # Truncate steps if bounded
             if bounds is not None:
                 x = np.minimum(np.maximum(x, lower), upper)
 
@@ -157,10 +154,11 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
                 allpasses = False
                 break
 
-    obj_stri = "" 
+    obj_str = ""
     if eval_obj:
         obj_str = ", Obj = {}".format(objs[-5:])
-    log.info("##### End: gnorm={}, allpasses={}, p={}{}".format(gnorm,allpasses,p,obj_str))
+    log.info("##### End: gnorm={}, allpasses={}, p={}{}"
+             .format(gnorm, allpasses, p, obj_str))
 
     # Format results
     res = OptimizeResult(
@@ -173,37 +171,3 @@ def sgd_spark(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.95,
 
     return res
 
-
-def _sgd_batches(N, batchsize):
-    """ Batch index generator for SGD that will yeild random batches, and touch
-        all of the data (given sufficient interations). This is an infinite
-        sequence.
-
-        Arguments:
-            N, (int): length of dataset.
-            batchsize, (int): number of data points in each batch.
-
-        Yields:
-            array: of size (batchsize,) of random (int).
-    """
-
-    while True:
-        return _sgd_pass(N, batchsize)
-
-
-def _sgd_pass(N, batchsize):
-    """ Batch index generator for SGD that will yeild random batches for a
-        single pass through the whole dataset (i.e. a finitie sequence).
-
-        Arguments:
-            N, (int): length of dataset.
-            batchsize, (int): number of data points in each batch.
-
-        Yields:
-            array: of size (batchsize,) of random (int).
-    """
-
-    batch_inds = np.array_split(np.random.permutation(N), round(N / batchsize))
-
-    for b_inds in batch_inds:
-        yield b_inds
