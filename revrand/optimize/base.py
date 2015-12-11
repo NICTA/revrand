@@ -1,6 +1,7 @@
 import numpy as np
 
-from ..utils import flatten, unflatten, vectorize_args, unvectorize_args
+from ..utils import flatten, unflatten
+from ..externals import check_random_state
 
 from itertools import repeat
 from warnings import warn
@@ -79,7 +80,7 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
                 constraints=constraints, **options)
 
 
-def candidate_start_points_random(bounds, n_candidates=1000):
+def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
     """
     Randomly generate candidate starting points uniformly within a
     hyperrectangle.
@@ -99,20 +100,19 @@ def candidate_start_points_random(bounds, n_candidates=1000):
 
     Notes
     -----
-    Equivalent to::
+    Roughly equivalent to::
 
         lambda bounds, n_candidates=100: np.random.uniform(*zip(*bounds), size=(n_candidates, len(bounds))).T
 
     Examples
     --------
-    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.)], 
-    ...     n_candidates=5)
-    ... # doctest: +SKIP
-    array([[-7.7165118 , -8.35534484, -3.625521  , -4.02359491, -4.82233003],
-           [ 0.9498959 , -0.37492893,  0.16908869, -0.78321786,  1.40738975]])
+    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.)],
+    ...     n_candidates=5, random_state=1)
+    array([[-7.28935697, -9.99925656, -9.04608671, -8.78930863, -7.42101142],
+           [ 1.16097348, -0.09300228, -0.72298422,  0.03668218,  0.6164502 ]])
 
     >>> candidate_start_points = candidate_start_points_random(
-    ...     [(-10., -3.5), (-1., 2.)])
+    ...     [(-10., -3.5), (-1., 2.)], random_state=1)
 
     >>> candidate_start_points.shape
     (2, 1000)
@@ -129,22 +129,23 @@ def candidate_start_points_random(bounds, n_candidates=1000):
 
     Uniformly sample from line segment:
 
-    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5)
-    ... # doctest: +SKIP
-    array([[ 0.33371234,  1.52775115,  1.51805039,  0.32079371,  0.75478597]])
+    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5, random_state=1)
+    array([[ 0.25106601,  1.16097348, -0.99965688, -0.09300228, -0.55973233]])
 
     Uniformly sample from hyperrectangle:
 
     >>> candidate_start_points_random([(-10., -3.5), (-1., 2.), (5., 7.),
-    ... (2.71, 3.14)], n_candidates=5) # doctest: +SKIP
-    array([[-8.65860645, -6.83830936, -6.66424853, -7.92209109, -8.87889632],
-           [ 0.54385109,  0.63564042,  1.43670096, -0.56410552, -0.61085342],
-           [ 5.34469192,  6.8235269 ,  6.74123457,  5.26933478,  6.07431495],
-           [ 2.89553972,  3.11428126,  2.95325045,  2.95371842,  2.81686667]])
+    ... (2.71, 3.14)], n_candidates=5, random_state=1)
+    array([[-7.28935697, -9.04608671, -7.42101142, -8.67106038, -7.28751878],
+           [ 1.16097348, -0.72298422,  0.6164502 ,  1.63435231,  0.67606949],
+           [ 5.00022875,  5.37252042,  5.83838903,  5.05477519,  5.28077388],
+           [ 2.84000301,  2.85859111,  3.00464439,  2.99830103,  2.79518364]])
     """
+    generator = check_random_state(random_state)
+
     low, high = zip(*bounds)
     n_dims = len(bounds)
-    return np.random.uniform(low, high, (n_candidates, n_dims)).transpose()
+    return generator.uniform(low, high, (n_candidates, n_dims)).transpose()
 
 
 def candidate_start_points_grid(bounds, nums=3):
