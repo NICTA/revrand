@@ -7,6 +7,7 @@ from __future__ import division
 
 import numpy as np
 from scipy.stats import bernoulli, poisson, norm
+from scipy.special import gammaln
 
 from .utils import Positive
 from .transforms import logistic, softplus
@@ -17,6 +18,7 @@ from .transforms import logistic, softplus
 #
 
 tiny = np.finfo(float).tiny
+logtiny = np.log(tiny)
 small = 1e-100
 resol = np.finfo(float).resolution
 
@@ -75,7 +77,9 @@ class Bernoulli():
                 likelihood.
         """
 
-        return bernoulli.logpmf(y, logistic(f))
+        ll = bernoulli.logpmf(y, logistic(f))
+        ll[np.isinf(ll)] = logtiny
+        return ll
 
     def Ey(self, f):
         """ Expected value of the Bernoulli likelihood.
@@ -457,7 +461,9 @@ class Poisson(Bernoulli):
         """
 
         g = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
-        return poisson.logpmf(y, g)
+        logg = np.log(g)
+        logg[np.isinf(logg)] = logtiny
+        return y * logg - g - gammaln(y + 1)
 
     def Ey(self, f):
         """ Expected value of the Poisson likelihood.
