@@ -76,20 +76,23 @@ elif like == 'Bernoulli':
     llhood = likelihoods.Bernoulli()
     lparams = []
 elif like == 'Poisson':
-    llhood = likelihoods.Poisson(tranfcn='exp')
+    llhood = likelihoods.Poisson(tranfcn='softplus')
     lparams = []
 else:
     raise ValueError("Invalid likelihood, {}!".format(like))
 
 basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
     # + basis_functions.LinearBasis(onescol=True)
+bparams = [lenscale]
+# basis = basis_functions.PolynomialBasis(order=4)
+# bparams = []
 
 
 #
 # Inference
 #
 
-params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, [lenscale],
+params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
                    postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
                    eta=eta, batchsize=batchsize, maxit=passes)
 Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
