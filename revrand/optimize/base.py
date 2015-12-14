@@ -148,43 +148,43 @@ def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
     return generator.uniform(low, high, (n_candidates, n_dims)).transpose()
 
 
-def candidate_start_points_grid(bounds, nums=3):
+def candidate_start_points_lattice(bounds, nums=3):
     """
     Examples
     --------
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=[5, 3])
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3])
     array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
              0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
              0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=[5, 3]).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3]).shape
     (2, 15)
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)],
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
     ...                             nums=[5, 10, 9]) # doctest: +ELLIPSIS
     array([[-1.   , -1.   , -1.   , ...,  1.5  ,  1.5  ,  1.5  ],
            [-1.5  , -1.5  , -1.5  , ...,  3.   ,  3.   ,  3.   ],
            [ 0.   ,  0.625,  1.25 , ...,  3.75 ,  4.375,  5.   ]])
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)],
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
     ...                             nums=[5, 10, 9]).shape
     (3, 450)
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
     ...                             nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
     array([[-1. , -1. , -1. , ...,  1.5,  1.5,  1.5],
            [-1.5, -1.5, -1.5, ...,  3. ,  3. ,  3. ],
            [ 0. ,  0. ,  0. , ...,  5. ,  5. ,  5. ],
            [ 1. ,  3. ,  5. , ...,  1. ,  3. ,  5. ]])
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
     ...                             nums=[5, 10, 9, 3]).shape
     (4, 1350)
 
     Third ``num`` is ignored
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=[5, 3, 9])
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3, 9])
     array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
              0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
@@ -192,19 +192,19 @@ def candidate_start_points_grid(bounds, nums=3):
 
     Third bound is ignored
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], nums=[5, 3])
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)], nums=[5, 3])
     array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
              0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
              0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)]).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)]).shape
     (2, 9)
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3)], nums=9).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=9).shape
     (2, 81)
 
-    >>> candidate_start_points_grid([(-1, 1.5), (-1.5, 3), (0, 5)], nums=2).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)], nums=2).shape
     (3, 8)
     """
 
@@ -256,7 +256,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     >>> my_min = minimize_bounded_start_dec(sp_min)
     >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
 
-    >>> @minimize_bounded_start(candidate_start_points_grid, nums=[5, 9])
+    >>> @minimize_bounded_start(candidate_start_points_lattice, nums=[5, 9])
     ... def my_min(fun, x0, *args, **kwargs):
     ...     return sp_min(fun, x0, *args, **kwargs)
     >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
@@ -264,7 +264,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     array([ 0.875,  0.75 ])
 
     >>> minimize_bounded_start_dec = minimize_bounded_start(
-    ...     candidate_start_points_grid, nums=[5, 9])
+    ...     candidate_start_points_lattice, nums=[5, 9])
 
     >>> my_min = minimize_bounded_start_dec(sp_min)
     >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
@@ -273,7 +273,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
 
     Just to confirm this is the correct starting point:
 
-    >>> candidates = candidate_start_points_grid(rect, nums=[5, 9])
+    >>> candidates = candidate_start_points_lattice(rect, nums=[5, 9])
     >>> candidates[:, rosen(candidates).argmin()]
     array([ 0.875,  0.75 ])
     """
