@@ -6,6 +6,9 @@ python:
   - "2.7"
   - "3.4"
 
+virtualenv:
+  system_site_packages: true
+
 addons:
   apt:
     packages:
@@ -13,9 +16,6 @@ addons:
     - liblapack-dev
     - gfortran
     - python-nlopt
-
-virtualenv:
-  system_site_packages: true
 
 before_install:
   - pip install --upgrade pip
