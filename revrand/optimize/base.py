@@ -223,7 +223,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     --------
     >>> from scipy.optimize import minimize as sp_min, rosen, rosen_der
 
-    >>> @minimize_bounded_start(n_candidates=250)
+    >>> @minimize_bounded_start(n_candidates=250, random_state=1)
     ... def my_min(fun, x0, *args, **kwargs):
     ...     return sp_min(fun, x0, *args, **kwargs)
 
@@ -236,8 +236,8 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     >>> np.isclose(res.fun, 0)
     True
 
-    >>> res.start # doctest: +SKIP
-    array([ 0.97,  0.96])
+    >>> res.start.round(2)
+    array([ 1.17,  1.4 ])
 
     There are several other ways to use this decorator:
 

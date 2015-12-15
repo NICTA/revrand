@@ -97,7 +97,7 @@ class OrderedMemoize(Memoize, OrderedDict):
     pass
 
 
-def flatten_args(fn=None):
+def flatten_args(fn):
     """
     Examples
     --------

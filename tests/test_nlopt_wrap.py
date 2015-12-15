@@ -1,6 +1,5 @@
 from __future__ import division
 
-import warnings
 import pytest
 import nlopt
 import numpy as np
