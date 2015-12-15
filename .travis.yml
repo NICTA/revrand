@@ -1,7 +1,6 @@
 language: python
 
-sudo: required
-dist: trusty
+sudo: false
 
 python:
   - "2.7_with_system_site_packages"
@@ -11,6 +10,7 @@ addons:
     packages:
     - libnlopt0
     - python-nlopt
+
 
 
 script: python -c 'import nlopt'
