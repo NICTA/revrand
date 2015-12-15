@@ -4,7 +4,7 @@ sudo: false
 
 python:
   - "2.7"
-  - "3.4"
+  - "3.4_with_system_site_packages"
 
 virtualenv:
   system_site_packages: true
