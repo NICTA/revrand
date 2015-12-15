@@ -13,6 +13,7 @@ addons:
     - liblapack-dev
     - libatlas-base-dev
     - gfortran
+    - python-nlopt
 
 before_install:
   - pip install --upgrade pip
