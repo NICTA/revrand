@@ -148,7 +148,8 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         Phi2 = Phi**2
         dPhi = basis.grad(X, *_bparams)
         dPhiPhi = [dP * Phi for dP in dPhi]
-        PPP = [np.outer(p, p).dot(p) for p in Phi]
+        # Phi3 = [np.outer(p, p).dot(p) for p in Phi]
+        Phi3 = Phi**3
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -176,7 +177,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             iCkCj = 1 / (_C[:, k][:, np.newaxis] + _C)
             dC[:, k] = (-((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[:, k])
                         + H[:, k]) / (2 * K)
-            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(PPP)
+            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(Phi3)
                         + (iCkCj * mkmj).dot(pz[:, k])
                         - _m[:, k] / _reg) / K
 
