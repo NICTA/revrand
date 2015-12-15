@@ -14,15 +14,15 @@ addons:
     - gfortran
     - python-nlopt
 
+virtualenv:
+  system_site_packages: true
+
 before_install:
   - pip install --upgrade pip
   - pip install unipath requests 
 
 install: 
   - python setup.py install
-
-virtualenv:
-  system_site_packages: true
 
 script: py.test
 
