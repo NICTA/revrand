@@ -1,6 +1,7 @@
 language: python
 
 sudo: false
+dist: trusty
 
 python:
   - "2.7_with_system_site_packages"
