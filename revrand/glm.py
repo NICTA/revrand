@@ -177,7 +177,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             dC[:, k] = (-((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[:, k])
                         + H[:, k]) / (2 * K)
             dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(PPP)
-                        - (pz[:, k] * iCkCj * mkmj).sum(axis=1)
+                        + (iCkCj * mkmj).dot(pz[:, k])
                         - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
@@ -245,6 +245,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
                   eval_obj=True)
 
+        # NOTE: TEMP!
         # import matplotlib.pyplot as plt
         # niters = len(res.objs)
         # plt.plot(range(niters), res.norms, 'r', range(niters), res.objs, 'b')
