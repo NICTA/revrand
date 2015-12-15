@@ -12,6 +12,4 @@ addons:
     - libnlopt0
     - python-nlopt
 
-
-
-script: python -c 'import nlopt'
+script: pip freeze
