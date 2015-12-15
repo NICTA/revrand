@@ -10,4 +10,5 @@ addons:
     packages:
     - python-nlopt
 
+
 script: python -c 'import nlopt'
