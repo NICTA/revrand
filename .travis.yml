@@ -23,5 +23,7 @@ install:
 script: py.test --ignore=revrand/optimize/nlopt_wrap.py
 
 cache:
-  directories:
+  - apt
+  - pip
+  - directories:
     - $HOME/.cache/pip
