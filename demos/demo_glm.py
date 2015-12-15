@@ -42,8 +42,8 @@ lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
 
 # Likelihood
-like = 'Gaussian'
-# like = 'Bernoulli'
+# like = 'Gaussian'
+like = 'Bernoulli'
 # like = 'Poisson'
 
 #
@@ -82,7 +82,6 @@ else:
     raise ValueError("Invalid likelihood, {}!".format(like))
 
 basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
-    # + basis_functions.LinearBasis(onescol=True)
 bparams = [lenscale]
 # basis = basis_functions.PolynomialBasis(order=4)
 # bparams = []
