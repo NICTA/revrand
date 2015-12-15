@@ -3,7 +3,7 @@ language: python
 sudo: false
 
 python:
-  - "2.7"
+  - "2.7_with_system_site_packages"
   - "3.4"
 
 addons:
