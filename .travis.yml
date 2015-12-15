@@ -12,15 +12,19 @@ addons:
     - libblas-dev
     - liblapack-dev
     - gfortran
+    - python-nlopt
 
 before_install:
   - pip install --upgrade pip
+  - pip install unipath requests 
 
 install: 
-  - pip install unipath requests 
   - python setup.py install
 
-script: py.test --ignore=revrand/optimize/nlopt_wrap.py
+virtualenv:
+  system_site_packages: true
+
+script: py.test
 
 cache:
   - apt
