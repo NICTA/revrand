@@ -9,7 +9,6 @@ python:
 addons:
   apt:
     packages:
-    - python-nlopt
     - libblas-dev
     - liblapack-dev
     - libatlas-base-dev
