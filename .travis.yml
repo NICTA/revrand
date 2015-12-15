@@ -8,7 +8,7 @@ python:
 addons:
   apt:
     packages:
-    - python-nlopt
+    - nlopt
 
 
 script: python -c 'import nlopt'
