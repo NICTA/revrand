@@ -146,10 +146,9 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Basis function stuff
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
+        Phi3 = Phi**3
         dPhi = basis.grad(X, *_bparams)
         dPhiPhi = [dP * Phi for dP in dPhi]
-        # Phi3 = [np.outer(p, p).dot(p) for p in Phi]
-        Phi3 = Phi**3
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -245,12 +244,6 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                   np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
                   eval_obj=True)
-
-        # NOTE: TEMP!
-        # import matplotlib.pyplot as plt
-        # niters = len(res.objs)
-        # plt.plot(range(niters), res.norms, 'r', range(niters), res.objs, 'b')
-        # plt.show()
 
     m, C, reg, lparams, bparams = pcat.unflatten(res.x)
 
