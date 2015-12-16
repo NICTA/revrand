@@ -159,7 +159,7 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
 
         # Extract data, parameters, etc
         y, X = data[:, 0], data[:, 1:]
-        uparams = pcat.unflatten(params)
+        uparams = bcPcat.value.unflatten(params)
         _m, _C, _reg, _lparams, _bparams = uparams
 
         # Dimensions
@@ -168,10 +168,10 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         B = N / M
 
         # Basis function stuff
-        Phi = basis(X, *_bparams)  # N x D
+        Phi = bcBasis.value(X, *_bparams)  # N x D
         Phi2 = Phi**2
         Phi3 = Phi**3
-        dPhi = basis.grad(X, *_bparams)
+        dPhi = bcBasis.value.grad(X, *_bparams)
         dPhiPhi = [dP * Phi for dP in dPhi]
         f = Phi.dot(_m)  # N x K
 
@@ -189,10 +189,10 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         for k in range(K):
 
             # Common likelihood calculations
-            ll += B * likelihood.loglike(y, f[:, k], *_lparams).sum()
-            df = B * likelihood.df(y, f[:, k], *_lparams)
-            d2f = B * likelihood.d2f(y, f[:, k], *_lparams)
-            d3f = B * likelihood.d3f(y, f[:, k], *_lparams)
+            ll += B * bcLikelihood.value.loglike(y, f[:, k], *_lparams).sum()
+            df = B * bcLikelihood.value.df(y, f[:, k], *_lparams)
+            d2f = B * bcLikelihood.value.d2f(y, f[:, k], *_lparams)
+            d3f = B * bcLikelihood.value.d3f(y, f[:, k], *_lparams)
             H[:, k] = d2f.dot(Phi2) - 1. / _reg
 
             # Posterior mean and covariance gradients
@@ -205,8 +205,8 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                         - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
-            dp = likelihood.dp(y, f[:, k], *_lparams)
-            dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
+            dp = bcLikelihood.value.dp(y, f[:, k], *_lparams)
+            dp2df = bcLikelihood.value.dpd2f(y, f[:, k], *_lparams)
             for l in range(len(_lparams)):
                 dpH = dp2df[l].dot(Phi2)
                 dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
@@ -235,7 +235,7 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
                      .format(L2, _reg, _lparams, _bparams))
 
-        return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
+        return -L2, -bcPcat.value.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
 
     # Intialise m and C
     m = np.random.randn(D, K) + np.arange(K) - K / 2
@@ -259,9 +259,9 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         bounds += basis.bounds
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
-    bcBasis         = sc.broadcast(basis)
-    bcLikelihood    = sc.broadcast(likelihood)
-    bcPcat          = sc.broadcast(pcat)
+    bcBasis = sc.broadcast(basis)
+    bcLikelihood = sc.broadcast(likelihood)
+    bcPcat = sc.broadcast(pcat)
 
     if use_sgd is False:
         res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
