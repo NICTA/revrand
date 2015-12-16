@@ -16,7 +16,7 @@ from scipy.stats.distributions import gamma
 from scipy.optimize import brentq
 
 from .transforms import logsumexp
-from .optimize import minimize, sgd
+from .optimize import minimize, sgd, sgd_spark
 from .utils import CatParameters, Bound, Positive, checktypes, \
     list_to_params as l2p
 
@@ -24,9 +24,18 @@ from .utils import CatParameters, Bound, Positive, checktypes, \
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
+class DummySparkContext:
+    @staticmethod
+    def broadcast(x):
+        return VarWrapper(x)
+
+class VarWrapper:
+    def __init__(self, x):
+        self.value = x
+
+def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
           use_sgd=True, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
-          eta=1e-5, verbose=True):
+          eta=1e-5, verbose=True, spark=False):
     """
     Learn the parameters of a Bayesian generalised linear model (GLM).
 
@@ -121,8 +130,23 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         can use SGD straight-forwardly.
     """
 
-    N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+    if spark:
+        sc = data.context
+        N = data.count()
+        first = data.first()[1:]
+        d = len(first)
+        D = basis(np.atleast_2d(first), *bparams).shape[1]
+        sgd_func = sgd_spark
+        if not use_sgd:
+            log.warn("Spark support for SGD only. Using SGD.")
+
+    else:
+        sc = DummySparkContext()
+        N, d = data.shape
+        N -= 1
+        D = basis(np.atleast_2d(data[0, 1:]), *bparams).shape[1]
+        sgd_func = sgd
+
     K = postcomp
 
     # Pre-allocate here
@@ -235,13 +259,17 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         bounds += basis.bounds
     pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
 
+    bcBasis         = sc.broadcast(basis)
+    bcLikelihood    = sc.broadcast(likelihood)
+    bcPcat          = sc.broadcast(pcat)
+
     if use_sgd is False:
         res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
                        ftol=tol, maxiter=maxit, method='L-BFGS-B', jac=True,
-                       bounds=bounds, args=(np.hstack((y[:, np.newaxis], X)),))
+                       bounds=bounds, args=(data,))
     else:
-        res = sgd(L2, pcat.flatten([m, C, reg, lparams, bparams]),
-                  np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
+        res = sgd_func(L2, pcat.flatten([m, C, reg, lparams, bparams]),
+                  data, rate=rate, eta=eta,
                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
                   eval_obj=True)
 

@@ -105,23 +105,18 @@ bparams = [lenscale]
 #
 
 if not hasSparkContext:
-    params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
-                       postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
-                       eta=eta, batchsize=batchsize, maxit=passes)
-    Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
-    plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
-    y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
-
+    data = np.hstack((ytrain[:, np.newaxis], Xtrain))
 else:
     n_partitions = 4
     train_data = np.hstack((ytrain[:, np.newaxis], Xtrain))
-    rdd_train = sc.parallelize(train_data, n_partitions)
-    params = glm_spark.learn(rdd_train, llhood, lparams, basis, bparams,
-                   postcomp=postcomp, reg=reg, rate=rate,
-                   eta=eta, batchsize=batchsize, maxit=passes)
-    Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
-    plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
-    y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
+    data = sc.parallelize(train_data, n_partitions)
+
+params = glm.learn(data, llhood, lparams, basis, bparams,
+                   postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
+                   eta=eta, batchsize=batchsize, maxit=passes, spark=hasSparkContext)
+Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
+plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
+y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
 
 
 if like == 'Gaussian':
