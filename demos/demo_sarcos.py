@@ -67,7 +67,8 @@ if useSGD:
     #                               passes=passes, batchsize=batchsize)
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
-    params = glm.learn(X_train, y_train, llhood, lparams, base, [lenARD],
+    train_data = np.hstack((y_train[:, np.newaxis], X_train))
+    params = glm.learn(train_data, llhood, lparams, base, [lenARD],
                        postcomp=5, reg=regulariser, use_sgd=True, rate=rate,
                        eta=eta, batchsize=batchsize, maxit=passes)
 else:

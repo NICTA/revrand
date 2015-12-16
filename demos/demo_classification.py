@@ -69,7 +69,8 @@ elif method == 'MAP':
 elif method == 'GLM':
     llhood = likelihoods.Bernoulli()
     lparams = []
-    params = glm.learn(X, Y, llhood, lparams, Phi, [lenscale], reg=reg,
+    data = np.hstack((Y[:, np.newaxis], X))
+    params = glm.learn(data, llhood, lparams, Phi, [lenscale], reg=reg,
                        use_sgd=doSGD, maxit=passes, postcomp=K)
 else:
     raise ValueError("Invalid method chosen!")
