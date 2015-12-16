@@ -7,7 +7,7 @@ import numpy as np
 import logging
 from scipy.stats import poisson, bernoulli
 
-from revrand import basis_functions, glm, likelihoods, transforms
+from revrand import basis_functions, glm, likelihoods, transforms, glm_spark
 # from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 
@@ -15,6 +15,19 @@ from revrand.utils.datasets import gen_gausprocess_se
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
+# if demo run within spark environment, create context
+hasSparkContext = False
+try:
+    from pyspark import SparkConf, SparkContext
+    conf = (SparkConf()
+         .setMaster("local[4]")
+         .setAppName("Spark GLM Demo")
+         .set("spark.executor.memory", "1g"))
+    sc = SparkContext(conf = conf)
+    sc.addPyFile(__file__)
+    hasSparkContext = True
+except ImportError:
+    pass
 
 #
 # Settings
@@ -91,12 +104,25 @@ bparams = [lenscale]
 # Inference
 #
 
-params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
-                   postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
+if not hasSparkContext:
+    params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
+                       postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
+                       eta=eta, batchsize=batchsize, maxit=passes)
+    Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
+    plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
+    y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
+
+else:
+    n_partitions = 4
+    train_data = np.hstack((ytrain[:, np.newaxis], Xtrain))
+    rdd_train = sc.parallelize(train_data, n_partitions)
+    params = glm_spark.learn(rdd_train, llhood, lparams, basis, bparams,
+                   postcomp=postcomp, reg=reg, rate=rate,
                    eta=eta, batchsize=batchsize, maxit=passes)
-Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
-plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
-y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
+    Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
+    plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
+    y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
+
 
 if like == 'Gaussian':
     Sy2 = 2 * np.sqrt(Vy + params[2][0])
