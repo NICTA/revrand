@@ -27,8 +27,8 @@ class PyTest(TestCommand, object):
 setup(
     name='revrand',
     version='0.1rc1',
-    description='Implementation of the A la Carte approximation of Gaussian'
-                'processes, amongst other things.',
+    description='A library of scalable Bayesian generalised linear models with'
+                ' fancy features',
     author='Daniel Steinberg',
     author_email='daniel.steinberg@nicta.com.au',
     url='http://github.com/nicta/revrand',
