@@ -14,6 +14,20 @@ from revrand.utils.datasets import gen_gausprocess_se
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
+# if demo run within spark environment, create context
+hasSparkContext = False
+try:
+    from pyspark import SparkConf, SparkContext
+    conf = (SparkConf()
+         .setMaster("local[4]")
+         .setAppName("Spark regression Demo")
+         .set("spark.executor.memory", "1g"))
+    sc = SparkContext(conf = conf)
+    sc.addPyFile(__file__)
+    hasSparkContext = True
+except ImportError:
+    pass
+
 
 def main():
 
@@ -124,13 +138,26 @@ def main():
     else:
         raise ValueError('Invalid basis!')
 
+    # combine training data to single array
+    train_data = np.hstack((ytrain[:, np.newaxis], Xtrain))
+
     # Evidence lower-bound A la Carte learning
-    params_sgd = regression.learn_sgd(Xtrain, ytrain, base, hypers,
-                                      var=noise**2, rate=rate, eta=eta,
-                                      passes=passes, regulariser=reg,
-                                      rank=rank, batchsize=batchsize)
-    Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
-    Sy_s = np.sqrt(Vy_s)
+    if not hasSparkContext:
+        params_sgd = regression.learn_sgd(Xtrain, ytrain, base, hypers,
+                                          var=noise**2, rate=rate, eta=eta,
+                                          passes=passes, regulariser=reg,
+                                          rank=rank, batchsize=batchsize)
+        Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
+        Sy_s = np.sqrt(Vy_s)
+    else:
+        n_partitions = 4
+        data = sc.parallelize(train_data, n_partitions)
+        params_sgd = regression.learn_sgd_spark(data, base, hypers,
+                                          var=noise**2, rate=rate, eta=eta,
+                                          passes=passes, regulariser=reg,
+                                          rank=rank, batchsize=batchsize)
+        Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
+        Sy_s = np.sqrt(Vy_s)
 
     params_elbo = regression.learn(Xtrain, ytrain, base, hypers,
                                    diagcov=diagcov, var=noise**2,
@@ -144,7 +171,8 @@ def main():
 
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
-    params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, [lenscale],
+
+    params_glm = glm.learn(train_data, llhood, lparams, base, [lenscale],
                            reg=reg, use_sgd=True, rate=rate, postcomp=10,
                            eta=eta, batchsize=batchsize, maxit=passes)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,

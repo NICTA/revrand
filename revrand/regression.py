@@ -22,9 +22,11 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd
+from .optimize import minimize, sgd, sgd_spark
 from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
     checktypes
+
+from .utils import DummySparkContext
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -264,10 +266,39 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
         This is to allow for a reduced number of parameters to optimise with
         SGD. As a consequence, features with large dimensionality can be used.
     """
+    return learn_sgd_(np.hstack((y[:, np.newaxis], X)), basis, bparams, var,
+                      regulariser, rank, gtol, passes, rate, eta, batchsize,
+                      verbose, spark=False)
+
+
+def learn_sgd_spark(rdd, basis, bparams, var=1, regulariser=1., rank=None,
+              gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
+              verbose=True):
+    """
+    learn_sgd with spark
+    """
+    return learn_sgd_(rdd, basis, bparams, var, regulariser, rank, gtol,
+                      passes, rate, eta, batchsize, verbose, spark=True)
+
+
+def learn_sgd_(data, basis, bparams, var=1, regulariser=1., rank=None,
+              gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
+              verbose=True, spark=False):
 
     # Some consistency checking
-    N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+    if spark:
+        sc = data.context
+        N = data.count()
+        first = data.first()[1:]
+        d = len(first)
+        D = basis(np.atleast_2d(first), *bparams).shape[1]
+        sgd_func = sgd_spark
+    else:
+        sc = DummySparkContext()
+        N, d = data.shape
+        N -= 1
+        D = basis(np.atleast_2d(data[0, 1:]), *bparams).shape[1]
+        sgd_func = sgd
 
     if rank is None:
         rank = D
@@ -288,11 +319,11 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     def ELBO(params, data):
 
         y, X = data[:, 0], data[:, 1:]
-        uparams = pcat.unflatten(params)
+        uparams = bcPcat.value.unflatten(params)
         m, S, U, _var, _lambda, _theta = uparams
 
         # Get Basis
-        Phi = basis(X, *_theta)                      # Nb x D
+        Phi = bcBasis.value(X, *_theta)                      # Nb x D
         PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
@@ -351,7 +382,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
 
         # Loop through basis param grads
         dtheta = []
-        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
+        dPhis = bcBasis.value.grad(X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
             dPhiPhi = dPhi.T.dot(Phi) if rank > 0 else (dPhi * Phi).sum(axis=0)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
@@ -360,15 +391,19 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
         dtheta = l2p(_theta, dtheta)
 
-        return -ELBO, -pcat.flatten_grads(uparams, [dm, dS, dU, dvar, dlambda,
+        return -ELBO, -bcPcat.value.flatten_grads(uparams, [dm, dS, dU, dvar, dlambda,
                                                     dtheta])
+
+    # Broadcast variables
+    bcBasis = sc.broadcast(basis)
+    bcPcat = sc.broadcast(pcat)
 
     # NOTE: It would be nice if the optimizer knew how to handle Positive
     # bounds when the log trick is used, so we dont have to have this boiler
     # plate...
     bounds = [Bound()] * (2 * D + max(1, rank * D) + 2)
     bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
+    res = sgd_func(ELBO, pcat.flatten(vparams), data,
               rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
               batchsize=batchsize, eval_obj=True)
 

@@ -6,6 +6,7 @@ from .decorators import (vectorize_args, unvectorize_args, vectorize_result)
 from .base import (flatten, unflatten, couple, decouple, nwise, map_indices, 
                    params_to_list, list_to_params, CatParameters, Bound, 
                    Positive, checktypes)
+from .dummy_spark import (DummySparkContext,BroadcastVarWrapper)
 
 __all__ = [
     'vectorize_args',
@@ -18,3 +19,5 @@ __all__ = [
     'nwise',
     'map_indices'
 ]
+
+
