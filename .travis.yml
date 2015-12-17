@@ -1,19 +1,20 @@
 language: python
 
-sudo: required
-dist: trusty
-
 python:
   - "2.7"
+  - "3.4"
 
-virtualenv:
-  system_site_packages: true
+before_install:
+  - wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz
+  - tar -xvf nlopt-2.4.2.tar.gz
+  - cd nlopt-2.4.2
 
-addons:
-  apt:
-    packages:
-    - libnlopt0
-    - python-nlopt
+install:
+  - PYTHON=$(which python) ./configure --prefix=$(dirname $(dirname $(which python))) --enable-shared
+  - make
+  - make install
+  - pip install --upgrade pip
+  - pip install scipy
+  - python setup.py install
 
-script: python -c 'import nlopt'
-
+script: py.test
