@@ -4,6 +4,14 @@ python:
   - "2.7"
   - "3.4"
 
+addons:
+  apt:
+    packages:
+    - libblas-dev
+    - liblapack-dev
+    - libatlas-base-dev
+    - gfortran
+
 before_install:
   - wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz
   - tar -xvf nlopt-2.4.2.tar.gz
