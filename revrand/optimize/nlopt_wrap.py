@@ -31,7 +31,7 @@ NLOPT_MESSAGES = {
                             'returns a useful result.)',
     nlopt.FORCED_STOP: "Halted because of a forced termination: the user "
                        "called nlopt_force_stop(opt) on the optimization's "
-                       "nlopt_opt object opt from the user’s objective "
+                       "nlopt_opt object opt from the user's objective "
                        "function or constraints."
 }
 
