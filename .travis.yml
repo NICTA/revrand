@@ -22,7 +22,13 @@ install:
   - make
   - make install
   - pip install --upgrade pip
-  - pip install scipy
+  - pip install unipath requests
   - python setup.py install
 
 script: py.test
+
+cache:
+  - apt
+  - pip
+  - directories:
+    - $HOME/.cache/pip
