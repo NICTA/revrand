@@ -120,7 +120,7 @@ class Positive(Bound):
         ...
     ValueError: lower bound must be positive!
     """
-    def __new__(cls, lower=1e-14, *args):
+    def __new__(cls, lower=1e-14):
 
         if lower <= 0:
             raise ValueError('lower bound must be positive!')
