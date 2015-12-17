@@ -68,7 +68,8 @@ class Bernoulli():
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -87,7 +88,8 @@ class Bernoulli():
         Parameters
         ----------
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -106,7 +108,8 @@ class Bernoulli():
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -125,7 +128,8 @@ class Bernoulli():
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -146,7 +150,8 @@ class Bernoulli():
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -168,7 +173,8 @@ class Bernoulli():
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -191,7 +197,8 @@ class Bernoulli():
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -211,7 +218,8 @@ class Bernoulli():
             y: array_like
                 query quantiles, i.e.\  :math:`P(Y \leq y)`.
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -251,7 +259,8 @@ class Gaussian(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -270,7 +279,8 @@ class Gaussian(Bernoulli):
         Parameters
         ----------
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -291,7 +301,8 @@ class Gaussian(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -312,7 +323,8 @@ class Gaussian(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -334,7 +346,8 @@ class Gaussian(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -357,7 +370,8 @@ class Gaussian(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -382,7 +396,8 @@ class Gaussian(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -404,7 +419,8 @@ class Gaussian(Bernoulli):
             y: array_like
                 query quantiles, i.e.\  :math:`P(Y \leq y)`.
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
             var: float, array_like
                 The variance of the distribution
 
@@ -451,7 +467,8 @@ class Poisson(Bernoulli):
             y: array_like
                 array of integer targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -471,7 +488,8 @@ class Poisson(Bernoulli):
         Parameters
         ----------
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -490,7 +508,8 @@ class Poisson(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -512,7 +531,8 @@ class Poisson(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -538,7 +558,8 @@ class Poisson(Bernoulli):
             y: array_like
                 array of 0, 1 valued integers of targets
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
@@ -566,7 +587,8 @@ class Poisson(Bernoulli):
             y: array_like
                 query quantiles, i.e.\  :math:`P(Y \leq y)`.
             f: array_like
-                latent function from the GLM prior
+                latent function from the GLM prior (:math:`\mathbf{f} =
+                \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
