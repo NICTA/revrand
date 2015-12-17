@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-          ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
+          ftol=1e-6, maxit=1000, verbose=True):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
@@ -57,9 +57,6 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             optimiser function tolerance convergence criterion.
         maxit: int, optional
             maximum number of iterations for the optimiser.
-        usegradients: bool, optional
-            True for using gradients to optimize the parameters, otherwise
-            false uses BOBYQA (from nlopt).
 
     Returns
     -------
@@ -105,8 +102,8 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         Phi = basis(X, *_theta)                      # N x D
         PhiPhi = Phi.T.dot(Phi)
 
-        lower = False
         # Posterior Parameters
+        lower = False
         LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var, lower)
         m = cho_solve((LfullC, lower), Phi.T.dot(y)) / _var
 
@@ -150,9 +147,6 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
 
-        if not usegradients:
-            return -ELBO
-
         # Grad var
         dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
 
@@ -177,17 +171,15 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     # plate...
     bounds = [Bound()] * 2
     bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = minimize(ELBO, pcat.flatten(vparams), method=method, jac=True,
+    res = minimize(ELBO, pcat.flatten(vparams), method='L-BFGS-B', jac=True,
                    bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
 
-    var, regulariser, bparams = pcat.unflatten(res['x'])
+    var, regulariser, bparams = pcat.unflatten(res.x)
 
     if verbose:
-        log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
-                 .format(-res['fun'], var, regulariser, bparams))
-        if not res['success']:
-            log.info('Terminated unsuccessfully: {}.'.format(res['message']))
+        log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
+                 "message = {}."
+                 .format(-res['fun'], var, regulariser, bparams, res.message))
 
     return mcache, Ccache, bparams, var
 

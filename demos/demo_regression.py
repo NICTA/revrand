@@ -32,8 +32,6 @@ def main():
     passes = 500
     batchsize = 100
     reg = 1
-    usegradients = True
-    diagcov = False
     rank = 0
 
     # np.random.seed(100)
@@ -133,8 +131,7 @@ def main():
     Sy_s = np.sqrt(Vy_s)
 
     params_elbo = regression.learn(Xtrain, ytrain, base, hypers,
-                                   diagcov=diagcov, var=noise**2,
-                                   usegradients=usegradients, regulariser=reg)
+                                   var=noise**2, regulariser=reg)
     Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
@@ -180,7 +177,7 @@ def main():
 
     log.info("A la Carte (SGD), LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_sgd, smse_sgd, np.sqrt(params_sgd[3]), params_sgd[2]))
-    log.info("A la Cart, LL: {}, smse = {}, noise: {}, hypers: {}"
+    log.info("A la Carte, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
