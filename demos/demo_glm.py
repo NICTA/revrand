@@ -28,7 +28,7 @@ lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
 rate = 0.9
 eta = 1e-5
-passes = 300
+passes = 400
 batchsize = 100
 reg = 1
 postcomp = 5
@@ -43,8 +43,8 @@ noise_true = 0.1
 
 # Likelihood
 # like = 'Gaussian'
-like = 'Bernoulli'
-# like = 'Poisson'
+# like = 'Bernoulli'
+like = 'Poisson'
 
 #
 # Make Data
