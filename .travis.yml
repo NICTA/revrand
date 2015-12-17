@@ -23,11 +23,11 @@ install:
   - make install
   - cd $TRAVIS_BUILD_DIR
   - pip install --upgrade pip
+  - pip install --upgrade pytest
   - pip install unipath requests
   - python setup.py install
 
 script:
-  - pip freeze
   - py.test
 
 cache:
