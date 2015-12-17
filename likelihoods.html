@@ -94,7 +94,8 @@ the GLM prior into a probability.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211;
 expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
@@ -123,7 +124,8 @@ in all of the parameters combined (and in order).</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; query quantiles, i.e. <span class="math">\(P(Y \leq y)\)</span>.</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -148,7 +150,8 @@ Cumulative density function evaluated at y.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -174,7 +177,8 @@ the second derivative
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -200,7 +204,8 @@ the third derivative
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -226,7 +231,8 @@ the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -255,7 +261,8 @@ each parameter.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -280,7 +287,8 @@ the derivative of the likelihood Hessian w.r.t.                <span class="math
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -313,7 +321,8 @@ prior.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -339,7 +348,8 @@ expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; query quantiles, i.e. <span class="math">\(P(Y \leq y)\)</span>.</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -365,7 +375,8 @@ Cumulative density function evaluated at y.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -392,7 +403,8 @@ the second derivative
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -419,7 +431,8 @@ the third derivative
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -446,7 +459,8 @@ the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -476,7 +490,8 @@ each parameter.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -502,7 +517,8 @@ the derivative of the likelihood Hessian w.r.t.                <span class="math
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 <li><strong>var</strong> (<em>float, array_like</em>) &#8211; The variance of the distribution</li>
 </ul>
 </td>
@@ -535,7 +551,8 @@ function have been implemented.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211;
 expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
@@ -556,7 +573,8 @@ expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; query quantiles, i.e. <span class="math">\(P(Y \leq y)\)</span>.</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -581,7 +599,8 @@ Cumulative density function evaluated at y.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -607,7 +626,8 @@ the second derivative
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -633,7 +653,8 @@ the third derivative
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of 0, 1 valued integers of targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>
@@ -658,7 +679,8 @@ the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like</em>) &#8211; array of integer targets</li>
-<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior</li>
+<li><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
+\boldsymbol\Phi \mathbf{w}\)</span>)</li>
 </ul>
 </td>
 </tr>

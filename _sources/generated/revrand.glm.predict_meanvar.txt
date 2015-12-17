@@ -1,6 +1,0 @@
-revrand.glm.predict_meanvar
-===========================
-
-.. currentmodule:: revrand.glm
-
-.. autofunction:: predict_meanvar
