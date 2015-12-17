@@ -5,6 +5,10 @@ revrand
 .. image:: https://travis-ci.org/NICTA/revrand.svg?branch=master
    :target: https://travis-ci.org/NICTA/revrand
 
+ .. image:: https://pypip.in/version/revrand/badge.svg
+   :target: https://pypi.python.org/pypi/revrand/
+   :alt: Latest Version
+
 ------------------------------------------------------------------------------
 A library of scalable Bayesian generalised linear models with *fancy* features
 ------------------------------------------------------------------------------
