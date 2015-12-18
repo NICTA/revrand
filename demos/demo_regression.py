@@ -26,10 +26,10 @@ def main():
     lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
-    order = 5  # For polynomial basis
+    order = 7  # For polynomial basis
     rate = 0.9
     eta = 1e-5
-    passes = 500
+    passes = 1000
     batchsize = 100
     reg = 1
     rank = 5
@@ -114,11 +114,11 @@ def main():
     #
 
     if basis == 'Linear' or basis == 'Poly':
-        hypers = ()
+        hypers = []
     elif basis == 'FF' or basis == 'RKS' or basis == 'RBF':
-        hypers = (lenscale,)
+        hypers = [lenscale]
     elif basis == 'Combo':
-        hypers = (lenscale, lenscale2)
+        hypers = [lenscale, lenscale2]
     else:
         raise ValueError('Invalid basis!')
 
@@ -141,7 +141,7 @@ def main():
 
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
-    params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, [lenscale],
+    params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
                            reg=reg, use_sgd=True, rate=rate, postcomp=10,
                            eta=eta, batchsize=batchsize, maxit=passes)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
