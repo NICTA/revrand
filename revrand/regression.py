@@ -268,7 +268,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
 
     # Initialise parameters
     minit = np.random.randn(D)
-    Sinit = gamma.rvs(1, scale=0.1, size=D)
+    Sinit = gamma.rvs(2, scale=0.5, size=D)
     Uinit = np.random.randn(D, rank) if rank > 0 else 0
 
     # Initial parameter vector

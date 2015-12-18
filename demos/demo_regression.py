@@ -32,7 +32,7 @@ def main():
     passes = 500
     batchsize = 100
     reg = 1
-    rank = 0
+    rank = 5
 
     # np.random.seed(100)
 
