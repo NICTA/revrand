@@ -1,0 +1,2 @@
+#!/bin/bash 
+echo ECS_CLUSTER=spark_cluster >> /etc/ecs/ecs.config

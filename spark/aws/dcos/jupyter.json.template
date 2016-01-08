@@ -1,0 +1,24 @@
+{
+    "id": "jupyter",
+    "constraints": [
+        ["hostname", "UNIQUE"]
+    ],
+    "acceptedResourceRoles": ["slave_public"],
+    "container": {
+        "type": "DOCKER",
+        "docker": {
+            "image": "dtpc/revspark-1.6:latest",
+            "network": "HOST",
+            "privileged": false,
+            "parameters": [],
+            "forcePullImage": true
+        }
+    },
+    "env": {
+        "PYSPARK_SUBMIT_ARGS": "--master=mesos://${MESOS_MASTER} pyspark-shell"
+    },
+    "cmd": "jupyter notebook",
+    "cpus": 1,
+    "mem": 256,
+    "instances": 1
+}
