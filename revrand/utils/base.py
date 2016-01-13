@@ -7,33 +7,6 @@ from functools import partial
 from itertools import tee
 
 
-class Bunch(dict):
-    """
-    Container object for datasets: dictionary-like object that exposes
-    its keys as attributes.
-
-    Examples
-    --------
-    >>> b = Bunch(foo=42, bar=10)
-    >>> b == {'foo': 42, 'bar': 10}
-    True
-    >>> b.foo
-    42
-    >>> b.bar
-    10
-    >>> b['foo']
-    42
-    >>> b.baz = 61
-    >>> b.baz
-    61
-    >>> b['baz']
-    61
-    """
-    def __init__(self, **kwargs):
-        dict.__init__(self, kwargs)
-        self.__dict__ = self
-
-
 class Bound(namedtuple('Bound', ['lower', 'upper'])):
     """
     Define bounds on a variable for the optimiser. This defaults to all
@@ -131,6 +104,33 @@ class Positive(Bound):
     def __getnewargs__(self):
         """Required for pickling!"""
         return (self.lower, )
+
+
+class Bunch(dict):
+    """
+    Container object for datasets: dictionary-like object that exposes
+    its keys as attributes.
+
+    Examples
+    --------
+    >>> b = Bunch(foo=42, bar=10)
+    >>> b == {'foo': 42, 'bar': 10}
+    True
+    >>> b.foo
+    42
+    >>> b.bar
+    10
+    >>> b['foo']
+    42
+    >>> b.baz = 61
+    >>> b.baz
+    61
+    >>> b['baz']
+    61
+    """
+    def __init__(self, **kwargs):
+        dict.__init__(self, kwargs)
+        self.__dict__ = self
 
 
 def checktypes(sequence, checktype):

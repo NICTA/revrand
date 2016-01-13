@@ -23,8 +23,8 @@ from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
 from .optimize import minimize, sgd, augment_minimizer
-from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
-    checktypes
+from .utils import list_to_params as l2p, CatParameters, checktypes, Bound, \
+    Positive
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -177,8 +177,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     # res = minimize(ELBO, pcat.flatten(vparams), method='L-BFGS-B', jac=True,
     #                bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
     # var, regulariser, bparams = pcat.unflatten(res.x)
-    bounds = [Positive()] * 2
-    bounds += basis.bounds
+    bounds = [Positive()] * 2 + basis.bounds
     nmin = augment_minimizer(minimize)
     res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
                bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)

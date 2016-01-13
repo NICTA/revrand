@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils import flatten, unflatten
+from ..utils import flatten, unflatten, checktypes, Positive, Bound
 from ..externals import check_random_state
 
 from itertools import repeat
@@ -386,6 +386,27 @@ def flatten_args(shapes, order='C'):
     return flatten_args_dec
 
 
+# def logtrick_args(func, bounds):
+
+#     ispos = [isinstance(b, Positive) for b in bounds]
+
+#     def log_args_dec(func):
+    
+#         @wraps(func)
+#         def new_func(x):
+
+
+
+#     @wraps(func)
+#     def log_func(logargs):
+#         expargs = None  # TODO
+#         obj, expgrads = func(expargs)
+#         lograds = None  # TODO
+#         return obj, loggrads
+
+#     return log_func, bounds
+
+
 def augment_minimizer(minimizer):
     """
     Examples
@@ -436,3 +457,36 @@ def augment_minimizer(minimizer):
         return result
 
     return new_minimizer
+
+
+def log_minimizer(minimizer):
+
+    @wraps(minimizer)
+    def new_minimizer(fun, x0, bounds=None, jac=True, **minimizer_kwargs):
+
+        if bounds is None:
+            return minimizer(fun, x0, bounds, jac, **minimizer_kwargs)
+
+        ispos = [isinstance(b, Positive) for b in bounds]
+        logx = lambda x: [np.log(xi) if pos is True else xi for xi, pos
+                          in zip(x, ispos)]
+        expx = lambda x: [np.exp(xi) if pos is True else xi for xi, pos
+                          in zip(x, ispos)]
+        gradx = lambda g, x: [gi * xi if pos is True else gi for xi, gi, pos
+                              in zip(x, g, ispos)]
+
+        if callable(jac):
+            jac = lambda *jac_args, **jac_kwargs: gradx(jac(*jac_args,
+                                                            **jac_kwargs))
+        else:
+            if bool(jac):
+                def new_fun(x):
+                    obj, grad = fun(expx(x))
+                    return obj, gradx(grad)
+            else:
+                def new_fun(x):
+                    return fun(expx(x))
+
+        # TODO: redefine bounds properly!!!
+        bounds = None
+        return minimizer(new_fun, logx(x0), bounds, jac, **minimizer_kwargs)
