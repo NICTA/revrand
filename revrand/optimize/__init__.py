@@ -7,6 +7,7 @@ and also supports custom optimization methods.
 from .sgd import sgd
 from .base import (minimize,
                    minimize_bounded_start,
+                   augment_minimizer,
                    candidate_start_points_lattice,
                    candidate_start_points_random)
 
@@ -14,6 +15,7 @@ __all__ = [
     'sgd',
     'minimize',
     'minimize_bounded_start',
+    'augment_minimizer',
     'candidate_start_points_lattice',
     'candidate_start_points_random',
 ]

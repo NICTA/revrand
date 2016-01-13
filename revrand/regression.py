@@ -22,7 +22,7 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd
+from .optimize import minimize, sgd, augment_minimizer
 from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
     checktypes
 
@@ -88,15 +88,16 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
 
     # Initial parameter vector
-    vparams = [var, regulariser, bparams]
-    posbounds = checktypes(basis.bounds, Positive)
-    pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
-                         else [0, 1])
+    # vparams = [var, regulariser, bparams]
+    # posbounds = checktypes(basis.bounds, Positive)
+    # pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
+    #                      else [0, 1])
 
-    def ELBO(params):
+    # def ELBO(params):
+    def ELBO(_var, _lambda, *_theta):
 
-        uparams = pcat.unflatten(params)
-        _var, _lambda, _theta = uparams
+        # uparams = pcat.unflatten(params)
+        # _var, _lambda, _theta = uparams
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
@@ -104,7 +105,8 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         # Posterior Parameters
         lower = False
-        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var, lower)
+        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
+                         lower=lower)
         m = cho_solve((LfullC, lower), Phi.T.dot(y)) / _var
 
         # Common calcs dependent on form of C
@@ -159,22 +161,28 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         for dPhi in dPhis:
             dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
-            dtheta.append(dt)
+            dtheta.append(-dt)
 
         # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        dtheta = l2p(_theta, dtheta)
+        # dtheta = l2p(_theta, dtheta)
 
-        return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
+        # return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
+        return -ELBO, [-dvar, -dlambda] + dtheta
 
     # NOTE: It would be nice if the optimizer knew how to handle Positive
     # bounds when the log trick is used, so we dont have to have this boiler
     # plate...
-    bounds = [Bound()] * 2
-    bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    res = minimize(ELBO, pcat.flatten(vparams), method='L-BFGS-B', jac=True,
-                   bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
-
-    var, regulariser, bparams = pcat.unflatten(res.x)
+    # bounds = [Bound()] * 2
+    # bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
+    # res = minimize(ELBO, pcat.flatten(vparams), method='L-BFGS-B', jac=True,
+    #                bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
+    # var, regulariser, bparams = pcat.unflatten(res.x)
+    bounds = [Positive()] * 2
+    bounds += basis.bounds
+    nmin = augment_minimizer(minimize)
+    res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
+               bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
+    var, regulariser, bparams = res.x[0], res.x[1], res.x[2:]
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
