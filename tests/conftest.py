@@ -14,7 +14,7 @@ def make_quadratic():
     bounds = [(None, None), (None, None), (1.1, None)]
 
     x = np.linspace(-1, 1, N)
-    y = a*x**2 + b*x + c
+    y = a * x**2 + b * x + c
     data = np.vstack((y, x)).T
 
     return a, b, c, data, bounds

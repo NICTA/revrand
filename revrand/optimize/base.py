@@ -26,9 +26,7 @@ def get_minimize(backend='scipy'):
         try:
             from .nlopt_wrap import minimize as minimize_
         except ImportError:
-            warn('NLopt could not be imported.')
-
-    warn('Defaulting to scipy.optimize')
+            warn('NLopt could not be imported, defaulting to scipy.optimize.')
 
     return minimize_
 
@@ -377,34 +375,13 @@ def flatten_args(shapes, order='C'):
     def flatten_args_dec(func):
 
         @wraps(func)
-        def new_func(array1d):
-            args = unflatten(array1d, shapes, order)
-            return func(*args)
+        def new_func(array1d, *args, **kwargs):
+            xlist = unflatten(array1d, shapes, order)
+            return func(*xlist, *args, **kwargs)
 
         return new_func
 
     return flatten_args_dec
-
-
-# def logtrick_args(func, bounds):
-
-#     ispos = [isinstance(b, Positive) for b in bounds]
-
-#     def log_args_dec(func):
-    
-#         @wraps(func)
-#         def new_func(x):
-
-
-
-#     @wraps(func)
-#     def log_func(logargs):
-#         expargs = None  # TODO
-#         obj, expgrads = func(expargs)
-#         lograds = None  # TODO
-#         return obj, loggrads
-
-#     return log_func, bounds
 
 
 def augment_minimizer(minimizer):
@@ -444,9 +421,8 @@ def augment_minimizer(minimizer):
         new_fun = flatten_args_dec(fun)
 
         if callable(jac):
-            jac = lambda *jac_args, **jac_kwargs: flatten(jac(*jac_args,
-                                                              **jac_kwargs),
-                                                          returns_shapes=False)
+            jac = lambda *fargs, **fkwargs: flatten(jac(*fargs, **fkwargs),
+                                                    returns_shapes=False)
         else:
             if bool(jac):
                 new_fun = flatten_func_grad(new_fun)
@@ -460,33 +436,49 @@ def augment_minimizer(minimizer):
 
 
 def log_minimizer(minimizer):
+    """
+    Log-Trick decorator for wrapped optimizers.
+
+
+    TODO: TEST!!!!
+
+    """
 
     @wraps(minimizer)
-    def new_minimizer(fun, x0, bounds=None, jac=True, **minimizer_kwargs):
+    def new_minimizer(fun, x0, jac=True, bounds=None, **minimizer_kwargs):
 
         if bounds is None:
-            return minimizer(fun, x0, bounds, jac, **minimizer_kwargs)
+            return minimizer(fun, x0, jac=jac, bounds=bounds,
+                             **minimizer_kwargs)
 
+        # Functions that implement the log trick
         ispos = [isinstance(b, Positive) for b in bounds]
-        logx = lambda x: [np.log(xi) if pos is True else xi for xi, pos
-                          in zip(x, ispos)]
-        expx = lambda x: [np.exp(xi) if pos is True else xi for xi, pos
-                          in zip(x, ispos)]
-        gradx = lambda g, x: [gi * xi if pos is True else gi for xi, gi, pos
-                              in zip(x, g, ispos)]
+        logx = lambda x: np.array([np.log(xi) if pos else xi
+                                   for xi, pos in zip(x, ispos)])
+        expx = lambda x: np.array([np.exp(xi) if pos else xi
+                                   for xi, pos in zip(x, ispos)])
+        gradx = lambda g, x: np.array([gi * xi if pos else gi
+                                       for xi, gi, pos in zip(x, g, ispos)])
 
         if callable(jac):
-            jac = lambda *jac_args, **jac_kwargs: gradx(jac(*jac_args,
-                                                            **jac_kwargs))
+            jac = lambda x, *fargs, **fkwargs: gradx(jac(expx(x), *fargs,
+                                                         **fkwargs), x)
         else:
             if bool(jac):
-                def new_fun(x):
-                    obj, grad = fun(expx(x))
-                    return obj, gradx(grad)
+                def new_fun(x, *fargs, **fkwargs):
+                    o, g = fun(expx(x), *fargs, **fkwargs)
+                    return o, gradx(g, expx(x))
             else:
-                def new_fun(x):
-                    return fun(expx(x))
+                def new_fun(x, *fargs, **fkwargs):
+                    return fun(expx(x), *fargs, **fkwargs)
 
-        # TODO: redefine bounds properly!!!
-        bounds = None
-        return minimizer(new_fun, logx(x0), bounds, jac, **minimizer_kwargs)
+        # Redefine bounds as appropriate for new ranges
+        bounds = [Bound() if pos else b for b, pos in zip(bounds, ispos)]
+
+        # Transform the final result
+        result = minimizer(new_fun, logx(x0), jac=jac, bounds=bounds,
+                           **minimizer_kwargs)
+        result['x'] = expx(result['x'])
+        return result
+
+    return new_minimizer

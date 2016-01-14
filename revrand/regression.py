@@ -22,7 +22,7 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd, augment_minimizer
+from .optimize import minimize, sgd, augment_minimizer, log_minimizer
 from .utils import list_to_params as l2p, CatParameters, checktypes, Bound, \
     Positive
 
@@ -87,17 +87,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     mcache = np.zeros(D)
     Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
 
-    # Initial parameter vector
-    # vparams = [var, regulariser, bparams]
-    # posbounds = checktypes(basis.bounds, Positive)
-    # pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
-    #                      else [0, 1])
-
-    # def ELBO(params):
     def ELBO(_var, _lambda, *_theta):
-
-        # uparams = pcat.unflatten(params)
-        # _var, _lambda, _theta = uparams
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
@@ -163,24 +153,12 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(-dt)
 
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        # dtheta = l2p(_theta, dtheta)
-
-        # return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
         return -ELBO, [-dvar, -dlambda] + dtheta
 
-    # NOTE: It would be nice if the optimizer knew how to handle Positive
-    # bounds when the log trick is used, so we dont have to have this boiler
-    # plate...
-    # bounds = [Bound()] * 2
-    # bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    # res = minimize(ELBO, pcat.flatten(vparams), method='L-BFGS-B', jac=True,
-    #                bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
-    # var, regulariser, bparams = pcat.unflatten(res.x)
     bounds = [Positive()] * 2 + basis.bounds
-    nmin = augment_minimizer(minimize)
+    nmin = augment_minimizer(log_minimizer(minimize))
     res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
-               bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
+               bounds=bounds, ftol=ftol, maxiter=maxit)
     var, regulariser, bparams = res.x[0], res.x[1], res.x[2:]
 
     if verbose:

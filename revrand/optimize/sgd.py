@@ -5,6 +5,7 @@ Stochastic Gradient Descent
 import numpy as np
 from scipy.optimize import OptimizeResult
 
+
 def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
         eta=1e-5, gtol=1e-3, passes=10, eval_obj=False):
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
