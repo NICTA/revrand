@@ -23,7 +23,7 @@ from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
 from .optimize import minimize, sgd, struct_minimizer, logtrick_minimizer, \
-    struct_sgd, logtrick_sgd
+    struct_sgd, logtrick_sgd, sgd_data_wrap
 from .utils import list_to_params as l2p, CatParameters, checktypes, Bound, \
     Positive
 
@@ -257,18 +257,10 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     Sinit = gamma.rvs(2, scale=0.5, size=D)
     Uinit = np.random.randn(D, rank) if rank > 0 else 0
 
-    # Initial parameter vector
-    # vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
-    # posbounds = checktypes(basis.bounds, Positive)
-    # pcat = CatParameters(vparams, log_indices=[1, 3, 4, 5] if posbounds
-    #                      else [1, 3, 4])
-
-    # def ELBO(params, data):
+    @sgd_data_wrap
     def ELBO(m, S, U, _var, _lambda, *_theta, Data):
 
         y, X = Data[:, 0], Data[:, 1:]
-        # uparams = pcat.unflatten(params)
-        # m, S, U, _var, _lambda, _theta = uparams
 
         # Get Basis
         Phi = basis(X, *_theta)                      # Nb x D
@@ -336,28 +328,12 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(-dt)
 
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        # dtheta = l2p(_theta, dtheta)
-
         return -ELBO, [-dm, -dS, -dU, -dvar, -dlambda] + dtheta
-        # return -ELBO, -pcat.flatten_grads(uparams, [dm, dS, dU, dvar, dlambda,
-        #                                             dtheta])
-
-    # NOTE: It would be nice if the optimizer knew how to handle Positive
-    # bounds when the log trick is used, so we dont have to have this boiler
-    # plate...
-    # bounds = [Bound()] * (2 * D + max(1, rank * D) + 2)
-    # bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    # res = sgd(ELBO, pcat.flatten(vparams), np.hstack((y[:, np.newaxis], X)),
-    #           rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
-    #           batchsize=batchsize, eval_obj=True)
-    # m, S, U, var, regulariser, bparams = pcat.unflatten(res.x)
 
     vparams = [minit, Sinit, Uinit, var, regulariser] + bparams
-    bounds = [Bound()] * D + [Positive()] * D \
-        + [Bound()] * max(1, rank * D) + [Positive()] * 2 + basis.bounds
-    # nsgd = struct_sgd(logtrick_sgd(sgd))
-    nsgd = struct_sgd(sgd)
+    bounds = [Bound()] * D + [Positive()] * D + [Bound()] * max(1, rank * D) \
+        + [Positive()] * 2 + basis.bounds
+    nsgd = struct_sgd(logtrick_sgd(sgd))
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
                batchsize=batchsize, eval_obj=True)
@@ -371,6 +347,8 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
         log.info('Termination condition: {}.'.format(res['message']))
 
     return m, C, bparams, var
+
+
 
 
 def predict(Xs, basis, m, C, bparams, var):

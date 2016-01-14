@@ -11,6 +11,7 @@ from .base import (minimize,
                    struct_sgd,
                    logtrick_minimizer,
                    logtrick_sgd,
+                   sgd_data_wrap,
                    candidate_start_points_lattice,
                    candidate_start_points_random)
 
@@ -22,6 +23,7 @@ __all__ = [
     'struct_sgd',
     'logtrick_minimizer',
     'logtrick_sgd',
+    'sgd_data_wrap',
     'candidate_start_points_lattice',
     'candidate_start_points_random',
 ]

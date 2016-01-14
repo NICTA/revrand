@@ -537,6 +537,15 @@ def logtrick_sgd(sgd):
     return new_sgd
 
 
+def sgd_data_wrap(func):
+
+    @wraps(func)
+    def new_obj(*args):
+        return func(*args[:-1], Data=args[-1])
+
+    return new_obj
+
+
 #
 # Helper functions for log trick
 #

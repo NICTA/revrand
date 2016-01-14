@@ -6,7 +6,7 @@ import numpy as np
 def make_quadratic():
 
     # Find quadratic parameters y = a*x**2 + b*x + c
-    a = 3.
+    a = 3.  # Keep these positive for the log-trick tests!!
     b = 2.
     c = 1.
     N = 1000
