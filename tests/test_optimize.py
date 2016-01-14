@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from revrand.optimize import sgd, minimize, struct_minimizer, \
-    logtrick_minimizer
+    logtrick_minimizer, struct_sgd, logtrick_sgd
 from revrand.utils import CatParameters, Bound, Positive, flatten
 
 
@@ -21,8 +21,7 @@ def test_unbounded(make_quadratic):
     Ea, Eb, Ec = res['x']
     assert np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
-    res = minimize(qobj, w0, args=(data, False), jac=False, method=None,
-                   xtol=1e-8)
+    res = minimize(qobj, w0, args=(data, False), jac=False, method=None)
     Ea, Eb, Ec = res['x']
     assert np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
@@ -55,8 +54,14 @@ def test_structured_params(make_quadratic):
                method='L-BFGS-B')
     (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
 
+    nsgd = struct_sgd(sgd)
+    res = nsgd(qobj_struc, w0, data, bounds=None, eval_obj=True, gtol=1e-4,
+               passes=1000, rate=0.95, eta=1e-6)
+    (Ea_sgd, Eb_sgd), Ec_sgd = res['x']
+
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,
                        rtol=0)
+    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-2, rtol=0)
 
 
 def test_log_params(make_quadratic):
@@ -70,8 +75,14 @@ def test_log_params(make_quadratic):
                method='L-BFGS-B')
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
 
+    nsgd = logtrick_sgd(sgd)
+    res = nsgd(qobj, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
+               passes=1000, rate=0.95, eta=1e-6)
+    Ea_sgd, Eb_sgd, Ec_sgd = res['x']
+
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,
                        rtol=0)
+    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-1, rtol=0)
 
 
 def test_logstruc_params(make_quadratic):
@@ -85,8 +96,14 @@ def test_logstruc_params(make_quadratic):
                method='L-BFGS-B')
     (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
 
+    nsgd = struct_sgd(logtrick_sgd(sgd))
+    res = nsgd(qobj_struc, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
+               passes=1000, rate=0.95, eta=1e-6)
+    (Ea_sgd, Eb_sgd), Ec_sgd = res['x']
+
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,
                        rtol=0)
+    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-1, rtol=0)
 
 
 def test_catparams(make_quadratic):
@@ -137,7 +154,7 @@ def qobj(w, data, grad=True):
 
 def qobj_struc(w12, w3, data, grad=True):
 
-    return qobj(flatten([w12, w3])[0], data, grad)
+    return qobj(flatten([w12, w3], returns_shapes=False), data, grad)
 
 
 if __name__ == "__main__":

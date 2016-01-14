@@ -386,6 +386,9 @@ def flatten_args(shapes, order='C'):
 
 def struct_minimizer(minimizer):
     """
+    Allow an optimizer to accept a list of parameters to optimize, rather than
+    just a flattened array.
+
     Examples
     --------
     >>> from scipy.optimize import minimize as sp_min
@@ -435,13 +438,40 @@ def struct_minimizer(minimizer):
     return new_minimizer
 
 
+def struct_sgd(sgd):
+    """
+    Allow stochastic gradients to accept a list of parameters to optimize,
+    rather than just a flattened array.
+
+    TODO: examples
+    """
+
+    @wraps(sgd)
+    def new_sgd(fun, ndarrays, Data, eval_obj=False, **sgd_kwargs):
+
+        array1d, shapes = flatten(ndarrays)
+        flatten_args_dec = flatten_args(shapes)
+
+        new_fun = flatten_args_dec(fun)
+
+        if bool(eval_obj):
+            new_fun = flatten_func_grad(new_fun)
+        else:
+            new_fun = flatten(new_fun, returns_shapes=False)
+
+        result = sgd(new_fun, array1d, Data=Data, eval_obj=eval_obj,
+                     **sgd_kwargs)
+        result['x'] = tuple(unflatten(result['x'], shapes))
+        return result
+
+    return new_sgd
+
+
 def logtrick_minimizer(minimizer):
     """
-    Log-Trick decorator for wrapped optimizers.
+    Log-Trick decorator for optimizers.
 
-
-    TODO: TEST!!!!
-
+    TODO: examples (how it works with bounds)
     """
 
     @wraps(minimizer)
@@ -451,14 +481,7 @@ def logtrick_minimizer(minimizer):
             return minimizer(fun, x0, jac=jac, bounds=bounds,
                              **minimizer_kwargs)
 
-        # Functions that implement the log trick
-        ispos = [isinstance(b, Positive) for b in bounds]
-        logx = lambda x: np.array([np.log(xi) if pos else xi
-                                   for xi, pos in zip(x, ispos)])
-        expx = lambda x: np.array([np.exp(xi) if pos else xi
-                                   for xi, pos in zip(x, ispos)])
-        gradx = lambda g, x: np.array([gi * xi if pos else gi
-                                       for xi, gi, pos in zip(x, g, ispos)])
+        logx, expx, gradx, bounds = _logtrick_gen(bounds)
 
         if callable(jac):
             jac = lambda x, *fargs, **fkwargs: gradx(jac(expx(x), *fargs,
@@ -467,13 +490,10 @@ def logtrick_minimizer(minimizer):
             if bool(jac):
                 def new_fun(x, *fargs, **fkwargs):
                     o, g = fun(expx(x), *fargs, **fkwargs)
-                    return o, gradx(g, expx(x))
+                    return o, gradx(g, x)
             else:
                 def new_fun(x, *fargs, **fkwargs):
                     return fun(expx(x), *fargs, **fkwargs)
-
-        # Redefine bounds as appropriate for new ranges
-        bounds = [Bound() if pos else b for b, pos in zip(bounds, ispos)]
 
         # Transform the final result
         result = minimizer(new_fun, logx(x0), jac=jac, bounds=bounds,
@@ -482,3 +502,59 @@ def logtrick_minimizer(minimizer):
         return result
 
     return new_minimizer
+
+
+def logtrick_sgd(sgd):
+    """
+    Log-Trick decorator for stochastic gradients.
+
+    TODO: examples (how it works with bounds)
+    """
+
+    @wraps(sgd)
+    def new_sgd(fun, x0, Data, bounds=None, eval_obj=False, **sgd_kwargs):
+
+        if bounds is None:
+            return sgd(fun, x0, Data, bounds=bounds, eval_obj=eval_obj,
+                       **sgd_kwargs)
+
+        logx, expx, gradx, bounds = _logtrick_gen(bounds)
+
+        if bool(eval_obj):
+            def new_fun(x, *fargs, **fkwargs):
+                o, g = fun(expx(x), *fargs, **fkwargs)
+                return o, gradx(g, x)
+        else:
+            def new_fun(x, *fargs, **fkwargs):
+                return gradx(fun(expx(x), *fargs, **fkwargs), x)
+
+        # Transform the final result
+        result = sgd(new_fun, logx(x0), Data, bounds=bounds, eval_obj=eval_obj,
+                     **sgd_kwargs)
+        result['x'] = expx(result['x'])
+        return result
+
+    return new_sgd
+
+
+#
+# Helper functions for log trick
+#
+
+def _logtrick_gen(bounds):
+
+    # Test which parameters we can apply the log trick too
+    ispos = [isinstance(b, Positive) for b in bounds]
+
+    # Functions that implement the log trick
+    logx = lambda x: np.array([np.log(xi) if pos else xi
+                               for xi, pos in zip(x, ispos)])
+    expx = lambda x: np.array([np.exp(xi) if pos else xi
+                               for xi, pos in zip(x, ispos)])
+    gradx = lambda g, logx: np.array([gi * np.exp(lxi) if pos else gi
+                                      for lxi, gi, pos in zip(logx, g, ispos)])
+
+    # Redefine bounds as appropriate for new ranges
+    bounds = [Bound() if pos else b for b, pos in zip(bounds, ispos)]
+
+    return logx, expx, gradx, bounds
