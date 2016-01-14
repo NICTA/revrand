@@ -22,7 +22,7 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd, augment_minimizer, log_minimizer
+from .optimize import minimize, sgd, struct_minimizer, logtrick_minimizer
 from .utils import list_to_params as l2p, CatParameters, checktypes, Bound, \
     Positive
 
@@ -156,7 +156,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         return -ELBO, [-dvar, -dlambda] + dtheta
 
     bounds = [Positive()] * 2 + basis.bounds
-    nmin = augment_minimizer(log_minimizer(minimize))
+    nmin = struct_minimizer(logtrick_minimizer(minimize))
     res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
                bounds=bounds, ftol=ftol, maxiter=maxit)
     var, regulariser, bparams = res.x[0], res.x[1], res.x[2:]

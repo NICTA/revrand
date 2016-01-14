@@ -2,7 +2,8 @@ from __future__ import division
 
 import numpy as np
 
-from revrand.optimize import sgd, minimize, augment_minimizer, log_minimizer
+from revrand.optimize import sgd, minimize, struct_minimizer, \
+    logtrick_minimizer
 from revrand.utils import CatParameters, Bound, Positive, flatten
 
 
@@ -49,7 +50,7 @@ def test_structured_params(make_quadratic):
     a, b, c, data, _ = make_quadratic
     w0 = [np.random.randn(2), np.random.randn(1)[0]]
 
-    nmin = augment_minimizer(minimize)
+    nmin = struct_minimizer(minimize)
     res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=None,
                method='L-BFGS-B')
     (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
@@ -64,7 +65,7 @@ def test_log_params(make_quadratic):
     w0 = np.abs(np.random.randn(3))
     bounds = [Positive(), Bound(), Positive()]
 
-    nmin = log_minimizer(minimize)
+    nmin = logtrick_minimizer(minimize)
     res = nmin(qobj, w0, args=(data,), jac=True, bounds=bounds,
                method='L-BFGS-B')
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
@@ -79,7 +80,7 @@ def test_logstruc_params(make_quadratic):
     w0 = [np.abs(np.random.randn(2)), np.abs(np.random.randn(1))[0]]
     bounds = [Positive(), Bound(), Positive()]
 
-    nmin = augment_minimizer(log_minimizer(minimize))
+    nmin = struct_minimizer(logtrick_minimizer(minimize))
     res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=bounds,
                method='L-BFGS-B')
     (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']

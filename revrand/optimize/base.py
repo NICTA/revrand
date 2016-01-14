@@ -384,7 +384,7 @@ def flatten_args(shapes, order='C'):
     return flatten_args_dec
 
 
-def augment_minimizer(minimizer):
+def struct_minimizer(minimizer):
     """
     Examples
     --------
@@ -435,7 +435,7 @@ def augment_minimizer(minimizer):
     return new_minimizer
 
 
-def log_minimizer(minimizer):
+def logtrick_minimizer(minimizer):
     """
     Log-Trick decorator for wrapped optimizers.
 
