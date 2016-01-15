@@ -544,8 +544,6 @@ def logtrick_sgd(sgd):
 
 def sgd_data_wrap(func):
 
-    # TODO: can we encorporate this in the SGD optimisation decorators?
-
     @wraps(func)
     def new_obj(*args):
         return func(*args[:-1], Data=args[-1])

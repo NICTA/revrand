@@ -16,7 +16,9 @@ from scipy.stats.distributions import gamma
 from scipy.optimize import brentq
 
 from .transforms import logsumexp
-from .optimize import minimize, sgd
+from .optimize import minimize, sgd, sgd_data_wrap, structured_sgd, \
+    structured_minimizer, logtrick_sgd, logtrick_minimizer
+
 from .utils import CatParameters, Bound, Positive, checktypes, \
     list_to_params as l2p
 
