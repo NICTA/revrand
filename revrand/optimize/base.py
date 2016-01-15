@@ -416,9 +416,11 @@ def structured_minimizer(minimizer):
     """
 
     @wraps(minimizer)
-    def new_minimizer(fun, ndarrays, jac=True, **minimizer_kwargs):
+    def new_minimizer(fun, ndarrays, jac=True, bounds=None,
+                      **minimizer_kwargs):
 
         array1d, shapes = flatten(ndarrays)
+        fbounds = _flatten_bounds(bounds, shapes)
         flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -430,7 +432,8 @@ def structured_minimizer(minimizer):
             if bool(jac):
                 new_fun = flatten_func_grad(new_fun)
 
-        result = minimizer(new_fun, array1d, jac=jac, **minimizer_kwargs)
+        result = minimizer(new_fun, array1d, jac=jac, bounds=fbounds,
+                           **minimizer_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
         result['jac'] = tuple(unflatten(result['jac'], shapes))
         return result
@@ -447,9 +450,11 @@ def structured_sgd(sgd):
     """
 
     @wraps(sgd)
-    def new_sgd(fun, ndarrays, Data, eval_obj=False, **sgd_kwargs):
+    def new_sgd(fun, ndarrays, Data, bounds=None, eval_obj=False,
+                **sgd_kwargs):
 
         array1d, shapes = flatten(ndarrays)
+        fbounds = _flatten_bounds(bounds, shapes)
         flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -459,8 +464,8 @@ def structured_sgd(sgd):
         else:
             new_fun = flatten(new_fun, returns_shapes=False)
 
-        result = sgd(new_fun, array1d, Data=Data, eval_obj=eval_obj,
-                     **sgd_kwargs)
+        result = sgd(new_fun, array1d, Data=Data, bounds=fbounds,
+                     eval_obj=eval_obj, **sgd_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
         return result
 
@@ -547,7 +552,7 @@ def sgd_data_wrap(func):
 
 
 #
-# Helper functions for log trick
+# Helper functions
 #
 
 def _logtrick_gen(bounds):
@@ -567,3 +572,24 @@ def _logtrick_gen(bounds):
     bounds = [Bound() if pos else b for b, pos in zip(bounds, ispos)]
 
     return logx, expx, gradx, bounds
+
+
+def _flatten_bounds(bounds, shapes):
+
+    # TODO: generalise this for all potential shapes
+
+    if bounds is None:
+        return None
+
+    flat_bounds = []
+    for b, s in zip(bounds, shapes):
+        if len(s) == 0:
+            flat_bounds.append(b)
+        elif len(s) == 1:
+            flat_bounds.extend(b)
+        elif len(s) == 2:
+            flat_bounds.extend([bbb for bb in b for bbb in bb])
+        else:
+            raise NotImplementedError("Sorry, only matrix bounded parameters")
+
+    return flat_bounds

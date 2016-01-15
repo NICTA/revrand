@@ -89,7 +89,7 @@ def test_logstruc_params(make_quadratic):
 
     a, b, c, data, _ = make_quadratic
     w0 = [np.abs(np.random.randn(2)), np.abs(np.random.randn(1))[0]]
-    bounds = [Positive(), Bound(), Positive()]
+    bounds = [[Positive(), Bound()], Positive()]
 
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=bounds,
