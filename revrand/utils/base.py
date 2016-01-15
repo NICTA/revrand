@@ -50,14 +50,29 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
     ValueError: lower bound cannot be greater than upper bound!
     """
 
-    def __new__(cls, lower=None, upper=None):
+    def __new__(cls, lower=None, upper=None, shape=()):
+        # Shape is unused, but we have to have the same signature as the init
+        # We need new because named tuples are immutable
 
         if lower is not None and upper is not None:
             if lower > upper:
                 raise ValueError('lower bound cannot be greater than upper '
                                  'bound!')
-
         return super(Bound, cls).__new__(cls, lower, upper)
+
+    def __init__(self, lower=None, upper=None, shape=()):
+        # This init is just for copying this class.
+
+        self.shape = shape
+
+    def flatten(self):
+
+        if self.shape == ():
+            return [self]
+
+        cpy = self.__class__(shape=())
+
+        return [cpy for _ in range(np.prod(self.shape))]
 
 
 class Positive(Bound):
@@ -93,17 +108,16 @@ class Positive(Bound):
         ...
     ValueError: lower bound must be positive!
     """
-    def __new__(cls, lower=1e-14):
+    def __new__(cls, lower=1e-14, shape=()):
 
         if lower <= 0:
             raise ValueError('lower bound must be positive!')
 
-        return super(Positive, cls).__new__(cls, lower, None)
-        # return Bound.__new__(cls, lower, None)
+        return super(Positive, cls).__new__(cls, lower, None, shape)
 
     def __getnewargs__(self):
         """Required for pickling!"""
-        return (self.lower, )
+        return (self.lower,)
 
 
 class Bunch(dict):

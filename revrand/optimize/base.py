@@ -420,7 +420,7 @@ def structured_minimizer(minimizer):
                       **minimizer_kwargs):
 
         array1d, shapes = flatten(ndarrays)
-        fbounds = _flatten_bounds(bounds, shapes)
+        fbounds = _flatten_bounds(bounds)
         flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -454,7 +454,7 @@ def structured_sgd(sgd):
                 **sgd_kwargs):
 
         array1d, shapes = flatten(ndarrays)
-        fbounds = _flatten_bounds(bounds, shapes)
+        fbounds = _flatten_bounds(bounds)
         flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -558,7 +558,7 @@ def sgd_data_wrap(func):
 def _logtrick_gen(bounds):
 
     # Test which parameters we can apply the log trick too
-    ispos = [isinstance(b, Positive) for b in bounds]
+    ispos = [(type(b) is Positive) for b in bounds]
 
     # Functions that implement the log trick
     logx = lambda x: np.array([np.log(xi) if pos else xi
@@ -574,7 +574,7 @@ def _logtrick_gen(bounds):
     return logx, expx, gradx, bounds
 
 
-def _flatten_bounds(bounds, shapes):
+def _flatten_bounds(bounds):
 
     # TODO: generalise this for all potential shapes
 
@@ -582,14 +582,10 @@ def _flatten_bounds(bounds, shapes):
         return None
 
     flat_bounds = []
-    for b, s in zip(bounds, shapes):
-        if len(s) == 0:
+    for b in bounds:
+        if (type(b) is list) or (type(b) is tuple):
             flat_bounds.append(b)
-        elif len(s) == 1:
-            flat_bounds.extend(b)
-        elif len(s) == 2:
-            flat_bounds.extend([bbb for bb in b for bbb in bb])
         else:
-            raise NotImplementedError("Sorry, only matrix bounded parameters")
+            flat_bounds.extend(b.flatten())
 
     return flat_bounds

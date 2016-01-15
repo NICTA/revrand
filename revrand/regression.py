@@ -330,10 +330,11 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
         return -ELBO, [-dm, -dS, -dU, -dvar, -dlambda] + dtheta
 
     vparams = [minit, Sinit, Uinit, var, regulariser] + bparams
-    bounds = [[Bound()] * D,
-              [Positive()] * D,
-              [[Bound()] * max(1, rank)] * D,
-              Positive(), Positive()] + basis.bounds
+    bounds = [Bound(shape=minit.shape),
+              Positive(shape=Sinit.shape),
+              Bound(shape=Uinit.shape),
+              Positive(),
+              Positive()] + basis.bounds
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
