@@ -7,7 +7,7 @@ and also supports custom optimization methods.
 from .sgd import sgd
 from .base import (minimize,
                    minimize_bounded_start,
-                   struct_minimizer,
+                   structured_minimizer,
                    struct_sgd,
                    logtrick_minimizer,
                    logtrick_sgd,
@@ -19,7 +19,7 @@ __all__ = [
     'sgd',
     'minimize',
     'minimize_bounded_start',
-    'struct_minimizer',
+    'structured_minimizer',
     'struct_sgd',
     'logtrick_minimizer',
     'logtrick_sgd',

@@ -384,7 +384,7 @@ def flatten_args(shapes, order='C'):
     return flatten_args_dec
 
 
-def struct_minimizer(minimizer):
+def structured_minimizer(minimizer):
     """
     Allow an optimizer to accept a list of parameters to optimize, rather than
     just a flattened array.

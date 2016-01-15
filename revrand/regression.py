@@ -22,10 +22,9 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd, struct_minimizer, logtrick_minimizer, \
-    struct_sgd, logtrick_sgd, sgd_data_wrap
-from .utils import list_to_params as l2p, CatParameters, checktypes, Bound, \
-    Positive
+from .optimize import minimize, sgd, structured_minimizer, \
+    logtrick_minimizer, struct_sgd, logtrick_sgd, sgd_data_wrap
+from .utils import Bound, Positive
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -157,7 +156,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         return -ELBO, [-dvar, -dlambda] + dtheta
 
     bounds = [Positive()] * 2 + basis.bounds
-    nmin = struct_minimizer(logtrick_minimizer(minimize))
+    nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
                bounds=bounds, ftol=ftol, maxiter=maxit)
     var, regulariser, bparams = res.x[0], res.x[1], res.x[2:]
@@ -333,6 +332,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     vparams = [minit, Sinit, Uinit, var, regulariser] + bparams
     bounds = [Bound()] * D + [Positive()] * D + [Bound()] * max(1, rank * D) \
         + [Positive()] * 2 + basis.bounds
+
     nsgd = struct_sgd(logtrick_sgd(sgd))
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
@@ -347,8 +347,6 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
         log.info('Termination condition: {}.'.format(res['message']))
 
     return m, C, bparams, var
-
-
 
 
 def predict(Xs, basis, m, C, bparams, var):
