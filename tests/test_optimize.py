@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from revrand.optimize import sgd, minimize, structured_minimizer, \
-    logtrick_minimizer, struct_sgd, logtrick_sgd
+    logtrick_minimizer, structured_sgd, logtrick_sgd
 from revrand.utils import CatParameters, Bound, Positive, flatten
 
 
@@ -54,14 +54,14 @@ def test_structured_params(make_quadratic):
                method='L-BFGS-B')
     (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
 
-    nsgd = struct_sgd(sgd)
+    nsgd = structured_sgd(sgd)
     res = nsgd(qobj_struc, w0, data, bounds=None, eval_obj=True, gtol=1e-4,
                passes=1000, rate=0.95, eta=1e-6)
     (Ea_sgd, Eb_sgd), Ec_sgd = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,
                        rtol=0)
-    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-2, rtol=0)
+    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-1, rtol=0)
 
 
 def test_log_params(make_quadratic):
@@ -96,7 +96,7 @@ def test_logstruc_params(make_quadratic):
                method='L-BFGS-B')
     (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
 
-    nsgd = struct_sgd(logtrick_sgd(sgd))
+    nsgd = structured_sgd(logtrick_sgd(sgd))
     res = nsgd(qobj_struc, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
                passes=1000, rate=0.95, eta=1e-6)
     (Ea_sgd, Eb_sgd), Ec_sgd = res['x']

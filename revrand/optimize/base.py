@@ -376,8 +376,8 @@ def flatten_args(shapes, order='C'):
 
         @wraps(func)
         def new_func(array1d, *args, **kwargs):
-            xlist = unflatten(array1d, shapes, order)
-            return func(*xlist, *args, **kwargs)
+            args = tuple(unflatten(array1d, shapes, order)) + args
+            return func(*args, **kwargs)
 
         return new_func
 
@@ -404,7 +404,7 @@ def structured_minimizer(minimizer):
 
     Augment the Scipy optimizer to take structured inputs
 
-    >>> new_min = augment_minimizer(sp_min)
+    >>> new_min = structured_minimizer(sp_min)
 
     Initial values
 
@@ -438,7 +438,7 @@ def structured_minimizer(minimizer):
     return new_minimizer
 
 
-def struct_sgd(sgd):
+def structured_sgd(sgd):
     """
     Allow stochastic gradients to accept a list of parameters to optimize,
     rather than just a flattened array.

@@ -23,7 +23,7 @@ from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
 from .optimize import minimize, sgd, structured_minimizer, \
-    logtrick_minimizer, struct_sgd, logtrick_sgd, sgd_data_wrap
+    logtrick_minimizer, structured_sgd, logtrick_sgd, sgd_data_wrap
 from .utils import Bound, Positive
 
 # Set up logging
@@ -333,7 +333,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     bounds = [Bound()] * D + [Positive()] * D + [Bound()] * max(1, rank * D) \
         + [Positive()] * 2 + basis.bounds
 
-    nsgd = struct_sgd(logtrick_sgd(sgd))
+    nsgd = structured_sgd(logtrick_sgd(sgd))
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
                batchsize=batchsize, eval_obj=True)
