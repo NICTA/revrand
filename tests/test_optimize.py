@@ -3,8 +3,8 @@ from __future__ import division
 import numpy as np
 
 from revrand.optimize import sgd, minimize, structured_minimizer, \
-    logtrick_minimizer, structured_sgd, logtrick_sgd
-from revrand.utils import CatParameters, Bound, Positive, flatten
+    logtrick_minimizer, structured_sgd, logtrick_sgd, Bound, Positive
+from revrand.utils import flatten
 
 
 def test_unbounded(make_quadratic):
@@ -106,36 +106,6 @@ def test_logstruc_params(make_quadratic):
     assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-1, rtol=0)
 
 
-def test_catparams(make_quadratic):
-
-    a, b, c, data, _ = make_quadratic
-    y, x = data[:, 0], data[:, 1]
-    N = len(data)
-
-    u = y - (a * x**2 + b * x + c)
-    da, db, dc = -2 * np.array([(x**2 * u).sum(), (x * u).sum(), u.sum()]) / N
-
-    params = [[a, b], c]
-    grad = [[da, db], dc]
-
-    # Test parameter flattening and logging
-    pcat = CatParameters(params, log_indices=[1])
-    fparams = pcat.flatten(params)
-    assert all(np.array([a, b, np.log(c)]) == fparams)
-
-    # Test gradient flattening and chain rule
-    dparams = pcat.flatten_grads(params, grad)
-    assert all(np.array([da, db, dc * c]) == dparams)
-
-    # Test parameter reconstruction
-    rparams = pcat.unflatten(fparams)
-    for rp, p in zip(rparams, params):
-        if not np.isscalar(rp):
-            assert all(rp == p)
-        else:
-            assert rp == p
-
-
 def qobj(w, data, grad=True):
 
     y, x = data[:, 0], data[:, 1]
@@ -161,7 +131,6 @@ if __name__ == "__main__":
     from conftest import make_quadratic
     test_unbounded(make_quadratic())
     test_bounded(make_quadratic())
-    test_catparams(make_quadratic())
     test_structured_params(make_quadratic())
     test_log_params(make_quadratic())
     test_logstruc_params(make_quadratic())

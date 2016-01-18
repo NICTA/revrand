@@ -16,11 +16,8 @@ from scipy.stats.distributions import gamma
 from scipy.optimize import brentq
 
 from .transforms import logsumexp
-from .optimize import minimize, sgd, sgd_data_wrap, structured_sgd, \
-    structured_minimizer, logtrick_sgd, logtrick_minimizer
-
-from .utils import CatParameters, Bound, Positive, checktypes, \
-    list_to_params as l2p
+from .optimize import minimize, sgd, structured_sgd, structured_minimizer, \
+    logtrick_sgd, logtrick_minimizer, Bound, Positive
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -133,12 +130,10 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     H = np.empty((D, K))
 
     # Objective function Eq. 10 from [1], and gradients of ALL params
-    def L2(params, data):
+    def L2(_m, _C, _reg, _lparams, _bparams, data):
 
         # Extract data, parameters, etc
         y, X = data[:, 0], data[:, 1:]
-        uparams = pcat.unflatten(params)
-        _m, _C, _reg, _lparams, _bparams = uparams
 
         # Dimensions
         M, d = X.shape
@@ -161,8 +156,8 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Big loop though posterior mixtures for calculating stuff
         ll = 0
         dlp = [np.zeros_like(p) for p in _lparams]
-        # dbp = [np.zeros_like(p) for p in _bparams]
-        dbp = np.zeros(len(dPhi))
+        dbp = [np.zeros_like(p) for p in _bparams]
+        # dbp = np.zeros(len(dPhi))
 
         for k in range(K):
 
@@ -187,17 +182,14 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
             for l in range(len(_lparams)):
                 dpH = dp2df[l].dot(Phi2)
-                dlp[l] += B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
+                dlp[l] -= B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
-            # for l in range(len(_bparams)):
-            for l in range(len(dPhi)):
+            # for l in range(len(dPhi)):
+            for l in range(len(_bparams)):
                 dPhimk = dPhi[l].dot(_m[:, k])
                 dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
-                dbp[l] += (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
-
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        dbp = l2p(_bparams, dbp)
+                dbp[l] -= (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
@@ -213,41 +205,31 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
                      .format(L2, _reg, _lparams, _bparams))
 
-        return -L2, -pcat.flatten_grads(uparams, [dm, dC, dreg, dlp, dbp])
+        return -L2, [-dm, -dC, -dreg, dlp, dbp]
 
     # Intialise m and C
     m = np.random.randn(D, K) + np.arange(K) - K / 2
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
-    # Optimiser boiler plate for bounds, log trick, etc
-    # NOTE: It would be nice if the optimizer knew how to handle Positive
-    # bounds when the log trick is used, so we dont have to have this boiler
-    # plate...
-    bounds = [Bound()] * (2 * np.prod(m.shape) + 1)
-    loginds = [1, 2]
-    if checktypes(likelihood.bounds, Positive):
-        loginds.append(3)
-        bounds += [Bound()] * len(likelihood.bounds)
-    else:
-        bounds += likelihood.bounds
-    if checktypes(basis.bounds, Positive):
-        loginds.append(4)
-        bounds += [Bound()] * len(basis.bounds)
-    else:
-        bounds += basis.bounds
-    pcat = CatParameters([m, C, reg, lparams, bparams], log_indices=loginds)
+    bounds = [Bound(shape=m.shape),
+              Positive(shape=C.shape),
+              Positive(),
+              likelihood.bounds,
+              basis.bounds]
 
     if use_sgd is False:
-        res = minimize(L2, pcat.flatten([m, C, reg, lparams, bparams]),
-                       ftol=tol, maxiter=maxit, method='L-BFGS-B', jac=True,
-                       bounds=bounds, args=(np.hstack((y[:, np.newaxis], X)),))
+        nmin = structured_minimizer(logtrick_minimizer(minimize))
+        res = nmin(L2, [m, C, reg, lparams, bparams], ftol=tol, maxiter=maxit,
+                   method='L-BFGS-B', jac=True, bounds=bounds,
+                   args=(np.hstack((y[:, np.newaxis], X)),))
     else:
-        res = sgd(L2, pcat.flatten([m, C, reg, lparams, bparams]),
-                  np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
-                  bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
-                  eval_obj=True)
+        nsgd = structured_sgd(logtrick_sgd(sgd))
+        res = nsgd(L2, [m, C, reg, lparams, bparams],
+                   np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
+                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
+                   eval_obj=True)
 
-    m, C, reg, lparams, bparams = pcat.unflatten(res.x)
+    m, C, reg, lparams, bparams = res.x
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "

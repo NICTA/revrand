@@ -9,7 +9,7 @@ import numpy as np
 from scipy.stats import bernoulli, poisson, norm
 from scipy.special import gammaln
 
-from .utils import Positive
+from .optimize import Positive
 from .transforms import logistic, softplus
 
 

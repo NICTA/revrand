@@ -22,9 +22,8 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd, structured_minimizer, \
-    logtrick_minimizer, structured_sgd, logtrick_sgd, sgd_data_wrap
-from .utils import Bound, Positive
+from .optimize import minimize, sgd, Bound, Positive, structured_minimizer, \
+    logtrick_minimizer, structured_sgd, logtrick_sgd
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -87,7 +86,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     mcache = np.zeros(D)
     Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
 
-    def ELBO(_var, _lambda, *_theta):
+    def ELBO(_var, _lambda, _theta):
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
@@ -153,13 +152,13 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(-dt)
 
-        return -ELBO, [-dvar, -dlambda] + dtheta
+        return -ELBO, [-dvar, -dlambda, dtheta]
 
-    bounds = [Positive()] * 2 + basis.bounds
+    bounds = [Positive(), Positive(), basis.bounds]
     nmin = structured_minimizer(logtrick_minimizer(minimize))
-    res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
+    res = nmin(ELBO, [var, regulariser, bparams], method='L-BFGS-B', jac=True,
                bounds=bounds, ftol=ftol, maxiter=maxit)
-    var, regulariser, bparams = res.x[0], res.x[1], res.x[2:]
+    var, regulariser, bparams = res.x
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
@@ -256,8 +255,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     Sinit = gamma.rvs(2, scale=0.5, size=D)
     Uinit = np.random.randn(D, rank) if rank > 0 else 0
 
-    @sgd_data_wrap
-    def ELBO(m, S, U, _var, _lambda, *_theta, Data):
+    def ELBO(m, S, U, _var, _lambda, _theta, Data):
 
         y, X = Data[:, 0], Data[:, 1:]
 
@@ -327,20 +325,20 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(-dt)
 
-        return -ELBO, [-dm, -dS, -dU, -dvar, -dlambda] + dtheta
+        return -ELBO, [-dm, -dS, -dU, -dvar, -dlambda, dtheta]
 
-    vparams = [minit, Sinit, Uinit, var, regulariser] + bparams
+    vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
     bounds = [Bound(shape=minit.shape),
               Positive(shape=Sinit.shape),
               Bound(shape=Uinit.shape),
               Positive(),
-              Positive()] + basis.bounds
+              Positive(), basis.bounds]
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
                batchsize=batchsize, eval_obj=True)
-    (m, S, U, var, regulariser), bparams = res.x[0:5], res.x[5:]
+    m, S, U, var, regulariser, bparams = res.x
 
     C = S if rank == 0 else U.dot(U.T) + np.diag(S)
 

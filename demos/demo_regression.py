@@ -139,15 +139,15 @@ def main():
     # Nonparametric variational inference GLM
     #
 
-    # llhood = likelihoods.Gaussian()
-    # lparams = [noise**2]
-    # params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
-    #                        reg=reg, use_sgd=True, rate=rate, postcomp=10,
-    #                        eta=eta, batchsize=batchsize, maxit=passes)
-    # Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
-    #                                            *params_glm)
-    # Vy_g = Vf_g + params_glm[2][0]
-    # Sy_g = np.sqrt(Vy_g)
+    llhood = likelihoods.Gaussian()
+    lparams = [noise**2]
+    params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
+                           reg=reg, use_sgd=True, rate=rate, postcomp=10,
+                           eta=eta, batchsize=batchsize, maxit=passes)
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
+                                               *params_glm)
+    Vy_g = Vf_g + params_glm[2][0]
+    Sy_g = np.sqrt(Vy_g)
 
     #
     # Learn GP and predict
@@ -169,12 +169,12 @@ def main():
     LL_sgd = mll(ftest, Ey_s, Vf_s)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
-    # LL_g = mll(ftest, Ey_g, Vy_g)
+    LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_sgd = smse(ftest, Ey_s)
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
-    # smse_glm = smse(ftest, Ey_g)
+    smse_glm = smse(ftest, Ey_g)
 
     log.info("A la Carte (SGD), LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_sgd, smse_sgd, np.sqrt(params_sgd[3]), params_sgd[2]))
@@ -183,9 +183,9 @@ def main():
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
-    # log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
-    #          .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
-    #                  params_glm[3]))
+    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+                     params_glm[3]))
 
     #
     # Plot
@@ -215,9 +215,9 @@ def main():
                     label=None)
 
     # GLM Regressor
-    # pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
-    # pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
-    #                 edgecolor='m', linestyle='--', label=None)
+    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+                    edgecolor='m', linestyle='--', label=None)
 
     pl.legend()
 

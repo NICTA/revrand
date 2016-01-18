@@ -10,7 +10,8 @@ from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
-from ..utils import params_to_list, Positive
+from ..optimize import Positive
+from ..utils import params_to_list
 from ..hadamard import hadamard
 
 

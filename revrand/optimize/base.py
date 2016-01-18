@@ -1,8 +1,9 @@
 import numpy as np
 
-from ..utils import flatten, unflatten, checktypes, Positive, Bound
+from ..utils import flatten, unflatten
 from ..externals import check_random_state
 
+from collections import namedtuple
 from itertools import repeat
 from warnings import warn
 from six import wraps
@@ -12,6 +13,119 @@ from six import wraps
 #     'nlopt',
 #     'sgd'
 # ]
+
+
+class Bound(namedtuple('Bound', ['lower', 'upper'])):
+    """
+    Define bounds on a variable for the optimiser. This defaults to all
+    real values allowed (i.e. no bounds).
+
+    Parameters
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
+
+    Attributes
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
+
+    Examples
+    --------
+    >>> b = Bound(1e-10, upper=1e-5)
+    >>> b
+    Bound(lower=1e-10, upper=1e-05)
+    >>> b.lower
+    1e-10
+    >>> b.upper
+    1e-05
+    >>> isinstance(b, tuple)
+    True
+    >>> tuple(b)
+    (1e-10, 1e-05)
+    >>> lower, upper = b
+    >>> lower
+    1e-10
+    >>> upper
+    1e-05
+    >>> Bound(42, 10)
+    Traceback (most recent call last):
+        ...
+    ValueError: lower bound cannot be greater than upper bound!
+    """
+
+    def __new__(cls, lower=None, upper=None, shape=()):
+        # Shape is unused, but we have to have the same signature as the init
+        # We need new because named tuples are immutable
+
+        if lower is not None and upper is not None:
+            if lower > upper:
+                raise ValueError('lower bound cannot be greater than upper '
+                                 'bound!')
+        return super(Bound, cls).__new__(cls, lower, upper)
+
+    def __init__(self, lower=None, upper=None, shape=()):
+        # This init is just for copying this class.
+
+        self.shape = shape
+
+    def flatten(self):
+
+        if self.shape == ():
+            return [self]
+
+        cpy = self.__class__(shape=())
+
+        return [cpy for _ in range(np.prod(self.shape))]
+
+
+class Positive(Bound):
+    """
+    Define a positive only bound for the optimiser. This may induce the
+    'log trick' in the optimiser, which will ignore the 'smallest'
+    value (but will stay above 0).
+
+    Parameters
+    ---------
+    lower : float
+        The smallest value allowed for the optimiser to evaluate (if
+        not using the log trick).
+
+    Examples
+    --------
+    >>> b = Positive()
+    >>> b # doctest: +SKIP
+    Positive(lower=1e-14, upper=None)
+
+    Since ``tuple`` (and by extension its descendents) are immutable,
+    the lower bound for all instances of ``Positive`` are guaranteed to
+    be positive.
+
+    .. admonition::
+
+       Actually this is not totally true. Something like
+       ``b._replace(lower=-42)`` would actually thwart this. Should
+       delete this method from ``namedtuple`` when inheriting.
+
+    >>> c = Positive(lower=-10)
+    Traceback (most recent call last):
+        ...
+    ValueError: lower bound must be positive!
+    """
+    def __new__(cls, lower=1e-14, shape=()):
+
+        if lower <= 0:
+            raise ValueError('lower bound must be positive!')
+
+        return super(Positive, cls).__new__(cls, lower, None, shape)
+
+    def __getnewargs__(self):
+        """Required for pickling!"""
+        return (self.lower,)
 
 
 def get_minimize(backend='scipy'):
@@ -542,15 +656,6 @@ def logtrick_sgd(sgd):
     return new_sgd
 
 
-def sgd_data_wrap(func):
-
-    @wraps(func)
-    def new_obj(*args):
-        return func(*args[:-1], Data=args[-1])
-
-    return new_obj
-
-
 #
 # Helper functions
 #
@@ -579,11 +684,16 @@ def _flatten_bounds(bounds):
     if bounds is None:
         return None
 
+    def unwrap(flatb, bounds):
+        for b in bounds:
+            if type(b) is tuple:
+                flatb.append(b)
+            elif type(b) is list:
+                unwrap(flatb, b)
+            else:
+                flatb.extend(b.flatten())
+
     flat_bounds = []
-    for b in bounds:
-        if (type(b) is list) or (type(b) is tuple):
-            flat_bounds.append(b)
-        else:
-            flat_bounds.extend(b.flatten())
+    unwrap(flat_bounds, bounds)
 
     return flat_bounds

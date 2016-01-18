@@ -5,17 +5,19 @@ and also supports custom optimization methods.
 """
 
 from .sgd import sgd
-from .base import (minimize,
+from .base import (Bound, Positive,
+                   minimize,
                    minimize_bounded_start,
                    structured_minimizer,
                    structured_sgd,
                    logtrick_minimizer,
                    logtrick_sgd,
-                   sgd_data_wrap,
                    candidate_start_points_lattice,
                    candidate_start_points_random)
 
 __all__ = [
+    'Bound',
+    'Positive',
     'sgd',
     'minimize',
     'minimize_bounded_start',
@@ -23,7 +25,6 @@ __all__ = [
     'structured_sgd',
     'logtrick_minimizer',
     'logtrick_sgd',
-    'sgd_data_wrap',
     'candidate_start_points_lattice',
     'candidate_start_points_random',
 ]

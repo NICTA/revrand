@@ -2,122 +2,8 @@
 import numpy as np
 
 from six.moves import map, range, zip
-from collections import namedtuple
 from functools import partial
 from itertools import tee
-
-
-class Bound(namedtuple('Bound', ['lower', 'upper'])):
-    """
-    Define bounds on a variable for the optimiser. This defaults to all
-    real values allowed (i.e. no bounds).
-
-    Parameters
-    ----------
-    lower : float
-        The lower bound.
-    upper : float
-        The upper bound.
-
-    Attributes
-    ----------
-    lower : float
-        The lower bound.
-    upper : float
-        The upper bound.
-
-    Examples
-    --------
-    >>> b = Bound(1e-10, upper=1e-5)
-    >>> b
-    Bound(lower=1e-10, upper=1e-05)
-    >>> b.lower
-    1e-10
-    >>> b.upper
-    1e-05
-    >>> isinstance(b, tuple)
-    True
-    >>> tuple(b)
-    (1e-10, 1e-05)
-    >>> lower, upper = b
-    >>> lower
-    1e-10
-    >>> upper
-    1e-05
-    >>> Bound(42, 10)
-    Traceback (most recent call last):
-        ...
-    ValueError: lower bound cannot be greater than upper bound!
-    """
-
-    def __new__(cls, lower=None, upper=None, shape=()):
-        # Shape is unused, but we have to have the same signature as the init
-        # We need new because named tuples are immutable
-
-        if lower is not None and upper is not None:
-            if lower > upper:
-                raise ValueError('lower bound cannot be greater than upper '
-                                 'bound!')
-        return super(Bound, cls).__new__(cls, lower, upper)
-
-    def __init__(self, lower=None, upper=None, shape=()):
-        # This init is just for copying this class.
-
-        self.shape = shape
-
-    def flatten(self):
-
-        if self.shape == ():
-            return [self]
-
-        cpy = self.__class__(shape=())
-
-        return [cpy for _ in range(np.prod(self.shape))]
-
-
-class Positive(Bound):
-    """
-    Define a positive only bound for the optimiser. This may induce the
-    'log trick' in the optimiser, which will ignore the 'smallest'
-    value (but will stay above 0).
-
-    Parameters
-    ---------
-    lower : float
-        The smallest value allowed for the optimiser to evaluate (if
-        not using the log trick).
-
-    Examples
-    --------
-    >>> b = Positive()
-    >>> b # doctest: +SKIP
-    Positive(lower=1e-14, upper=None)
-
-    Since ``tuple`` (and by extension its descendents) are immutable,
-    the lower bound for all instances of ``Positive`` are guaranteed to
-    be positive.
-
-    .. admonition::
-
-       Actually this is not totally true. Something like
-       ``b._replace(lower=-42)`` would actually thwart this. Should
-       delete this method from ``namedtuple`` when inheriting.
-
-    >>> c = Positive(lower=-10)
-    Traceback (most recent call last):
-        ...
-    ValueError: lower bound must be positive!
-    """
-    def __new__(cls, lower=1e-14, shape=()):
-
-        if lower <= 0:
-            raise ValueError('lower bound must be positive!')
-
-        return super(Positive, cls).__new__(cls, lower, None, shape)
-
-    def __getnewargs__(self):
-        """Required for pickling!"""
-        return (self.lower,)
 
 
 class Bunch(dict):
@@ -160,7 +46,7 @@ def checktypes(sequence, checktype):
         bool: True if all of the elements are the same type, else False
     """
 
-    return all(isinstance(i, checktype) for i in sequence)
+    return all(type(i) is checktype for i in sequence)
 
 
 def couple(f, g):
@@ -432,7 +318,7 @@ def flatten(arys, order='C', returns_shapes=True):
 
 def unflatten(ary, shapes, order='C'):
     """
-    Given a flat (1d) array, and a list of shapes (represented as tuples), 
+    Given a flat (1d) array, and a list of shapes (represented as tuples),
     return a list of ndarrays with the specified shapes.
 
     Parameters
@@ -579,87 +465,6 @@ def map_indices(fn, iterable, indices):
             yield fn(arg)
         else:
             yield arg
-
-
-class CatParameters(object):
-
-    def __init__(self, params, log_indices=None):
-
-        self.pshapes = [np.asarray(p).shape if not np.isscalar(p)
-                        else 1 for p in params]
-
-        if log_indices is not None:
-            self.log_indices = log_indices
-        else:
-            self.log_indices = []
-
-    def flatten(self, params):
-        """ This will take a list of parameters of scalars or arrays, and
-            return a flattened array which is a concatenation of all of these
-            parameters.
-
-            This could be useful for using with an optimiser!
-
-            Arguments:
-                params: a list of scalars of arrays.
-
-            Returns:
-                list: a list or 1D array of scalars which is a flattened
-                    concatenation of params.
-        """
-
-        vec = []
-        for i, p in enumerate(params):
-            fp = np.atleast_1d(p).flatten()
-            vec.extend(fp if i not in self.log_indices else np.log(fp))
-
-        return np.array(vec)
-
-    def flatten_grads(self, params, grads):
-
-        vec = []
-        for i, (p, g) in enumerate(zip(params, grads)):
-            g = np.atleast_1d(g)
-
-            # Chain rule if log params used
-            if i in self.log_indices:
-                g *= np.atleast_1d(p)
-
-            vec.extend(g.flatten())
-
-        return np.array(vec)
-
-    def unflatten(self, flatparams):
-        """ This will turn a flattened list of parameters into the original
-            parameter argument list, given a template.
-
-            This could be useful for using after an optimiser!
-
-            Argument:
-                params: the template list of parameters.
-
-                flatlist: the flattened list of parameters to turn into the
-                    original parameter list.
-
-            Returns:
-                list: A list of the same form as params, but with the values
-                    from flatlist.
-        """
-
-        rparams = []
-        listind = 0
-        for i, p in enumerate(self.pshapes):
-            if np.isscalar(p):
-                up = flatparams[listind]
-                listind += 1
-            else:
-                nelems = np.product(p)
-                up = np.reshape(flatparams[listind:(listind + nelems)], p)
-                listind += nelems
-
-            rparams.append(up if i not in self.log_indices else np.exp(up))
-
-        return rparams
 
 
 def params_to_list(params):
