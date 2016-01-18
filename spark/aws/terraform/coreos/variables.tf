@@ -7,6 +7,14 @@ variable "region" {
     default = "ap-southeast-2"
 }
 
+variable "master_instance" {
+    default = "m3.medium"
+}
+
+variable "slave_instance" {
+    default = "m3.medium"
+}
+
 variable "ami_instance" {
     #default = "ami-eeadf58d" # stable
     default = "ami-25062346" # beta

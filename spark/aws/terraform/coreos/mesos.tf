@@ -158,7 +158,7 @@ resource "aws_security_group" "master" {
  Public
 */
 resource "aws_instance" "mesos-master" {
-    instance_type = "m3.large"
+    instance_type = "${var.master_instance}"
     ami = "${var.ami_instance}"
     key_name = "dave"
     security_groups = [ "${aws_security_group.master.id}" ]
@@ -226,7 +226,7 @@ output "mesos-master-ip" {
 }
 
 resource "aws_instance" "mesos-slave" {
-    instance_type = "m3.large"
+    instance_type = "${var.slave_instance}"
     ami = "${var.ami_instance}"
     key_name = "dave"
     security_groups = ["${aws_security_group.master.id}"]
