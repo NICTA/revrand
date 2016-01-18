@@ -330,7 +330,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
     bounds = [Bound(shape=minit.shape),
               Positive(shape=Sinit.shape),
-              Bound(shape=Uinit.shape),
+              Bound(shape=Uinit.shape if rank > 0 else ()),
               Positive(),
               Positive(), basis.bounds]
 

@@ -61,18 +61,18 @@ lenARD = lenscale * np.ones(D)
 
 if useSGD:
     log.info("Using SGD regressor")
-    # params = regression.learn_sgd(X_train, y_train, base, [lenARD],
+    # params = regression.learn_sgd(X_train, y_train, base, lenARD,
     #                               rate=rate, var=noise**2, rank=rank,
     #                               regulariser=regulariser, eta=eta,
     #                               passes=passes, batchsize=batchsize)
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
-    params = glm.learn(X_train, y_train, llhood, lparams, base, [lenARD],
+    params = glm.learn(X_train, y_train, llhood, lparams, base, lenARD,
                        postcomp=5, reg=regulariser, use_sgd=True, rate=rate,
                        eta=eta, batchsize=batchsize, maxit=passes)
 else:
     log.info("Using full variational regressor")
-    params = regression.learn(X_train, y_train, base, [lenARD],
+    params = regression.learn(X_train, y_train, base, lenARD,
                               var=noise**2, diagcov=diagcov,
                               regulariser=regulariser)
 
