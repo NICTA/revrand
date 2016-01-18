@@ -6,4 +6,5 @@ if [ "$#" -ne 1 ]; then
 fi
 
 MESOS_MASTER=$1
-${SPARK_HOME}/bin/spark-submit  --master mesos://${MESOS_MASTER}:5050 --py-files=/root/dora-0.1-py3.4.egg /root/spark-demo.py
+DIR=/root/python
+${SPARK_HOME}/bin/spark-submit  --master mesos://${MESOS_MASTER}:5050 --py-files=${DIR}/dora-0.1-py3.4.egg ${DIR}/spark-demo.py

@@ -29,17 +29,21 @@ RUN curl -sf http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz | tar zx -C /root
  && rm -r /root/nlopt-2.4.2
 
 ### 
-ADD files/test-simple.py /root/test-simple.py
-ADD files/spark-demo.py /root/spark-demo.py
 ADD files/run-demo.sh /root/run-demo.sh
 
-ADD files/dora-0.1-py3.4.egg /root/dora-0.1-py3.4.egg
+ADD files/python /root/python
 
 ### 
 RUN pip3 install sklearn \
  && pip3 install flask
 
+# Install Tini
+RUN apt-get install -y wget 
+RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.6.0/tini && \
+    echo "d5ed732199c36a1189320e6c4859f0169e950692f451c03e7854243b95f4234b *tini" | sha256sum -c - && \
+    mv tini /usr/local/bin/tini && \
+    chmod +x /usr/local/bin/tini
 
-
-
+ENTRYPOINT ["tini", "--"]
+CMD ["jupyter", "notebook"]
 

@@ -1,0 +1,27 @@
+{
+    "variables": {
+        "aws_access_key": "",
+        "aws_secret_key": ""
+    },
+    "builders": [{
+        "name": "ubuntu-mesos-ami",
+        "type": "amazon-ebs",
+        "access_key": "{{user `aws_access_key`}}",
+        "secret_key": "{{user `aws_secret_key`}}",
+        "region": "ap-southeast-2",
+        "source_ami": "ami-543d1837",
+        "instance_type": "m3.large",
+        "ssh_username": "ubuntu",
+        "ami_name": "ubuntu-mesos-{{isotime | clean_ami_name}}",
+        "ami_description": "Ubuntu 14.04 LTS with Mesos + Docker (created by Packer at {{isotime}})"
+    }],
+    "provisioners": [{
+        "type": "file",
+        "source": "./install.sh",
+        "destination": "/tmp/install.sh"
+    },
+    {
+        "type": "shell",
+        "script": "install.sh"
+    }]
+}
