@@ -23,7 +23,7 @@ dig2 = 5
 # A la Carte classifier setting
 nbases = 300
 lenscale = 5
-reg = 1
+reg = 1e3
 doSGD = True
 method = 'GLM'
 passes = 300
