@@ -86,8 +86,8 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
 class Positive(Bound):
     """
     Define a positive only bound for the optimiser. This may induce the
-    'log trick' in the optimiser, which will ignore the 'smallest'
-    value (but will stay above 0).
+    'log trick' in the optimiser (when using an appropriate decorator), which
+    will ignore the 'smallest' value (but will stay above 0).
 
     Parameters
     ---------
@@ -134,13 +134,14 @@ def get_minimize(backend='scipy'):
     >>> minimize = get_minimize('nlopt') # doctest: +SKIP
     >>> minimize = get_minimize('foo') # doctest: +SKIP
     """
-    from .spopt_wrap import minimize as minimize_
 
     if backend == 'nlopt':
         try:
             from .nlopt_wrap import minimize as minimize_
         except ImportError:
             warn('NLopt could not be imported, defaulting to scipy.optimize.')
+    else:
+        from .spopt_wrap import minimize as minimize_
 
     return minimize_
 
@@ -192,7 +193,8 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
                 constraints=constraints, **options)
 
 
-def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
+def candidate_start_points_random(bounds, n_candidates=1000,
+                                  random_state=None):
     """
     Randomly generate candidate starting points uniformly within a
     hyperrectangle.
@@ -214,7 +216,8 @@ def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
     -----
     Roughly equivalent to::
 
-        lambda bounds, n_candidates=100: np.random.uniform(*zip(*bounds), size=(n_candidates, len(bounds))).T
+        lambda bounds, n_candidates=100: \
+            np.random.uniform(*zip(*bounds), size=(n_candidates,len(bounds))).T
 
     Examples
     --------
@@ -241,7 +244,8 @@ def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
 
     Uniformly sample from line segment:
 
-    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5, random_state=1)
+    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5,
+    ...                               random_state=1)
     array([[ 0.25106601,  1.16097348, -0.99965688, -0.09300228, -0.55973233]])
 
     Uniformly sample from hyperrectangle:
@@ -270,11 +274,12 @@ def candidate_start_points_lattice(bounds, nums=3):
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
              0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
 
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3]).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)],
+    ...                                nums=[5, 3]).shape
     (2, 15)
 
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
-    ...                             nums=[5, 10, 9]) # doctest: +ELLIPSIS
+    ...                                nums=[5, 10, 9]) # doctest: +ELLIPSIS
     array([[-1.   , -1.   , -1.   , ...,  1.5  ,  1.5  ,  1.5  ],
            [-1.5  , -1.5  , -1.5  , ...,  3.   ,  3.   ,  3.   ],
            [ 0.   ,  0.625,  1.25 , ...,  3.75 ,  4.375,  5.   ]])
@@ -284,7 +289,7 @@ def candidate_start_points_lattice(bounds, nums=3):
     (3, 450)
 
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
-    ...                             nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
+    ...                                nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
     array([[-1. , -1. , -1. , ...,  1.5,  1.5,  1.5],
            [-1.5, -1.5, -1.5, ...,  3. ,  3. ,  3. ],
            [ 0. ,  0. ,  0. , ...,  5. ,  5. ,  5. ],
@@ -304,7 +309,8 @@ def candidate_start_points_lattice(bounds, nums=3):
 
     Third bound is ignored
 
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)], nums=[5, 3])
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
+    ...                                nums=[5, 3])
     array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
              0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
@@ -316,7 +322,8 @@ def candidate_start_points_lattice(bounds, nums=3):
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=9).shape
     (2, 81)
 
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)], nums=2).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
+    ...                                nums=2).shape
     (3, 8)
     """
 
@@ -560,7 +567,42 @@ def structured_sgd(sgd):
     Allow stochastic gradients to accept a list of parameters to optimize,
     rather than just a flattened array.
 
-    TODO: examples
+    Examples
+    --------
+    >>> from ..optimize import sgd
+
+    Define a cost function that returns a pair. The first element is the cost
+    value and the second element is the gradient represented by a sequence.
+    Even if the cost is a function of a single variable, the gradient must be a
+    sequence containing one element.
+
+    >>> def cost(w, lambda_, data):
+    ...     N = len(data)
+    ...     y, X = data[:, 0], data[:, 1:]
+    ...     y_est = X.dot(w)
+    ...     ww = w.T.dot(w)
+    ...     obj = (y - y_est).sum() / N + lambda_ * ww
+    ...     gradw = - 2 * X.T.dot(y - y_est) / N + 2 * lambda_ * w
+    ...     gradl = ww
+    ...     return obj, [gradw, gradl]
+
+    Augment the SGD optimizer to take structured inputs
+
+    >>> new_sgd = structured_sgd(sgd)
+
+    Data
+
+    >>> y = np.linspace(1, 10, 100) + np.random.randn(100) + 1
+    >>> X = np.array([np.ones(100), np.linspace(1, 100, 100)]).T
+    >>> data = np.hstack((y[:, np.newaxis], X))
+
+    Initial values
+
+    >>> w_0 = np.array([1., 1.])
+    >>> lambda_0 = .25
+
+    >>> res = new_sgd(cost, [w_0, lambda_0], data, batchsize=10, eval_obj=True)
+    >>> res_w, res_lambda = res.x
     """
 
     @wraps(sgd)
@@ -590,7 +632,41 @@ def logtrick_minimizer(minimizer):
     """
     Log-Trick decorator for optimizers.
 
-    TODO: examples (how it works with bounds)
+    This decorator implements the "log trick" for optimizing positive bounded
+    variables. It will apply this trick for any variables that correspond to a
+    Positive() bound.
+
+    Examples
+    --------
+    >>> from scipy.optimize import minimize as sp_min
+    >>> from ..optimize import Bound, Positive
+
+    This is a simple cost function where we need to enforce particular
+    variabled are positive-only bounded.
+
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, lambda_ * w
+
+    Lets enforce that the `w` are positive,
+
+    >>> bounds = [Positive(), Positive(), Positive()]
+    >>> new_min = logtrick_minimizer(sp_min)
+
+    Initial values
+
+    >>> w_0 = np.array([.5, .1, .2])
+    >>> lambda_0 = .25
+
+    >>> res = new_min(cost, w_0, args=(lambda_0,), bounds=bounds,
+    ...               method='L-BFGS-B', jac=True)
+    >>> res.x >= 0
+    array([ True,  True,  True], dtype=bool)
+
+    Note
+    ----
+    This decorator only works on unstructured optimizers. However, it can be
+    use with structured_minimizer, so long as it is the inner wrapper.
     """
 
     @wraps(minimizer)
@@ -627,7 +703,51 @@ def logtrick_sgd(sgd):
     """
     Log-Trick decorator for stochastic gradients.
 
-    TODO: examples (how it works with bounds)
+    This decorator implements the "log trick" for optimizing positive bounded
+    variables using SGD. It will apply this trick for any variables that
+    correspond to a Positive() bound.
+
+    Examples
+    --------
+    >>> from ..optimize import sgd, Bound, Positive
+
+    This is a simple cost function where we need to enforce particular
+    variabled are positive-only bounded.
+
+    >>> def cost(w, data, lambda_):
+    ...     N = len(data)
+    ...     y, X = data[:, 0], data[:, 1:]
+    ...     y_est = X.dot(w)
+    ...     ww = w.T.dot(w)
+    ...     obj = (y - y_est).sum() / N + lambda_ * ww
+    ...     gradw = - 2 * X.T.dot(y - y_est) / N + 2 * lambda_ * w
+    ...     return obj, gradw
+
+    Lets enforce that the `w` are positive,
+
+    >>> bounds = [Positive(), Positive()]
+    >>> new_sgd = logtrick_sgd(sgd)
+
+    Data
+
+    >>> y = np.linspace(1, 10, 100) + np.random.randn(100) + 1
+    >>> X = np.array([np.ones(100), np.linspace(1, 100, 100)]).T
+    >>> data = np.hstack((y[:, np.newaxis], X))
+
+    Initial values
+
+    >>> w_0 = np.array([1., 1.])
+    >>> lambda_0 = .25
+
+    >>> res = new_sgd(cost, w_0, data, args=(lambda_0,), bounds=bounds,
+    ...               batchsize=10, eval_obj=True)
+    >>> res.x >= 0
+    array([ True,  True], dtype=bool)
+
+    Note
+    ----
+    This decorator only works on unstructured optimizers. However, it can be
+    use with structured_minimizer, so long as it is the inner wrapper.
     """
 
     @wraps(sgd)

@@ -70,11 +70,11 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
 
     # Process bounds
     if bounds is not None:
+        if len(bounds) != D:
+            raise ValueError("The dimension of the bounds does not match x0!")
+
         lower = np.array([-np.inf if b[0] is None else b[0] for b in bounds])
         upper = np.array([np.inf if b[1] is None else b[1] for b in bounds])
-
-        if len(lower) != D:
-            raise ValueError("The dimension of the bounds does not match x0!")
 
     # Initialise
     gnorm = np.inf
