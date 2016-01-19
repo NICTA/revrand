@@ -1,0 +1,6 @@
+revrand.optimize.base.candidate_start_points_lattice
+====================================================
+
+.. currentmodule:: revrand.optimize.base
+
+.. autofunction:: candidate_start_points_lattice

@@ -1,0 +1,6 @@
+revrand.optimize.base.structured_sgd
+====================================
+
+.. currentmodule:: revrand.optimize.base
+
+.. autofunction:: structured_sgd

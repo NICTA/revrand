@@ -27,7 +27,7 @@
     <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
     <link rel="next" title="revrand.basis_functions.base.Basis" href="revrand.basis_functions.base.Basis.html" />
-    <link rel="prev" title="revrand.basis_functions.base.SigmoidalBasis" href="revrand.basis_functions.base.SigmoidalBasis.html" />
+    <link rel="prev" title="Basis Functions" href="../basis_funcs.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -50,7 +50,7 @@
           <a href="revrand.basis_functions.base.Basis.html" title="revrand.basis_functions.base.Basis"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
+          <a href="../basis_funcs.html" title="Basis Functions"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
@@ -76,14 +76,14 @@
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cdist</span></code>(XA,&nbsp;XB[,&nbsp;metric,&nbsp;p,&nbsp;V,&nbsp;VI,&nbsp;w])</td>
 <td>Computes distance between each pair of the two collections of inputs.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">hadamard</span></code>(Y[,&nbsp;ordering])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
+<td>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly heterogenous dimensions and shapes and concatenate them together into a flat (1d) array.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">hadamard</span></code>(Y[,&nbsp;ordering])</td>
 <td><em>Very fast</em> Hadamard transform for single vector at a time</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">norm</span></code>(a[,&nbsp;ord])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">norm</span></code>(a[,&nbsp;ord])</td>
 <td>Matrix or vector norm.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">params_to_list</span></code>(params)</td>
-<td>This will take a list of parameters of scalars or arrays, and return a flattened array which is a concatenation of all of these parameters.</td>
 </tr>
 </tbody>
 </table>
@@ -109,7 +109,7 @@
 <tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.PolynomialBasis.html#revrand.basis_functions.base.PolynomialBasis" title="revrand.basis_functions.base.PolynomialBasis"><code class="xref py py-obj docutils literal"><span class="pre">PolynomialBasis</span></code></a>(order[,&nbsp;include_bias])</td>
 <td>Polynomial basis class, this essentially creates the concatenation, Phi = [X^0, X^1, ..., X^p] where p is specified in the constructor.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">Positive</span></code></td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">Positive</span></code>([lower,&nbsp;upper,&nbsp;shape])</td>
 <td>Define a positive only bound for the optimiser.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.RadialBasis.html#revrand.basis_functions.base.RadialBasis" title="revrand.basis_functions.base.RadialBasis"><code class="xref py py-obj docutils literal"><span class="pre">RadialBasis</span></code></a>(centres[,&nbsp;lenscale_bounds,&nbsp;upper])</td>
@@ -135,8 +135,8 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.base.SigmoidalBasis.html"
-                        title="previous chapter">revrand.basis_functions.base.SigmoidalBasis</a></p>
+  <p class="topless"><a href="../basis_funcs.html"
+                        title="previous chapter">Basis Functions</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="revrand.basis_functions.base.Basis.html"
                         title="next chapter">revrand.basis_functions.base.Basis</a></p>
@@ -170,7 +170,7 @@
           <a href="revrand.basis_functions.base.Basis.html" title="revrand.basis_functions.base.Basis"
              >next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
+          <a href="../basis_funcs.html" title="Basis Functions"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 
@@ -178,7 +178,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
     </div>
   </body>
 </html>

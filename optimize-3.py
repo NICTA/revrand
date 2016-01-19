@@ -3,7 +3,7 @@ import numpy as np
 
 from scipy.optimize import rosen
 from matplotlib.colors import LogNorm
-from revrand.optimize import candidate_start_points_grid
+from revrand.optimize import candidate_start_points_lattice
 from revrand.utils import unvectorize_args
 
 _rosen = unvectorize_args(rosen)
@@ -11,7 +11,8 @@ _rosen = unvectorize_args(rosen)
 y, x = np.mgrid[-1:3.1:0.1, -2:2.2:0.1]
 z = _rosen(x, y)
 
-candidates = candidate_start_points_grid([(-1, 1.5), (-.5, 1.5)], nums=12)
+candidates = candidate_start_points_lattice([(-1, 1.5), (-.5, 1.5)],
+                                            nums=12)
 candidates_min = candidates[:, np.argmin(rosen(candidates))]
 
 fig = plt.figure(figsize=(13, 4))

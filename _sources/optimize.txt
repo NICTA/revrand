@@ -1,6 +1,28 @@
 Optimization
 ============
 
+.. currentmodule:: revrand.optimize
+
+.. autosummary::
+   :toctree: generated/
+
+   base
+   base.minimize
+   base.Bound
+   base.Positive
+   base.structured_minimizer
+   base.structured_sgd
+   base.logtrick_minimizer
+   base.logtrick_sgd
+   base.candidate_start_points_lattice
+   base.candidate_start_points_random
+
+   sgd.sgd
+
+
+Optimizer Equivalency Table
+---------------------------
+
 ==============  =================================
 scipy.optimize  NLopt
 ==============  =================================
@@ -23,8 +45,9 @@ dogleg          *Requires second-order gradients*
 trust-ncg       *Requires second-order gradients*
 ==============  =================================
 
-Candidate Starting Points
--------------------------
+
+Candidate Starting Points Example
+---------------------------------
 
 .. plot::
    :include-source:
@@ -32,12 +55,13 @@ Candidate Starting Points
    import matplotlib.pyplot as plt
 
    from mpl_toolkits.mplot3d import Axes3D
-   from revrand.optimize import candidate_start_points_grid 
+   from revrand.optimize import candidate_start_points_lattice 
 
    fig = plt.figure()
    ax = plt.axes(projection='3d')
 
-   ax.scatter(*candidate_start_points_grid([(-1, 1.5), (-.5, 1.5), (0, 5)], [6, 8, 10]))
+   ax.scatter(*candidate_start_points_lattice([(-1, 1.5), (-.5, 1.5), (0, 5)],
+                                              [6, 8, 10]))
 
    ax.set_xlabel('x')
    ax.set_ylabel('y')
@@ -72,7 +96,7 @@ Candidate Starting Points
 
    from scipy.optimize import rosen
    from matplotlib.colors import LogNorm
-   from revrand.optimize import candidate_start_points_grid 
+   from revrand.optimize import candidate_start_points_lattice 
    from revrand.utils import unvectorize_args
 
    _rosen = unvectorize_args(rosen)
@@ -80,7 +104,8 @@ Candidate Starting Points
    y, x = np.mgrid[-1:3.1:0.1, -2:2.2:0.1]
    z = _rosen(x, y)
 
-   candidates = candidate_start_points_grid([(-1, 1.5), (-.5, 1.5)], nums=12)
+   candidates = candidate_start_points_lattice([(-1, 1.5), (-.5, 1.5)],
+                                               nums=12)
    candidates_min = candidates[:, np.argmin(rosen(candidates))]
 
    fig = plt.figure(figsize=(13, 4))
@@ -116,6 +141,3 @@ Candidate Starting Points
    ax2.set_ylabel('y')
 
    plt.show()
-
-.. automodule:: revrand.optimize
-   :members:

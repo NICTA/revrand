@@ -1,0 +1,32 @@
+revrand.optimize.base.Bound
+===========================
+
+.. currentmodule:: revrand.optimize.base
+
+.. autoclass:: Bound
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Bound.__init__
+      ~Bound.count
+      ~Bound.flatten
+      ~Bound.index
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Bound.lower
+      ~Bound.upper
+   
+   

@@ -1,0 +1,6 @@
+revrand.optimize.base.logtrick_sgd
+==================================
+
+.. currentmodule:: revrand.optimize.base
+
+.. autofunction:: logtrick_sgd

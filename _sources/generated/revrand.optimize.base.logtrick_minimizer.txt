@@ -1,0 +1,6 @@
+revrand.optimize.base.logtrick_minimizer
+========================================
+
+.. currentmodule:: revrand.optimize.base
+
+.. autofunction:: logtrick_minimizer

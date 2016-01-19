@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>revrand.optimize.base.candidate_start_points_random &mdash; revrand 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Optimization" href="../optimize.html" />
+    <link rel="next" title="revrand.optimize.sgd.sgd" href="revrand.optimize.sgd.sgd.html" />
+    <link rel="prev" title="revrand.optimize.base.candidate_start_points_lattice" href="revrand.optimize.base.candidate_start_points_lattice.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.sgd.sgd.html" title="revrand.optimize.sgd.sgd"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.base.candidate_start_points_lattice.html" title="revrand.optimize.base.candidate_start_points_lattice"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="revrand-optimize-base-candidate-start-points-random">
+<h1>revrand.optimize.base.candidate_start_points_random<a class="headerlink" href="#revrand-optimize-base-candidate-start-points-random" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="revrand.optimize.base.candidate_start_points_random">
+<code class="descclassname">revrand.optimize.base.</code><code class="descname">candidate_start_points_random</code><span class="sig-paren">(</span><em>bounds</em>, <em>n_candidates=1000</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.base.candidate_start_points_random" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly generate candidate starting points uniformly within a
+hyperrectangle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bounds</strong> (<em>list of tuples (pairs)</em>) &#8211; List of one or more bound pairs</li>
+<li><strong>n_candidates</strong> (<em>int</em>) &#8211; Number of candidate starting points to generate</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Array of shape (len(bounds), n_candidates)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Roughly equivalent to:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">lambda</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">100</span><span class="p">:</span>             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_candidates</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span>
+<span class="gp">... </span>    <span class="n">n_candidates</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">array([[-7.28935697, -9.99925656, -9.04608671, -8.78930863, -7.42101142],</span>
+<span class="go">       [ 1.16097348, -0.09300228, -0.72298422,  0.03668218,  0.6164502 ]])</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points</span> <span class="o">=</span> <span class="n">candidate_start_points_random</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(2, 1000)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span> <span class="o">&lt;</span> <span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">2.</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Uniformly sample from line segment:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>                              <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">array([[ 0.25106601,  1.16097348, -0.99965688, -0.09300228, -0.55973233]])</span>
+</pre></div>
+</div>
+<p>Uniformly sample from hyperrectangle:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">),</span> <span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">7.</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">(</span><span class="mf">2.71</span><span class="p">,</span> <span class="mf">3.14</span><span class="p">)],</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">array([[-7.28935697, -9.04608671, -7.42101142, -8.67106038, -7.28751878],</span>
+<span class="go">       [ 1.16097348, -0.72298422,  0.6164502 ,  1.63435231,  0.67606949],</span>
+<span class="go">       [ 5.00022875,  5.37252042,  5.83838903,  5.05477519,  5.28077388],</span>
+<span class="go">       [ 2.84000301,  2.85859111,  3.00464439,  2.99830103,  2.79518364]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="revrand.optimize.base.candidate_start_points_lattice.html"
+                        title="previous chapter">revrand.optimize.base.candidate_start_points_lattice</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="revrand.optimize.sgd.sgd.html"
+                        title="next chapter">revrand.optimize.sgd.sgd</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.sgd.sgd.html" title="revrand.optimize.sgd.sgd"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.base.candidate_start_points_lattice.html" title="revrand.optimize.base.candidate_start_points_lattice"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
+    </div>
+  </body>
+</html>

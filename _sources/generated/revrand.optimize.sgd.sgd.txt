@@ -1,0 +1,6 @@
+revrand.optimize.sgd.sgd
+========================
+
+.. currentmodule:: revrand.optimize.sgd
+
+.. autofunction:: sgd

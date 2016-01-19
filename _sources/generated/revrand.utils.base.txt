@@ -9,16 +9,12 @@ revrand.utils.base
 
    .. autosummary::
    
-      checktypes
       couple
       custom_reshape
       decouple
       flatten
-      list_to_params
       map_indices
-      namedtuple
       nwise
-      params_to_list
       tee
       unflatten
    
@@ -30,10 +26,7 @@ revrand.utils.base
 
    .. autosummary::
    
-      Bound
       Bunch
-      CatParameters
-      Positive
       map
       partial
       range

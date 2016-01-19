@@ -1,0 +1,32 @@
+revrand.optimize.base.Positive
+==============================
+
+.. currentmodule:: revrand.optimize.base
+
+.. autoclass:: Positive
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Positive.__init__
+      ~Positive.count
+      ~Positive.flatten
+      ~Positive.index
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Positive.lower
+      ~Positive.upper
+   
+   
