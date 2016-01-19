@@ -266,6 +266,22 @@ def candidate_start_points_random(bounds, n_candidates=1000,
 
 def candidate_start_points_lattice(bounds, nums=3):
     """
+    Generate candidate starting points on a uniform grid within a
+    hyperrectangle.
+
+    Parameters
+    ----------
+    bounds : list of tuples (pairs)
+        List of one or more bound pairs
+
+    nums : int (optional)
+        number of grid points per dimension
+
+    Returns
+    -------
+    ndarray
+        Array of shape (len(bounds), prod(nums))
+
     Examples
     --------
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3])

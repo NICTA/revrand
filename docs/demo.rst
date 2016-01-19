@@ -33,7 +33,7 @@ Here we run a large scale Gaussian process approximation algorithm on the
 SARCOS robot arm dataset from [1]_. We compare against a Gaussian process only
 using a random subset of data.
 
-.. plot:: ../demos/demo_sarcos.py
+(:download:`Source code <../demos/demo_sarcos.py>`)
 
 
 Classification
@@ -57,7 +57,7 @@ against a logistic classifier from `scikit learn
 for classifying digits `3` and `5` from the USPS handwritten digits experiment
 used in [1]_.
 
-.. plot:: ../demos/demo_classification.py
+(:download:`Source code <../demos/demo_classification.py>`)
 
 
 Classify all digits from the USPS digits dataset
@@ -70,7 +70,7 @@ a multiclass logistic classifier from `scikit learn
 for classifying `all` digits from the USPS handwritten digits experiment used
 in [1]_.
 
-.. plot:: ../demos/demo_multi_classification.py
+(:download:`Source code <../demos/demo_multi_classification.py>`)
 
 
 Stochastic Gradient Descent
