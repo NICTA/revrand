@@ -16,5 +16,5 @@ DEMO_SCRIPT=$1
 # local master using all cores
 MASTER="local[*]" 
 
-PYSPARK_SUBMIT_ARGS="--master ${MASTER}" PYSPARK_PYTHON=python3 spark-submit $DEMO_SCRIPT
+PYSPARK_PYTHON=python3 spark-submit --master "${MASTER}" --verbose $DEMO_SCRIPT
 

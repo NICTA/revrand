@@ -16,9 +16,7 @@ hasSparkContext = False
 try:
     from pyspark import SparkConf, SparkContext
     conf = (SparkConf()
-         .setMaster("local[4]")
          .setAppName("Spark SGD Demo")
-         .set("spark.executor.memory", "1g"))
     sc = SparkContext(conf = conf)
     sc.addPyFile(__file__)
     hasSparkContext = True
