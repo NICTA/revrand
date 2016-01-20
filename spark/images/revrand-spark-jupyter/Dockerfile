@@ -30,12 +30,15 @@ RUN curl -sf http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz | tar zx -C /root
 
 ### 
 ADD files/run-demo.sh /root/run-demo.sh
-
 ADD files/python /root/python
 
 ### 
 RUN pip3 install sklearn \
  && pip3 install flask
+
+### Dora
+ENV DORA_GIT_REF=master
+RUN pip3 install https://github.com/NICTA/dora/zipball/${DORA_GIT_REF}
 
 # Install Tini
 RUN apt-get install -y wget 

@@ -37,7 +37,8 @@ ADD files/spark-defaults.conf ${SPARK_HOME}/conf/spark-defaults.conf
 WORKDIR ${SPARK_HOME}
 
 ##### Revrand (spark_sgd branch)
-RUN pip3 install https://github.com/NICTA/revrand/archive/spark_sgd.zip \
+ENV REVRAND_GIT_REF=spark_sgd
+RUN pip3 install https://github.com/NICTA/revrand/zipball/${REVRAND_GIT_REF} \
  && pip3 install unipath
 
 ##### Clean up
