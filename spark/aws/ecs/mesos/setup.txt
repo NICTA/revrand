@@ -1,9 +1,0 @@
-aws ecs create-cluster --cluster-name spark_mesos
-
-aws ec2 run-instances --image-id ami-00e7bf63 --count 3 --instance-type m3.large --key-name dave --iam-instance-profile "Name= ecsRole" --security-groups DCSecurityGroup --user-data file://userdata.txt
-
-aws ecs list-container-instances --cluster spark_mesos
-
-aws ecs run-task --cluster spark_mesos --task-definition mesos --count 1
-
-
