@@ -168,7 +168,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     return mcache, Ccache, bparams, var
 
 
-def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
+def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
               gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
               verbose=True):
     """
@@ -190,10 +190,8 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
             observation variance initial value.
         regulariser: float, optional
             weight regulariser (variance) initial value.
-        rank: int, optional
-            the rank of the off-diagonal covariance approximation, has to be
-            [0, D] where D is the dimension of the basis. None is the same as
-            setting rank = D.
+        diagcov: bool, optional
+            approximate posterior covariance with diagional matrix.
         gtol: float,
             SGD tolerance convergence criterion.
         passes: int, optional
@@ -245,50 +243,49 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
 
-    if rank is None:
-        rank = D
-    if (rank < 0) or (rank > D):
-        raise ValueError("rank has to be in the range [0, {}]!".format(D))
-
     # Initialise parameters
     minit = np.random.randn(D)
-    Sinit = gamma.rvs(2, scale=0.5, size=D)
-    Uinit = np.random.randn(D, rank) if rank > 0 else 0
+    if diagcov:
+        Sinit = gamma.rvs(2, scale=0.5, size=D)
+    else:
+        Sinit = np.random.randn(int(D * (D + 1) / 2))
 
-    def ELBO(m, S, U, _var, _lambda, _theta, Data):
+    def ELBO(m, S, _var, _lambda, _theta, Data):
 
         y, X = Data[:, 0], Data[:, 1:]
+        Nb = len(y)
+        datrat = Nb / N
 
         # Get Basis
         Phi = basis(X, *_theta)                      # Nb x D
-        PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
-        logdetC = np.log(S).sum()
-        iS = 1. / S
 
-        if rank == 0:
+        if diagcov:
             C = S
-            TrPhiPhiC = (PPdiag * C).sum()
-            TrC = C.sum()
+            PPdiag = (Phi**2).sum(axis=0)
+            TrPhiPhiC = (PPdiag * S).sum()
+            TrC = S.sum()
+            logdetC = np.log(S).sum()
         else:
-            C = U.dot(U.T) + np.diag(S)
+            trilind = np.tril_indices(D)
+            LS = np.zeros((D, D))
+            LS[trilind] = S
+            C = LS.dot(LS.T)
             PhiPhi = Phi.T.dot(Phi)
             TrPhiPhiC = np.sum(PhiPhi * C)
             TrC = np.trace(C)
-            UiS = U.T * iS
-            LUSU = jitchol(np.eye(rank) + UiS.dot(U))
-            logdetC += cho_log_det(LUSU)
+            LC = jitchol(C, lower=True)
+            logdetC = cho_log_det(LC)
 
         # Calculate ELBO
-        Nb = len(y)
         ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
                        + sqErr / _var
                        + TrPhiPhiC / _var
-                       + Nb / N * (
+                       + datrat * (
                            + (TrC + mm) / _lambda
                            - logdetC
                            + D * np.log(_lambda)
@@ -299,38 +296,38 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
                      .format(ELBO, _var, _lambda, _theta))
 
         # Mean gradient
-        dm = Err.dot(Phi) / _var - m * Nb / (_lambda * N)
+        dm = Err.dot(Phi) / _var - m * datrat / _lambda
 
         # Covariance gradient
-        if rank == 0:
-            iCdiag = iS
-            dU = 0
+        if diagcov:
+            dS = - 0.5 * (PPdiag / _var + datrat * (1. / _lambda - 1. / S))
         else:
-            iC = np.diag(iS) - UiS.T.dot(cho_solve((LUSU, False), UiS))
-            iCdiag = iC.diagonal()
-            dU = (Nb / N * (iC - np.eye(D) / _lambda) - PhiPhi / _var).dot(U)
-        dS = - 0.5 * (PPdiag / _var + Nb / N * (1. / _lambda - iCdiag))
+            # TODO This doesnt seem to work....
+            dLS = - LS * (PhiPhi / _var
+                          + datrat * (np.eye(D) / _lambda
+                                      - cho_solve((LC, True), np.eye(D))))
+            dS = dLS[trilind]
 
         # Grad variance
         dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
-        dlambda = 0.5 * Nb / (_lambda * N) * ((TrC + mm) / _lambda - D)
+        dlambda = 0.5 * datrat / _lambda * ((TrC + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
-            dPhiPhi = dPhi.T.dot(Phi) if rank > 0 else (dPhi * Phi).sum(axis=0)
+            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(-dt)
 
-        return -ELBO, [-dm, -dS, -dU, -dvar, -dlambda, dtheta]
+        return -ELBO, [-dm, -dS, -dvar, -dlambda, dtheta]
 
-    vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
+    vparams = [minit, Sinit, var, regulariser, bparams]
     bounds = [Bound(shape=minit.shape),
-              Positive(shape=Sinit.shape),
-              Bound(shape=Uinit.shape if rank > 0 else ()),
+              Positive(shape=Sinit.shape) if diagcov else
+              Bound(shape=Sinit.shape),
               Positive(),
               Positive(), basis.bounds]
 
@@ -338,9 +335,16 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
                batchsize=batchsize, eval_obj=True)
-    m, S, U, var, regulariser, bparams = res.x
+    m, S, var, regulariser, bparams = res.x
 
-    C = S if rank == 0 else U.dot(U.T) + np.diag(S)
+    if diagcov:
+        C = S
+    else:
+        # TODO: make this a function
+        trilind = np.tril_indices(D)
+        SL = np.zeros((D, D))
+        SL[trilind] = S
+        C = SL.dot(SL.T)
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."

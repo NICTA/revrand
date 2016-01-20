@@ -32,7 +32,7 @@ def main():
     passes = 1000
     batchsize = 100
     reg = 1
-    rank = 5
+    diagcov = True
 
     # np.random.seed(100)
 
@@ -126,7 +126,7 @@ def main():
     params_sgd = regression.learn_sgd(Xtrain, ytrain, base, hypers,
                                       var=noise**2, rate=rate, eta=eta,
                                       passes=passes, regulariser=reg,
-                                      rank=rank, batchsize=batchsize)
+                                      diagcov=diagcov, batchsize=batchsize)
     Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
     Sy_s = np.sqrt(Vy_s)
 

@@ -210,7 +210,10 @@ def flatten(arys, order='C', returns_shapes=True):
     -----
     Equivalent to::
 
-        lambda arys, order='C', returns_shapes=True: (np.hstack(map(partial(np.ravel, order=order), ndarrays)), list(map(np.shape, ndarrays))) if returns_shapes else np.hstack(map(partial(np.ravel, order=order), ndarrays))
+        lambda arys, order='C', returns_shapes=True: \
+            (np.hstack(map(partial(np.ravel, order=order), ndarrays)),
+             list(map(np.shape, ndarrays))) if returns_shapes \
+             else np.hstack(map(partial(np.ravel, order=order), ndarrays))
 
     This implementation relies on the fact that scalars are treated as
     0-dimensional arrays. That is,
