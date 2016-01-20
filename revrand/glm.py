@@ -16,7 +16,7 @@ from scipy.stats.distributions import gamma
 from scipy.optimize import brentq
 
 from .transforms import logsumexp
-from .optimize import minimize, sgd, spark_sgd, structured_sgd, structured_minimizer, \
+from .optimize import minimize, sgd, sgd_spark, structured_sgd, structured_minimizer, \
     logtrick_sgd, logtrick_minimizer, Bound, Positive
 
 # Set up logging
@@ -247,7 +247,7 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
         res = nmin(L2, [m, C, reg, lparams, bparams], ftol=tol, maxiter=maxit,
-                   method='L-BFGS-B', jac=True, bounds=bounds,, args=(data,))
+                   method='L-BFGS-B', jac=True, bounds=bounds, args=(data,))
     else:
         nsgd = structured_sgd(logtrick_sgd(sgd_func))
         res = nsgd(L2, [m, C, reg, lparams, bparams], data, rate=rate, eta=eta,

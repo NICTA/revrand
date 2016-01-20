@@ -1,4 +1,3 @@
-
 #! /usr/bin/env python3
 """ A La Carte GP Application to SARCOS dataset. """
 

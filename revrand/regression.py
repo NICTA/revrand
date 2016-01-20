@@ -362,7 +362,6 @@ def learn_sgd_(data, basis, bparams, var=1, regulariser=1., rank=None,
 	
     # Broadcast variables
     bcBasis = sc.broadcast(basis)
-    bcPcat = sc.broadcast(pcat)
 
     bounds = [Bound(shape=minit.shape),
               Positive(shape=Sinit.shape),

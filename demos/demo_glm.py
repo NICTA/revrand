@@ -7,7 +7,7 @@ import numpy as np
 import logging
 from scipy.stats import poisson, bernoulli
 
-from revrand import basis_functions, glm, likelihoods, transforms, glm_spark
+from revrand import basis_functions, glm, likelihoods, transforms
 # from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 
