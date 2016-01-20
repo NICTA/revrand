@@ -22,9 +22,8 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd, sgd_spark
-from .utils import list_to_params as l2p, CatParameters, Positive, Bound, \
-    checktypes
+from .optimize import minimize, sgd, sgd_spark, Bound, Positive, structured_minimizer, \
+    logtrick_minimizer, structured_sgd, logtrick_sgd
 
 from .utils import DummySparkContext
 
@@ -33,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-          ftol=1e-6, maxit=1000, verbose=True, usegradients=True):
+          ftol=1e-6, maxit=1000, verbose=True):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
@@ -59,9 +58,6 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             optimiser function tolerance convergence criterion.
         maxit: int, optional
             maximum number of iterations for the optimiser.
-        usegradients: bool, optional
-            True for using gradients to optimize the parameters, otherwise
-            false uses BOBYQA (from nlopt).
 
     Returns
     -------
@@ -92,24 +88,16 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     mcache = np.zeros(D)
     Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
 
-    # Initial parameter vector
-    vparams = [var, regulariser, bparams]
-    posbounds = checktypes(basis.bounds, Positive)
-    pcat = CatParameters(vparams, log_indices=[0, 1, 2] if posbounds
-                         else [0, 1])
-
-    def ELBO(params):
-
-        uparams = pcat.unflatten(params)
-        _var, _lambda, _theta = uparams
+    def ELBO(_var, _lambda, _theta):
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
         PhiPhi = Phi.T.dot(Phi)
 
-        lower = False
         # Posterior Parameters
-        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var, lower)
+        lower = False
+        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
+                         lower=lower)
         m = cho_solve((LfullC, lower), Phi.T.dot(y)) / _var
 
         # Common calcs dependent on form of C
@@ -152,9 +140,6 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
 
-        if not usegradients:
-            return -ELBO
-
         # Grad var
         dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
 
@@ -167,29 +152,20 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         for dPhi in dPhis:
             dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
-            dtheta.append(dt)
+            dtheta.append(-dt)
 
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        dtheta = l2p(_theta, dtheta)
+        return -ELBO, [-dvar, -dlambda, dtheta]
 
-        return -ELBO, -pcat.flatten_grads(uparams, [dvar, dlambda, dtheta])
-
-    # NOTE: It would be nice if the optimizer knew how to handle Positive
-    # bounds when the log trick is used, so we dont have to have this boiler
-    # plate...
-    bounds = [Bound()] * 2
-    bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    method = 'L-BFGS-B' if usegradients else None  # else BOBYQA numerical
-    res = minimize(ELBO, pcat.flatten(vparams), method=method, jac=True,
-                   bounds=bounds, ftol=ftol, xtol=1e-8, maxiter=maxit)
-
-    var, regulariser, bparams = pcat.unflatten(res['x'])
+    bounds = [Positive(), Positive(), basis.bounds]
+    nmin = structured_minimizer(logtrick_minimizer(minimize))
+    res = nmin(ELBO, [var, regulariser, bparams], method='L-BFGS-B', jac=True,
+               bounds=bounds, ftol=ftol, maxiter=maxit)
+    var, regulariser, bparams = res.x
 
     if verbose:
-        log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
-                 .format(-res['fun'], var, regulariser, bparams))
-        if not res['success']:
-            log.info('Terminated unsuccessfully: {}.'.format(res['message']))
+        log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
+                 "message = {}."
+                 .format(-res['fun'], var, regulariser, bparams, res.message))
 
     return mcache, Ccache, bparams, var
 
@@ -307,20 +283,12 @@ def learn_sgd_(data, basis, bparams, var=1, regulariser=1., rank=None,
 
     # Initialise parameters
     minit = np.random.randn(D)
-    Sinit = gamma.rvs(1, scale=0.1, size=D)
+    Sinit = gamma.rvs(2, scale=0.5, size=D)
     Uinit = np.random.randn(D, rank) if rank > 0 else 0
 
-    # Initial parameter vector
-    vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
-    posbounds = checktypes(basis.bounds, Positive)
-    pcat = CatParameters(vparams, log_indices=[1, 3, 4, 5] if posbounds
-                         else [1, 3, 4])
+    def ELBO(m, S, U, _var, _lambda, _theta, Data):
 
-    def ELBO(params, data):
-
-        y, X = data[:, 0], data[:, 1:]
-        uparams = bcPcat.value.unflatten(params)
-        m, S, U, _var, _lambda, _theta = uparams
+        y, X = Data[:, 0], Data[:, 1:]
 
         # Get Basis
         Phi = bcBasis.value(X, *_theta)                      # Nb x D
@@ -386,28 +354,28 @@ def learn_sgd_(data, basis, bparams, var=1, regulariser=1., rank=None,
         for dPhi in dPhis:
             dPhiPhi = dPhi.T.dot(Phi) if rank > 0 else (dPhi * Phi).sum(axis=0)
             dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
-            dtheta.append(dt)
+            dtheta.append(-dt)
 
-        # Reconstruct dtheta in shape of theta, NOTE: this is a bit clunky!
-        dtheta = l2p(_theta, dtheta)
+        return -ELBO, [-dm, -dS, -dU, -dvar, -dlambda, dtheta]
 
-        return -ELBO, -bcPcat.value.flatten_grads(uparams, [dm, dS, dU, dvar, dlambda,
-                                                    dtheta])
-
+    vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
+	
     # Broadcast variables
     bcBasis = sc.broadcast(basis)
     bcPcat = sc.broadcast(pcat)
 
-    # NOTE: It would be nice if the optimizer knew how to handle Positive
-    # bounds when the log trick is used, so we dont have to have this boiler
-    # plate...
-    bounds = [Bound()] * (2 * D + max(1, rank * D) + 2)
-    bounds += [Bound()] * len(basis.bounds) if posbounds else basis.bounds
-    res = sgd_func(ELBO, pcat.flatten(vparams), data,
-              rate=rate, eta=eta, bounds=bounds, gtol=gtol, passes=passes,
-              batchsize=batchsize, eval_obj=True)
+    bounds = [Bound(shape=minit.shape),
+              Positive(shape=Sinit.shape),
+              Bound(shape=Uinit.shape if rank > 0 else ()),
+              Positive(),
+              Positive(), basis.bounds]
 
-    m, S, U, var, regulariser, bparams = pcat.unflatten(res.x)
+    nsgd = structured_sgd(logtrick_sgd(sgd_func))
+    res = nsgd(ELBO, vparams, Data=data, rate=rate,
+               eta=eta, bounds=bounds, gtol=gtol, passes=passes,
+               batchsize=batchsize, eval_obj=True)
+    m, S, U, var, regulariser, bparams = res.x
+
     C = S if rank == 0 else U.dot(U.T) + np.diag(S)
 
     if verbose:

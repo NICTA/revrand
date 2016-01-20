@@ -3,6 +3,7 @@ import numpy as np
 from ..utils import flatten, unflatten
 from ..externals import check_random_state
 
+from collections import namedtuple
 from itertools import repeat
 from warnings import warn
 from six import wraps
@@ -14,21 +15,133 @@ from six import wraps
 # ]
 
 
+class Bound(namedtuple('Bound', ['lower', 'upper'])):
+    """
+    Define bounds on a variable for the optimiser. This defaults to all
+    real values allowed (i.e. no bounds).
+
+    Parameters
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
+
+    Attributes
+    ----------
+    lower : float
+        The lower bound.
+    upper : float
+        The upper bound.
+
+    Examples
+    --------
+    >>> b = Bound(1e-10, upper=1e-5)
+    >>> b
+    Bound(lower=1e-10, upper=1e-05)
+    >>> b.lower
+    1e-10
+    >>> b.upper
+    1e-05
+    >>> isinstance(b, tuple)
+    True
+    >>> tuple(b)
+    (1e-10, 1e-05)
+    >>> lower, upper = b
+    >>> lower
+    1e-10
+    >>> upper
+    1e-05
+    >>> Bound(42, 10)
+    Traceback (most recent call last):
+        ...
+    ValueError: lower bound cannot be greater than upper bound!
+    """
+
+    def __new__(cls, lower=None, upper=None, shape=()):
+        # Shape is unused, but we have to have the same signature as the init
+        # We need new because named tuples are immutable
+
+        if lower is not None and upper is not None:
+            if lower > upper:
+                raise ValueError('lower bound cannot be greater than upper '
+                                 'bound!')
+        return super(Bound, cls).__new__(cls, lower, upper)
+
+    def __init__(self, lower=None, upper=None, shape=()):
+        # This init is just for copying this class.
+
+        self.shape = shape
+
+    def flatten(self):
+
+        if self.shape == ():
+            return [self]
+
+        cpy = self.__class__(shape=())
+
+        return [cpy for _ in range(np.prod(self.shape))]
+
+
+class Positive(Bound):
+    """
+    Define a positive only bound for the optimiser. This may induce the
+    'log trick' in the optimiser (when using an appropriate decorator), which
+    will ignore the 'smallest' value (but will stay above 0).
+
+    Parameters
+    ---------
+    lower : float
+        The smallest value allowed for the optimiser to evaluate (if
+        not using the log trick).
+
+    Examples
+    --------
+    >>> b = Positive()
+    >>> b # doctest: +SKIP
+    Positive(lower=1e-14, upper=None)
+
+    Since ``tuple`` (and by extension its descendents) are immutable,
+    the lower bound for all instances of ``Positive`` are guaranteed to
+    be positive.
+
+    .. admonition::
+
+       Actually this is not totally true. Something like
+       ``b._replace(lower=-42)`` would actually thwart this. Should
+       delete this method from ``namedtuple`` when inheriting.
+
+    >>> c = Positive(lower=-10)
+    Traceback (most recent call last):
+        ...
+    ValueError: lower bound must be positive!
+    """
+    def __new__(cls, lower=1e-14, shape=()):
+
+        if lower <= 0:
+            raise ValueError('lower bound must be positive!')
+
+        return super(Positive, cls).__new__(cls, lower, None, shape)
+
+    def __getnewargs__(self):
+        """Required for pickling!"""
+        return (self.lower,)
+
+
 def get_minimize(backend='scipy'):
     """
     >>> minimize = get_minimize() # doctest: +SKIP
     >>> minimize = get_minimize('nlopt') # doctest: +SKIP
     >>> minimize = get_minimize('foo') # doctest: +SKIP
     """
-    from .spopt_wrap import minimize as minimize_
 
     if backend == 'nlopt':
         try:
             from .nlopt_wrap import minimize as minimize_
         except ImportError:
-            warn('NLopt could not be imported.')
-
-    warn('Defaulting to scipy.optimize')
+            warn('NLopt could not be imported, defaulting to scipy.optimize.')
+    else:
+        from .spopt_wrap import minimize as minimize_
 
     return minimize_
 
@@ -80,7 +193,8 @@ def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
                 constraints=constraints, **options)
 
 
-def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
+def candidate_start_points_random(bounds, n_candidates=1000,
+                                  random_state=None):
     """
     Randomly generate candidate starting points uniformly within a
     hyperrectangle.
@@ -102,7 +216,8 @@ def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
     -----
     Roughly equivalent to::
 
-        lambda bounds, n_candidates=100: np.random.uniform(*zip(*bounds), size=(n_candidates, len(bounds))).T
+        lambda bounds, n_candidates=100: \
+            np.random.uniform(*zip(*bounds), size=(n_candidates,len(bounds))).T
 
     Examples
     --------
@@ -129,7 +244,8 @@ def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
 
     Uniformly sample from line segment:
 
-    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5, random_state=1)
+    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5,
+    ...                               random_state=1)
     array([[ 0.25106601,  1.16097348, -0.99965688, -0.09300228, -0.55973233]])
 
     Uniformly sample from hyperrectangle:
@@ -150,6 +266,22 @@ def candidate_start_points_random(bounds, n_candidates=1000, random_state=None):
 
 def candidate_start_points_lattice(bounds, nums=3):
     """
+    Generate candidate starting points on a uniform grid within a
+    hyperrectangle.
+
+    Parameters
+    ----------
+    bounds : list of tuples (pairs)
+        List of one or more bound pairs
+
+    nums : int (optional)
+        number of grid points per dimension
+
+    Returns
+    -------
+    ndarray
+        Array of shape (len(bounds), prod(nums))
+
     Examples
     --------
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3])
@@ -158,11 +290,12 @@ def candidate_start_points_lattice(bounds, nums=3):
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
              0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
 
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3]).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)],
+    ...                                nums=[5, 3]).shape
     (2, 15)
 
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
-    ...                             nums=[5, 10, 9]) # doctest: +ELLIPSIS
+    ...                                nums=[5, 10, 9]) # doctest: +ELLIPSIS
     array([[-1.   , -1.   , -1.   , ...,  1.5  ,  1.5  ,  1.5  ],
            [-1.5  , -1.5  , -1.5  , ...,  3.   ,  3.   ,  3.   ],
            [ 0.   ,  0.625,  1.25 , ...,  3.75 ,  4.375,  5.   ]])
@@ -172,7 +305,7 @@ def candidate_start_points_lattice(bounds, nums=3):
     (3, 450)
 
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
-    ...                             nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
+    ...                                nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
     array([[-1. , -1. , -1. , ...,  1.5,  1.5,  1.5],
            [-1.5, -1.5, -1.5, ...,  3. ,  3. ,  3. ],
            [ 0. ,  0. ,  0. , ...,  5. ,  5. ,  5. ],
@@ -192,7 +325,8 @@ def candidate_start_points_lattice(bounds, nums=3):
 
     Third bound is ignored
 
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)], nums=[5, 3])
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
+    ...                                nums=[5, 3])
     array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
              0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
            [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
@@ -204,7 +338,8 @@ def candidate_start_points_lattice(bounds, nums=3):
     >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=9).shape
     (2, 81)
 
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)], nums=2).shape
+    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
+    ...                                nums=2).shape
     (3, 8)
     """
 
@@ -377,17 +512,20 @@ def flatten_args(shapes, order='C'):
     def flatten_args_dec(func):
 
         @wraps(func)
-        def new_func(array1d):
-            args = unflatten(array1d, shapes, order)
-            return func(*args)
+        def new_func(array1d, *args, **kwargs):
+            args = tuple(unflatten(array1d, shapes, order)) + args
+            return func(*args, **kwargs)
 
         return new_func
 
     return flatten_args_dec
 
 
-def augment_minimizer(minimizer):
+def structured_minimizer(minimizer):
     """
+    Allow an optimizer to accept a list of parameters to optimize, rather than
+    just a flattened array.
+
     Examples
     --------
     >>> from scipy.optimize import minimize as sp_min
@@ -403,7 +541,7 @@ def augment_minimizer(minimizer):
 
     Augment the Scipy optimizer to take structured inputs
 
-    >>> new_min = augment_minimizer(sp_min)
+    >>> new_min = structured_minimizer(sp_min)
 
     Initial values
 
@@ -415,24 +553,283 @@ def augment_minimizer(minimizer):
     """
 
     @wraps(minimizer)
-    def new_minimizer(fun, ndarrays, jac=True, **minimizer_kwargs):
+    def new_minimizer(fun, ndarrays, jac=True, bounds=None,
+                      **minimizer_kwargs):
 
         array1d, shapes = flatten(ndarrays)
+        fbounds = _flatten_bounds(bounds)
         flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
 
         if callable(jac):
-            jac = lambda *jac_args, **jac_kwargs: flatten(jac(*jac_args,
-                                                              **jac_kwargs),
-                                                          returns_shapes=False)
+            jac = lambda *fargs, **fkwargs: flatten(jac(*fargs, **fkwargs),
+                                                    returns_shapes=False)
         else:
             if bool(jac):
                 new_fun = flatten_func_grad(new_fun)
 
-        result = minimizer(new_fun, array1d, jac=jac, **minimizer_kwargs)
+        result = minimizer(new_fun, array1d, jac=jac, bounds=fbounds,
+                           **minimizer_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
         result['jac'] = tuple(unflatten(result['jac'], shapes))
         return result
 
     return new_minimizer
+
+
+def structured_sgd(sgd):
+    """
+    Allow stochastic gradients to accept a list of parameters to optimize,
+    rather than just a flattened array.
+
+    Examples
+    --------
+    >>> from ..optimize import sgd
+
+    Define a cost function that returns a pair. The first element is the cost
+    value and the second element is the gradient represented by a sequence.
+    Even if the cost is a function of a single variable, the gradient must be a
+    sequence containing one element.
+
+    >>> def cost(w, lambda_, data):
+    ...     N = len(data)
+    ...     y, X = data[:, 0], data[:, 1:]
+    ...     y_est = X.dot(w)
+    ...     ww = w.T.dot(w)
+    ...     obj = (y - y_est).sum() / N + lambda_ * ww
+    ...     gradw = - 2 * X.T.dot(y - y_est) / N + 2 * lambda_ * w
+    ...     gradl = ww
+    ...     return obj, [gradw, gradl]
+
+    Augment the SGD optimizer to take structured inputs
+
+    >>> new_sgd = structured_sgd(sgd)
+
+    Data
+
+    >>> y = np.linspace(1, 10, 100) + np.random.randn(100) + 1
+    >>> X = np.array([np.ones(100), np.linspace(1, 100, 100)]).T
+    >>> data = np.hstack((y[:, np.newaxis], X))
+
+    Initial values
+
+    >>> w_0 = np.array([1., 1.])
+    >>> lambda_0 = .25
+
+    >>> res = new_sgd(cost, [w_0, lambda_0], data, batchsize=10, eval_obj=True)
+    >>> res_w, res_lambda = res.x
+    """
+
+    @wraps(sgd)
+    def new_sgd(fun, ndarrays, Data, bounds=None, eval_obj=False,
+                **sgd_kwargs):
+
+        array1d, shapes = flatten(ndarrays)
+        fbounds = _flatten_bounds(bounds)
+        flatten_args_dec = flatten_args(shapes)
+
+        new_fun = flatten_args_dec(fun)
+
+        if bool(eval_obj):
+            new_fun = flatten_func_grad(new_fun)
+        else:
+            new_fun = flatten(new_fun, returns_shapes=False)
+
+        result = sgd(new_fun, array1d, Data=Data, bounds=fbounds,
+                     eval_obj=eval_obj, **sgd_kwargs)
+        result['x'] = tuple(unflatten(result['x'], shapes))
+        return result
+
+    return new_sgd
+
+
+def logtrick_minimizer(minimizer):
+    """
+    Log-Trick decorator for optimizers.
+
+    This decorator implements the "log trick" for optimizing positive bounded
+    variables. It will apply this trick for any variables that correspond to a
+    Positive() bound.
+
+    Examples
+    --------
+    >>> from scipy.optimize import minimize as sp_min
+    >>> from ..optimize import Bound, Positive
+
+    This is a simple cost function where we need to enforce particular
+    variabled are positive-only bounded.
+
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, lambda_ * w
+
+    Lets enforce that the `w` are positive,
+
+    >>> bounds = [Positive(), Positive(), Positive()]
+    >>> new_min = logtrick_minimizer(sp_min)
+
+    Initial values
+
+    >>> w_0 = np.array([.5, .1, .2])
+    >>> lambda_0 = .25
+
+    >>> res = new_min(cost, w_0, args=(lambda_0,), bounds=bounds,
+    ...               method='L-BFGS-B', jac=True)
+    >>> res.x >= 0
+    array([ True,  True,  True], dtype=bool)
+
+    Note
+    ----
+    This decorator only works on unstructured optimizers. However, it can be
+    use with structured_minimizer, so long as it is the inner wrapper.
+    """
+
+    @wraps(minimizer)
+    def new_minimizer(fun, x0, jac=True, bounds=None, **minimizer_kwargs):
+
+        if bounds is None:
+            return minimizer(fun, x0, jac=jac, bounds=bounds,
+                             **minimizer_kwargs)
+
+        logx, expx, gradx, bounds = _logtrick_gen(bounds)
+
+        if callable(jac):
+            jac = lambda x, *fargs, **fkwargs: gradx(jac(expx(x), *fargs,
+                                                         **fkwargs), x)
+        else:
+            if bool(jac):
+                def new_fun(x, *fargs, **fkwargs):
+                    o, g = fun(expx(x), *fargs, **fkwargs)
+                    return o, gradx(g, x)
+            else:
+                def new_fun(x, *fargs, **fkwargs):
+                    return fun(expx(x), *fargs, **fkwargs)
+
+        # Transform the final result
+        result = minimizer(new_fun, logx(x0), jac=jac, bounds=bounds,
+                           **minimizer_kwargs)
+        result['x'] = expx(result['x'])
+        return result
+
+    return new_minimizer
+
+
+def logtrick_sgd(sgd):
+    """
+    Log-Trick decorator for stochastic gradients.
+
+    This decorator implements the "log trick" for optimizing positive bounded
+    variables using SGD. It will apply this trick for any variables that
+    correspond to a Positive() bound.
+
+    Examples
+    --------
+    >>> from ..optimize import sgd, Bound, Positive
+
+    This is a simple cost function where we need to enforce particular
+    variabled are positive-only bounded.
+
+    >>> def cost(w, data, lambda_):
+    ...     N = len(data)
+    ...     y, X = data[:, 0], data[:, 1:]
+    ...     y_est = X.dot(w)
+    ...     ww = w.T.dot(w)
+    ...     obj = (y - y_est).sum() / N + lambda_ * ww
+    ...     gradw = - 2 * X.T.dot(y - y_est) / N + 2 * lambda_ * w
+    ...     return obj, gradw
+
+    Lets enforce that the `w` are positive,
+
+    >>> bounds = [Positive(), Positive()]
+    >>> new_sgd = logtrick_sgd(sgd)
+
+    Data
+
+    >>> y = np.linspace(1, 10, 100) + np.random.randn(100) + 1
+    >>> X = np.array([np.ones(100), np.linspace(1, 100, 100)]).T
+    >>> data = np.hstack((y[:, np.newaxis], X))
+
+    Initial values
+
+    >>> w_0 = np.array([1., 1.])
+    >>> lambda_0 = .25
+
+    >>> res = new_sgd(cost, w_0, data, args=(lambda_0,), bounds=bounds,
+    ...               batchsize=10, eval_obj=True)
+    >>> res.x >= 0
+    array([ True,  True], dtype=bool)
+
+    Note
+    ----
+    This decorator only works on unstructured optimizers. However, it can be
+    use with structured_minimizer, so long as it is the inner wrapper.
+    """
+
+    @wraps(sgd)
+    def new_sgd(fun, x0, Data, bounds=None, eval_obj=False, **sgd_kwargs):
+
+        if bounds is None:
+            return sgd(fun, x0, Data, bounds=bounds, eval_obj=eval_obj,
+                       **sgd_kwargs)
+
+        logx, expx, gradx, bounds = _logtrick_gen(bounds)
+
+        if bool(eval_obj):
+            def new_fun(x, *fargs, **fkwargs):
+                o, g = fun(expx(x), *fargs, **fkwargs)
+                return o, gradx(g, x)
+        else:
+            def new_fun(x, *fargs, **fkwargs):
+                return gradx(fun(expx(x), *fargs, **fkwargs), x)
+
+        # Transform the final result
+        result = sgd(new_fun, logx(x0), Data, bounds=bounds, eval_obj=eval_obj,
+                     **sgd_kwargs)
+        result['x'] = expx(result['x'])
+        return result
+
+    return new_sgd
+
+
+#
+# Helper functions
+#
+
+def _logtrick_gen(bounds):
+
+    # Test which parameters we can apply the log trick too
+    ispos = [(type(b) is Positive) for b in bounds]
+
+    # Functions that implement the log trick
+    logx = lambda x: np.array([np.log(xi) if pos else xi
+                               for xi, pos in zip(x, ispos)])
+    expx = lambda x: np.array([np.exp(xi) if pos else xi
+                               for xi, pos in zip(x, ispos)])
+    gradx = lambda g, logx: np.array([gi * np.exp(lxi) if pos else gi
+                                      for lxi, gi, pos in zip(logx, g, ispos)])
+
+    # Redefine bounds as appropriate for new ranges
+    bounds = [Bound() if pos else b for b, pos in zip(bounds, ispos)]
+
+    return logx, expx, gradx, bounds
+
+
+def _flatten_bounds(bounds):
+
+    if bounds is None:
+        return None
+
+    def unwrap(flatb, bounds):
+        for b in bounds:
+            if type(b) is tuple:
+                flatb.append(b)
+            elif type(b) is list:
+                unwrap(flatb, b)
+            else:
+                flatb.extend(b.flatten())
+
+    flat_bounds = []
+    unwrap(flat_bounds, bounds)
+
+    return flat_bounds

@@ -2,8 +2,9 @@ from __future__ import division
 
 import numpy as np
 
-from revrand.optimize import sgd, minimize
-from revrand.utils import CatParameters
+from revrand.optimize import sgd, minimize, structured_minimizer, \
+    logtrick_minimizer, structured_sgd, logtrick_sgd, Bound, Positive
+from revrand.utils import flatten
 
 
 def test_unbounded(make_quadratic):
@@ -20,8 +21,7 @@ def test_unbounded(make_quadratic):
     Ea, Eb, Ec = res['x']
     assert np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
-    res = minimize(qobj, w0, args=(data, False), jac=False, method=None,
-                   xtol=1e-8)
+    res = minimize(qobj, w0, args=(data, False), jac=False, method=None)
     Ea, Eb, Ec = res['x']
     assert np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
@@ -44,34 +44,66 @@ def test_bounded(make_quadratic):
                        atol=1e-2, rtol=0)
 
 
-def test_catparams(make_quadratic):
+def test_structured_params(make_quadratic):
 
     a, b, c, data, _ = make_quadratic
-    y, x = data[:, 0], data[:, 1]
-    N = len(data)
+    w0 = [np.random.randn(2), np.random.randn(1)[0]]
 
-    u = y - (a * x**2 + b * x + c)
-    da, db, dc = -2 * np.array([(x**2 * u).sum(), (x * u).sum(), u.sum()]) / N
+    nmin = structured_minimizer(minimize)
+    res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=None,
+               method='L-BFGS-B')
+    (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
 
-    params = [[a, b], c]
-    grad = [[da, db], dc]
+    nsgd = structured_sgd(sgd)
+    res = nsgd(qobj_struc, w0, data, bounds=None, eval_obj=True, gtol=1e-4,
+               passes=1000, rate=0.95, eta=1e-6)
+    (Ea_sgd, Eb_sgd), Ec_sgd = res['x']
 
-    # Test parameter flattening and logging
-    pcat = CatParameters(params, log_indices=[1])
-    fparams = pcat.flatten(params)
-    assert all(np.array([a, b, np.log(c)]) == fparams)
+    assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,
+                       rtol=0)
+    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-1, rtol=0)
 
-    # Test gradient flattening and chain rule
-    dparams = pcat.flatten_grads(params, grad)
-    assert all(np.array([da, db, dc * c]) == dparams)
 
-    # Test parameter reconstruction
-    rparams = pcat.unflatten(fparams)
-    for rp, p in zip(rparams, params):
-        if not np.isscalar(rp):
-            assert all(rp == p)
-        else:
-            assert rp == p
+def test_log_params(make_quadratic):
+
+    a, b, c, data, _ = make_quadratic
+    w0 = np.abs(np.random.randn(3))
+    bounds = [Positive(), Bound(), Positive()]
+
+    nmin = logtrick_minimizer(minimize)
+    res = nmin(qobj, w0, args=(data,), jac=True, bounds=bounds,
+               method='L-BFGS-B')
+    Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
+
+    nsgd = logtrick_sgd(sgd)
+    res = nsgd(qobj, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
+               passes=1000, rate=0.95, eta=1e-6)
+    Ea_sgd, Eb_sgd, Ec_sgd = res['x']
+
+    assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,
+                       rtol=0)
+    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-1, rtol=0)
+
+
+def test_logstruc_params(make_quadratic):
+
+    a, b, c, data, _ = make_quadratic
+    w0 = [np.abs(np.random.randn(2)), np.abs(np.random.randn(1))[0]]
+    bounds = [Positive(shape=(2,)), Bound()]
+
+    nmin = structured_minimizer(logtrick_minimizer(minimize))
+    res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=bounds,
+               method='L-BFGS-B')
+    (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
+
+    nsgd = structured_sgd(logtrick_sgd(sgd))
+    res = nsgd(qobj_struc, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
+               passes=1000, rate=0.95, eta=1e-6)
+    (Ea_sgd, Eb_sgd), Ec_sgd = res['x']
+
+    assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,
+                       rtol=0)
+    assert np.allclose((Ea_sgd, Eb_sgd, Ec_sgd), (a, b, c), atol=1e-1, rtol=0)
 
 
 def qobj(w, data, grad=True):
@@ -90,8 +122,15 @@ def qobj(w, data, grad=True):
         return f
 
 
+def qobj_struc(w12, w3, data, grad=True):
+
+    return qobj(flatten([w12, w3], returns_shapes=False), data, grad)
+
+
 if __name__ == "__main__":
     from conftest import make_quadratic
     test_unbounded(make_quadratic())
     test_bounded(make_quadratic())
-    test_catparams(make_quadratic())
+    test_structured_params(make_quadratic())
+    test_log_params(make_quadratic())
+    test_logstruc_params(make_quadratic())

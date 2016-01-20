@@ -10,7 +10,8 @@ from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
-from ..utils import params_to_list, Positive
+from ..optimize import Positive
+from ..utils import flatten
 from ..hadamard import hadamard
 
 
@@ -504,10 +505,11 @@ class RandomRBF_ARD(RandomRBF):
                 lenscale_bounds: a tuple of bounds for the RBFs' length scales.
         """
 
+        # lenscale_bounds.shape = Xdim
         super(RandomRBF_ARD, self).__init__(nbases, Xdim, lenscale_bounds)
         self.bounds *= Xdim
 
-    def __call__(self, X, lenscales):
+    def __call__(self, X, *lenscales):
         """ Apply the random ARD-RBF to X.
 
             Arguments:
@@ -524,11 +526,11 @@ class RandomRBF_ARD(RandomRBF):
         N, D = X.shape
         self._checkD(D, len(lenscales))
 
-        WX = np.dot(X, self.W / lenscales[:, np.newaxis])
+        WX = np.dot(X, self.W / np.asarray(lenscales)[:, np.newaxis])
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
-    def grad(self, X, lenscales):
+    def grad(self, X, *lenscales):
         """ Get the gradients of this basis w.r.t.\ the length scales.
 
             Arguments:
@@ -546,7 +548,7 @@ class RandomRBF_ARD(RandomRBF):
         N, D = X.shape
         self._checkD(D, len(lenscales))
 
-        WX = np.dot(X, self.W / lenscales[:, np.newaxis])
+        WX = np.dot(X, self.W / np.asarray(lenscales)[:, np.newaxis])
         sinWX = - np.sin(WX)
         cosWX = np.cos(WX)
 
@@ -699,7 +701,7 @@ class BasisCat(object):
 
     def __call__(self, X, *params):
 
-        return self.from_vector(X, params_to_list(params))
+        return self.from_vector(X, flatten(params, returns_shapes=False))
 
     def from_vector(self, X, vec):
 
@@ -731,7 +733,7 @@ class BasisCat(object):
         return dPhis
 
     def grad(self, X, *params):
-        return self.grad_from_vector(X, params_to_list(params))
+        return self.grad_from_vector(X, flatten(params, returns_shapes=False))
 
     @property
     def bounds(self):

@@ -6,6 +6,7 @@ import numpy as np
 from scipy.optimize import OptimizeResult
 from revrand.optimize.sgd_updater import (AdaDelta)
 
+
 def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100,
         gtol=1e-3, passes=10, eval_obj=False, rate=0.95, eta=1e-6):
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
@@ -75,11 +76,11 @@ def sgd_u(fun, x0, Data, args=(), updater=AdaDelta(), bounds=None,
 
     # Process bounds
     if bounds is not None:
+        if len(bounds) != D:
+            raise ValueError("The dimension of the bounds does not match x0!")
+
         lower = np.array([-np.inf if b[0] is None else b[0] for b in bounds])
         upper = np.array([np.inf if b[1] is None else b[1] for b in bounds])
-
-        if len(lower) != D:
-            raise ValueError("The dimension of the bounds does not match x0!")
 
     # Learning Records
     obj = None

@@ -40,15 +40,13 @@ def main():
     lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
-    order = 5  # For polynomial basis
+    order = 7  # For polynomial basis
     rate = 0.9
     eta = 1e-5
-    passes = 500
+    passes = 1000
     batchsize = 100
     reg = 1
-    usegradients = True
-    diagcov = False
-    rank = 0
+    rank = 5
 
     # np.random.seed(100)
 
@@ -130,11 +128,11 @@ def main():
     #
 
     if basis == 'Linear' or basis == 'Poly':
-        hypers = ()
+        hypers = []
     elif basis == 'FF' or basis == 'RKS' or basis == 'RBF':
-        hypers = (lenscale,)
+        hypers = [lenscale]
     elif basis == 'Combo':
-        hypers = (lenscale, lenscale2)
+        hypers = [lenscale, lenscale2]
     else:
         raise ValueError('Invalid basis!')
 
@@ -160,8 +158,7 @@ def main():
         Sy_s = np.sqrt(Vy_s)
 
     params_elbo = regression.learn(Xtrain, ytrain, base, hypers,
-                                   diagcov=diagcov, var=noise**2,
-                                   usegradients=usegradients, regulariser=reg)
+                                   var=noise**2, regulariser=reg)
     Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
@@ -172,7 +169,7 @@ def main():
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
 
-    params_glm = glm.learn(train_data, llhood, lparams, base, [lenscale],
+    params_glm = glm.learn(train_data, llhood, lparams, base, hypers,
                            reg=reg, use_sgd=True, rate=rate, postcomp=10,
                            eta=eta, batchsize=batchsize, maxit=passes)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
@@ -194,13 +191,14 @@ def main():
     Sy_gp = np.sqrt(Vy_gp)
 
     #
-    # Evaluate LL
+    # Evaluate LL and SMSE
     #
 
     LL_sgd = mll(ftest, Ey_s, Vf_s)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
     LL_g = mll(ftest, Ey_g, Vy_g)
+
     smse_sgd = smse(ftest, Ey_s)
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
@@ -208,7 +206,7 @@ def main():
 
     log.info("A la Carte (SGD), LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_sgd, smse_sgd, np.sqrt(params_sgd[3]), params_sgd[2]))
-    log.info("A la Cart, LL: {}, smse = {}, noise: {}, hypers: {}"
+    log.info("A la Carte, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
