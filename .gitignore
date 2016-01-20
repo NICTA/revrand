@@ -74,3 +74,6 @@ demos/_revrand_data/
 
 # pycharm
 .idea/
+
+# bcompare
+*.orig
