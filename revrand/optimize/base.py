@@ -572,7 +572,9 @@ def structured_minimizer(minimizer):
         result = minimizer(new_fun, array1d, jac=jac, bounds=fbounds,
                            **minimizer_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
-        result['jac'] = tuple(unflatten(result['jac'], shapes))
+        if bool(jac):
+            result['jac'] = tuple(unflatten(result['jac'], shapes))
+
         return result
 
     return new_minimizer
