@@ -248,7 +248,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
     if diagcov:
         Sinit = gamma.rvs(2, scale=0.5, size=D)
     else:
-        Sinit = np.random.randn(int(D * (D + 1) / 2))
+        Sinit = np.random.randn(int(D * (D + 1) / 2)) / 1000
 
     def ELBO(m, S, _var, _lambda, _theta, Data):
 
@@ -267,9 +267,9 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
         if diagcov:
             C = S
             PPdiag = (Phi**2).sum(axis=0)
-            TrPhiPhiC = (PPdiag * S).sum()
-            TrC = S.sum()
-            logdetC = np.log(S).sum()
+            TrPhiPhiC = (PPdiag * C).sum()
+            TrC = C.sum()
+            logdetC = np.log(C).sum()
         else:
             trilind = np.tril_indices(D)
             LS = np.zeros((D, D))
@@ -280,6 +280,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
             TrC = np.trace(C)
             LC = jitchol(C, lower=True)
             logdetC = cho_log_det(LC)
+            # import IPython; IPython.embed()
 
         # Calculate ELBO
         ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
@@ -303,10 +304,9 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
             dS = - 0.5 * (PPdiag / _var + datrat * (1. / _lambda - 1. / S))
         else:
             # TODO This doesnt seem to work....
-            dLS = - LS * (PhiPhi / _var
-                          + datrat * (np.eye(D) / _lambda
-                                      - cho_solve((LC, True), np.eye(D))))
-            dS = dLS[trilind]
+            dS = - (PhiPhi.dot(LS) / _var + datrat * (LS / _lambda
+                    - cho_solve((LC, True), LS)))
+            dS = dS[trilind]
 
         # Grad variance
         dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
