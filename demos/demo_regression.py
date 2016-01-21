@@ -22,14 +22,14 @@ def main():
     #
 
     # Algorithmic properties
-    nbases = 100
+    nbases = 50
     lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
     order = 7  # For polynomial basis
     rate = 0.9
     eta = 1e-5
-    passes = 1000
+    passes = 2000
     batchsize = 100
     reg = 1
     diagcov = False

@@ -10,9 +10,6 @@ the "A la Carte" GP [1]_.
    2015.
 """
 
-# TODO:
-#   - Make reshaping dtheta less clunky with log trick
-
 from __future__ import division
 
 import numpy as np
@@ -220,23 +217,15 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
 
     Notes
     -----
-        This approximates the posterior covariance matrix over the weights with
-        a diagonal plus low rank matrix:
+        This actually optimises the evidence lower bound on log marginal
+        likelihood, rather than log marginal likelihood directly. In the case
+        of a full posterior convariance matrix, this bound is tight and the
+        exact solution will be found (modulo local minima for the
+        hyperparameters).
 
-        .. math ::
-
-            \mathbf{w} \sim \mathcal{N}(\mathbf{m}, \mathbf{C})
-
-        where,
-
-        .. math ::
-
-            \mathbf{C} = \mathbf{U}\mathbf{U}^{T} + \\text{diag}(\mathbf{s}),
-            \quad \mathbf{U} \in \mathbb{R}^{D\\times \\text{rank}},
-            \quad \mathbf{s} \in \mathbb{R}^{D}.
-
-        This is to allow for a reduced number of parameters to optimise with
-        SGD. As a consequence, features with large dimensionality can be used.
+        Furthermore, since SGD is used to estimate all of the parameters of the
+        covariance matrix (or rather a log-cholesky factor), many passes may be
+        required for convergence.
     """
 
     # Some consistency checking
@@ -248,7 +237,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
     if diagcov:
         Sinit = gamma.rvs(2, scale=0.5, size=D)
     else:
-        Sinit = np.random.randn(int(D * (D + 1) / 2)) / 1000
+        Sinit = np.random.randn(int(D * (D + 1) / 2)) * 1e-3
 
     def ELBO(m, S, _var, _lambda, _theta, Data):
 
@@ -271,16 +260,11 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
             TrC = C.sum()
             logdetC = np.log(C).sum()
         else:
-            trilind = np.tril_indices(D)
-            LS = np.zeros((D, D))
-            LS[trilind] = S
-            C = LS.dot(LS.T)
+            LS, C = _logcholfact(S, D)
             PhiPhi = Phi.T.dot(Phi)
             TrPhiPhiC = np.sum(PhiPhi * C)
             TrC = np.trace(C)
-            LC = jitchol(C, lower=True)
-            logdetC = cho_log_det(LC)
-            # import IPython; IPython.embed()
+            logdetC = cho_log_det(LS)
 
         # Calculate ELBO
         ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
@@ -303,10 +287,9 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
         if diagcov:
             dS = - 0.5 * (PPdiag / _var + datrat * (1. / _lambda - 1. / S))
         else:
-            # TODO This doesnt seem to work....
-            dS = - (PhiPhi.dot(LS) / _var + datrat * (LS / _lambda
-                    - cho_solve((LC, True), LS)))
-            dS = dS[trilind]
+            dS = _logcholfact_grad(- (PhiPhi.dot(LS) / _var
+                                      + datrat * (LS / _lambda
+                                      - cho_solve((LS, True), LS))), LS)
 
         # Grad variance
         dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
@@ -337,14 +320,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
                batchsize=batchsize, eval_obj=True)
     m, S, var, regulariser, bparams = res.x
 
-    if diagcov:
-        C = S
-    else:
-        # TODO: make this a function
-        trilind = np.tril_indices(D)
-        SL = np.zeros((D, D))
-        SL[trilind] = S
-        C = SL.dot(SL.T)
+    C = S if diagcov else _logcholfact(S, D)[1]
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
@@ -395,3 +371,23 @@ def predict(Xs, basis, m, C, bparams, var):
         Vf = ((Phi_s * C) * Phi_s).sum(axis=1)
 
     return Ey, Vf, Vf + var
+
+
+#
+# Module Helper functions
+#
+
+def _logcholfact(l, D):
+
+    L = np.zeros((D, D))
+    L[np.tril_indices(D)] = l
+    L[np.diag_indices(D)] = np.exp(L[np.diag_indices(D)])
+
+    return L, L.dot(L.T)
+
+
+def _logcholfact_grad(dL, L):
+
+    D = dL.shape[0]
+    dL[np.diag_indices(D)] *= L[np.diag_indices(D)]
+    return dL[np.tril_indices(D)]
