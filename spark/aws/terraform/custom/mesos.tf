@@ -195,7 +195,7 @@ resource "aws_instance" "mesos-slave" {
     }
 
     tags {
-        Name = "reverand-spark-slave-${count.index}"
+        Name = "revrand-spark-slave-${count.index}"
     }
 
     count = "${var.n_slaves}"

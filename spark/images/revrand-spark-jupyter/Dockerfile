@@ -29,10 +29,6 @@ RUN curl -sf http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz | tar zx -C /root
  && rm -r /root/nlopt-2.4.2
 
 ### 
-ADD files/run-demo.sh /root/run-demo.sh
-ADD files/python /root/python
-
-### 
 RUN pip3 install sklearn \
  && pip3 install flask
 
@@ -49,4 +45,8 @@ RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.6.0/tini &
 
 ENTRYPOINT ["tini", "--"]
 CMD ["jupyter", "notebook"]
+
+### Add scripts and examples (needs work)
+ADD files/run-demo.sh /root/run-demo.sh
+ADD files/python /root/python
 
