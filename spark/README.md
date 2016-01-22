@@ -10,20 +10,26 @@ Mesos spark docker image `dtpc/revrand-spark`
 Spark driver docker image `dtpc/revrand-spark-jupyter`
 
 
-Mesosphere DCOS
----------------
+Deployment methods
+------------------
+
+### Mesosphere DCOS
 
 https://mesosphere.com/product/
 
-`cd aws/dcos`, then run `create-dcos-stack.sh`
+`cd aws/dcos`, then run `create-dcos-stack.sh`.
 
-Automatically sets up a Mesos cluster with DNS, Marathon and zookeeper.
+Automatically sets up a Mesos cluster with DNS, Marathon and zookeeper. This uses AWS cloudformation with the Mesosphere DCOS template.
 
-Need to ssh into one of the machines and manually run revrand-spark-jupyter docker container to get jupyter spark driver. Should be able to submit this to marathon directly.
+Once deployed (you can check via the AWS web console or by running `aws cloudformation --describe-stacks`), submit the jupyter docker container as a task to Marathon by running:
 
+`./run-pyspark-jupyter.sh <mesos_master_private_ip>:5050`
 
-Hashicorp Terraform
--------------------
+where the Mesos master private ip will be something like 10.0.x.x. This can can be obtained from the AWS console. 
+
+Jupyter will take a minute or two to startup, and can then be accessed from on public slave IP (from AWS ECS console) and port 9999. Mesos can be accessed on the master public IP on port 5050. 
+
+### Hashicorp Terraform
 
 https://www.terraform.io/
 
@@ -40,6 +46,8 @@ Run `terraform apply`
 
 This takes a few minutes, after which the Mesos master and Jupiter notebook web addresses are output to the terminal.
 
+Jupyter Notebook
+----------------
 In Jupiter start the `example-revrand-sgd.ipynb` which runs revrands AdaDelta SGD algorithm in parallel to optimise weights of a radial basis function to fit data from a sine wave.
 
 Alternatively start a new PySpark kernel and the spark context is available as `sc`. When a spark task is sent to the Mesos master, it runs the `revrand-spark` docker image on each slave. The first time this is done it needs to download thee image first, so it takes a few mins for the task to get started (tasks will appear as STAGING on Mesos while this happens).
