@@ -49,4 +49,3 @@ CMD ["jupyter", "notebook"]
 ### Add scripts and examples (needs work)
 ADD files/run-demo.sh /root/run-demo.sh
 ADD files/python /root/python
-
