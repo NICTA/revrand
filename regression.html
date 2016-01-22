@@ -122,7 +122,7 @@ hyperparameters).</p>
 
 <dl class="function">
 <dt id="revrand.regression.learn_sgd">
-<code class="descclassname">revrand.regression.</code><code class="descname">learn_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>rank=None</em>, <em>gtol=0.001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.regression.learn_sgd" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.regression.</code><code class="descname">learn_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>gtol=0.001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.regression.learn_sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters and hyperparameters of an approximate Bayesian linear
 regressor using stochastic gradient descent for large scale problems.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -136,9 +136,8 @@ regressor using stochastic gradient descent for large scale problems.</p>
 <li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of parameters of the basis object.</li>
 <li><strong>var</strong> (<em>float, optional</em>) &#8211; observation variance initial value.</li>
 <li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
-<li><strong>rank</strong> (<em>int, optional</em>) &#8211; the rank of the off-diagonal covariance approximation, has to be
-[0, D] where D is the dimension of the basis. None is the same as
-setting rank = D.</li>
+<li><strong>diagcov</strong> (<em>bool, optional</em>) &#8211; approximate posterior covariance with diagional matrix (enables
+many features to be used by avoiding a matrix inversion).</li>
 <li><strong>gtol</strong> (<em>float,</em>) &#8211; SGD tolerance convergence criterion.</li>
 <li><strong>passes</strong> (<em>int, optional</em>) &#8211; Number of complete passes through the data before optimization
 terminates (unless it converges first).</li>
@@ -166,17 +165,18 @@ learned observation variance</li>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>This approximates the posterior covariance matrix over the weights with
-a diagonal plus low rank matrix:</p>
-<div class="math">
-\[\mathbf{w} \sim \mathcal{N}(\mathbf{m}, \mathbf{C})\]</div>
-<p>where,</p>
-<div class="math">
-\[\mathbf{C} = \mathbf{U}\mathbf{U}^{T} + \text{diag}(\mathbf{s}),
-\quad \mathbf{U} \in \mathbb{R}^{D\times \text{rank}},
-\quad \mathbf{s} \in \mathbb{R}^{D}.\]</div>
-<p>This is to allow for a reduced number of parameters to optimise with
-SGD. As a consequence, features with large dimensionality can be used.</p>
+<p>This actually optimises the evidence lower bound on log marginal
+likelihood, rather than log marginal likelihood directly. In the case
+of a full posterior convariance matrix, this bound is tight and the
+exact solution will be found (modulo local minima for the
+hyperparameters).</p>
+<p>Furthermore, since SGD is used to estimate all of the parameters of the
+covariance matrix (or rather a log-cholesky factor), many passes may be
+required for convergence.</p>
+<p>When <code class="code docutils literal"><span class="pre">diagcov</span></code> is <code class="code docutils literal"><span class="pre">True</span></code>, this algorithm still has to
+perform a matix inversion on the posterior weight covariances, and so
+this setting is not efficient when the dimensionality of the features
+is large.</p>
 </dd></dl>
 
 <dl class="function">
