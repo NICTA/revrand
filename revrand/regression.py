@@ -188,7 +188,8 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
         regulariser: float, optional
             weight regulariser (variance) initial value.
         diagcov: bool, optional
-            approximate posterior covariance with diagional matrix.
+            approximate posterior covariance with diagional matrix (enables
+            many features to be used by avoiding a matrix inversion).
         gtol: float,
             SGD tolerance convergence criterion.
         passes: int, optional
@@ -226,6 +227,11 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
         Furthermore, since SGD is used to estimate all of the parameters of the
         covariance matrix (or rather a log-cholesky factor), many passes may be
         required for convergence.
+
+        When :code:`diagcov` is :code:`True`, this algorithm still has to
+        perform a matix inversion on the posterior weight covariances, and so
+        this setting is not efficient when the dimensionality of the features
+        is large.
     """
 
     # Some consistency checking
