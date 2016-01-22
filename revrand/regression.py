@@ -234,10 +234,6 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
 
     # Initialise parameters
     minit = np.random.randn(D)
-    # if diagcov:
-    #     Sinit = gamma.rvs(2, scale=0.5, size=D)
-    # else:
-    #     Sinit = np.random.randn(int(D * (D + 1) / 2))
     Sinit = gamma.rvs(2, scale=0.5, size=D)
     if not diagcov:
         Sinit = np.diag(np.sqrt(Sinit))[np.tril_indices(D)]

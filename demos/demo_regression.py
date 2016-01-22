@@ -30,7 +30,7 @@ def main():
     rate = 0.9
     eta = 1e-5
     passes = 1000
-    batchsize = 10
+    batchsize = 100
     reg = 1
     diagcov = False
 
