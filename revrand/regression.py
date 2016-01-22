@@ -91,9 +91,9 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         # Posterior Parameters
         lower = False
-        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
-                         lower=lower)
-        m = cho_solve((LfullC, lower), Phi.T.dot(y)) / _var
+        LiC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
+                      lower=lower)
+        m = cho_solve((LiC, lower), Phi.T.dot(y)) / _var
 
         # Common calcs dependent on form of C
         if diagcov:
@@ -102,9 +102,9 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             logdetC = np.log(C).sum()
             TrC = C.sum()
         else:
-            C = cho_solve((LfullC, lower), np.eye(D))
+            C = cho_solve((LiC, lower), np.eye(D))
             TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -cho_log_det(LfullC)
+            logdetC = -cho_log_det(LiC)
             TrC = np.trace(C)
 
         # Common computations
@@ -266,10 +266,10 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
             logdetC = np.log(C).sum()
         else:
             PhiPhi = Phi.T.dot(Phi)
-            LS, C = _logcholfact(S, D)
+            LC, C = _logcholfact(S, D)
             TrPhiPhiC = np.sum(PhiPhi * C)
             TrC = np.trace(C)
-            logdetC = cho_log_det(LS)
+            logdetC = cho_log_det(LC)
 
         # Calculate ELBO
         ELBO = -0.5 * (B * (M * np.log(2 * np.pi * _var)
@@ -291,9 +291,9 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
         if diagcov:
             dS = - 0.5 * (B * PPdiag / _var + 1. / _lambda - 1. / S)
         else:
-            dS = _logcholfact_grad(- (B * PhiPhi.dot(LS) / _var
-                                      + LS / _lambda
-                                      - cho_solve((LS, True), LS)), LS)
+            dS = _logcholfact_grad(- (B * PhiPhi.dot(LC) / _var
+                                      + LC / _lambda
+                                      - cho_solve((LC, True), LC)), LC)
 
         # Grad variance
         dvar = 0.5 / _var * (-N + B * (TrPhiPhiC + sqErr) / _var)
