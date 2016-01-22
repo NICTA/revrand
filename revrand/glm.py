@@ -181,7 +181,6 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         ll = 0
         dlp = [np.zeros_like(p) for p in _lparams]
         dbp = [np.zeros_like(p) for p in _bparams]
-        # dbp = np.zeros(len(dPhi))
 
         for k in range(K):
 
@@ -209,7 +208,6 @@ def learn(data, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dlp[l] -= B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
-            # for l in range(len(dPhi)):
             for l in range(len(_bparams)):
                 dPhimk = dPhi[l].dot(_m[:, k])
                 dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)

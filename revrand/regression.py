@@ -10,9 +10,6 @@ the "A la Carte" GP [1]_.
    2015.
 """
 
-# TODO:
-#   - Make reshaping dtheta less clunky with log trick
-
 from __future__ import division
 
 import numpy as np
@@ -96,9 +93,9 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         # Posterior Parameters
         lower = False
-        LfullC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
-                         lower=lower)
-        m = cho_solve((LfullC, lower), Phi.T.dot(y)) / _var
+        LiC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
+                      lower=lower)
+        m = cho_solve((LiC, lower), Phi.T.dot(y)) / _var
 
         # Common calcs dependent on form of C
         if diagcov:
@@ -107,9 +104,9 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             logdetC = np.log(C).sum()
             TrC = C.sum()
         else:
-            C = cho_solve((LfullC, lower), np.eye(D))
+            C = cho_solve((LiC, lower), np.eye(D))
             TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -cho_log_det(LfullC)
+            logdetC = -cho_log_det(LiC)
             TrC = np.trace(C)
 
         # Common computations
@@ -170,7 +167,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     return mcache, Ccache, bparams, var
 
 
-def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
+def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
               gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
               verbose=True):
     """
@@ -192,10 +189,9 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
             observation variance initial value.
         regulariser: float, optional
             weight regulariser (variance) initial value.
-        rank: int, optional
-            the rank of the off-diagonal covariance approximation, has to be
-            [0, D] where D is the dimension of the basis. None is the same as
-            setting rank = D.
+        diagcov: bool, optional
+            approximate posterior covariance with diagional matrix (enables
+            many features to be used by avoiding a matrix inversion).
         gtol: float,
             SGD tolerance convergence criterion.
         passes: int, optional
@@ -224,40 +220,37 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., rank=None,
 
     Notes
     -----
-        This approximates the posterior covariance matrix over the weights with
-        a diagonal plus low rank matrix:
+        This actually optimises the evidence lower bound on log marginal
+        likelihood, rather than log marginal likelihood directly. In the case
+        of a full posterior convariance matrix, this bound is tight and the
+        exact solution will be found (modulo local minima for the
+        hyperparameters).
 
-        .. math ::
+        Furthermore, since SGD is used to estimate all of the parameters of the
+        covariance matrix (or rather a log-cholesky factor), many passes may be
+        required for convergence.
 
-            \mathbf{w} \sim \mathcal{N}(\mathbf{m}, \mathbf{C})
-
-        where,
-
-        .. math ::
-
-            \mathbf{C} = \mathbf{U}\mathbf{U}^{T} + \\text{diag}(\mathbf{s}),
-            \quad \mathbf{U} \in \mathbb{R}^{D\\times \\text{rank}},
-            \quad \mathbf{s} \in \mathbb{R}^{D}.
-
-        This is to allow for a reduced number of parameters to optimise with
-        SGD. As a consequence, features with large dimensionality can be used.
+        When :code:`diagcov` is :code:`True`, this algorithm still has to
+        perform a matix inversion on the posterior weight covariances, and so
+        this setting is not efficient when the dimensionality of the features
+        is large.
     """
     return learn_sgd_(np.hstack((y[:, np.newaxis], X)), basis, bparams, var,
-                      regulariser, rank, gtol, passes, rate, eta, batchsize,
+                      regulariser, diagcov, gtol, passes, rate, eta, batchsize,
                       verbose, spark=False)
 
 
-def learn_sgd_spark(rdd, basis, bparams, var=1, regulariser=1., rank=None,
+def learn_sgd_spark(rdd, basis, bparams, var=1, regulariser=1., diagcov=False,
               gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
               verbose=True):
     """
     learn_sgd with spark
     """
-    return learn_sgd_(rdd, basis, bparams, var, regulariser, rank, gtol,
+    return learn_sgd_(rdd, basis, bparams, var, regulariser, diagcov, gtol,
                       passes, rate, eta, batchsize, verbose, spark=True)
 
 
-def learn_sgd_(data, basis, bparams, var=1, regulariser=1., rank=None,
+def learn_sgd_(data, basis, bparams, var=1, regulariser=1., diagcov=False,
               gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
               verbose=True, spark=False):
 
@@ -276,96 +269,87 @@ def learn_sgd_(data, basis, bparams, var=1, regulariser=1., rank=None,
         D = basis(np.atleast_2d(data[0, 1:]), *bparams).shape[1]
         sgd_func = sgd
 
-    if rank is None:
-        rank = D
-    if (rank < 0) or (rank > D):
-        raise ValueError("rank has to be in the range [0, {}]!".format(D))
-
     # Initialise parameters
     minit = np.random.randn(D)
     Sinit = gamma.rvs(2, scale=0.5, size=D)
-    Uinit = np.random.randn(D, rank) if rank > 0 else 0
+    if not diagcov:
+        Sinit = np.diag(np.sqrt(Sinit))[np.tril_indices(D)]
 
-    def ELBO(m, S, U, _var, _lambda, _theta, Data):
+    def ELBO(m, S, _var, _lambda, _theta, Data):
 
         y, X = Data[:, 0], Data[:, 1:]
+        M = len(y)
+        B = N / M
 
         # Get Basis
         Phi = bcBasis.value(X, *_theta)                      # Nb x D
-        PPdiag = (Phi**2).sum(axis=0)
 
         # Common computations
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
-        logdetC = np.log(S).sum()
-        iS = 1. / S
 
-        if rank == 0:
+        if diagcov:
             C = S
+            PPdiag = (Phi**2).sum(axis=0)
             TrPhiPhiC = (PPdiag * C).sum()
             TrC = C.sum()
+            logdetC = np.log(C).sum()
         else:
-            C = U.dot(U.T) + np.diag(S)
             PhiPhi = Phi.T.dot(Phi)
+            LC, C = _logcholfact(S, D)
             TrPhiPhiC = np.sum(PhiPhi * C)
             TrC = np.trace(C)
-            UiS = U.T * iS
-            LUSU = jitchol(np.eye(rank) + UiS.dot(U))
-            logdetC += cho_log_det(LUSU)
+            logdetC = cho_log_det(LC)
 
         # Calculate ELBO
-        Nb = len(y)
-        ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
-                       + sqErr / _var
-                       + TrPhiPhiC / _var
-                       + Nb / N * (
-                           + (TrC + mm) / _lambda
-                           - logdetC
-                           + D * np.log(_lambda)
-                           - D))
+        ELBO = -0.5 * (B * (M * np.log(2 * np.pi * _var)
+                            + sqErr / _var
+                            + TrPhiPhiC / _var)
+                       + (TrC + mm) / _lambda
+                       - logdetC
+                       + D * np.log(_lambda)
+                       - D)
 
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
 
         # Mean gradient
-        dm = Err.dot(Phi) / _var - m * Nb / (_lambda * N)
+        dm = B * Err.dot(Phi) / _var - m / _lambda
 
         # Covariance gradient
-        if rank == 0:
-            iCdiag = iS
-            dU = 0
+        if diagcov:
+            dS = - 0.5 * (B * PPdiag / _var + 1. / _lambda - 1. / S)
         else:
-            iC = np.diag(iS) - UiS.T.dot(cho_solve((LUSU, False), UiS))
-            iCdiag = iC.diagonal()
-            dU = (Nb / N * (iC - np.eye(D) / _lambda) - PhiPhi / _var).dot(U)
-        dS = - 0.5 * (PPdiag / _var + Nb / N * (1. / _lambda - iCdiag))
+            dS = _logcholfact_grad(- (B * PhiPhi.dot(LC) / _var
+                                      + LC / _lambda
+                                      - cho_solve((LC, True), LC)), LC)
 
         # Grad variance
-        dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
+        dvar = 0.5 / _var * (-N + B * (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
-        dlambda = 0.5 * Nb / (_lambda * N) * ((TrC + mm) / _lambda - D)
+        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = bcBasis.value.grad(X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
-            dPhiPhi = dPhi.T.dot(Phi) if rank > 0 else (dPhi * Phi).sum(axis=0)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
+            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
+            dt = B * (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(-dt)
 
-        return -ELBO, [-dm, -dS, -dU, -dvar, -dlambda, dtheta]
+        return -ELBO, [-dm, -dS, -dvar, -dlambda, dtheta]
 
-    vparams = [minit, Sinit, Uinit, var, regulariser, bparams]
+    vparams = [minit, Sinit, var, regulariser, bparams]
 	
     # Broadcast variables
     bcBasis = sc.broadcast(basis)
 
     bounds = [Bound(shape=minit.shape),
-              Positive(shape=Sinit.shape),
-              Bound(shape=Uinit.shape if rank > 0 else ()),
+              Positive(shape=Sinit.shape) if diagcov else
+              Bound(shape=Sinit.shape),
               Positive(),
               Positive(), basis.bounds]
 
@@ -373,9 +357,9 @@ def learn_sgd_(data, basis, bparams, var=1, regulariser=1., rank=None,
     res = nsgd(ELBO, vparams, Data=data, rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
                batchsize=batchsize, eval_obj=True)
-    m, S, U, var, regulariser, bparams = res.x
 
-    C = S if rank == 0 else U.dot(U.T) + np.diag(S)
+    m, S, var, regulariser, bparams = res.x
+    C = S if diagcov else _logcholfact(S, D)[1]
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}."
@@ -426,3 +410,23 @@ def predict(Xs, basis, m, C, bparams, var):
         Vf = ((Phi_s * C) * Phi_s).sum(axis=1)
 
     return Ey, Vf, Vf + var
+
+
+#
+# Module Helper functions
+#
+
+def _logcholfact(l, D):
+
+    L = np.zeros((D, D))
+    L[np.tril_indices(D)] = l
+    L[np.diag_indices(D)] = np.exp(L[np.diag_indices(D)])
+
+    return L, L.dot(L.T)
+
+
+def _logcholfact_grad(dL, L):
+
+    D = dL.shape[0]
+    dL[np.diag_indices(D)] *= L[np.diag_indices(D)]
+    return dL[np.tril_indices(D)]

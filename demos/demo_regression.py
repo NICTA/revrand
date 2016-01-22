@@ -34,7 +34,7 @@ def main():
     #
 
     # Algorithmic properties
-    nbases = 100
+    nbases = 50
     lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
@@ -44,7 +44,7 @@ def main():
     passes = 1000
     batchsize = 100
     reg = 1
-    rank = 5
+    diagcov = False
 
     # np.random.seed(100)
 
@@ -142,21 +142,21 @@ def main():
         params_sgd = regression.learn_sgd(Xtrain, ytrain, base, hypers,
                                           var=noise**2, rate=rate, eta=eta,
                                           passes=passes, regulariser=reg,
-                                          rank=rank, batchsize=batchsize)
+                                      	  diagcov=diagcov, batchsize=batchsize)
         Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
         Sy_s = np.sqrt(Vy_s)
     else:
-        n_partitions = 4
-        data = sc.parallelize(train_data, n_partitions)
+        data = sc.parallelize(train_data)
         params_sgd = regression.learn_sgd_spark(data, base, hypers,
                                           var=noise**2, rate=rate, eta=eta,
                                           passes=passes, regulariser=reg,
-                                          rank=rank, batchsize=batchsize)
+                                      	  diagcov=diagcov, batchsize=batchsize)
         Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
         Sy_s = np.sqrt(Vy_s)
 
     params_elbo = regression.learn(Xtrain, ytrain, base, hypers,
-                                   var=noise**2, regulariser=reg)
+                                   diagcov=diagcov, var=noise**2,
+                                   regulariser=reg)
     Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
@@ -251,6 +251,15 @@ def main():
     pl.title('Regression demo')
     pl.ylabel('y')
     pl.xlabel('x')
+
+    # f, (ax1, ax2) = pl.subplots(2)
+    # ax1.imshow(params_sgd[1], interpolation='none')
+    # ax1.set_title('SGD')
+
+    # ax2.imshow(params_elbo[1], interpolation='none')
+    # ax2.set_title('ELBO')
+    # pl.colorbar
+
     pl.show()
 
 
