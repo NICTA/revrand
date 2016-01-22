@@ -29,8 +29,8 @@ def main():
     order = 7  # For polynomial basis
     rate = 0.9
     eta = 1e-5
-    passes = 2000
-    batchsize = 100
+    passes = 1000
+    batchsize = 10
     reg = 1
     diagcov = False
 
@@ -131,7 +131,8 @@ def main():
     Sy_s = np.sqrt(Vy_s)
 
     params_elbo = regression.learn(Xtrain, ytrain, base, hypers,
-                                   var=noise**2, regulariser=reg)
+                                   diagcov=diagcov, var=noise**2,
+                                   regulariser=reg)
     Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
@@ -139,15 +140,15 @@ def main():
     # Nonparametric variational inference GLM
     #
 
-    # llhood = likelihoods.Gaussian()
-    # lparams = [noise**2]
-    # params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
-    #                        reg=reg, use_sgd=True, rate=rate, postcomp=10,
-    #                        eta=eta, batchsize=batchsize, maxit=passes)
-    # Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
-    #                                            *params_glm)
-    # Vy_g = Vf_g + params_glm[2][0]
-    # Sy_g = np.sqrt(Vy_g)
+    llhood = likelihoods.Gaussian()
+    lparams = [noise**2]
+    params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
+                           reg=reg, use_sgd=True, rate=rate, postcomp=10,
+                           eta=eta, batchsize=batchsize, maxit=passes)
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
+                                               *params_glm)
+    Vy_g = Vf_g + params_glm[2][0]
+    Sy_g = np.sqrt(Vy_g)
 
     #
     # Learn GP and predict
@@ -169,12 +170,12 @@ def main():
     LL_sgd = mll(ftest, Ey_s, Vf_s)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
-    # LL_g = mll(ftest, Ey_g, Vy_g)
+    LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_sgd = smse(ftest, Ey_s)
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
-    # smse_glm = smse(ftest, Ey_g)
+    smse_glm = smse(ftest, Ey_g)
 
     log.info("A la Carte (SGD), LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_sgd, smse_sgd, np.sqrt(params_sgd[3]), params_sgd[2]))
@@ -183,9 +184,9 @@ def main():
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
-    # log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
-    #          .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
-    #                  params_glm[3]))
+    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+                     params_glm[3]))
 
     #
     # Plot
@@ -215,16 +216,25 @@ def main():
                     label=None)
 
     # GLM Regressor
-    # pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
-    # pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
-    #                 edgecolor='m', linestyle='--', label=None)
+    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+                    edgecolor='m', linestyle='--', label=None)
 
-    # pl.legend()
+    pl.legend()
 
     pl.grid(True)
     pl.title('Regression demo')
     pl.ylabel('y')
     pl.xlabel('x')
+
+    # f, (ax1, ax2) = pl.subplots(2)
+    # ax1.imshow(params_sgd[1], interpolation='none')
+    # ax1.set_title('SGD')
+
+    # ax2.imshow(params_elbo[1], interpolation='none')
+    # ax2.set_title('ELBO')
+    # pl.colorbar
+
     pl.show()
 
 

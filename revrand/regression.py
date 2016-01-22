@@ -234,16 +234,19 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
 
     # Initialise parameters
     minit = np.random.randn(D)
-    if diagcov:
-        Sinit = gamma.rvs(2, scale=0.5, size=D)
-    else:
-        Sinit = np.random.randn(int(D * (D + 1) / 2)) * 1e-3
+    # if diagcov:
+    #     Sinit = gamma.rvs(2, scale=0.5, size=D)
+    # else:
+    #     Sinit = np.random.randn(int(D * (D + 1) / 2))
+    Sinit = gamma.rvs(2, scale=0.5, size=D)
+    if not diagcov:
+        Sinit = np.diag(np.sqrt(Sinit))[np.tril_indices(D)]
 
     def ELBO(m, S, _var, _lambda, _theta, Data):
 
         y, X = Data[:, 0], Data[:, 1:]
-        Nb = len(y)
-        datrat = Nb / N
+        M = len(y)
+        B = N / M
 
         # Get Basis
         Phi = basis(X, *_theta)                      # Nb x D
@@ -260,49 +263,48 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
             TrC = C.sum()
             logdetC = np.log(C).sum()
         else:
-            LS, C = _logcholfact(S, D)
             PhiPhi = Phi.T.dot(Phi)
+            LS, C = _logcholfact(S, D)
             TrPhiPhiC = np.sum(PhiPhi * C)
             TrC = np.trace(C)
             logdetC = cho_log_det(LS)
 
         # Calculate ELBO
-        ELBO = -0.5 * (Nb * np.log(2 * np.pi * _var)
-                       + sqErr / _var
-                       + TrPhiPhiC / _var
-                       + datrat * (
-                           + (TrC + mm) / _lambda
-                           - logdetC
-                           + D * np.log(_lambda)
-                           - D))
+        ELBO = -0.5 * (B * (M * np.log(2 * np.pi * _var)
+                            + sqErr / _var
+                            + TrPhiPhiC / _var)
+                       + (TrC + mm) / _lambda
+                       - logdetC
+                       + D * np.log(_lambda)
+                       - D)
 
         if verbose:
             log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                      .format(ELBO, _var, _lambda, _theta))
 
         # Mean gradient
-        dm = Err.dot(Phi) / _var - m * datrat / _lambda
+        dm = B * Err.dot(Phi) / _var - m / _lambda
 
         # Covariance gradient
         if diagcov:
-            dS = - 0.5 * (PPdiag / _var + datrat * (1. / _lambda - 1. / S))
+            dS = - 0.5 * (B * PPdiag / _var + 1. / _lambda - 1. / S)
         else:
-            dS = _logcholfact_grad(- (PhiPhi.dot(LS) / _var
-                                      + datrat * (LS / _lambda
-                                      - cho_solve((LS, True), LS))), LS)
+            dS = _logcholfact_grad(- (B * PhiPhi.dot(LS) / _var
+                                      + LS / _lambda
+                                      - cho_solve((LS, True), LS)), LS)
 
         # Grad variance
-        dvar = 0.5 / _var * (-Nb + (TrPhiPhiC + sqErr) / _var)
+        dvar = 0.5 / _var * (-N + B * (TrPhiPhiC + sqErr) / _var)
 
         # Grad reg
-        dlambda = 0.5 * datrat / _lambda * ((TrC + mm) / _lambda - D)
+        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
 
         # Loop through basis param grads
         dtheta = []
         dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
         for dPhi in dPhis:
             dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
+            dt = B * (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
             dtheta.append(-dt)
 
         return -ELBO, [-dm, -dS, -dvar, -dlambda, dtheta]
@@ -318,8 +320,8 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
                batchsize=batchsize, eval_obj=True)
-    m, S, var, regulariser, bparams = res.x
 
+    m, S, var, regulariser, bparams = res.x
     C = S if diagcov else _logcholfact(S, D)[1]
 
     if verbose:
