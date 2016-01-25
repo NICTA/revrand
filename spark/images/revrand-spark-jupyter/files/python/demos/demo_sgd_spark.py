@@ -15,8 +15,7 @@ log = logging.getLogger(__name__)
 hasSparkContext = False
 try:
     from pyspark import SparkConf, SparkContext
-    conf = (SparkConf()
-         .setAppName("Spark SGD Demo")
+    conf = (SparkConf().setAppName("Spark SGD Demo"))
     sc = SparkContext(conf = conf)
     sc.addPyFile(__file__)
     hasSparkContext = True
@@ -95,7 +94,7 @@ def sgd_demo():
 
         # Distributed SGD for learning w (AdaGrad)
         w0 = np.random.randn(Phi.shape[1])
-        rdd = sc.parallelize(train_dat, rdd_partitions)
+        rdd = sc.parallelize(train_dat)
         results = sgd_u_spark(f, w0, rdd, updater=AdaGrad(np.shape(w)), passes=passes,
                             batchsize=batchsize, eval_obj=True, gtol=min_grad_norm)
         w_sgd_dag, gnorms_dag, costs_dag = results['x'], results['norms'], results['objs']

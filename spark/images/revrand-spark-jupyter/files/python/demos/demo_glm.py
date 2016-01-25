@@ -19,8 +19,7 @@ log = logging.getLogger(__name__)
 hasSparkContext = False
 try:
     from pyspark import SparkConf, SparkContext
-    conf = (SparkConf()
-         .setAppName("Spark GLM Demo")
+    conf = (SparkConf().setAppName("Spark GLM Demo"))
     sc = SparkContext(conf = conf)
     sc.addPyFile(__file__)
     hasSparkContext = True

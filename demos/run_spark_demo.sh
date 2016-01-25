@@ -6,15 +6,14 @@
 #   - demo_glm.py
 #   - demo_regression.py
 
-if [ "$#" -ne 1 ]; then
-    echo "usage: run_spark_demp.sh <python_script>"
+if [ "$#" -lt 1 ]; then
+    echo "usage: run_spark_demp.sh <python_script> [<master>]"
     exit 1
 fi
 
 DEMO_SCRIPT=$1
+LOCAL="local[*]"
+MASTER=${2:-$LOCAL}
 
-# local master using all cores
-MASTER="local[*]" 
-
-PYSPARK_PYTHON=python3 spark-submit --master "${MASTER}" --verbose $DEMO_SCRIPT
+PYSPARK_PYTHON=python3 ${SPARK_HOME}/bin/spark-submit --master "${MASTER}" --verbose $DEMO_SCRIPT
 

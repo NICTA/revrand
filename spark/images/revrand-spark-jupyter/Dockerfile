@@ -47,5 +47,5 @@ ENTRYPOINT ["tini", "--"]
 CMD ["jupyter", "notebook"]
 
 ### Add scripts and examples (needs work)
-ADD files/run-demo.sh /root/run-demo.sh
+ADD files/run-ipython.sh /root/run-ipython.sh
 ADD files/python /root/python

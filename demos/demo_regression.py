@@ -18,8 +18,7 @@ log = logging.getLogger(__name__)
 hasSparkContext = False
 try:
     from pyspark import SparkConf, SparkContext
-    conf = (SparkConf()
-         .setAppName("Spark regression Demo"))
+    conf = (SparkConf().setAppName("Spark regression Demo"))
     sc = SparkContext(conf = conf)
     sc.addPyFile(__file__)
     hasSparkContext = True

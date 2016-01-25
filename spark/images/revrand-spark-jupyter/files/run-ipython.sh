@@ -6,4 +6,4 @@ if [ "$#" -ne 1 ]; then
 fi
 
 MESOS_MASTER=$1
-PYSPARK_PYTHON=python3 PYSPARK_DRIVER_PYTHON=ipython3 /opt/spark/bin/pyspark --master mesos://${MESOS_MASTER}:5050
+PYSPARK_PYTHON=python3 PYSPARK_DRIVER_PYTHON=ipython3 ${SPARK_HOME}/bin/pyspark --master mesos://${MESOS_MASTER}:5050
