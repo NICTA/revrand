@@ -5,6 +5,9 @@ revrand
 .. image:: https://travis-ci.org/NICTA/revrand.svg?branch=master
    :target: https://travis-ci.org/NICTA/revrand
 
+.. image:: https://codecov.io/github/NICTA/revrand/coverage.svg?branch=master
+    :target: https://codecov.io/github/NICTA/revrand?branch=master
+
 ------------------------------------------------------------------------------
 A library of scalable Bayesian generalised linear models with *fancy* features
 ------------------------------------------------------------------------------
