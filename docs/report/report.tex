@@ -2,12 +2,17 @@
 
 % Packages
 \usepackage{sectsty}
-
+\usepackage{hyperref}
+\usepackage{xcolor}
 
 % Package config
 \sectionfont{\normalfont\sffamily\bfseries}
 \subsectionfont{\normalfont\sffamily\bfseries}
-
+\hypersetup{colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
 
 % Preamble
 \title{\sffamily{\emph{revrand}: Technical Report}}
@@ -22,8 +27,19 @@
 \maketitle
 \vspace{-0.5cm}
 \noindent\makebox[\linewidth]{\rule{\linewidth}{0.8pt}}
+\vspace{0.3cm}
 
-\abstract{Something here}
+\begin{abstract}
+    This is a technical report on the \emph{revrand} software library. This
+    library implements various Bayesian linear models (Bayesian linear
+    regression), approximate Gaussian processes and generalised linear models.
+    These algorithms have been implemented such that they can be used for
+    large-scale inference by using stochastic gradients, and are deployable on
+    computational clusters with Apache Spark. All of the algorithms in
+    \emph{revrand} use a unified feature composition framework, that allows for
+    easy composition of positive-definite covariance functions and easy
+    manipulation and combination of regression basis functions.
+\end{abstract}
 
 \tableofcontents
 
@@ -44,5 +60,7 @@
 \section{Feature Composition Framework}
 
 \section{Apache Spark Bindings}
+
+\section{Future Functionality}
 
 \end{document}
