@@ -37,4 +37,4 @@ cache:
     - $HOME/.cache/pip
 
 after_success:
-  - codecov
+  - codecov --token=2be93333-0184-42d1-a096-7d7d6fb6b8bd
