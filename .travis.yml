@@ -23,7 +23,7 @@ install:
   - make install
   - cd $TRAVIS_BUILD_DIR
   - pip install --upgrade pip
-  - pip install --upgrade pytest
+  - pip install --upgrade pytest pytest-cov
   - pip install codecov unipath requests
   - python setup.py install
 
