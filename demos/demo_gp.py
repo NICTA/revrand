@@ -25,8 +25,9 @@ def main():
                       np.random.normal(loc=0.0, scale=0.05,
                                        size=(x.shape[0], 1)))
     y = underlyingFunc(X) + noise_level * np.random.randn(nTrain, 1)
+    y = y.ravel()
     Xs = np.linspace(0., 1., nQuery)[:, np.newaxis]
-    data_mean = np.mean(y, axis=0)
+    data_mean = np.mean(y)
     ys = y - data_mean
     # ----------------------------------------------------------
 
@@ -56,10 +57,8 @@ def main():
     fig = pl.figure()
     ax = fig.add_subplot(111)
     ax.plot(Xs, post_mu, 'k-')
-    post_mu = post_mu[:, np.newaxis]
-
-    upper = (post_mu.ravel() + 2*np.sqrt(post_var.ravel()))
-    lower = (post_mu.ravel() - 2*np.sqrt(post_var.ravel()))
+    upper = post_mu + 2*np.sqrt(post_var)
+    lower = post_mu - 2*np.sqrt(post_var)
 
     ax.fill_between(Xs.ravel(), upper, lower,
                     facecolor=(0.9, 0.9, 0.9), edgecolor=(0.5, 0.5, 0.5))

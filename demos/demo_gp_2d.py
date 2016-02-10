@@ -25,7 +25,6 @@ def main():
     X = X[np.argsort(X[:, 0])]
     noise = np.random.normal(loc=0.0, scale=0.1, size=(nTrain,))
     Y = (np.cos(3*np.pi*X[:, 0]) + np.cos(3*np.pi*X[:, 1])) + noise
-    Y = Y[:, np.newaxis]
 
     data_mean = np.mean(Y, axis=0)
     ys = Y-data_mean

@@ -147,13 +147,13 @@ def main():
     #
     # Learn GP and predict
     #
-
-    kdef = lambda h, k: h(1e-5, 1e2, 1) * k(kern.gaussian,
-                                            h(1e-5, 1e5, lenscale))
+    def kdef(h, k):
+        return (h(1e-5, 1., 0.5) * k(kern.gaussian, h(1e-5, 1e5, lenscale)) +
+                k(kern.lognoise, h(-4, 1, -3)))
     hyper_params = gp.learn(Xtrain, ytrain, kdef, verbose=True, ftol=1e-15,
                             maxiter=passes)
-    regressor = gp.condition(Xtrain, ytrain, kdef, hyper_params)
 
+    regressor = gp.condition(Xtrain, ytrain, kdef, hyper_params)
     query = gp.query(regressor, Xtest)
     Ey_gp = gp.mean(query)
     Vf_gp = gp.variance(query)

@@ -21,6 +21,7 @@ def learn(X, y, kernel_defn, optCriterion=None, verbose=False, ftol=1e-8,
           maxiter=10000):
 
     n, d = X.shape
+
     if optCriterion is None:
         optCriterion = criterions.negative_log_marginal_likelihood
     else:

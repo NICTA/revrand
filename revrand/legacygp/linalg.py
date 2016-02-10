@@ -12,6 +12,8 @@ def svdInverse(factorisation):
 
 def svd_yKy(factorisation, y):
     # efficiently computes y' Kinv y
+    if y.ndim < 2:
+        y = np.atleast_2d(y).T  # view... dot behaves strangely otherwise
     R, s, Rt = factorisation
     ss = 1./np.sqrt(s)
     # K = R.dot(np.diag(s).dot(Rt))
