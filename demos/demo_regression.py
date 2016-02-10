@@ -2,7 +2,8 @@
 """ A La Carte GP and basis function demo. """
 
 import matplotlib.pyplot as pl
-import dora.regressors.gp as gp
+import revrand.legacygp as gp
+import revrand.legacygp.kernels as kern
 import numpy as np
 import logging
 
@@ -29,7 +30,7 @@ def main():
     order = 7  # For polynomial basis
     rate = 0.9
     eta = 1e-5
-    passes = 1000
+    passes = 100
     batchsize = 100
     reg = 1
     diagcov = False
@@ -96,18 +97,11 @@ def main():
     else:
         raise ValueError('Invalid basis!')
 
-    #
-    # Make real GP
-    #
-
-    kdef = lambda h, k: h(1e-5, 1e2, 1) * k('gaussian', h(1e-5, 1e5, lenscale))
-    kfunc = gp.compose(kdef)
-
     # Set up optimisation
-    learning_params = gp.OptConfig()
-    learning_params.sigma = gp.auto_range(kdef)
-    learning_params.noise = gp.Range([1e-5], [1e5], [1])
-    learning_params.walltime = 60
+    # learning_params = gp.OptConfig()
+    # learning_params.sigma = gp.auto_range(kdef)
+    # learning_params.noise = gp.Range([1e-5], [1e5], [1])
+    # learning_params.walltime = 60
 
     #
     # Learn regression parameters and predict
@@ -154,14 +148,19 @@ def main():
     # Learn GP and predict
     #
 
-    hyper_params = gp.learn(Xtrain, ytrain, kfunc, learning_params)
-    regressor = gp.condition(Xtrain, ytrain, kfunc, hyper_params)
+    kdef = lambda h, k: h(1e-5, 1e2, 1) * k(kern.gaussian,
+                                            h(1e-5, 1e5, lenscale))
+    hyper_params = gp.learn(Xtrain, ytrain, kdef, verbose=True, ftol=1e-15,
+                            maxiter=passes)
+    regressor = gp.condition(Xtrain, ytrain, kdef, hyper_params)
 
-    query = gp.query(Xtest, regressor)
-    Ey_gp = gp.mean(regressor, query)
-    Vf_gp = gp.variance(regressor, query)
-    Vy_gp = Vf_gp + np.array(hyper_params[1])**2
+    query = gp.query(regressor, Xtest)
+    Ey_gp = gp.mean(query)
+    Vf_gp = gp.variance(query)
+    Vy_gp = gp.variance(query, noise=True)
     Sy_gp = np.sqrt(Vy_gp)
+
+    # import ipdb; ipdb.set_trace()
 
     #
     # Evaluate LL and SMSE

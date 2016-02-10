@@ -32,8 +32,8 @@ def svdSolve(factorisation, M):
     """
     R, s, Rt = factorisation
     n = R.shape[0]
-    m = M.shape[1]
     assert(M.shape[0] == n)
+    m = M.shape[1] if np.ndim(M) > 1 else 1
     ss = 1./np.sqrt(s)
     R2 = R * ss[np.newaxis, :]
 
@@ -51,4 +51,3 @@ def svdHalfSolve(factorisation, M):
     ss = 1./np.sqrt(s)
     R2 = R * ss[np.newaxis, :]
     return R2.T.dot(M)  # O(n^2 (2m))
-
