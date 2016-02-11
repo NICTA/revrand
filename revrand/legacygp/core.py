@@ -31,6 +31,7 @@ def learn(X, y, kernel_defn, optCriterion=None, verbose=False, ftol=1e-8,
 
     # Automatically determine the range
     meta = get_meta(kernel_defn)
+
     bounds = [Bound(l, h) for l, h in zip(meta.lowerBound, meta.upperBound)]
     theta0 = meta.initialVal
 
@@ -64,7 +65,7 @@ class criterions:
 
     # Compute the log marginal likelihood
     @staticmethod
-    def stacked_negative_log_marginal_likelihood(y, factors):
+    def snlml(y, factors):
         n, n_stacks = y.shape
         nll = 0.5 * (np.asarray([linalg.svd_yKy(factors, y[:, i_stacks])
                      for i_stacks in range(n_stacks)]).sum() +
