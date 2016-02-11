@@ -62,6 +62,16 @@ class criterions:
                      n * np.log(2.0 * np.pi))
         return nll
 
+    # Compute the log marginal likelihood
+    @staticmethod
+    def stacked_negative_log_marginal_likelihood(y, factors):
+        n, n_stacks = y.shape
+        nll = 0.5 * (np.asarray([linalg.svd_yKy(factors, y[:, i_stacks])
+                     for i_stacks in range(n_stacks)]).sum() +
+                     n_stacks * linalg.svdLogDet(factors) +
+                     n_stacks * n * np.log(2.0 * np.pi))
+        return nll
+
     # # Compute the leave one out neg log prob
     # @staticmethod
     # def negative_log_prob_cross_val(y, factors):
