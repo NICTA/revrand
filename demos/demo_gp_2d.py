@@ -36,18 +36,18 @@ def main():
     Xs = np.vstack((xv.ravel(), yv.ravel())).T
 
     # Compose isotropic kernel:
-    def kernel_defn(h, k):
+    def kerneldef(h, k):
         a = h(0.1, 5, 0.1)
         b = h(0.1, 5, 0.1)
         logsigma = h(-6, 1)
         return a*k(gp.kernels.gaussian, b) + k(gp.kernels.lognoise, logsigma)
 
-    hyper_params = gp.learn(X, ys, kernel_defn, verbose=True, ftol=1e-5,
+    hyper_params = gp.learn(X, ys, kerneldef, verbose=True, ftol=1e-5,
                             maxiter=2000)
 
-    print(gp.describe(kernel_defn, hyper_params))
+    print(gp.describe(kerneldef, hyper_params))
 
-    regressor = gp.condition(X, ys, kernel_defn, hyper_params)
+    regressor = gp.condition(X, ys, kerneldef, hyper_params)
 
     query = gp.query(regressor, Xs)
     post_mu = gp.mean(query) + data_mean

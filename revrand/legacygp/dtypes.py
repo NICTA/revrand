@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-Range = namedtuple('Range', 'lowerBound upperBound initialVal')
+Range = namedtuple('Range', 'lower_bound upper_bound initial_val')
 
 QueryParams = namedtuple('GPQuery', 'regressor Xs K_xxs')
 

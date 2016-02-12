@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def svdInverse(factorisation):
+def svd_inverse(factorisation):
     R, s, Rt = factorisation
     # R, S, RT = np.linalg.svd(K)
     ss = 1./np.sqrt(s)
@@ -22,14 +22,14 @@ def svd_yKy(factorisation, y):
     return np.sum(F**2)
 
 
-def svdLogDet(factorisation):
+def svd_log_det(factorisation):
     """ Computes log determinant for a svd factorisation
     """
     R, s, Rt = factorisation
     return np.sum(np.log(s))
 
 
-def svdSolve(factorisation, M):
+def svd_solve(factorisation, M):
     """ Computes A\M for factorisation = np.linalg.svd(A)
     """
     R, s, Rt = factorisation
@@ -46,7 +46,7 @@ def svdSolve(factorisation, M):
         return R2.dot(R2.T).dot(M)  # O(n^2 (m + n))
 
 
-def svdHalfSolve(factorisation, M):
+def svd_half_solve(factorisation, M):
     """ Computes A\M for factorisation = np.linalg.svd(A)
     """
     R, s, Rt = factorisation

@@ -23,6 +23,7 @@ parts/
 sdist/
 var/
 docs/generated/
+demos/_revrand_data/
 *.egg-info/
 .installed.cfg
 *.egg
