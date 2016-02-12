@@ -32,7 +32,7 @@ def main():
     # ----------------------------------------------------------
 
     # Define a pathological GP kernel:
-    def kernel_defn(h, k):
+    def kerneldef(h, k):
         a = h(0.1, 5, 0.1)
         b = h(0.1, 5, 0.1)
         logsigma = h(-6, 1)
@@ -40,14 +40,14 @@ def main():
                 + k(gp.kernels.lognoise, logsigma))
 
     # Learning signal and noise hyperparameters
-    hyper_params = gp.learn(X, ys, kernel_defn, verbose=False, ftol=1e-15,
+    hyper_params = gp.learn(X, ys, kerneldef, verbose=False, ftol=1e-15,
                             maxiter=2000)
 
     # old_hyper_params = [1.48, .322, np.log(0.0486)]
-    # print(gp.describe(kernel_defn, old_hyper_params))
-    print(gp.describe(kernel_defn, hyper_params))
+    # print(gp.describe(kerneldef, old_hyper_params))
+    print(gp.describe(kerneldef, hyper_params))
 
-    regressor = gp.condition(X, ys, kernel_defn, hyper_params)
+    regressor = gp.condition(X, ys, kerneldef, hyper_params)
     query = gp.query(regressor, Xs)
     post_mu = gp.mean(query) + data_mean
     # post_cov = gp.covariance(query)
