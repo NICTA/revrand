@@ -13,32 +13,32 @@ import logging
 log = logging.getLogger('GP')
 
 
-def describe(kernel_defn, hypers):
-    return get_repr(kernel_defn)(hypers)
+def describe(kerneldef, hypers):
+    return get_repr(kerneldef)(hypers)
 
 
-def learn(X, y, kernel_defn, optCriterion=None, verbose=False, ftol=1e-8,
+def learn(X, y, kerneldef, opt_criterion=None, verbose=False, ftol=1e-8,
           maxiter=10000):
 
     n, d = X.shape
 
-    if optCriterion is None:
-        optCriterion = criterions.negative_log_marginal_likelihood
+    if opt_criterion is None:
+        opt_criterion = criterions.negative_log_marginal_likelihood
     else:
         pass  # check type
 
-    cov_fn = compose(kernel_defn)
+    cov_fn = compose(kerneldef)
 
     # Automatically determine the range
-    meta = get_meta(kernel_defn)
+    meta = get_meta(kerneldef)
 
-    bounds = [Bound(l, h) for l, h in zip(meta.lowerBound, meta.upperBound)]
-    theta0 = meta.initialVal
+    bounds = [Bound(l, h) for l, h in zip(meta.lower_bound, meta.upper_bound)]
+    theta0 = meta.initial_val
 
     def criterion(*theta):
         K = cov_fn(X, X, theta, True)  # learn with noise!
         factors = np.linalg.svd(K)
-        value = optCriterion(y, factors)
+        value = opt_criterion(y, factors)
         if verbose:
             log.info("[{0}] {1}".format(value, theta))
         return value
@@ -59,17 +59,17 @@ class criterions:
     def negative_log_marginal_likelihood(y, factors):
         n = y.shape[0]
         nll = 0.5 * (linalg.svd_yKy(factors, y) +
-                     linalg.svdLogDet(factors) +
+                     linalg.svd_log_det(factors) +
                      n * np.log(2.0 * np.pi))
         return nll
 
     # Compute the log marginal likelihood
     @staticmethod
-    def snlml(y, factors):
+    def stacked_negative_log_marginal_likelihood(y, factors):
         n, n_stacks = y.shape
         nll = 0.5 * (np.asarray([linalg.svd_yKy(factors, y[:, i_stacks])
                      for i_stacks in range(n_stacks)]).sum() +
-                     n_stacks * linalg.svdLogDet(factors) +
+                     n_stacks * linalg.svd_log_det(factors) +
                      n_stacks * n * np.log(2.0 * np.pi))
         return nll
 
@@ -77,7 +77,7 @@ class criterions:
     # @staticmethod
     # def negative_log_prob_cross_val(y, factors):
     #     n = y.shape[0]
-    #     Kinv = svdInverse(factors)  # more expensive!
+    #     Kinv = svd_inverse(factors)  # more expensive!
     #     alpha = Kinv.dot(y)  # might as well now
     #     logprob = 0.
     #     for i in range(n):
@@ -88,7 +88,7 @@ class criterions:
     #     return -logprob
 
 
-def condition(X, y, kernel_defn, hypers):
+def condition(X, y, kerneldef, hypers):
     """ Conditions a GP kernelFn(hypers) on the data X, y
         Arguments:
             Array nxd: X target input features
@@ -96,11 +96,11 @@ def condition(X, y, kernel_defn, hypers):
             kernel
             hypers: vector of hyperparameters.
     """
-    kernelFn = compose(kernel_defn)
+    kernelFn = compose(kerneldef)
     kernel = lambda x1, x2, noise: kernelFn(x1, x2, hypers, noise)
     K = kernel(X, X, True)
     svd_factors = np.linalg.svd(K)
-    alpha = linalg.svdSolve(svd_factors, y)
+    alpha = linalg.svd_solve(svd_factors, y)
     return dtypes.RegressionParams(X, svd_factors, alpha, kernel, y)
 
 
@@ -118,46 +118,46 @@ def query(regressor, Xs):
     return dtypes.QueryParams(regressor, Xs, K_xxs)
 
 
-def mean(queryParams):
+def mean(query_params):
     """ Computes the predictive mean for a query.
     Arguments:
         QueryParams: made with query()
     Returns:
         Array(nx1): the mean prediction.
     """
-    assert(isinstance(queryParams, dtypes.QueryParams))
-    return np.dot(queryParams.K_xxs.T, queryParams.regressor.alpha)
+    assert(isinstance(query_params, dtypes.QueryParams))
+    return np.dot(query_params.K_xxs.T, query_params.regressor.alpha)
 
 
-def covariance(queryParams, noise=True):
+def covariance(query_params, noise=True):
     """ Computes a full predictive covariance metrix for a query.
     Arguments:
         QueryParams: made with query()
     Returns:
         Array(nxn): the full covariance matrix.
     """
-    assert(isinstance(queryParams, dtypes.QueryParams))
-    regressor = queryParams.regressor
-    K_xs = regressor.kernel(queryParams.Xs, queryParams.Xs, noise)
-    v = linalg.svdHalfSolve(regressor.factorisation, queryParams.K_xxs)
+    assert(isinstance(query_params, dtypes.QueryParams))
+    regressor = query_params.regressor
+    K_xs = regressor.kernel(query_params.Xs, query_params.Xs, noise)
+    v = linalg.svd_half_solve(regressor.factorisation, query_params.K_xxs)
     return K_xs - np.dot(v.T, v)
 
 
-def variance(queryParams, noise=True):
+def variance(query_params, noise=True):
     """ Computes a full predictive covariance metrix for a query.
     Arguments:
         QueryParams: made with query()
     Returns:
         Array(nxn): the full covariance matrix.
     """
-    assert(isinstance(queryParams, dtypes.QueryParams))
-    regressor = queryParams.regressor
-    K_xs = regressor.kernel(queryParams.Xs, None, noise)
-    v = linalg.svdHalfSolve(regressor.factorisation, queryParams.K_xxs)
+    assert(isinstance(query_params, dtypes.QueryParams))
+    regressor = query_params.regressor
+    K_xs = regressor.kernel(query_params.Xs, None, noise)
+    v = linalg.svd_half_solve(regressor.factorisation, query_params.K_xxs)
     return K_xs - np.sum(v**2, axis=0)
 
 
-def compose(kernel_defn):
+def compose(kerneldef):
     """ Converts a user's kernel definition fn(h,k)
         Args:
             h - Hyperparameter function (min, max, mid)
@@ -171,12 +171,12 @@ def compose(kernel_defn):
         k = lambda kfunc, par: (kfunc(x1, x2, par) if
                                 (noise or not hasattr(kfunc, '__is_noise'))
                                 else 0.)
-        return kernel_defn(h, k)
+        return kerneldef(h, k)
 
     return user_kernel
 
 
-def get_meta(kernel_defn):
+def get_meta(kerneldef):
     """ Introspects a user's kernel definition fn(h,k)
            h - Hyperparameter function (min, max, mid)
            k - Kernel call function (name, hyper, optional_list_of_dimensions)
@@ -200,12 +200,12 @@ def get_meta(kernel_defn):
         # Compatible 'kernel' that takes nothing and does nothing.
         return 0.
 
-    kernel_defn(h, k)  # Call the kernel def to pull out the hypers
+    kerneldef(h, k)  # Call the kernel def to pull out the hypers
 
     return dtypes.Range(mins, maxs, mids)
 
 
-def get_repr(kernel_defn):
+def get_repr(kerneldef):
     """ Returns a Function that prints a kernel to console with its
         hyperparameters.
     """
@@ -250,8 +250,8 @@ def get_repr(kernel_defn):
         h = lambda a, b, c=None: next(theta_iter)
         k = lambda f, par: PrintTree_(f.__name__ + '{' + PrintTree_.txt_(par)
                                       + '}')
-        # now kernel_defn(h, k) returns a print tree
-        return kernel_defn(h, k).__repr__()
+        # now kerneldef(h, k) returns a print tree
+        return kerneldef(h, k).__repr__()
 
     return print_fn  # We are returning a closure
 
@@ -261,8 +261,5 @@ def noise_kernel(func):
     return func
 
 
-def isNoise(func):
+def is_noise(func):
     return hasattr(func, '__is_noise')
-
-
-
