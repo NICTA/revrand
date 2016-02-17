@@ -129,13 +129,13 @@ def test_make_nlopt_fun_grad_free1(start_point):
 def test_make_nlopt_fun_grad_path(start_point):
     x0 = start_point
     opt = nlopt.opt(nlopt.LD_LBFGS, len(x0))
-    cache = []
-    obj_fun = make_nlopt_fun(rosen, jac=rosen_der, xs=cache)
+    path = []
+    obj_fun = make_nlopt_fun(rosen, jac=rosen_der, path=path)
     opt.set_min_objective(obj_fun)
     assert np.allclose(opt.optimize(x0), np.array([1., 1., 1., 1., 1.]))
     assert np.isclose(opt.last_optimum_value(), 0)
-    assert len(cache) == 51
-    assert np.allclose(np.array(cache).round(2),
+    assert len(path) == 51
+    assert np.allclose(np.array(path).round(2),
                        np.array(
         [[1.3, 0.7, 0.8, 1.9, 1.2],
          [-514.1, 286.1, 342.4, -2083.5, 483.2],

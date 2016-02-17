@@ -36,6 +36,7 @@ NLOPT_MESSAGES = {
 }
 
 
+# TODO: argument to specify whether to be stateful
 def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
              constraints=[], **options):
     """
@@ -104,15 +105,17 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
     # Create NLopt object
     dim = len(x0)
 
+    # If not a NLopt algorithm enum
     if isinstance(method, str):
-        method = get_nlopt_enum_by_name(method)
+        method = get_nlopt_enum(method)
 
     opt = nlopt.opt(method, dim)
 
-    xs = []
+    # Initialize path
+    path = []
 
     # Create NLOpt objective function
-    obj_fun = make_nlopt_fun(fun, jac, args, xs)
+    obj_fun = make_nlopt_fun(fun, jac, args, path)
     opt.set_min_objective(obj_fun)
 
     # Normalize and set parameter bounds
@@ -124,16 +127,18 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
     # Equality and Inequality Constraints
     for constr in constraints:
 
-        fun = make_nlopt_fun(fun=constr['fun'], 
-                             jac=constr.get('jac', False), 
+        # Could unpack kwargs here `make_nlopt_fun(**constr)`
+        # but we want to support default values
+        fun = make_nlopt_fun(fun=constr['fun'],
+                             jac=constr.get('jac', False),
                              args=constr.get('args', ()))
 
         if constr['type'] == 'eq':
             opt.add_equality_constraint(fun)
         elif constr['type'] == 'ineq':
             opt.add_inequality_constraint(fun)
-        elif constr['type'] in ('eq_m', 'ineq_m'): # TODO: Define '_m' as suffix
-                                                   # for now. 
+        elif constr['type'] in ('eq_m', 'ineq_m'):
+            # TODO: Define '_m' as suffix for now.
             # TODO: Add support for vector/matrix-valued constraints
             raise NotImplementedError('Vector-valued constraints currently '
                                       'not supported.')
@@ -141,12 +146,11 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
             raise ValueError('Constraint type not recognized')
 
     # Set other options, e.g. termination criteria
-    # This may or may not be a great idea... Time will tell. 
     for option, val in options.items():
         try:
             set_option = getattr(opt, 'set_{option}'.format(option=option))
         except AttributeError:
-            raise ValueError('Parameter {option} could not be ' 
+            raise ValueError('Parameter {option} could not be '
                              'recognized.'.format(option=option))
         else:
             set_option(val)
@@ -155,7 +159,8 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
     try:
         x = opt.optimize(x0)
     except nlopt.RoundoffLimited:
-        x = xs[-1]
+        # If we encounter a RoundoffLimited exception, simply return last point
+        x = path[-1]
 
     return OptimizeResult(
         x=x,
@@ -165,22 +170,30 @@ def minimize(fun, x0, args=(), method=None, jac=None, bounds=None,
     )
 
 
-def make_nlopt_fun(fun, jac=True, args=(), xs=None):
+def make_nlopt_fun(fun, jac=True, args=(), path=None):
     """
-    Make NLOpt objective function (as specified by the the `NLOpt Python
-    interface`_), from SciPy-style objective functions.
+    Make an NLopt objective function (as specified by the the `NLOpt Python
+    interface`_) from SciPy-style objective function.
 
-    The NLOpt objective functions are far less pleasant to work with and
-    are even *required* to have side effects since gradient arrays are
-    required to be passed-by-reference and modifed in-place.
+    The NLOpt objective functions are far less pleasant to work with since they
+    are *required* to have side effects because gradient arrays are required to
+    be passed-by-reference and modified in-place.
+
+    Parameters
+    ----------
+    fun : callable
+        Objective function
+
+    jac : bool or callable, optional
+        Jacobian (gradient) of objective function.
 
     .. _`NLOpt Python interface`:
        http://ab-initio.mit.edu/wiki/index.php/NLopt_Python_Reference#Objective_function
     """
     def nlopt_fun(x, grad):
 
-        if xs is not None:
-            xs.append(x.copy())
+        if path is not None:
+            path.append(x.copy())
 
         ret = fun(x, *args)
         grad_temp = None
@@ -212,7 +225,7 @@ def make_nlopt_fun(fun, jac=True, args=(), xs=None):
     return nlopt_fun
 
 
-def get_nlopt_enum_by_name(method_name=None, default=nlopt.LN_BOBYQA):
+def get_nlopt_enum(method_name=None, default=nlopt.LN_BOBYQA):
     """
     Get NLOpt algorithm object by name. If the algorithm is not found,
     defaults to `nlopt.LN_BOBYQA`.
@@ -245,29 +258,29 @@ def get_nlopt_enum_by_name(method_name=None, default=nlopt.LN_BOBYQA):
 
     Examples
     --------
-    >>> get_nlopt_enum_by_name('LN_NELDERMEAD') == nlopt.LN_NELDERMEAD
+    >>> get_nlopt_enum('LN_NELDERMEAD') == nlopt.LN_NELDERMEAD
     True
 
-    >>> get_nlopt_enum_by_name('ln_neldermead') == nlopt.LN_NELDERMEAD
+    >>> get_nlopt_enum('ln_neldermead') == nlopt.LN_NELDERMEAD
     True
 
     One is permitted to be cavalier with these method names.
 
-    >>> get_nlopt_enum_by_name('ln_NelderMead') == nlopt.LN_NELDERMEAD
+    >>> get_nlopt_enum('ln_NelderMead') == nlopt.LN_NELDERMEAD
     True
 
-    >>> get_nlopt_enum_by_name() == nlopt.LN_BOBYQA
+    >>> get_nlopt_enum() == nlopt.LN_BOBYQA
     True
 
-    >>> get_nlopt_enum_by_name('foobar') == nlopt.LN_BOBYQA
+    >>> get_nlopt_enum('foobar') == nlopt.LN_BOBYQA
     True
 
     .. todo:: Exceptional cases (low-priority)
 
-    >>> get_nlopt_enum_by_name('G_MLSL') == nlopt.G_MLSL # doctest: +SKIP
+    >>> get_nlopt_enum('G_MLSL') == nlopt.G_MLSL # doctest: +SKIP
     True
 
-    >>> get_nlopt_enum_by_name('AUGLAG') == nlopt.AUGLAG # doctest: +SKIP
+    >>> get_nlopt_enum('AUGLAG') == nlopt.AUGLAG # doctest: +SKIP
     True
     """
     if method_name is None:
@@ -277,7 +290,7 @@ def get_nlopt_enum_by_name(method_name=None, default=nlopt.LN_BOBYQA):
         return NLOPT_ALGORITHMS[method_name.upper()]
     except KeyError:
         warn('Method {name} could not be found. Defaulting to '
-             '{default}'.format(name=method_name, default=default), 
+             '{default}'.format(name=method_name, default=default),
              RuntimeWarning)
         return default
 
@@ -324,12 +337,18 @@ def normalize_bounds(bounds=[]):
     """
     return map(normalize_bound, bounds)
 
+
 def get_nlopt_message(ret_code):
     """
+    Notes
+    -----
+    Identical to ``NLOPT_MESSAGES.get``
+
+    Examples
+    --------
     >>> get_nlopt_message(nlopt.SUCCESS)
     'Success'
-    
     >>> get_nlopt_message(nlopt.INVALID_ARGS)
     'Invalid arguments (e.g. lower bounds are bigger than upper bounds, an unknown algorithm was specified, etcetera).'
-    """ 
+    """
     return NLOPT_MESSAGES.get(ret_code)
