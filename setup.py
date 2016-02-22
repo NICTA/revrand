@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-""" Setup utility for the revrand package. """
+"""Setup utility for the revrand package."""
 
 from setuptools import setup, find_packages
-
 from setuptools.command.test import test as TestCommand
 
 
@@ -38,17 +37,15 @@ setup(
     },
     tests_require=['pytest'],
     install_requires=[
-        'scipy >= 0.14.1',
         'numpy >= 1.8.2',
+        'scipy >= 0.14.1',
+        'autograd >= 1.1.3'
         'six >= 1.9.0',
-        # NLopt >= 2.4.2
     ],
     extras_require={
-        # 'nonlinear': ['NLopt'],
         'demos': [
             'unipath',
             'requests',
-            # 'dora'
         ],
     },
     license="Apache Software License 2.0",

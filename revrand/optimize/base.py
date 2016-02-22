@@ -1,6 +1,4 @@
-import numpy as np
-
-from ..utils import flatten, unflatten, flatten_args
+from ..utils import flatten, unflatten, flatten_args, flatten_result
 from ..externals import check_random_state
 
 from collections import namedtuple
@@ -432,45 +430,6 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     return minimize_bounded_start_dec
 
 
-def flatten_func_grad(func):
-    """
-    Examples
-    --------
-    >>> def cost(w, lambda_):
-    ...     sq_norm = w.T.dot(w)
-    ...     return .5 * lambda_ * sq_norm, [lambda_ * w, .5 * sq_norm]
-    >>> val, grad = cost(np.array([.5, .1, -.2]), .25)
-
-    >>> np.isclose(val, 0.0375)
-    True
-
-    >>> len(grad)
-    2
-    >>> grad_w, grad_lambda = grad
-    >>> np.shape(grad_w)
-    (3,)
-    >>> np.shape(grad_lambda)
-    ()
-    >>> grad_w
-    array([ 0.125,  0.025, -0.05 ])
-    >>> np.isclose(grad_lambda, 0.15)
-    True
-
-    >>> cost_new = flatten_func_grad(cost)
-    >>> val_new, grad_new = cost_new(np.array([.5, .1, -.2]), .25)
-    >>> val == val_new
-    True
-    >>> grad_new
-    array([ 0.125,  0.025, -0.05 ,  0.15 ])
-    """
-    @wraps(func)
-    def new_func(*args, **kwargs):
-        val, grad = func(*args, **kwargs)
-        return val, flatten(grad, returns_shapes=False)
-
-    return new_func
-
-
 def structured_minimizer(minimizer):
     """
     Allow an optimizer to accept a list of parameters to optimize, rather than
@@ -512,15 +471,15 @@ def structured_minimizer(minimizer):
         fbounds = _flatten_bounds(bounds)
 
         if callable(jac):
-            jac = lambda *fargs, **fkwargs: flatten(jac(*fargs, **fkwargs),
-                                                    returns_shapes=False)
+            jac = flatten_result(jac)
         else:
             if bool(jac):
-                new_fun = flatten_func_grad(new_fun)
+                new_fun = flatten_result(new_fun, 1)
 
         result = minimizer(new_fun, array1d, jac=jac, bounds=fbounds,
                            **minimizer_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
+
         if bool(jac):
             result['jac'] = tuple(unflatten(result['jac'], shapes))
 
@@ -582,7 +541,7 @@ def structured_sgd(sgd):
         fbounds = _flatten_bounds(bounds)
 
         if bool(eval_obj):
-            new_fun = flatten_func_grad(new_fun)
+            new_fun = flatten_result(new_fun, 1)
         else:
             new_fun = flatten(new_fun, returns_shapes=False)
 

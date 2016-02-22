@@ -230,8 +230,69 @@ def unflatten_args(func, order='C', returns_shapes=False):
     return new_func
 
 
-def vectorize_result(fn):
-    @wraps(fn)
-    def new_fn(*args):
-        return np.asarray(fn(*args))
-    return new_fn
+def flatten_result(func, *items):
+    """
+    >>> def f(x, y):
+    ...    return 2*x + 3*y**2, (2, 6*y)
+
+    >>> g = flatten_result(f, 1)
+    >>> g(2., 1.)
+    [7.0, array([ 2.,  6.])]
+
+    >>> g = flatten_result(f)
+    >>> g(2., 1.)
+    array([ 7.,  2.,  6.])
+
+    >>> def f():
+    ...     return {'a': 3, 'b': (2, 5, (3, 1, 5))}
+    >>> g = flatten_result(f, 'b')
+    >>> sorted(g().items())
+    [('a', 3), ('b', array([2, 5, 3, 1, 5]))]
+
+    Gradients:
+
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, (lambda_ * w, .5 * sq_norm)
+    >>> val, grad = cost(np.array([.5, .1, -.2]), .25)
+
+    >>> np.isclose(val, 0.0375)
+    True
+
+    >>> len(grad)
+    2
+    >>> grad_w, grad_lambda = grad
+    >>> np.shape(grad_w)
+    (3,)
+    >>> np.shape(grad_lambda)
+    ()
+    >>> grad_w
+    array([ 0.125,  0.025, -0.05 ])
+    >>> np.isclose(grad_lambda, 0.15)
+    True
+
+    >>> cost_new = flatten_result(cost, 1)
+    >>> val_new, grad_new = cost_new(np.array([.5, .1, -.2]), .25)
+    >>> val == val_new
+    True
+    >>> grad_new
+    array([ 0.125,  0.025, -0.05 ,  0.15 ])
+    """
+    @wraps(func)
+    def new_func(*args, **kwargs):
+
+        res = func(*args, **kwargs)
+
+        if isinstance(res, tuple):
+            res = list(res)
+            # TODO: we should really cast back to tuple when returning...
+
+        if items:
+            for item in items:
+                res[item] = flatten(res[item], returns_shapes=False)
+        else:
+            res = flatten(res, returns_shapes=False)
+
+        return res
+
+    return new_func
