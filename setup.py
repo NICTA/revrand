@@ -39,7 +39,7 @@ setup(
     install_requires=[
         'numpy >= 1.8.2',
         'scipy >= 0.14.1',
-        'autograd >= 1.1.3'
+        'autograd >= 1.1.3',
         'six >= 1.9.0',
     ],
     extras_require={
