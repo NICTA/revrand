@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils import flatten, unflatten
+from ..utils import flatten, unflatten, flatten_args
 from ..externals import check_random_state
 
 from collections import namedtuple
@@ -471,56 +471,6 @@ def flatten_func_grad(func):
     return new_func
 
 
-def flatten_args(shapes, order='C'):
-    """
-    Examples
-    --------
-    >>> @flatten_args([(5,), ()])
-    ... def f(w, lambda_):
-    ...     return .5 * lambda_ * w.T.dot(w)
-    >>> np.isclose(f(np.array([2., .5, .6, -.2, .9, .2])), .546)
-    True
-
-    >>> w = np.array([2., .5, .6, -.2, .9])
-    >>> lambda_ = .2
-    >>> np.isclose(.5 * lambda_ * w.T.dot(w), .546)
-    True
-
-    Some other curious applications
-
-    >>> from operator import mul
-    >>> flatten_args_dec = flatten_args([(), (3,)])
-    >>> func = flatten_args_dec(mul)
-    >>> func(np.array([3.1, .6, 1.71, -1.2]))
-    array([ 1.86 ,  5.301, -3.72 ])
-    >>> 3.1 * np.array([.6, 1.71, -1.2])
-    array([ 1.86 ,  5.301, -3.72 ])
-
-    >>> flatten_args_dec = flatten_args([(9,), (15,)])
-    >>> func = flatten_args_dec(np.meshgrid)
-    >>> x, y = func(np.arange(-5, 7, .5)) # 7 - (-5) / 0.5 = 24 = 9 + 15
-    >>> x.shape
-    (15, 9)
-    >>> x[0, :]
-    array([-5. , -4.5, -4. , -3.5, -3. , -2.5, -2. , -1.5, -1. ])
-    >>> y.shape
-    (15, 9)
-    >>> y[:, 0]
-    array([-0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5,  3. ,  3.5,  4. ,  4.5,
-            5. ,  5.5,  6. ,  6.5])
-    """
-    def flatten_args_dec(func):
-
-        @wraps(func)
-        def new_func(array1d, *args, **kwargs):
-            args = tuple(unflatten(array1d, shapes, order)) + args
-            return func(*args, **kwargs)
-
-        return new_func
-
-    return flatten_args_dec
-
-
 def structured_minimizer(minimizer):
     """
     Allow an optimizer to accept a list of parameters to optimize, rather than
@@ -557,10 +507,9 @@ def structured_minimizer(minimizer):
                       **minimizer_kwargs):
 
         array1d, shapes = flatten(ndarrays)
-        fbounds = _flatten_bounds(bounds)
-        flatten_args_dec = flatten_args(shapes)
+        new_fun = flatten_args(fun, shapes=shapes)
 
-        new_fun = flatten_args_dec(fun)
+        fbounds = _flatten_bounds(bounds)
 
         if callable(jac):
             jac = lambda *fargs, **fkwargs: flatten(jac(*fargs, **fkwargs),
@@ -628,10 +577,9 @@ def structured_sgd(sgd):
                 **sgd_kwargs):
 
         array1d, shapes = flatten(ndarrays)
-        fbounds = _flatten_bounds(bounds)
-        flatten_args_dec = flatten_args(shapes)
+        new_fun = flatten_args(fun, shapes=shapes)
 
-        new_fun = flatten_args_dec(fun)
+        fbounds = _flatten_bounds(bounds)
 
         if bool(eval_obj):
             new_fun = flatten_func_grad(new_fun)

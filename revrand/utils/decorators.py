@@ -1,9 +1,8 @@
-"""
-Reusable decorators
-"""
+"""Reusable decorators."""
 
 from ..utils.base import flatten, unflatten
 from collections import OrderedDict
+from itertools import repeat
 from six import wraps
 
 import numpy as np
@@ -97,144 +96,99 @@ class OrderedMemoize(Memoize, OrderedDict):
     pass
 
 
-def flatten_args(fn):
+def flatten_args(func, shapes=None, order='C'):
     """
     Examples
     --------
-    >>> @flatten_args
-    ... def f(x):
-    ...     return 2*x
-
-    >>> x, y, z = f(np.array([1., 2.]), 3., np.array([[1., 2.],[.5, .9]]))
-
-    >>> x
-    array([ 2.,  4.])
-
-    >>> y
-    6.0
-
-    >>> z
-    array([[ 2. ,  4. ],
-           [ 1. ,  1.8]])
-    """
-    @wraps(fn)
-    def new_fn(*args):
-        args_flat, shapes = flatten(args)
-        result = fn(args_flat)
-        return unflatten(result, shapes=shapes)
-
-    return new_fn
-
-
-def vectorize_args(fn):
-    """
-    When defining functions of several variables, it is usually more 
-    readable to write out each variable as a separate argument. This is 
-    also convenient for evaluating functions on a `numpy.meshgrid`. 
-
-    However, the family of optimizers in `scipy.optimize` expects that 
-    all functions, including those of several variables, receive a 
-    single argument, which is a `numpy.ndarray` in the case of functions
-    of several variables.
-
-    Readability counts. We need not compromise readability to conform to
-    some interface when higher-order functions/decorators can abstract 
-    away the details for us. This is what this decorator does. 
-
-    See Also
-    --------
-    revrand.utils.decorators.unvectorize_args
-
-    Examples
-    --------
-
-    Optimizers such as those in `scipy.optimize` expects a function 
-    defined like this.
-
-    >>> def fun1(v):
-    ...     # elliptic parabaloid
-    ...     return 2*v[0]**2 + 2*v[1]**2 - 4
-    
-    >>> a = np.array([2, 3])
-    
-    >>> fun1(a)
-    22
-
-    Whereas this representation is not only more readable but more 
-    natural.
-
-    >>> def fun2(x, y):
-    ...     # elliptic parabaloid
-    ...     return 2*x**2 + 2*y**2 - 4
-    
-    >>> fun2(2, 3)
-    22
-
-    It is also important for evaluating functions on a `numpy.meshgrid`
-
-    >>> y, x = np.mgrid[-5:5:0.2, -5:5:0.2]
-    >>> fun2(x, y)
-    array([[ 96.  ,  92.08,  88.32, ...,  84.72,  88.32,  92.08],
-           [ 92.08,  88.16,  84.4 , ...,  80.8 ,  84.4 ,  88.16],
-           [ 88.32,  84.4 ,  80.64, ...,  77.04,  80.64,  84.4 ],
-           ..., 
-           [ 84.72,  80.8 ,  77.04, ...,  73.44,  77.04,  80.8 ],
-           [ 88.32,  84.4 ,  80.64, ...,  77.04,  80.64,  84.4 ],
-           [ 92.08,  88.16,  84.4 , ...,  80.8 ,  84.4 ,  88.16]])
-
-    We can easily reconcile the differences between these representation
-    without having to compromise readability.
-
-    >>> fun1(a) == vectorize_args(fun2)(a)
+    >>> def f(w, lambda_):
+    ...     return .5 * lambda_ * w.T.dot(w)
+    >>> g = flatten_args(f, shapes=[(5,), ()])
+    >>> np.isclose(g(np.array([2., .5, .6, -.2, .9, .2])),
+    ...            f(np.array([2., .5, .6, -.2, .9]), .2))
     True
 
-    >>> @vectorize_args
-    ... def fun3(x, y):
-    ...     # elliptic parabaloid
-    ...     return 2*x**2 + 2*y**2 - 4
-    
-    >>> fun1(a) == fun3(a)
+    >>> from scipy.spatial.distance import mahalanobis
+    >>> c = np.random.randn(4, 4)
+    >>> M = c.dot(c.T)
+    >>> u = np.random.randn(4)
+    >>> v = np.random.randn(4)
+    >>> a, shapes = flatten((u, v, M), returns_shapes=True)
+    >>> mahalanobis_flattened = flatten_args(mahalanobis, shapes=shapes)
+    >>> np.isclose(mahalanobis(u, v, M), mahalanobis_flattened(a))
     True
+
+    >>> f = lambda x, y: 2*x**2 + 2*y**2 - 4 # elliptic paraboloid
+    >>> f_ = flatten_args(f)
+    >>> f(2., 1.5) == f_(np.array([2., 1.5]))
+    True
+
+    Some other interesting applications:
+
+    >>> from operator import mul
+    >>> func = flatten_args(mul, shapes=[(), (3,)])
+    >>> np.allclose(func(np.array([3.1, .6, 1.71, -1.2])),
+    ...             3.1 * np.array([.6, 1.71, -1.2]))
+    True
+
+    >>> func = flatten_args(np.meshgrid, shapes=[(9,), (15,)])
+    >>> x, y = func(np.arange(-5, 7, .5)) # 7 - (-5) / 0.5 = 24 = 15 + 9
+    >>> x.shape
+    (15, 9)
+    >>> x[0, :]
+    array([-5. , -4.5, -4. , -3.5, -3. , -2.5, -2. , -1.5, -1. ])
+    >>> y.shape
+    (15, 9)
+    >>> y[:, 0]
+    array([-0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5,  3. ,  3.5,  4. ,  4.5,
+            5. ,  5.5,  6. ,  6.5])
     """
-    @wraps(fn)
-    def new_fn(vec):
-        return fn(*vec)
-    return new_fn
 
-def unvectorize_args(fn):
+    @wraps(func)
+    def new_func(array1d, *args, **kwargs):
 
+        nonlocal shapes
+        if shapes is None:
+            # equiv to `shapes = [()] * len(array1d)` but IMHO cleaner
+            shapes = list(repeat((), len(array1d)))
+
+        args = tuple(unflatten(array1d, shapes, order)) + args
+        return func(*args, **kwargs)
+
+    return new_func
+
+
+def unflatten_args(func, order='C', returns_shapes=False):
     """
     See Also
     --------
-    revrand.utils.decorators.vectorize_args
+    revrand.utils.decorators.flatten_args
 
     Examples
     --------
-    The Rosenbrock function is commonly used as a performance test 
-    problem for optimization algorithms. It and its derivatives are 
-    included in `scipy.optimize` and is implemented as expected by the 
-    family of optimization methods in `scipy.optimize`.
+    The Rosenbrock function is commonly used as a test problem for optimization
+    algorithms. It and its derivatives are included in `scipy.optimize` and is
+    implemented as expected by the family of optimization methods in
+    `scipy.optimize`.
 
         def rosen(x):
             return sum(100.0*(x[1:]-x[:-1]**2.0)**2.0 + (1-x[:-1])**2.0)
 
-    This representation makes it unwieldy to perform operations such as 
-    plotting since it is less straightforward to evaluate the function 
-    on a `meshgrid`. This decorator helps reconcile the differences 
-    between these representations.
+    This representation makes it unwieldy to perform operations such as
+    plotting since it is less straightforward to evaluate the function on a
+    `meshgrid`. This decorator helps reconcile the differences between these
+    representations.
 
     >>> from scipy.optimize import rosen
-
     >>> rosen(np.array([0.5, 1.5]))
     156.5
 
-    >>> unvectorize_args(rosen)(0.5, 1.5) 
+    >>> unflatten_args(rosen)(0.5, 1.5)
     ... # doctest: +NORMALIZE_WHITESPACE
-    156.5    
+    156.5
 
-    The `rosen` function is implemented in such a way that it 
-    generalizes to the Rosenbrock function of any number of variables. 
-    This decorator supports can support any functions defined in a 
+    The `rosen` function is implemented in such a way that it
+    generalizes to the Rosenbrock function of any number of variables.
+    This decorator supports can support any functions defined in a
     similar manner.
 
     The function with any number of arguments are well-defined:
@@ -242,32 +196,39 @@ def unvectorize_args(fn):
     >>> rosen(np.array([0.5, 1.5, 1., 0., 0.2]))
     418.0
 
-    >>> unvectorize_args(rosen)(0.5, 1.5, 1., 0., 0.2)
+    >>> unflatten_args(rosen)(0.5, 1.5, 1., 0., 0.2)
     ... # can accept any variable number of arguments!
     418.0
 
     Make it easier to work with for other operations
 
-    >>> rosen_ = unvectorize_args(rosen)
+    >>> rosen_ = np.vectorize(unflatten_args(rosen))
     >>> y, x = np.mgrid[0:2.1:0.05, -1:1.2:0.05]
     >>> z = rosen_(x, y)
-    >>> z.round(2)
+    >>> z.round(2) # doctest: +NORMALIZE_WHITESPACE
     array([[ 104.  ,   85.25,   69.22, ...,  121.55,  146.42,  174.92],
            [  94.25,   76.48,   61.37, ...,  110.78,  134.57,  161.95],
            [  85.  ,   68.2 ,   54.02, ...,  100.5 ,  123.22,  149.47],
-           ..., 
+           ...,
            [  94.25,  113.53,  133.57, ...,   71.83,   54.77,   39.4 ],
            [ 104.  ,  124.25,  145.22, ...,   80.55,   62.42,   45.92],
            [ 114.25,  135.48,  157.37, ...,   89.78,   70.57,   52.95]])
 
-    Now this can be directly plotted with `mpl_toolkits.mplot3d.Axes3D` 
+    Now this can be directly plotted with `mpl_toolkits.mplot3d.Axes3D`
     and `ax.plot_surface`.
 
     """
-    @wraps(fn)
-    def new_fn(*args):
-        return fn(np.asarray(args))
-    return new_fn
+    @wraps(func)
+    def new_func(*args, **kwargs):
+
+        if returns_shapes:
+            array1d, shapes = flatten(args, order, returns_shapes)
+            return func(array1d, **kwargs), shapes
+
+        return func(flatten(args, order, returns_shapes), **kwargs)
+
+    return new_func
+
 
 def vectorize_result(fn):
     @wraps(fn)

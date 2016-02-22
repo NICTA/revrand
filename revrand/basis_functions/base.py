@@ -5,7 +5,7 @@
 
 from __future__ import division
 
-import numpy as np
+import autograd.numpy as np
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist

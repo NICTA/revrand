@@ -1,18 +1,17 @@
-"""
-Reusable utility functions
-"""
+"""Reusable utility functions."""
 
-from .decorators import (vectorize_args, unvectorize_args, vectorize_result)
 from .base import (flatten, unflatten, couple, decouple, nwise, map_indices)
+from .decorators import (flatten_args, unflatten_args, vectorize_result)
 
 __all__ = [
-    'vectorize_args',
-    'unvectorize_args',
+    'flatten_args',
+    'unflatten_args',
     'vectorize_result',
     'flatten',
     'unflatten',
     'couple',
     'decouple',
     'nwise',
-    'map_indices'
+    'map_indices',
+    'flatten_args'
 ]

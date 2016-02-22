@@ -1,3 +1,4 @@
+"""Utilities - resuable functions/classes."""
 
 import numpy as np
 
@@ -8,8 +9,8 @@ from itertools import tee
 
 class Bunch(dict):
     """
-    Container object for datasets: dictionary-like object that exposes
-    its keys as attributes.
+    Container object for datasets: dictionary-like object that exposes its keys
+    as attributes.
 
     Examples
     --------
