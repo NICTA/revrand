@@ -1,3 +1,5 @@
+import numpy as np
+
 from ..utils import flatten, unflatten, flatten_args, flatten_result
 from ..externals import check_random_state
 
