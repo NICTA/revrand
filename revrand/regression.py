@@ -19,61 +19,67 @@ from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, sgd, Bound, Positive, structured_minimizer, \
-    logtrick_minimizer, structured_sgd, logtrick_sgd
+from .optimize import (minimize, sgd, Bound, Positive, structured_minimizer,
+                       logtrick_minimizer, structured_sgd, logtrick_sgd)
+
+from .utils.functions import FuncRes
 
 # Set up logging
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-          ftol=1e-6, maxit=1000, verbose=True):
-    """
-    Learn the parameters and hyperparameters of a Bayesian linear regressor.
+def make_elbo(X, y, basis_func):
 
-    Parameters
-    ----------
-        X: ndarray
-            (N, d) array input dataset (N samples, d dimensions).
-        y: ndarray
-            (N,) array targets (N samples)
-        basis: Basis
-            A basis object, see the basis_functions module.
-        bparams: sequence
-            A sequence of parameters of the basis object.
-        var: float, optional
-            observation variance initial value.
-        regulariser: float, optional
-            weight regulariser (variance) initial value.
-        diagcov: bool, optional
-            approximate posterior covariance with diagional matrix.
-        verbose: bool, optional
-            log learning status.
-        ftol: float, optional
-            optimiser function tolerance convergence criterion.
-        maxit: int, optional
-            maximum number of iterations for the optimiser.
+    N, d = X.shape
 
-    Returns
-    -------
-        m: ndarray
-            (D,) array of posterior weight means (D is the dimension of the
-            features).
-        C: ndarray
-            (D,) array of posterior weight variances.
-        bparams: sequence
-            learned sequence of basis object hyperparameters.
-        float:
-            learned observation variance
+    def elbo(var, lambda_, *thetas):
 
-    Notes
-    -----
-        This actually optimises the evidence lower bound on log marginal
-        likelihood, rather than log marginal likelihood directly. In the case
-        of a full posterior convariance matrix, this bound is tight and the
-        exact solution will be found (modulo local minima for the
-        hyperparameters).
-    """
+        Phi = basis_func(X, *thetas).value
+        PhiPhi = np.dot(Phi.T, Phi)
+
+        _, D = Phi.shape
+
+        LiC = jitchol(np.diag(np.ones(D)/lambda_) + PhiPhi/var)
+
+        m = cho_solve((LiC, True), np.dot(Phi.T, y)) / var
+        C = cho_solve((LiC, True), np.eye(D))
+
+        TrPhiPhiC = np.sum(PhiPhi * C)
+        logdetC = - cho_log_det(LiC)
+        TrC = np.trace(C)
+
+        Err = y - np.dot(Phi, m)
+        sqErr = np.sum(Err**2)
+        mm = np.sum(m**2)
+
+        # Function value
+        value = -.5 * (N * np.log(2. * np.pi * var)
+                       + sqErr / var
+                       + TrPhiPhiC / var
+                       + (TrC + mm) / lambda_
+                       - logdetC
+                       + D * np.log(lambda_)
+                       - D)
+
+        # Gradient computations
+        grad_var = .5 / var * (-N + (sqErr + TrPhiPhiC) / var)
+
+        grad_lambda = .5 / lambda_ * ((TrC + mm) / lambda_ - D)
+
+        grad_thetas = []
+        dPhis = basis_func(X, *thetas).grad if len(thetas) > 0 else []
+        for dPhi in dPhis:
+            dPhiPhi = np.dot(dPhi.T, Phi)
+            dt = (np.dot(m.T, np.dot(Err, dPhi)) - np.sum(dPhiPhi*C)) / var
+            grad_thetas.append(-dt)
+
+        return FuncRes(value=-value, grad=(-grad_var, -grad_lambda)+tuple(grad_thetas))
+
+    return elbo
+
+
+def learn(X, y, basis, bparams, var=1., regulariser=1., ftol=1e-6, maxit=1e+3,
+          ,autograd=True, verbose=True):
 
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
@@ -156,6 +162,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     res = nmin(ELBO, [var, regulariser, bparams], method='L-BFGS-B', jac=True,
                bounds=bounds, ftol=ftol, maxiter=maxit)
     var, regulariser, bparams = res.x
+    print(res.x)
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "

@@ -1,14 +1,13 @@
-""" Various linear algebra utilities. """
+"""Various linear algebra utilities."""
 
 
 from __future__ import division
 
-import numpy as np
-from scipy.linalg import cholesky, LinAlgError
+import autograd.numpy as np
+from autograd.scipy.linalg import solve_triangular
 
 
-def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
-            overwrite_a=False, check_finite=True):
+def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False):
     """
     Do cholesky decomposition with a bit of diagonal jitter if needs be.
 
@@ -60,36 +59,46 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
     """
 
     try:
-        chol = cholesky(a, lower=lower, overwrite_a=overwrite_a,
-                        check_finite=check_finite)
+        chol = np.linalg.cholesky(a)
         if returns_jit:
             return chol, jit
         else:
             return chol
 
-    except LinAlgError:
+    except np.linalg.LinAlgError:
 
         if jit is None:
             jit = 1e-16
 
         if jit > jit_max:
-            raise LinAlgError('Exceeded maximum jitter limit, yet a is still'
-                              ' not positive semidefinite!')
+            raise np.linalg.LinAlgError('Exceeded maximum jitter limit, yet a is still'
+                                        ' not positive semidefinite!')
 
         diag = np.diag(a)
-        diag_mean = diag.mean()
+        diag_mean = np.mean(diag)
         diag_delta = jit * diag_mean
 
-        if overwrite_a:
-            diag_ind = np.diag_indices_from(a)
-            a[diag_ind] += diag_delta
-            return jitchol(a, jit=10 * jit, jit_max=jit_max,
-                           returns_jit=returns_jit, lower=lower,
-                           overwrite_a=overwrite_a, check_finite=check_finite)
-
         return jitchol(a + diag_delta * np.eye(*a.shape), jit=10 * jit,
-                       jit_max=jit_max, returns_jit=returns_jit, lower=lower,
-                       overwrite_a=overwrite_a, check_finite=check_finite)
+                       jit_max=jit_max, returns_jit=returns_jit)
+
+
+def cho_solve(c_and_lower, b):
+
+    c, lower = c_and_lower
+
+    if c.ndim != 2 or c.shape[0] != c.shape[1]:
+        raise ValueError("The factored matrix c is not square.")
+
+    if c.shape[1] != b.shape[0]:
+        raise ValueError("incompatible dimensions.")
+
+    if not lower:
+        c = c.T
+
+    y = solve_triangular(c, b, trans='N', lower=True)
+    x = solve_triangular(c, y, trans='T', lower=True)
+
+    return x
 
 
 def cho_log_det(c):
@@ -111,16 +120,4 @@ def cho_log_det(c):
     >>> np.isclose(cho_log_det(l), np.log(np.linalg.det(a)))
     True
     """
-    return 2 * np.sum(np.log(c.diagonal()))
-
-# deprecated
-def logdet(L):
-    """ Compute the log determinant of a matrix.
-
-        Arguments:
-            L: The [NxN] cholesky factor of the matrix.
-
-        Returns:
-            The log determinant (scalar)
-    """
-    return cho_log_det(L)
+    return 2 * np.sum(np.log(np.diag(c)))

@@ -1,4 +1,4 @@
-""" Various basis function objects specialised for parameter learning.
+"""Various basis function objects specialised for parameter learning.
 
     To make a new basis object, see the documentation of the Basis class.
 """
@@ -13,6 +13,19 @@ from scipy.spatial.distance import cdist
 from ..optimize import Positive
 from ..utils import flatten
 from ..hadamard import hadamard
+
+from .utils.functions import FuncRes
+
+
+def make_radial_basis(mu):
+
+    def radial_basis(X, s):
+        # equivalent to cdist(X, mu, 'sqeuclidean')
+        r = np.sum((np.atleast_3d(X) - np.atleast_2d(mu).T)**2, axis=1)
+        q = np.exp(-r / (2 * s**2))
+        return FuncRes(value=q, grad=(r * q / s**3,))
+
+    return radial_basis
 
 
 #
