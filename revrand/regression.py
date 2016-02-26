@@ -15,20 +15,21 @@ from __future__ import division
 import numpy as np
 import logging
 
-from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
-from .linalg import jitchol, cho_log_det
-from .optimize import (minimize, sgd, Bound, Positive, structured_minimizer,
-                       logtrick_minimizer, structured_sgd, logtrick_sgd)
+from .linalg import (cho_solve, jitchol, cho_log_det)
+from .optimize import (sgd, Bound, Positive, structured_sgd, logtrick_sgd,
+                       decorated_minimize as minimize)
 
-from .utils.functions import FuncRes
+from .utils.base import Bunch
+from .types.functions import FuncRes
+from basis_functions import identity
 
 # Set up logging
 log = logging.getLogger(__name__)
 
 
-def make_elbo(X, y, basis_func):
+def make_elbo(X, y, basis_func, cache=Bunch()):
 
     N, d = X.shape
 
@@ -39,7 +40,7 @@ def make_elbo(X, y, basis_func):
 
         _, D = Phi.shape
 
-        LiC = jitchol(np.diag(np.ones(D)/lambda_) + PhiPhi/var)
+        LiC = jitchol(np.diag(np.ones(D) / lambda_) + PhiPhi / var)
 
         m = cho_solve((LiC, True), np.dot(Phi.T, y)) / var
         C = cho_solve((LiC, True), np.eye(D))
@@ -53,13 +54,17 @@ def make_elbo(X, y, basis_func):
         mm = np.sum(m**2)
 
         # Function value
-        value = -.5 * (N * np.log(2. * np.pi * var)
-                       + sqErr / var
-                       + TrPhiPhiC / var
-                       + (TrC + mm) / lambda_
-                       - logdetC
-                       + D * np.log(lambda_)
-                       - D)
+        elb = -.5 * (N * np.log(2. * np.pi * var)
+                     + sqErr / var
+                     + TrPhiPhiC / var
+                     + (TrC + mm) / lambda_
+                     - logdetC
+                     + D * np.log(lambda_)
+                     - D)
+
+        cache.elb = elb
+        cache.m = m
+        cache.C = C
 
         # Gradient computations
         grad_var = .5 / var * (-N + (sqErr + TrPhiPhiC) / var)
@@ -70,106 +75,29 @@ def make_elbo(X, y, basis_func):
         dPhis = basis_func(X, *thetas).grad if len(thetas) > 0 else []
         for dPhi in dPhis:
             dPhiPhi = np.dot(dPhi.T, Phi)
-            dt = (np.dot(m.T, np.dot(Err, dPhi)) - np.sum(dPhiPhi*C)) / var
+            dt = (np.dot(m.T, np.dot(Err, dPhi)) - np.sum(dPhiPhi * C)) / var
             grad_thetas.append(-dt)
 
-        return FuncRes(value=-value, grad=(-grad_var, -grad_lambda)+tuple(grad_thetas))
+        return FuncRes(value=elb, grad=(grad_var, grad_lambda) + tuple(grad_thetas))
 
     return elbo
 
 
-def learn(X, y, basis, bparams, var=1., regulariser=1., ftol=1e-6, maxit=1e+3,
-          ,autograd=True, verbose=True):
+def learn(X, y, basis=identity, basis_args=(), basis_args_bounds=[], var=1., 
+          regulariser=1., var_bound=Positive(), regulariser_bound=Positive(),
+          tol=1e-6, maxiter=1000, autograd=False, verbose=True):
 
-    N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+    cache = Bunch()
+    elbo = make_elbo(X, y, basis, cache=cache)
 
-    # Caches for returning optimal params
-    ELBOcache = [-np.inf]
-    mcache = np.zeros(D)
-    Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
+    res = minimize(elbo, method='L-BFGS-B', jac=True,
+                   ndarrays=(var, regulariser) + tuple(basis_args),
+                   bounds=(var_bound, regulariser_bound) + tuple(basis_args_bounds),
+                   tol=tol, options=dict(maxiter=maxiter))
 
-    def ELBO(_var, _lambda, _theta):
+    var, regulariser, *basis_args = res.x
 
-        # Get Basis
-        Phi = basis(X, *_theta)                      # N x D
-        PhiPhi = Phi.T.dot(Phi)
-
-        # Posterior Parameters
-        lower = False
-        LiC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
-                      lower=lower)
-        m = cho_solve((LiC, lower), Phi.T.dot(y)) / _var
-
-        # Common calcs dependent on form of C
-        if diagcov:
-            C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
-            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
-            logdetC = np.log(C).sum()
-            TrC = C.sum()
-        else:
-            C = cho_solve((LiC, lower), np.eye(D))
-            TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -cho_log_det(LiC)
-            TrC = np.trace(C)
-
-        # Common computations
-        Err = y - Phi.dot(m)
-        sqErr = (Err**2).sum()
-        mm = (m**2).sum()
-
-        # Calculate ELBO
-        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
-                       + sqErr / _var
-                       + TrPhiPhiC / _var
-                       + (TrC + mm) / _lambda
-                       - logdetC
-                       + D * np.log(_lambda)
-                       - D)
-
-        # NOTE: In the above, TriPhiPhiC / _var = D - TrC / _lambda when we
-        # analytically solve for C, but we need the trace terms for gradients
-        # anyway, so we'll keep them.
-
-        # Cache square error to compute corrected variance
-        if ELBO > ELBOcache[0]:
-            mcache[:] = m
-            Ccache[:] = C
-            ELBOcache[0] = ELBO
-
-        if verbose:
-            log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
-                     .format(ELBO, _var, _lambda, _theta))
-
-        # Grad var
-        dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
-
-        # Grad reg
-        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
-
-        # Loop through basis param grads
-        dtheta = []
-        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for dPhi in dPhis:
-            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
-            dtheta.append(-dt)
-
-        return -ELBO, [-dvar, -dlambda, dtheta]
-
-    bounds = [Positive(), Positive(), basis.bounds]
-    nmin = structured_minimizer(logtrick_minimizer(minimize))
-    res = nmin(ELBO, [var, regulariser, bparams], method='L-BFGS-B', jac=True,
-               bounds=bounds, ftol=ftol, maxiter=maxit)
-    var, regulariser, bparams = res.x
-    print(res.x)
-
-    if verbose:
-        log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
-                 "message = {}."
-                 .format(-res['fun'], var, regulariser, bparams, res.message))
-
-    return mcache, Ccache, bparams, var
+    return cache.m, cache.C, basis_args, var
 
 
 def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,

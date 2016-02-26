@@ -11,10 +11,13 @@ from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
 from ..optimize import Positive
-from ..utils import flatten
 from ..hadamard import hadamard
+from ..utils.functions import FuncRes
+from ..utils import flatten
 
-from .utils.functions import FuncRes
+
+def identity(X, *args):
+    return FuncRes(value=X, grad=tuple(0 for _ in args))
 
 
 def make_radial_basis(mu):
@@ -26,7 +29,6 @@ def make_radial_basis(mu):
         return FuncRes(value=q, grad=(r * q / s**3,))
 
     return radial_basis
-
 
 #
 # Basis objects

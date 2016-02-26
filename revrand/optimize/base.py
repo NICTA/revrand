@@ -744,3 +744,11 @@ def _flatten_bounds(bounds):
     unwrap(flat_bounds, bounds)
 
     return flat_bounds
+
+
+# definition here so we don't have to write
+# `structured_minimizer(logtrick_minimizer(minimize))` everytime
+@structured_minimizer
+@logtrick_minimizer
+def decorated_minimize(*args, **kwargs):
+    return minimize(*args, **kwargs)
