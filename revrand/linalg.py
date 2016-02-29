@@ -25,7 +25,7 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False):
     --------
     >>> a = np.array([[1, -2j],
     ...               [2j, 5]])
-    >>> jitchol(a, lower=True)
+    >>> jitchol(a)
     array([[ 1.+0.j,  0.+0.j],
            [ 0.+2.j,  1.+0.j]])
     >>> np.all(a == np.array([[1, -2j],
@@ -37,9 +37,9 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False):
     ...               [ 0, -1,  2]])
     >>> U, jit = jitchol(b, returns_jit=True)
     >>> U.round(2)
-    array([[ 1.41, -0.71,  0.  ],
-           [ 0.  ,  1.22, -0.82],
-           [ 0.  ,  0.  ,  1.15]])
+    array([[ 1.41,  0.  ,  0.  ],
+           [-0.71,  1.22,  0.  ],
+           [ 0.  , -0.82,  1.15]])
     >>> jit is None
     True
 
@@ -82,21 +82,77 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False):
                        jit_max=jit_max, returns_jit=returns_jit)
 
 
-def cho_solve(c_and_lower, b):
+def cho_solve(c_and_lower, b, overwrite_b=False, check_finite=True):
+    """
+    Solve the linear equations A x = b, given the Cholesky factorization of A.
 
+    Parameters
+    ----------
+    (c, lower) : tuple, (array, bool)
+        Cholesky factorization of a, as given by cholesky
+    b : array
+        Right-hand side
+    overwrite_b : bool, optional
+        Whether to overwrite data in b (may improve performance)
+    check_finite : bool, optional
+        Whether to check that the input matrices contain only finite numbers.
+        Disabling may give a performance gain, but may result in problems
+        (crashes, non-termination) if the inputs do contain infinities or NaNs.
+    Returns
+    -------
+    x : array
+        The solution to the system A x = b
+    Examples
+    --------
+    >>> import scipy as sp
+    >>> c = np.random.randn(4, 4)
+    >>> a = c.dot(c.T)
+    >>> a_inv = np.linalg.solve(a, np.identity(4))
+
+    Lower Cholesky Decomposition
+
+    >>> l = sp.linalg.cholesky(a, lower=True)
+    >>> np.allclose(l.dot(l.T), a)
+    True
+    >>> np.allclose(cho_solve((l, True), np.identity(4)), a_inv)
+    True
+    >>> np.allclose(cho_solve((l, True), np.identity(4)),
+    ...             sp.linalg.cho_solve((l, True), np.identity(4)))
+    True
+
+    Upper Cholesky Decomposition
+
+    >>> u = sp.linalg.cholesky(a, lower=False)
+    >>> np.allclose(u.T.dot(u), a)
+    True
+    >>> np.allclose(cho_solve((u, False), np.identity(4)), a_inv)
+    True
+    >>> np.allclose(cho_solve((u, False), np.identity(4)),
+    ...             sp.linalg.cho_solve((u, False), np.identity(4)))
+    True
+    """
     c, lower = c_and_lower
+
+    if check_finite:
+        b1 = np.asarray_chkfinite(b)
+        c = np.asarray_chkfinite(c)
+    else:
+        b1 = np.asarray(b)
+        c = np.asarray(c)
 
     if c.ndim != 2 or c.shape[0] != c.shape[1]:
         raise ValueError("The factored matrix c is not square.")
 
-    if c.shape[1] != b.shape[0]:
+    if c.shape[1] != b1.shape[0]:
         raise ValueError("incompatible dimensions.")
 
     if not lower:
         c = c.T
 
-    y = solve_triangular(c, b, trans='N', lower=True)
-    x = solve_triangular(c, y, trans='T', lower=True)
+    y = solve_triangular(c, b1, trans='N', lower=True, overwrite_b=overwrite_b,
+                         check_finite=check_finite)
+    x = solve_triangular(c, y, trans='T', lower=True, overwrite_b=overwrite_b,
+                         check_finite=True)
 
     return x
 
@@ -108,6 +164,7 @@ def cho_log_det(c):
 
     Examples
     --------
+    >>> from scipy.linalg import cholesky
     >>> a = np.array([[ 2, -1,  0],
     ...               [-1,  2, -1],
     ...               [ 0, -1,  2]])

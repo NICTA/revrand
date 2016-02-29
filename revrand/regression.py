@@ -23,7 +23,7 @@ from .optimize import (sgd, Bound, Positive, structured_sgd, logtrick_sgd,
 
 from .utils.base import Bunch
 from .types.functions import FuncRes
-from basis_functions import identity
+from .basis_functions import identity
 
 # Set up logging
 log = logging.getLogger(__name__)

@@ -12,7 +12,7 @@ from scipy.spatial.distance import cdist
 
 from ..optimize import Positive
 from ..hadamard import hadamard
-from ..utils.functions import FuncRes
+from ..types.functions import FuncRes
 from ..utils import flatten
 
 
