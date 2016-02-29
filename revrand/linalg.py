@@ -75,7 +75,7 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False):
                                         ' not positive semidefinite!')
 
         diag = np.diag(a)
-        diag_mean = np.mean(diag)
+        diag_mean = diag.mean()
         diag_delta = jit * diag_mean
 
         return jitchol(a + diag_delta * np.eye(*a.shape), jit=10 * jit,

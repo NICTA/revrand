@@ -12,7 +12,7 @@ the "A la Carte" GP [1]_.
 
 from __future__ import division
 
-import numpy as np
+import autograd.numpy as np
 import logging
 
 from scipy.stats.distributions import gamma
@@ -86,7 +86,8 @@ def make_elbo(X, y, basis_func, cache=Bunch()):
 
 def learn(X, y, basis=identity, basis_args=(), basis_args_bounds=[], var=1., 
           regulariser=1., var_bound=Positive(), regulariser_bound=Positive(),
-          tol=1e-6, maxiter=1000, use_autograd=False, verbose=True):
+          tol=1e-6, maxiter=1000, use_autograd=False, minimizer_cb=print,
+          verbose=True):
 
     cache = Bunch()
     elbo = make_elbo(X, y, basis, cache=cache)
@@ -98,7 +99,7 @@ def learn(X, y, basis=identity, basis_args=(), basis_args_bounds=[], var=1.,
     res = minimize(elbo, method='L-BFGS-B', jac=True,
                    ndarrays=(var, regulariser) + tuple(basis_args),
                    bounds=(var_bound, regulariser_bound) + tuple(basis_args_bounds),
-                   callback=print, tol=tol, options=dict(maxiter=maxiter))
+                   callback=minimizer_cb, tol=tol, options=dict(maxiter=maxiter))
 
     var, regulariser, *basis_args = res.x
 
