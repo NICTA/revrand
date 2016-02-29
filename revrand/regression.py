@@ -77,9 +77,9 @@ def make_elbo(X, y, basis_func, cache=Bunch()):
         for dPhi in dPhis:
             dPhiPhi = np.dot(dPhi.T, Phi)
             dt = (np.dot(m.T, np.dot(Err, dPhi)) - np.sum(dPhiPhi * C)) / var
-            grad_thetas.append(-dt)
+            grad_thetas.append(dt)
 
-        return FuncRes(value=-elb, grad=(-grad_var, -grad_lambda) + tuple(grad_thetas))
+        return FuncRes(value=elb, grad=(grad_var, grad_lambda) + tuple(grad_thetas))
 
     return elbo
 
@@ -91,13 +91,13 @@ def learn(X, y, basis=identity, basis_args=(), basis_args_bounds=[], var=1.,
 
     cache = Bunch()
     elbo = make_elbo(X, y, basis, cache=cache)
-    # neg_elbo = func_negate(elbo)
+    neg_elbo = func_negate(elbo)
 
     if use_autograd:
-        elbo = value_and_multigrad(func_value(elbo),
-                                   argnums=list(range(len(basis_args_bounds) + 2)))
+        neg_elbo = value_and_multigrad(func_value(neg_elbo),
+                                       argnums=list(range(len(basis_args_bounds)+2)))
 
-    res = minimize(elbo, method='L-BFGS-B', jac=True,
+    res = minimize(neg_elbo, method='L-BFGS-B', jac=True,
                    ndarrays=(var, regulariser) + tuple(basis_args),
                    bounds=(var_bound, regulariser_bound) + tuple(basis_args_bounds),
                    callback=minimizer_cb, tol=tol, options=dict(maxiter=maxiter))
