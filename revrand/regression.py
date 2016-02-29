@@ -94,7 +94,8 @@ def learn(X, y, basis=identity, basis_args=(), basis_args_bounds=[], var=1.,
     # neg_elbo = func_negate(elbo)
 
     if use_autograd:
-        elbo = value_and_multigrad(func_value(elbo), argnums=[0, 1, 2])
+        elbo = value_and_multigrad(func_value(elbo),
+                                   argnums=list(range(len(basis_args_bounds) + 2)))
 
     res = minimize(elbo, method='L-BFGS-B', jac=True,
                    ndarrays=(var, regulariser) + tuple(basis_args),
