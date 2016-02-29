@@ -20,14 +20,15 @@ from .base import Bunch
 from ..externals import check_random_state
 
 
-def make_regression(func, n_samples=100, n_features=1, bias=0.0, noise=0.0,
+def make_regression(func, X=None, n_samples=100, sample_mean=0.,
+                    sample_stdev=1., n_features=1, bias=0., noise=0.,
                     random_state=None):
     """
     Make dataset for a regression problem.
 
     Examples
     --------
-    >>> f = lambda x: 0.5*x + np.sin(2*x)
+    >>> f = lambda x: .5*x + np.sin(2.*x)
     >>> X, y = make_regression(f, bias=.5, noise=1., random_state=1)
     >>> X.shape
     (100, 1)
@@ -44,7 +45,9 @@ def make_regression(func, n_samples=100, n_features=1, bias=0.0, noise=0.0,
     """
     generator = check_random_state(random_state)
 
-    X = generator.randn(n_samples, n_features)
+    if X is None:
+        X = sample_stdev * generator.randn(n_samples, n_features) + sample_mean
+
     # unpack the columns of X
     y = func(*X.T) + bias
 

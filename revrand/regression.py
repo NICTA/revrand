@@ -22,7 +22,8 @@ from .optimize import (sgd, Bound, Positive, structured_sgd, logtrick_sgd,
                        decorated_minimize as minimize)
 
 from .utils.base import Bunch
-from .types.functions import FuncRes
+from .utils.autograd import value_and_multigrad
+from .types.functions import FuncRes, func_negate, func_value
 from .basis_functions import identity
 
 # Set up logging
@@ -78,29 +79,33 @@ def make_elbo(X, y, basis_func, cache=Bunch()):
             dt = (np.dot(m.T, np.dot(Err, dPhi)) - np.sum(dPhiPhi * C)) / var
             grad_thetas.append(-dt)
 
-        return FuncRes(value=elb, grad=(grad_var, grad_lambda) + tuple(grad_thetas))
+        return FuncRes(value=-elb, grad=(-grad_var, -grad_lambda) + tuple(grad_thetas))
 
     return elbo
 
 
 def learn(X, y, basis=identity, basis_args=(), basis_args_bounds=[], var=1., 
           regulariser=1., var_bound=Positive(), regulariser_bound=Positive(),
-          tol=1e-6, maxiter=1000, autograd=False, verbose=True):
+          tol=1e-6, maxiter=1000, use_autograd=False, verbose=True):
 
     cache = Bunch()
     elbo = make_elbo(X, y, basis, cache=cache)
+    # neg_elbo = func_negate(elbo)
+
+    if use_autograd:
+        elbo = value_and_multigrad(func_value(elbo), argnums=[0, 1, 2])
 
     res = minimize(elbo, method='L-BFGS-B', jac=True,
                    ndarrays=(var, regulariser) + tuple(basis_args),
                    bounds=(var_bound, regulariser_bound) + tuple(basis_args_bounds),
-                   tol=tol, options=dict(maxiter=maxiter))
+                   callback=print, tol=tol, options=dict(maxiter=maxiter))
 
     var, regulariser, *basis_args = res.x
 
-    return cache.m, cache.C, basis_args, var
+    return basis_args, cache.m, cache.C, var
 
 
-def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
+def learn_sgd(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
               gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
               verbose=True):
     """
@@ -269,7 +274,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
     return m, C, bparams, var
 
 
-def predict(Xs, basis, m, C, bparams, var):
+def predict(Xs, basis, basis_args, m, C, var):
     """
     Predict using Bayesian linear regression.
 
@@ -279,12 +284,12 @@ def predict(Xs, basis, m, C, bparams, var):
             (Ns,d) array query input dataset (Ns samples, d dimensions).
         basis: Basis
             A basis object, see the basis_functions module.
+        bparams: sequence
+            A sequence of hyperparameters of the basis object.
         m: ndarray
             (D,) array of regression weights (posterior).
         C: ndarray
             (D,) or (D, D) array of regression weight covariances (posterior).
-        bparams: sequence
-            A sequence of hyperparameters of the basis object.
         var: float
             observation variance.
 
@@ -301,13 +306,13 @@ def predict(Xs, basis, m, C, bparams, var):
             X_star of shape (N_star,).
     """
 
-    Phi_s = basis(Xs, *bparams)
+    Phi_s = basis(Xs, *basis_args).value
 
     Ey = Phi_s.dot(m)
     if C.ndim == 2:
-        Vf = (Phi_s.dot(C) * Phi_s).sum(axis=1)
+        Vf = np.sum(Phi_s.dot(C) * Phi_s, axis=1)
     else:
-        Vf = ((Phi_s * C) * Phi_s).sum(axis=1)
+        Vf = np.sum((Phi_s * C) * Phi_s, axis=1)
 
     return Ey, Vf, Vf + var
 

@@ -3,8 +3,7 @@ from warnings import warn
 
 import numpy as np
 
-from revrand.optimize import sgd, minimize, structured_minimizer, \
-    logtrick_minimizer, structured_sgd, logtrick_sgd, Bound, Positive
+from revrand.optimize import sgd, decorated_minimize, structured_sgd, logtrick_sgd, Bound, Positive
 from revrand.utils import flatten
 
 try:
@@ -128,9 +127,8 @@ def test_logstruc_params(make_quadratic):
     w0 = [np.abs(np.random.randn(2)), np.abs(np.random.randn(1))[0]]
     bounds = [Positive(shape=(2,)), Bound()]
 
-    nmin = structured_minimizer(logtrick_minimizer(minimize))
-    res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=bounds,
-               method='L-BFGS-B')
+    res = decorated_minimize(qobj_struc, w0, args=(data,), jac=True,
+                             bounds=bounds, method='L-BFGS-B')
     (Ea_bfgs, Eb_bfgs), Ec_bfgs = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs), (a, b, c), atol=1e-2,

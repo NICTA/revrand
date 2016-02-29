@@ -82,7 +82,7 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False):
                        jit_max=jit_max, returns_jit=returns_jit)
 
 
-def cho_solve(c_and_lower, b, overwrite_b=False, check_finite=True):
+def cho_solve(c_and_lower, b):
     """
     Solve the linear equations A x = b, given the Cholesky factorization of A.
 
@@ -92,12 +92,6 @@ def cho_solve(c_and_lower, b, overwrite_b=False, check_finite=True):
         Cholesky factorization of a, as given by cholesky
     b : array
         Right-hand side
-    overwrite_b : bool, optional
-        Whether to overwrite data in b (may improve performance)
-    check_finite : bool, optional
-        Whether to check that the input matrices contain only finite numbers.
-        Disabling may give a performance gain, but may result in problems
-        (crashes, non-termination) if the inputs do contain infinities or NaNs.
     Returns
     -------
     x : array
@@ -133,26 +127,17 @@ def cho_solve(c_and_lower, b, overwrite_b=False, check_finite=True):
     """
     c, lower = c_and_lower
 
-    if check_finite:
-        b1 = np.asarray_chkfinite(b)
-        c = np.asarray_chkfinite(c)
-    else:
-        b1 = np.asarray(b)
-        c = np.asarray(c)
-
     if c.ndim != 2 or c.shape[0] != c.shape[1]:
         raise ValueError("The factored matrix c is not square.")
 
-    if c.shape[1] != b1.shape[0]:
+    if c.shape[1] != b.shape[0]:
         raise ValueError("incompatible dimensions.")
 
     if not lower:
         c = c.T
 
-    y = solve_triangular(c, b1, trans='N', lower=True, overwrite_b=overwrite_b,
-                         check_finite=check_finite)
-    x = solve_triangular(c, y, trans='T', lower=True, overwrite_b=overwrite_b,
-                         check_finite=True)
+    y = solve_triangular(c, b, trans='N', lower=True)
+    x = solve_triangular(c, y, trans='T', lower=True)
 
     return x
 

@@ -5,7 +5,9 @@ from operator import neg
 
 
 class FuncRes(namedtuple('FuncRes', ['value', 'grad'])):
-    pass
+
+    def __neg__(self):
+        return self.__class__(value=neg(self.value), grad=tuple(map(neg, self.grad)))
 
 
 def func_value(func):
@@ -27,7 +29,6 @@ def func_grad(func, argnum=0):
 def func_negate(func):
 
     def new_func(*args, **kwargs):
-        result = func(*args, **kwargs)
-        return FuncRes(value=neg(result.value), grad=tuple(map(neg, result.grad)))
+        return -func(*args, **kwargs)
 
     return new_func

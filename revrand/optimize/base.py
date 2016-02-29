@@ -3,6 +3,7 @@ import numpy as np
 from ..utils import flatten, unflatten, flatten_args, flatten_result
 from ..externals import check_random_state
 
+from scipy.optimize import minimize
 from collections import namedtuple
 from itertools import repeat
 from warnings import warn
@@ -126,71 +127,6 @@ class Positive(Bound):
     def __getnewargs__(self):
         """Required for pickling!"""
         return (self.lower,)
-
-
-def get_minimize(backend='scipy'):
-    """
-    >>> minimize = get_minimize() # doctest: +SKIP
-    >>> minimize = get_minimize('nlopt') # doctest: +SKIP
-    >>> minimize = get_minimize('foo') # doctest: +SKIP
-    """
-
-    if backend == 'nlopt':
-        try:
-            from .nlopt_wrap import minimize as minimize_
-        except ImportError:
-            warn('NLopt could not be imported, defaulting to scipy.optimize.')
-    else:
-        from .spopt_wrap import minimize as minimize_
-
-    return minimize_
-
-
-def minimize(fun, x0, args=(), method=None, jac=True, bounds=None,
-             constraints=[], backend='scipy', **options):
-    """
-    Scipy.optimize.minimize-style wrapper for NLopt and scipy's minimize.
-
-        Arguments:
-            fun: callable, Objective function.
-            x0: ndarray, Initial guess.
-            args, (tuple): optional, Extra arguments passed to the objective
-                function and its derivatives (Jacobian).
-            method, (int), a value from nlopt.SOME_METHOD (e.g.
-                nlopt.NL_BOBYQA). if None, nlopt.NL_BOBYQA is used.
-            bounds: sequence, optional. Bounds for variables, (min, max) pairs
-                for each element in x, defining the bounds on that parameter.
-                Use None for one of min or max when there is no bound in that
-                direction.
-            ftol, (float): optional. Relative difference of objective function
-                between subsequent iterations before termination.
-            xtol, (float): optional. Relative difference between values, x,
-                between subsequent iterations before termination.
-            maxiter, (int): optional. Maximum number of function evaluations
-                before termination.
-            jac: if using a scipy.optimize.minimize, choose whether or not to
-                you will be providing gradients or if they should be calculated
-                numerically. Otherwise ignored for NLopt.
-
-        Returns:
-            x, (ndarray): The solution of the optimization.
-            success, (bool): Whether or not the optimizer exited successfully.
-            message, (str): Description of the cause of the termination (see
-                NLopts documentation for codes).
-            fun, (float): Final value of objective function.
-
-    Examples
-    --------
-    >>> from scipy.optimize import rosen, rosen_der
-    >>> x0 = np.array([ 0.875,  0.75 ])
-    >>> minimize(rosen, x0, method='LD_LBFGS', jac=rosen_der, backend='nlopt')
-    ... # doctest: +SKIP
-    >>> minimize(rosen, x0, method='L-BFGS-B', jac=rosen_der) # doctest: +SKIP
-    """
-    min_ = get_minimize(backend)
-
-    return min_(fun, x0, args=args, method=method, jac=jac, bounds=bounds,
-                constraints=constraints, **options)
 
 
 def candidate_start_points_random(bounds, n_candidates=1000,
