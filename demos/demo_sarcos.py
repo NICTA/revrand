@@ -3,7 +3,8 @@
 
 import logging
 import numpy as np
-import dora.regressors.gp as gp
+import revrand.legacygp as gp
+import revrand.legacygp.kernels as kern
 
 from revrand import regression, glm, basis_functions, likelihoods
 from revrand.validation import smse, msll
@@ -52,6 +53,7 @@ train_ind = np.random.choice(range(Ntrain), size=gp_Ntrain, replace=False)
 X_train_sub = X_train[train_ind, :]
 y_train_sub = y_train[train_ind]
 
+
 #
 # Train A la Carte
 #
@@ -76,35 +78,19 @@ else:
                               var=noise**2, diagcov=diagcov,
                               regulariser=regulariser)
 
+
 #
 # Train GP
 #
 
-kdef = lambda h, k: h(1e-5, 1e5, sigma) \
-    * k('gaussian', h(np.ones(D) * 1e-5, np.ones(D) * 1e5, lenARD))
-kfunc = gp.compose(kdef)
 
-# Set up optimisation
-learning_params = gp.OptConfig()
-learning_params.sigma = gp.auto_range(kdef)
-learning_params.noise = gp.Range([1e-5], [1e5], [noise])
-learning_params.walltime = 300
+def kdef(h, k):
+    return (h(1e-5, 1., 0.5)
+            * k(kern.gaussian, [h(1e-5, 1e5, l) for l in lenARD])
+            + k(kern.lognoise, h(-4, 1, -3)))
 
-
-# Learn hyperparameters
-hyper_params = gp.learn(X_train_sub, y_train_sub, kfunc, learning_params)
-regressor = gp.condition(X_train_sub, y_train_sub, kfunc, hyper_params)
-
-
-#
-# Predict GP
-#
-
-query = gp.query(X_test, regressor)
-Ey_gp = gp.mean(regressor, query)
-Vf_gp = gp.variance(regressor, query) + np.array(hyper_params[1])**2
-Vy_gp = Vf_gp + np.array(hyper_params[1])**2
-Sy_gp = np.sqrt(Vy_gp)
+hyper_params = gp.learn(X_train_sub, y_train_sub, kdef, verbose=True,
+                        ftol=1e-15, maxiter=1000)
 
 
 #
@@ -116,6 +102,18 @@ Sy_gp = np.sqrt(Vy_gp)
 Ey, Vf, _, _ = glm.predict_meanvar(X_test, llhood, base, *params)
 Vy = Vf + params[2][0]
 Sy = np.sqrt(Vy)
+
+
+#
+# Predict GP
+#
+
+regressor = gp.condition(X_train_sub, y_train_sub, kdef, hyper_params)
+query = gp.query(regressor, X_test)
+Ey_gp = gp.mean(query)
+Vf_gp = gp.variance(query)
+Vy_gp = gp.variance(query, noise=True)
+Sy_gp = np.sqrt(Vy_gp)
 
 
 #

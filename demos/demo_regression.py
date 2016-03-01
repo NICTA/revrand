@@ -147,6 +147,7 @@ def main():
     #
     # Learn GP and predict
     #
+
     def kdef(h, k):
         return (h(1e-5, 1., 0.5) * k(kern.gaussian, h(1e-5, 1e5, lenscale)) +
                 k(kern.lognoise, h(-4, 1, -3)))
