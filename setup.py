@@ -48,7 +48,6 @@ setup(
         'demos': [
             'unipath',
             'requests',
-            # 'dora'
         ],
     },
     license="Apache Software License 2.0",
