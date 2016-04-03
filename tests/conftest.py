@@ -18,3 +18,12 @@ def make_quadratic():
     data = np.vstack((y, x)).T
 
     return a, b, c, data, bounds
+
+
+@pytest.fixture
+def make_data():
+
+    X1 = np.random.randn(100, 5)
+    X2 = np.random.randn(100, 3)
+
+    return X1, X2
