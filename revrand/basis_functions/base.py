@@ -5,14 +5,21 @@
 
 from __future__ import division
 
+import inspect
 import numpy as np
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
 from ..optimize import Positive
-from ..utils import flatten
+# from ..utils import flatten
 from ..hadamard import hadamard
+
+
+# TODO:
+# - Finish grad calcs, answer zeros padding question, see #45
+# - Remove the need to bases to know their params bounds, see #54 and #55
+# - Implement basis function input slicing, see #53
 
 
 #
@@ -95,7 +102,27 @@ class Basis:
                     (N, D) zeros must be returned.
             """
         # A bit inefficient, but it generalises well...
-        return [np.zeros(self(X).shape)]
+        return np.zeros(self(X).shape)
+
+    def _call_popargs(self, X, *args):
+
+        selfargs, otherargs = self._splitargs(args, self.__call__)
+
+        return self.__call__(X, *selfargs), otherargs
+
+    def _grad_popargs(self, X, *args):
+
+        selfargs, otherargs = self._splitargs(args, self.grad)
+
+        return self.grad(X, *selfargs), otherargs
+
+    def _splitargs(self, args, fn):
+
+        params = (inspect.signature(fn)).parameters
+        nargs = len(params) - 1
+        selfargs, otherargs = args[:nargs], args[nargs:]
+
+        return selfargs, otherargs
 
     @property
     def bounds(self):
@@ -112,51 +139,6 @@ class Basis:
             scalars in all of the parameters combined (and in order).
         """
         self._bounds = bounds
-
-    def from_vector(self, X, vec):
-        """ Apply this basis function to X like __call__(), but instead of
-            being given parameter arguments, this function is given a flat list
-            of all of the parameters. The parameters must be constructed from
-            this list/vector in this function.
-
-            This is primarily used for learning with an optimiser.
-
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                vec: a flat list or array containing a concatenation of all of
-                    the flattened parameters. This list is of len(self.bounds).
-
-            Returns:
-                array: of shape (N, D) where D is the number of basis
-                    functions.
-        """
-        return self(X)
-
-    def grad_from_vector(self, X, vec):
-        """ Return the gradient of the basis function w.r.t.\ each of the
-            parameters, but like from_vector, instead of being given parameter
-            arguments, this function is given a flat list of all of the
-            parameters.
-
-            Arguments:
-                X: (N, d) array of observations where N is the number of
-                    samples, and d is the dimensionality of X.
-                vec: a flat list or array containing a concatenation of all of
-                    the flattened parameters. This list is of len(self.bounds).
-
-            Returns:
-                list: with each element being an (N, D) array (same
-                    dimensionality as return by __call__()) of a gradient with
-                    respect to a parameter. The length of this list must be the
-                    same as the *total* number of scalars in all of the
-                    parameters, i.e. the same length as vec.
-
-                    The exception to this is if there are *no* parameters, in
-                    which case a list of one element, containing an array of
-                    (N, D) zeros must be returned.
-        """
-        return self.grad(X)
 
     def __add__(self, other):
 
@@ -318,7 +300,7 @@ class RadialBasis(Basis):
         sdist = cdist(X, self.C, 'sqeuclidean')
         dPhi = np.exp(- sdist / (2 * lenscale**2)) * sdist / lenscale**3
 
-        return [dPhi]
+        return dPhi
 
     def from_vector(self, X, vec):
         return self(X, vec[0])
@@ -410,7 +392,7 @@ class SigmoidalBasis(Basis):
 
         dPhi = - dist * sigma * (1 - sigma) / lenscale**2
 
-        return [dPhi]
+        return dPhi
 
 
 class RandomRBF(RadialBasis):
@@ -480,8 +462,8 @@ class RandomRBF(RadialBasis):
         WX = np.dot(X, self.W / lenscale)
         dWX = WX / lenscale
 
-        return [np.hstack((dWX * np.sin(WX), -dWX * np.cos(WX)))
-                / np.sqrt(self.n)]
+        return np.hstack((dWX * np.sin(WX), -dWX * np.cos(WX))) \
+            / np.sqrt(self.n)
 
     def _checkD(self, D):
         if D != self.d:
@@ -509,7 +491,7 @@ class RandomRBF_ARD(RandomRBF):
         super(RandomRBF_ARD, self).__init__(nbases, Xdim, lenscale_bounds)
         self.bounds *= Xdim
 
-    def __call__(self, X, *lenscales):
+    def __call__(self, X, lenscales):
         """ Apply the random ARD-RBF to X.
 
             Arguments:
@@ -530,7 +512,7 @@ class RandomRBF_ARD(RandomRBF):
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
-    def grad(self, X, *lenscales):
+    def grad(self, X, lenscales):
         """ Get the gradients of this basis w.r.t.\ the length scales.
 
             Arguments:
@@ -558,13 +540,7 @@ class RandomRBF_ARD(RandomRBF):
             dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX))
                         / np.sqrt(self.n))
 
-        return dPhi
-
-    def from_vector(self, X, vec):
-        return self(X, vec)
-
-    def grad_from_vector(self, X, vec):
-        return self.grad(X, vec)
+        return np.dstack(dPhi)
 
     def _checkD(self, Xdim, lendim):
         if Xdim != self.d:
@@ -653,8 +629,8 @@ class FastFood(RandomRBF):
         VX = self.__makeVX(X) / lenscale
         dVX = - VX / lenscale
 
-        return [np.hstack((-dVX * np.sin(VX), dVX * np.cos(VX)))
-                / np.sqrt(self.n)]
+        return np.hstack((-dVX * np.sin(VX), dVX * np.cos(VX))) \
+            / np.sqrt(self.n)
 
     def __sample_params(self):
 
@@ -701,27 +677,39 @@ class BasisCat(object):
 
     def __call__(self, X, *params):
 
-        return self.from_vector(X, flatten(params, returns_shapes=False))
+        Phi = []
+        args = params
 
-    def from_vector(self, X, vec):
-
-        Phi = [base.from_vector(X, vec[b:e])
-               for base, b, e in zip(self.bases, self.__beg, self.__end)]
+        for base in self.bases:
+            phi, args = base._call_popargs(X, *args)
+            Phi.append(phi)
 
         return np.hstack(Phi)
 
-    def grad_from_vector(self, X, vec):
+    def grad(self, X, *params):
 
-        # Get the gradients from each basis in list of lists
-        grads = [base.grad_from_vector(X, vec[b:e])
-                 for base, b, e in zip(self.bases, self.__beg, self.__end)]
+        # Get all gradients
+        grads = []
+        hasgrad = []
+        args = params
+
+        for base in self.bases:
+            narg = len(args)
+            g, args = base._grad_popargs(X, *args)
+            hasgrad.append(True) if narg > len(args) else hasgrad.append(False)
+            grads.append(g)
+
+        # TODO: Sort out the following for mixed 2 and 3 dim arrays
+        # - Do we want to even zero-pad?
+        # - Maybe it's more efficient to just ignore the zero entries in the
+        #   final grad calcs?
 
         # Now combine the padded arrays and gradient in correct positions
         dPhis = []
         for i, glist in enumerate(grads):
 
-            # Ignore bases with no gradients
-            if self.nparams_list[i] == 0:
+            # Ignore bases with no parameters
+            if not hasgrad[i]:
                 continue
 
             # Pad gradient with relevant zeros for other bases
@@ -731,9 +719,6 @@ class BasisCat(object):
                 dPhis.append(np.hstack(dPhi))
 
         return dPhis
-
-    def grad(self, X, *params):
-        return self.grad_from_vector(X, flatten(params, returns_shapes=False))
 
     @property
     def bounds(self):
