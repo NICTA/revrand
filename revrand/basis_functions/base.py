@@ -106,20 +106,20 @@ class Basis:
 
     def _call_popargs(self, X, *args):
 
-        selfargs, otherargs = self._splitargs(args, self.__call__)
+        selfargs, otherargs = self._splitargs(args, self.__call__, offset=1)
 
         return self.__call__(X, *selfargs), otherargs
 
     def _grad_popargs(self, X, *args):
 
-        selfargs, otherargs = self._splitargs(args, self.grad)
+        selfargs, otherargs = self._splitargs(args, self.grad, offset=1)
 
         return self.grad(X, *selfargs), otherargs
 
-    def _splitargs(self, args, fn):
+    def _splitargs(self, args, fn, offset=0):
 
         params = (inspect.signature(fn)).parameters
-        nargs = len(params) - 1
+        nargs = len(params) - offset
         selfargs, otherargs = args[:nargs], args[nargs:]
 
         return selfargs, otherargs
