@@ -101,8 +101,7 @@ class Basis:
                     which case a list of one element, containing an array of
                     (N, D) zeros must be returned.
             """
-        # A bit inefficient, but it generalises well...
-        return np.zeros(self(X).shape)
+        return np.array([])
 
     def _call_popargs(self, X, *args):
 
@@ -659,6 +658,27 @@ class FastFood(RandomRBF):
 
 
 #
+# Basis helper functions
+#
+
+def apply_grad(fun, grad):
+
+    if len(grad) == 0:
+        return
+    elif inspect.isgenerator(grad):
+        fgrad = []
+        for g in grad:
+            fgrad.append(apply_grad(grad))
+        return fgrad
+    elif grad.ndim == 2:
+        return fun(grad)
+    elif grad.ndim == 3:
+        return np.array([fun(grad[:, :, i]) for i in range(grad.shape[2])])
+    else:
+        raise ValueError("Only 2d or 3d gradients allowed!")
+
+
+#
 # Other basis construction objects and functions
 #
 
@@ -689,36 +709,29 @@ class BasisCat(object):
     def grad(self, X, *params):
 
         # Get all gradients
+        N = X.shape[0]
         grads = []
-        hasgrad = []
+        shapes = [0]
         args = params
 
         for base in self.bases:
             narg = len(args)
             g, args = base._grad_popargs(X, *args)
-            hasgrad.append(True) if narg > len(args) else hasgrad.append(False)
-            grads.append(g)
-
-        # TODO: Sort out the following for mixed 2 and 3 dim arrays
-        # - Do we want to even zero-pad?
-        # - Maybe it's more efficient to just ignore the zero entries in the
-        #   final grad calcs?
+            if narg > len(args):
+                grads.append(g)
+                shapes.append(g.shape[1])
 
         # Now combine the padded arrays and gradient in correct positions
-        dPhis = []
-        for i, glist in enumerate(grads):
+        D = np.sum(shapes)
+        endinds = np.cumsum(shapes)
 
-            # Ignore bases with no parameters
-            if not hasgrad[i]:
-                continue
+        for i, g in enumerate(grads):
 
-            # Pad gradient with relevant zeros for other bases
-            for g in glist:
-                dPhi = [np.zeros(grads[j][0].shape) if j != i else g
-                        for j in range(self.nbases)]
-                dPhis.append(np.hstack(dPhi))
+            dims = (N, D) if g.ndim < 3 else (N, D, g.shape[2])
+            dPhi = np.zeros(dims)
+            dPhi[:, endinds[i]:endinds[i + 1]] = g
 
-        return dPhis
+            yield dPhi
 
     @property
     def bounds(self):
