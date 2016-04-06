@@ -21,6 +21,7 @@ from scipy.stats.distributions import gamma
 from .linalg import jitchol, cho_log_det
 from .optimize import minimize, sgd, Bound, Positive, structured_minimizer, \
     logtrick_minimizer, structured_sgd, logtrick_sgd
+from .basis_functions import apply_grad
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     mcache = np.zeros(D)
     Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
 
-    def ELBO(_var, _lambda, _theta):
+    def ELBO(_var, _lambda, *_theta):
 
         # Get Basis
         Phi = basis(X, *_theta)                      # N x D
@@ -141,21 +142,21 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         # Grad reg
         dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
 
-        # Loop through basis param grads
-        dtheta = []
-        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for dPhi in dPhis:
+        # Get structured basis function gradients
+        def dtheta(dPhi):
             dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
-            dt = (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
-            dtheta.append(-dt)
+            return - (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
 
-        return -ELBO, [-dvar, -dlambda, dtheta]
+        dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
 
-    bounds = [Positive(), Positive(), basis.bounds]
+        return -ELBO, [-dvar, -dlambda] + dtheta
+
+    bounds = [Positive(), Positive()]
+    bounds.extend(basis.bounds)
     nmin = structured_minimizer(logtrick_minimizer(minimize))
-    res = nmin(ELBO, [var, regulariser, bparams], method='L-BFGS-B', jac=True,
+    res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
                bounds=bounds, ftol=ftol, maxiter=maxit)
-    var, regulariser, bparams = res.x
+    var, regulariser, bparams = res.x[0], res.x[1], res.x[2:]
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
