@@ -738,12 +738,9 @@ class BasisCat(object):
     @property
     def bounds(self):
 
-        bounds = [b.bounds for b in self.bases if len(b) > 0]
+        bounds = [b.bounds for b in self.bases if len(b.bounds) > 0]
 
-        if len(bounds) == 1:
-            return bounds[0]
-
-        return bounds
+        return bounds[0] if len(bounds) == 1 else bounds
 
     def __add__(self, other):
 

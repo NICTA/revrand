@@ -3,7 +3,8 @@ Reusable utility functions
 """
 
 from .decorators import (vectorize_args, unvectorize_args, vectorize_result)
-from .base import (flatten, unflatten, couple, decouple, nwise, map_indices)
+from .base import (flatten, unflatten, couple, decouple, nwise, map_indices,
+                   append_or_extend)
 
 __all__ = [
     'vectorize_args',
@@ -14,5 +15,6 @@ __all__ = [
     'couple',
     'decouple',
     'nwise',
-    'map_indices'
+    'map_indices',
+    'append_or_extend'
 ]
