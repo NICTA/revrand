@@ -143,10 +143,11 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         B = N / M
 
         # Basis function stuff
-        Phi = basis(X, *_bparams)  # N x D
+        Phi = basis(X, *_bparams)  # M x D
         Phi2 = Phi**2
         Phi3 = Phi**3
-        f = Phi.dot(_m)  # N x K
+        f = Phi.dot(_m)  # M x K
+        df, d2f, d3f = np.zeros((M, K)), np.zeros((M, K)), np.zeros((M, K))
 
         # Posterior responsability terms
         logqkk = _qmatrix(_m, _C)
@@ -156,23 +157,23 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         # Big loop though posterior mixtures for calculating stuff
         ll = 0
         dlp = [np.zeros_like(p) for p in _lparams]
-        dbp = [np.zeros_like(p) for p in _bparams]
 
         for k in range(K):
 
             # Common likelihood calculations
             ll += B * likelihood.loglike(y, f[:, k], *_lparams).sum()
-            df = B * likelihood.df(y, f[:, k], *_lparams)
-            d2f = B * likelihood.d2f(y, f[:, k], *_lparams)
-            d3f = B * likelihood.d3f(y, f[:, k], *_lparams)
-            H[:, k] = d2f.dot(Phi2) - 1. / _reg
+            df[:, k] = B * likelihood.df(y, f[:, k], *_lparams)
+            d2f[:, k] = B * likelihood.d2f(y, f[:, k], *_lparams)
+            d3f[:, k] = B * likelihood.d3f(y, f[:, k], *_lparams)
+            H[:, k] = d2f[:, k].dot(Phi2) - 1. / _reg
 
             # Posterior mean and covariance gradients
             mkmj = _m[:, k][:, np.newaxis] - _m
             iCkCj = 1 / (_C[:, k][:, np.newaxis] + _C)
             dC[:, k] = (-((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[:, k])
                         + H[:, k]) / (2 * K)
-            dm[:, k] = (df.dot(Phi) + 0.5 * _C[:, k] * d3f.dot(Phi3)
+            dm[:, k] = (df[:, k].dot(Phi)
+                        + 0.5 * _C[:, k] * d3f[:, k].dot(Phi3)
                         + (iCkCj * mkmj).dot(pz[:, k])
                         - _m[:, k] / _reg) / K
 
@@ -192,8 +193,9 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             dPhiPhi = dPhi * Phi
             for k in range(K):
                 dPhimk = dPhi.dot(_m[:, k])
-                dPhiH = d2f.dot(dPhiPhi) + 0.5 * (d3f * dPhimk).dot(Phi2)
-                dt -= (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+                dPhiH = d2f[:, k].dot(dPhiPhi) + \
+                    0.5 * (d3f[:, k] * dPhimk).dot(Phi2)
+                dt -= (df[:, k].dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
             return dt
 
         dbp = apply_grad(dtheta, basis.grad(X, *_bparams))

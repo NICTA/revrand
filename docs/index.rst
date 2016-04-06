@@ -14,12 +14,10 @@ Contents:
    installation
    basis_funcs
    regression
-   classification
    glm
    likelihoods
    transforms
    linalg
-   hadamard
    optimize
    utils
    demo

@@ -8,17 +8,14 @@ from __future__ import division
 import sys
 import inspect
 import numpy as np
-from scipy.linalg import norm
+from scipy.linalg import norm, hadamard
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
 from ..optimize import Positive
-# from ..utils import flatten
-from ..hadamard import hadamard
 
 
 # TODO:
-# - Finish grad calcs, answer zeros padding question, see #45
 # - Remove the need to bases to know their params bounds, see #54 and #55
 # - Implement basis function input slicing, see #53
 
