@@ -5,6 +5,7 @@
 
 from __future__ import division
 
+import sys
 import inspect
 import numpy as np
 from scipy.linalg import norm
@@ -20,6 +21,13 @@ from ..hadamard import hadamard
 # - Finish grad calcs, answer zeros padding question, see #45
 # - Remove the need to bases to know their params bounds, see #54 and #55
 # - Implement basis function input slicing, see #53
+
+if sys.version_info[0] < 3:
+    def count_args(func):
+        return len(inspect.getargspec(func)[0])
+else:
+    def count_args(func):
+        return len((inspect.signature(func)).parameters)
 
 
 #
@@ -101,7 +109,7 @@ class Basis:
                     which case a list of one element, containing an array of
                     (N, D) zeros must be returned.
             """
-        return np.array([])
+        return []
 
     def _call_popargs(self, X, *args):
 
@@ -113,12 +121,11 @@ class Basis:
 
         selfargs, otherargs = self._splitargs(args, self.grad, offset=1)
 
-        return self.grad(X, *selfargs), otherargs
+        return self.grad(X, *selfargs), otherargs, selfargs
 
     def _splitargs(self, args, fn, offset=0):
 
-        params = (inspect.signature(fn)).parameters
-        nargs = len(params) - offset
+        nargs = count_args(fn) - offset
         selfargs, otherargs = args[:nargs], args[nargs:]
 
         return selfargs, otherargs
@@ -255,7 +262,7 @@ class RadialBasis(Basis):
 
         self.M, self.D = centres.shape
         self.C = centres
-        self.bounds = [lenscale_bounds]
+        self.bounds = lenscale_bounds
 
     def __call__(self, X, lenscale):
         """
@@ -326,7 +333,7 @@ class SigmoidalBasis(Basis):
 
         self.M, self.D = centres.shape
         self.C = centres
-        self.bounds = [lenscale_bounds]
+        self.bounds = lenscale_bounds
 
     def __call__(self, X, lenscale):
         r"""Apply the sigmoid basis function to X.
@@ -416,7 +423,7 @@ class RandomRBF(RadialBasis):
         self.d = Xdim
         self.n = nbases
         self.W = np.random.randn(self.d, self.n)
-        self.bounds = [lenscale_bounds]
+        self.bounds = lenscale_bounds
 
     def __call__(self, X, lenscale):
         """
@@ -488,7 +495,8 @@ class RandomRBF_ARD(RandomRBF):
 
         # lenscale_bounds.shape = Xdim
         super(RandomRBF_ARD, self).__init__(nbases, Xdim, lenscale_bounds)
-        self.bounds *= Xdim
+        lenscale_bounds.shape = Xdim
+        self.bounds = lenscale_bounds
 
     def __call__(self, X, lenscales):
         """ Apply the random ARD-RBF to X.
@@ -571,7 +579,7 @@ class FastFood(RandomRBF):
                     scales.
         """
 
-        self.bounds = [lenscale_bounds]
+        self.bounds = lenscale_bounds
 
         # Make sure our dimensions are powers of 2
         l = int(np.ceil(np.log2(Xdim)))
@@ -663,13 +671,11 @@ class FastFood(RandomRBF):
 
 def apply_grad(fun, grad):
 
-    if len(grad) == 0:
-        return
-    elif inspect.isgenerator(grad):
-        fgrad = []
-        for g in grad:
-            fgrad.append(apply_grad(grad))
-        return fgrad
+    if inspect.isgenerator(grad):
+        fgrad = [apply_grad(fun, g) for g in grad]
+        return fgrad if len(fgrad) != 1 else fgrad[0]
+    elif len(grad) == 0:
+        return []
     elif grad.ndim == 2:
         return fun(grad)
     elif grad.ndim == 3:
@@ -688,12 +694,6 @@ class BasisCat(object):
     def __init__(self, basis_list):
 
         self.bases = basis_list
-        self.nbases = len(basis_list)
-        self.nparams_list = [len(b.bounds) for b in self.bases]
-
-        # Lists for convenient indexing of parameters
-        self.__beg = np.cumsum([0] + self.nparams_list[:-1])
-        self.__end = np.cumsum(self.nparams_list)
 
     def __call__(self, X, *params):
 
@@ -710,25 +710,27 @@ class BasisCat(object):
 
         # Get all gradients
         N = X.shape[0]
+        args = list(params)
         grads = []
-        shapes = [0]
-        args = params
+        dims = [0]
 
         for base in self.bases:
-            narg = len(args)
-            g, args = base._grad_popargs(X, *args)
-            if narg > len(args):
-                grads.append(g)
-                shapes.append(g.shape[1])
+            g, args, sargs = base._grad_popargs(X, *args)
+            grads.append(g)
+            dims.append(base(X, *sargs).shape[1] if len(g) == 0 else
+                        g.shape[1])
 
-        # Now combine the padded arrays and gradient in correct positions
-        D = np.sum(shapes)
-        endinds = np.cumsum(shapes)
+        # Now generate structured gradients
+        D = np.sum(dims)
+        endinds = np.cumsum(dims)
 
         for i, g in enumerate(grads):
 
-            dims = (N, D) if g.ndim < 3 else (N, D, g.shape[2])
-            dPhi = np.zeros(dims)
+            if len(g) == 0:
+                continue
+
+            dPhi_dim = (N, D) if g.ndim < 3 else (N, D, g.shape[2])
+            dPhi = np.zeros(dPhi_dim)
             dPhi[:, endinds[i]:endinds[i + 1]] = g
 
             yield dPhi
@@ -736,9 +738,10 @@ class BasisCat(object):
     @property
     def bounds(self):
 
-        bounds = []
-        for b in self.bases:
-            bounds += b.bounds
+        bounds = [b.bounds for b in self.bases if len(b) > 0]
+
+        if len(bounds) == 1:
+            return bounds[0]
 
         return bounds
 

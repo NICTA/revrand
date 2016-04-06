@@ -23,7 +23,9 @@ def make_quadratic():
 @pytest.fixture
 def make_data():
 
-    X1 = np.random.randn(100, 5)
-    X2 = np.random.randn(100, 3)
+    w = np.array([1., 2.])
+    x = np.atleast_2d(np.arange(-50, 50)).T
+    X = np.hstack((np.ones((100, 1)), x))
+    y = X.dot(w) + np.random.randn(100) / 1000
 
-    return X1, X2
+    return X, y, w
