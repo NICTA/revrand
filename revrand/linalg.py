@@ -113,14 +113,14 @@ def cho_log_det(c):
     """
     return 2 * np.sum(np.log(c.diagonal()))
 
-# deprecated
-def logdet(L):
-    """ Compute the log determinant of a matrix.
+# # deprecated
+# def logdet(L):
+#     """ Compute the log determinant of a matrix.
 
-        Arguments:
-            L: The [NxN] cholesky factor of the matrix.
+#         Arguments:
+#             L: The [NxN] cholesky factor of the matrix.
 
-        Returns:
-            The log determinant (scalar)
-    """
-    return cho_log_det(L)
+#         Returns:
+#             The log determinant (scalar)
+#     """
+#     return cho_log_det(L)

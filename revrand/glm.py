@@ -146,7 +146,6 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
         Phi3 = Phi**3
-        dPhis = basis.grad(X, *_bparams)
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -184,20 +183,20 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dpH = dp2df[l].dot(Phi2)
                 dlp[l] -= B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
-            # Basis function parameter gradients
-            def dtheta(dPhi):
-                dPhimk = dPhi.dot(_m[:, k])
-                dPhiH = d2f.dot(dPhi * Phi) + 0.5 * (d3f * dPhimk).dot(Phi2)
-                return - (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
-
-            dtheta = append_or_extend([], apply_grad(dtheta, dPhis))
-            if len(_bparams) > 0:
-                print(dbp, dtheta)
-            for i in range(len(dbp)):
-                dbp[i] += dtheta[i]
-
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
+
+        # Basis function parameter gradients
+        def dtheta(dPhi):
+            dt = 0
+            dPhiPhi = dPhi * Phi
+            for k in range(K):
+                dPhimk = dPhi.dot(_m[:, k])
+                dPhiH = d2f.dot(dPhiPhi) + 0.5 * (d3f * dPhimk).dot(Phi2)
+                dt -= (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+            return dt
+
+        dbp = apply_grad(dtheta, basis.grad(X, *_bparams))
 
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (ll
