@@ -18,6 +18,7 @@ import logging
 from scipy.linalg import cho_solve
 from scipy.stats.distributions import gamma
 
+from .utils import append_or_extend
 from .linalg import jitchol, cho_log_det
 from .optimize import minimize, sgd, Bound, Positive, structured_minimizer, \
     logtrick_minimizer, structured_sgd, logtrick_sgd
@@ -149,14 +150,16 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
 
-        return -ELBO, [-dvar, -dlambda] + dtheta
+        # if len(_theta) > 0:
+        #     import IPython; IPython.embed()
 
-    bounds = [Positive(), Positive()]
-    bounds.extend(basis.bounds)
+        return -ELBO, append_or_extend([-dvar, -dlambda], dtheta)
+
+    bounds = append_or_extend([Positive(), Positive()], basis.bounds)
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
                bounds=bounds, ftol=ftol, maxiter=maxit)
-    var, regulariser, bparams = res.x[0], res.x[1], res.x[2:]
+    (var, regulariser), bparams = res.x[:2], res.x[2:]
 
     if verbose:
         log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
@@ -245,9 +248,9 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
     if not diagcov:
         Sinit = np.diag(np.sqrt(Sinit))[np.tril_indices(D)]
 
-    def ELBO(m, S, _var, _lambda, _theta, Data):
+    def ELBO(m, S, _var, _lambda, *args):
 
-        y, X = Data[:, 0], Data[:, 1:]
+        _theta, y, X = args[:-1], args[-1][:, 0], args[-1][:, 1:]
         M = len(y)
         B = N / M
 
@@ -302,29 +305,29 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
         # Grad reg
         dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
 
-        # Loop through basis param grads
-        dtheta = []
-        dPhis = basis.grad(X, *_theta) if len(_theta) > 0 else []
-        for dPhi in dPhis:
+        # Get structured basis function gradients
+        def dtheta(dPhi):
             dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
-            dt = B * (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
-            dtheta.append(-dt)
+            return - (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
 
-        return -ELBO, [-dm, -dS, -dvar, -dlambda, dtheta]
+        dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
 
-    vparams = [minit, Sinit, var, regulariser, bparams]
+        return -ELBO, append_or_extend([-dm, -dS, -dvar, -dlambda], dtheta)
+
+    vparams = [minit, Sinit, var, regulariser] + bparams
     bounds = [Bound(shape=minit.shape),
               Positive(shape=Sinit.shape) if diagcov else
               Bound(shape=Sinit.shape),
               Positive(),
-              Positive(), basis.bounds]
+              Positive()]
+    append_or_extend(bounds, basis.bounds)
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
                eta=eta, bounds=bounds, gtol=gtol, passes=passes,
                batchsize=batchsize, eval_obj=True)
 
-    m, S, var, regulariser, bparams = res.x
+    (m, S, var, regulariser), bparams = res.x[:4], res.x[4:]
     C = S if diagcov else _logcholfact(S, D)[1]
 
     if verbose:

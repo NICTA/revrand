@@ -33,6 +33,12 @@ class Bunch(dict):
         self.__dict__ = self
 
 
+def append_or_extend(mylist, obj):
+
+    mylist.extend(obj if isinstance(obj, list) else [obj])
+    return mylist
+
+
 def couple(f, g):
     """
     Given a pair of functions that take the same arguments, return a

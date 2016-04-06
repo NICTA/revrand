@@ -15,6 +15,8 @@ from multiprocessing import Pool
 from scipy.stats.distributions import gamma
 from scipy.optimize import brentq
 
+from .utils import append_or_extend
+from .basis_functions import apply_grad
 from .transforms import logsumexp
 from .optimize import minimize, sgd, structured_sgd, structured_minimizer, \
     logtrick_sgd, logtrick_minimizer, Bound, Positive
@@ -130,10 +132,10 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     H = np.empty((D, K))
 
     # Objective function Eq. 10 from [1], and gradients of ALL params
-    def L2(_m, _C, _reg, _lparams, _bparams, data):
+    def L2(_m, _C, _reg, _lparams, *args):
 
         # Extract data, parameters, etc
-        y, X = data[:, 0], data[:, 1:]
+        _bparams, y, X = args[:-1], args[-1][:, 0], args[-1][:, 1:]
 
         # Dimensions
         M, d = X.shape
@@ -144,8 +146,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
         Phi = basis(X, *_bparams)  # N x D
         Phi2 = Phi**2
         Phi3 = Phi**3
-        dPhi = basis.grad(X, *_bparams)
-        dPhiPhi = [dP * Phi for dP in dPhi]
+        dPhis = basis.grad(X, *_bparams)
         f = Phi.dot(_m)  # N x K
 
         # Posterior responsability terms
@@ -184,10 +185,16 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                 dlp[l] -= B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
 
             # Basis function parameter gradients
-            for l in range(len(_bparams)):
-                dPhimk = dPhi[l].dot(_m[:, k])
-                dPhiH = d2f.dot(dPhiPhi[l]) + 0.5 * (d3f * dPhimk).dot(Phi2)
-                dbp[l] -= (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+            def dtheta(dPhi):
+                dPhimk = dPhi.dot(_m[:, k])
+                dPhiH = d2f.dot(dPhi * Phi) + 0.5 * (d3f * dPhimk).dot(Phi2)
+                return - (df.dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
+
+            dtheta = append_or_extend([], apply_grad(dtheta, dPhis))
+            if len(_bparams) > 0:
+                print(dbp, dtheta)
+            for i in range(len(dbp)):
+                dbp[i] += dtheta[i]
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
@@ -203,7 +210,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
                      .format(L2, _reg, _lparams, _bparams))
 
-        return -L2, [-dm, -dC, -dreg, dlp, dbp]
+        return -L2, append_or_extend([-dm, -dC, -dreg, dlp], dbp)
 
     # Intialise m and C
     m = np.random.randn(D, K) + np.arange(K) - K / 2
@@ -212,22 +219,23 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
     bounds = [Bound(shape=m.shape),
               Positive(shape=C.shape),
               Positive(),
-              likelihood.bounds,
-              basis.bounds]
+              likelihood.bounds]
+    append_or_extend(bounds, basis.bounds)
+
+    vparams = [m, C, reg, lparams] + bparams
 
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
-        res = nmin(L2, [m, C, reg, lparams, bparams], ftol=tol, maxiter=maxit,
+        res = nmin(L2, vparams, ftol=tol, maxiter=maxit,
                    method='L-BFGS-B', jac=True, bounds=bounds,
                    args=(np.hstack((y[:, np.newaxis], X)),))
     else:
         nsgd = structured_sgd(logtrick_sgd(sgd))
-        res = nsgd(L2, [m, C, reg, lparams, bparams],
-                   np.hstack((y[:, np.newaxis], X)), rate=rate, eta=eta,
-                   bounds=bounds, gtol=tol, passes=maxit, batchsize=batchsize,
-                   eval_obj=True)
+        res = nsgd(L2, vparams, np.hstack((y[:, np.newaxis], X)), rate=rate,
+                   eta=eta, bounds=bounds, gtol=tol, passes=maxit,
+                   batchsize=batchsize, eval_obj=True)
 
-    m, C, reg, lparams, bparams = res.x
+    (m, C, reg, lparams), bparams = res.x[:4], res.x[4:]
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "
