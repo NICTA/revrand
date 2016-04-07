@@ -14,9 +14,7 @@ revrand.basis_functions.base.Basis
    .. autosummary::
    
       ~Basis.__init__
-      ~Basis.from_vector
       ~Basis.grad
-      ~Basis.grad_from_vector
    
    
 

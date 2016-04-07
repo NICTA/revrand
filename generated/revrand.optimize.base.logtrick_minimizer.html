@@ -28,8 +28,8 @@
     <link rel="up" title="Optimization" href="../optimize.html" />
     <link rel="next" title="revrand.optimize.base.logtrick_sgd" href="revrand.optimize.base.logtrick_sgd.html" />
     <link rel="prev" title="revrand.optimize.base.structured_sgd" href="revrand.optimize.base.structured_sgd.html" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
 <![endif]-->
@@ -72,29 +72,29 @@
 variables. It will apply this trick for any variables that correspond to a
 Positive() bound.</p>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span> <span class="k">as</span> <span class="n">sp_min</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">..optimize</span> <span class="kn">import</span> <span class="n">Bound</span><span class="p">,</span> <span class="n">Positive</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">minimize</span> <span class="k">as</span> <span class="n">sp_min</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">..optimize</span> <span class="k">import</span> <span class="n">Bound</span><span class="p">,</span> <span class="n">Positive</span>
 </pre></div>
 </div>
 <p>This is a simple cost function where we need to enforce particular
 variabled are positive-only bounded.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">):</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="n">sq_norm</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">lambda_</span> <span class="o">*</span> <span class="n">sq_norm</span><span class="p">,</span> <span class="n">lambda_</span> <span class="o">*</span> <span class="n">w</span>
 </pre></div>
 </div>
 <p>Lets enforce that the <cite>w</cite> are positive,</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">Positive</span><span class="p">(),</span> <span class="n">Positive</span><span class="p">(),</span> <span class="n">Positive</span><span class="p">()]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">Positive</span><span class="p">(),</span> <span class="n">Positive</span><span class="p">(),</span> <span class="n">Positive</span><span class="p">()]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">new_min</span> <span class="o">=</span> <span class="n">logtrick_minimizer</span><span class="p">(</span><span class="n">sp_min</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Initial values</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">w_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">w_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">lambda_0</span> <span class="o">=</span> <span class="o">.</span><span class="mi">25</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">new_min</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">w_0</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">lambda_0</span><span class="p">,),</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
-<span class="gp">... </span>              <span class="n">method</span><span class="o">=</span><span class="s1">&#39;L-BFGS-B&#39;</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">new_min</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">w_0</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">lambda_0</span><span class="p">,),</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="n">method</span><span class="o">=</span><span class="s1">&#39;L-BFGS-B&#39;</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span>
 <span class="go">array([ True,  True,  True], dtype=bool)</span>
 </pre></div>
@@ -128,9 +128,6 @@ use with structured_minimizer, so long as it is the inner wrapper.</p>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -158,7 +155,7 @@ use with structured_minimizer, so long as it is the inner wrapper.</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
     </div>
   </body>
 </html>

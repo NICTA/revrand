@@ -14,9 +14,7 @@ revrand.basis_functions.base.PolynomialBasis
    .. autosummary::
    
       ~PolynomialBasis.__init__
-      ~PolynomialBasis.from_vector
       ~PolynomialBasis.grad
-      ~PolynomialBasis.grad_from_vector
    
    
 

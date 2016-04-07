@@ -9,8 +9,9 @@ revrand.basis_functions.base
 
    .. autosummary::
    
+      apply_grad
       cdist
-      flatten
+      count_args
       hadamard
       norm
    

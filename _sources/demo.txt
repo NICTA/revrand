@@ -36,43 +36,6 @@ using a random subset of data.
 (:download:`Source code <../demos/demo_sarcos.py>`)
 
 
-Classification
---------------
-
-Fit a square wave
-.................
-
-This is a simple demo to test the logistic classifiers in this library with 
-various learning algorithms on fitting a square wave.
-
-.. plot:: ../demos/demo_classify_simple.py
-
-
-Classify `3` and `5` from the USPS digits dataset
-.................................................
-
-In this demo the logistic classifiers implemented in this library are compared
-against a logistic classifier from `scikit learn
-<http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_
-for classifying digits `3` and `5` from the USPS handwritten digits experiment
-used in [1]_.
-
-(:download:`Source code <../demos/demo_classification.py>`)
-
-
-Classify all digits from the USPS digits dataset
-................................................
-
-In this demo multiclass logistic classifiers implemented in this library
-(categorical likelihood, softmax transformation function) are compared against
-a multiclass logistic classifier from `scikit learn
-<http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_
-for classifying `all` digits from the USPS handwritten digits experiment used
-in [1]_.
-
-(:download:`Source code <../demos/demo_multi_classification.py>`)
-
-
 Stochastic Gradient Descent
 ---------------------------
 

@@ -9,6 +9,7 @@ revrand.utils.base
 
    .. autosummary::
    
+      append_or_extend
       couple
       custom_reshape
       decouple

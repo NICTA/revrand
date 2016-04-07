@@ -28,8 +28,8 @@
     <link rel="up" title="Optimization" href="../optimize.html" />
     <link rel="next" title="revrand.optimize.base.logtrick_minimizer" href="revrand.optimize.base.logtrick_minimizer.html" />
     <link rel="prev" title="revrand.optimize.base.structured_minimizer" href="revrand.optimize.base.structured_minimizer.html" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
 <![endif]-->
@@ -70,14 +70,14 @@
 <dd><p>Allow stochastic gradients to accept a list of parameters to optimize,
 rather than just a flattened array.</p>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">..optimize</span> <span class="kn">import</span> <span class="n">sgd</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">..optimize</span> <span class="k">import</span> <span class="n">sgd</span>
 </pre></div>
 </div>
 <p>Define a cost function that returns a pair. The first element is the cost
 value and the second element is the gradient represented by a sequence.
 Even if the cost is a function of a single variable, the gradient must be a
 sequence containing one element.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">y</span><span class="p">,</span> <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
 <span class="gp">... </span>    <span class="n">y_est</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
@@ -89,21 +89,21 @@ sequence containing one element.</p>
 </pre></div>
 </div>
 <p>Augment the SGD optimizer to take structured inputs</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_sgd</span> <span class="o">=</span> <span class="n">structured_sgd</span><span class="p">(</span><span class="n">sgd</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">new_sgd</span> <span class="o">=</span> <span class="n">structured_sgd</span><span class="p">(</span><span class="n">sgd</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Data</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">y</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">X</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Initial values</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">w_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">w_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">lambda_0</span> <span class="o">=</span> <span class="o">.</span><span class="mi">25</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">new_sgd</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="p">[</span><span class="n">w_0</span><span class="p">,</span> <span class="n">lambda_0</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">batchsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">eval_obj</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">new_sgd</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="p">[</span><span class="n">w_0</span><span class="p">,</span> <span class="n">lambda_0</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">batchsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">eval_obj</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res_w</span><span class="p">,</span> <span class="n">res_lambda</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
 </pre></div>
 </div>
@@ -131,9 +131,6 @@ sequence containing one element.</p>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -161,7 +158,7 @@ sequence containing one element.</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
     </div>
   </body>
 </html>

@@ -28,8 +28,8 @@
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
     <link rel="next" title="revrand.basis_functions.base.Basis" href="revrand.basis_functions.base.Basis.html" />
     <link rel="prev" title="Basis Functions" href="../basis_funcs.html" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
 <![endif]-->
@@ -73,16 +73,19 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cdist</span></code>(XA,&nbsp;XB[,&nbsp;metric,&nbsp;p,&nbsp;V,&nbsp;VI,&nbsp;w])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">apply_grad</span></code>(fun,&nbsp;grad)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">cdist</span></code>(XA,&nbsp;XB[,&nbsp;metric,&nbsp;p,&nbsp;V,&nbsp;VI,&nbsp;w])</td>
 <td>Computes distance between each pair of the two collections of inputs.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
-<td>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly heterogenous dimensions and shapes and concatenate them together into a flat (1d) array.</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">count_args</span></code>(func)</td>
+<td></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">hadamard</span></code>(Y[,&nbsp;ordering])</td>
-<td><em>Very fast</em> Hadamard transform for single vector at a time</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">hadamard</span></code>(n[,&nbsp;dtype])</td>
+<td>Construct a Hadamard matrix.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">norm</span></code>(a[,&nbsp;ord])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">norm</span></code>(a[,&nbsp;ord,&nbsp;axis,&nbsp;keepdims])</td>
 <td>Matrix or vector norm.</td>
 </tr>
 </tbody>
@@ -148,9 +151,6 @@
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -178,7 +178,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
     </div>
   </body>
 </html>

@@ -14,9 +14,7 @@ revrand.basis_functions.base.SigmoidalBasis
    .. autosummary::
    
       ~SigmoidalBasis.__init__
-      ~SigmoidalBasis.from_vector
       ~SigmoidalBasis.grad
-      ~SigmoidalBasis.grad_from_vector
    
    
 

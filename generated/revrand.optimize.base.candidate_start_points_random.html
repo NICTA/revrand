@@ -28,8 +28,8 @@
     <link rel="up" title="Optimization" href="../optimize.html" />
     <link rel="next" title="revrand.optimize.sgd.sgd" href="revrand.optimize.sgd.sgd.html" />
     <link rel="prev" title="revrand.optimize.base.candidate_start_points_lattice" href="revrand.optimize.base.candidate_start_points_lattice.html" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
 <![endif]-->
@@ -89,44 +89,44 @@ hyperrectangle.</p>
 </table>
 <p class="rubric">Notes</p>
 <p>Roughly equivalent to:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">lambda</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">100</span><span class="p">:</span>             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_candidates</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">100</span><span class="p">:</span>             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_candidates</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
 </pre></div>
 </div>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span>
 <span class="gp">... </span>    <span class="n">n_candidates</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">array([[-7.28935697, -9.99925656, -9.04608671, -8.78930863, -7.42101142],</span>
 <span class="go">       [ 1.16097348, -0.09300228, -0.72298422,  0.03668218,  0.6164502 ]])</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points</span> <span class="o">=</span> <span class="n">candidate_start_points_random</span><span class="p">(</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points</span> <span class="o">=</span> <span class="n">candidate_start_points_random</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">[(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points</span><span class="o">.</span><span class="n">shape</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(2, 1000)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">)</span>
 <span class="go">True</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span> <span class="o">&lt;</span> <span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span> <span class="o">&lt;</span> <span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">candidate_start_points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">2.</span><span class="p">)</span>
 <span class="go">True</span>
 </pre></div>
 </div>
 <p>Uniformly sample from line segment:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)],</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="gp">... </span>                              <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">array([[ 0.25106601,  1.16097348, -0.99965688, -0.09300228, -0.55973233]])</span>
 </pre></div>
 </div>
 <p>Uniformly sample from hyperrectangle:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">),</span> <span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">7.</span><span class="p">),</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">candidate_start_points_random</span><span class="p">([(</span><span class="o">-</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">),</span> <span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">7.</span><span class="p">),</span>
 <span class="gp">... </span><span class="p">(</span><span class="mf">2.71</span><span class="p">,</span> <span class="mf">3.14</span><span class="p">)],</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">array([[-7.28935697, -9.04608671, -7.42101142, -8.67106038, -7.28751878],</span>
 <span class="go">       [ 1.16097348, -0.72298422,  0.6164502 ,  1.63435231,  0.67606949],</span>
@@ -158,9 +158,6 @@ hyperrectangle.</p>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -188,7 +185,7 @@ hyperrectangle.</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
     </div>
   </body>
 </html>

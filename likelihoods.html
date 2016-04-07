@@ -27,8 +27,8 @@
     <link rel="top" title="revrand 0.1 documentation" href="index.html" />
     <link rel="next" title="revrand.likelihoods.Bernoulli" href="generated/revrand.likelihoods.Bernoulli.html" />
     <link rel="prev" title="Generalised Linear Models" href="glm.html" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
 <![endif]-->
@@ -97,8 +97,7 @@ the GLM prior into a probability.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211;
-expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array_like</td>
 </tr>
@@ -129,8 +128,7 @@ in all of the parameters combined (and in order).</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cdf</strong> &#8211;
-Cumulative density function evaluated at y.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cdf</strong> &#8211; Cumulative density function evaluated at y.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -155,8 +153,7 @@ Cumulative density function evaluated at y.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the second derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the second derivative
 <span class="math">\(\partial^2 \log p(y|f)/ \partial f^2\)</span></p>
 </td>
 </tr>
@@ -182,8 +179,7 @@ the second derivative
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the third derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the third derivative
 <span class="math">\(\partial^3 \log p(y|f)/ \partial f^3\)</span></p>
 </td>
 </tr>
@@ -209,8 +205,7 @@ the third derivative
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
@@ -236,8 +231,7 @@ the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211;
-the derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211; the derivative
 <span class="math">\(\partial \log p(y|f, \theta)/ \partial \theta\)</span> for
 each parameter.</p>
 </td>
@@ -266,8 +260,7 @@ each parameter.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211;
-the derivative of the likelihood Hessian w.r.t.                <span class="math">\(\theta\)</span> for each parameter.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211; the derivative of the likelihood Hessian w.r.t.                <span class="math">\(\theta\)</span> for each parameter.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
@@ -292,8 +285,7 @@ the derivative of the likelihood Hessian w.r.t.                <span class="math
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>logp</strong> &#8211;
-the log likelihood of each y given each f under this
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>logp</strong> &#8211; the log likelihood of each y given each f under this
 likelihood.</p>
 </td>
 </tr>
@@ -327,8 +319,7 @@ prior.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211;
-expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
@@ -354,8 +345,7 @@ expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cdf</strong> &#8211;
-Cumulative density function evaluated at y.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cdf</strong> &#8211; Cumulative density function evaluated at y.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -381,8 +371,7 @@ Cumulative density function evaluated at y.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the second derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the second derivative
 <span class="math">\(\partial^2 \log p(y|f)/ \partial f^2\)</span></p>
 </td>
 </tr>
@@ -409,8 +398,7 @@ the second derivative
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the third derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the third derivative
 <span class="math">\(\partial^3 \log p(y|f)/ \partial f^3\)</span></p>
 </td>
 </tr>
@@ -437,8 +425,7 @@ the third derivative
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
@@ -465,8 +452,7 @@ the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211;
-the derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211; the derivative
 <span class="math">\(\partial \log p(y|f, \theta)/ \partial \theta\)</span> for
 each parameter.</p>
 </td>
@@ -496,8 +482,7 @@ each parameter.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211;
-the derivative of the likelihood Hessian w.r.t.                <span class="math">\(\theta\)</span> for each parameter.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dp</strong> &#8211; the derivative of the likelihood Hessian w.r.t.                <span class="math">\(\theta\)</span> for each parameter.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
@@ -523,8 +508,7 @@ the derivative of the likelihood Hessian w.r.t.                <span class="math
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>logp</strong> &#8211;
-the log likelihood of each y given each f under this
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>logp</strong> &#8211; the log likelihood of each y given each f under this
 likelihood.</p>
 </td>
 </tr>
@@ -554,8 +538,7 @@ function have been implemented.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>array_like</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211;
-expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array_like</td>
 </tr>
@@ -578,8 +561,7 @@ expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cdf</strong> &#8211;
-Cumulative density function evaluated at y.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cdf</strong> &#8211; Cumulative density function evaluated at y.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -604,8 +586,7 @@ Cumulative density function evaluated at y.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the second derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the second derivative
 <span class="math">\(\partial^2 \log p(y|f)/ \partial f^2\)</span></p>
 </td>
 </tr>
@@ -631,8 +612,7 @@ the second derivative
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the third derivative
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the third derivative
 <span class="math">\(\partial^3 \log p(y|f)/ \partial f^3\)</span></p>
 </td>
 </tr>
@@ -658,8 +638,7 @@ the third derivative
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211;
-the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> &#8211; the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
@@ -684,8 +663,7 @@ the derivative <span class="math">\(\partial \log p(y|f) / \partial f\)</span></
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>logp</strong> &#8211;
-the log likelihood of each y given each f under this
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>logp</strong> &#8211; the log likelihood of each y given each f under this
 likelihood.</p>
 </td>
 </tr>
@@ -720,9 +698,6 @@ likelihood.</p>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -749,7 +724,7 @@ likelihood.</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
     </div>
   </body>
 </html>

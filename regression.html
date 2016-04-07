@@ -25,10 +25,10 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.1 documentation" href="index.html" />
-    <link rel="next" title="Classification" href="classification.html" />
+    <link rel="next" title="Generalised Linear Models" href="glm.html" />
     <link rel="prev" title="revrand.basis_functions.base.SigmoidalBasis" href="generated/revrand.basis_functions.base.SigmoidalBasis.html" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
 <![endif]-->
@@ -46,7 +46,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classification.html" title="Classification"
+          <a href="glm.html" title="Generalised Linear Models"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="generated/revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
@@ -97,15 +97,11 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>m</strong> (<em>ndarray</em>) &#8211;
-(D,) array of posterior weight means (D is the dimension of the
+<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of posterior weight means (D is the dimension of the
 features).</li>
-<li><strong>C</strong> (<em>ndarray</em>) &#8211;
-(D,) array of posterior weight variances.</li>
-<li><strong>bparams</strong> (<em>sequence</em>) &#8211;
-learned sequence of basis object hyperparameters.</li>
-<li><em>float</em> &#8211;
-learned observation variance</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) array of posterior weight variances.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; learned sequence of basis object hyperparameters.</li>
+<li><em>float</em> &#8211; learned observation variance</li>
 </ul>
 </p>
 </td>
@@ -149,15 +145,11 @@ terminates (unless it converges first).</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>m</strong> (<em>ndarray</em>) &#8211;
-(D,) array of posterior weight means (D is the dimension of the
+<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of posterior weight means (D is the dimension of the
 features).</li>
-<li><strong>C</strong> (<em>ndarray</em>) &#8211;
-(D,) array of posterior weight variances.</li>
-<li><strong>bparams</strong> (<em>sequence</em>) &#8211;
-learned sequence of basis object hyperparameters.</li>
-<li><em>float</em> &#8211;
-learned observation variance</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) array of posterior weight variances.</li>
+<li><strong>bparams</strong> (<em>sequence</em>) &#8211; learned sequence of basis object hyperparameters.</li>
+<li><em>float</em> &#8211; learned observation variance</li>
 </ul>
 </p>
 </td>
@@ -198,14 +190,11 @@ is large.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Ey</strong> (<em>ndarray</em>) &#8211;
-The expected value of y_star for the query inputs, X_star
+<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y_star for the query inputs, X_star
 of shape (N_star,).</li>
-<li><strong>Vf</strong> (<em>ndarray</em>) &#8211;
-The expected variance of f_star for the query inputs,
+<li><strong>Vf</strong> (<em>ndarray</em>) &#8211; The expected variance of f_star for the query inputs,
 X_star of shape (N_star,).</li>
-<li><strong>Vy</strong> (<em>ndarray</em>) &#8211;
-The expected variance of y_star for the query inputs,
+<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of y_star for the query inputs,
 X_star of shape (N_star,).</li>
 </ul>
 </p>
@@ -227,8 +216,8 @@ X_star of shape (N_star,).</li>
   <p class="topless"><a href="generated/revrand.basis_functions.base.SigmoidalBasis.html"
                         title="previous chapter">revrand.basis_functions.base.SigmoidalBasis</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="classification.html"
-                        title="next chapter">Classification</a></p>
+  <p class="topless"><a href="glm.html"
+                        title="next chapter">Generalised Linear Models</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -237,9 +226,6 @@ X_star of shape (N_star,).</li>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -256,7 +242,7 @@ X_star of shape (N_star,).</li>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classification.html" title="Classification"
+          <a href="glm.html" title="Generalised Linear Models"
              >next</a> |</li>
         <li class="right" >
           <a href="generated/revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
@@ -266,7 +252,7 @@ X_star of shape (N_star,).</li>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
     </div>
   </body>
 </html>

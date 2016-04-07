@@ -14,9 +14,7 @@ revrand.basis_functions.base.LinearBasis
    .. autosummary::
    
       ~LinearBasis.__init__
-      ~LinearBasis.from_vector
       ~LinearBasis.grad
-      ~LinearBasis.grad_from_vector
    
    
 
