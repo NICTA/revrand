@@ -1,6 +1,8 @@
 from __future__ import division
 
 import numpy as np
+from operator import add
+from functools import reduce
 
 import revrand.basis_functions as bs
 
@@ -84,3 +86,45 @@ def test_apply_grad(make_data):
     gs = bs.apply_grad(obj, base.grad(X, 1., np.ones(d)))
     assert np.isscalar(gs[0])
     assert gs[1].shape == (d,)
+
+
+def test_bases(make_data):
+
+    X, _, _ = make_data
+    N, d = X.shape
+
+    bases = [bs.LinearBasis(onescol=True),
+             bs.PolynomialBasis(order=2),
+             bs.RadialBasis(centres=X[:10, :]),
+             bs.SigmoidalBasis(centres=X[:10, :]),
+             bs.RandomRBF(Xdim=d, nbases=10),
+             bs.RandomRBF_ARD(Xdim=d, nbases=10),
+             bs.FastFood(Xdim=d, nbases=10),
+             ]
+
+    hypers = [None,
+              None,
+              1.,
+              1.,
+              1.,
+              np.ones(d),
+              1.
+              ]
+
+    for b, h in zip(bases, hypers):
+        P = b(X, h) if h is not None else b(X)
+        dP = b.grad(X, h) if h is not None else b.grad(X)
+
+        assert P.shape[0] == N
+        assert dP.shape[0] == N if not isinstance(dP, list) else dP == []
+        assert P.ndim == 2
+
+    bcat = reduce(add, bases)
+    hyps = [h for h in hypers if h is not None]
+    P = bcat(X, *hyps)
+    dP = bcat.grad(X, *hyps)
+
+    assert P.shape[0] == N
+    assert P.ndim == 2
+    for dp in dP:
+        assert dp.shape[0] == N if not isinstance(dp, list) else dp == []

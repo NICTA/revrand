@@ -8,11 +8,12 @@ from __future__ import division
 import sys
 import inspect
 import numpy as np
-from scipy.linalg import norm, hadamard
+from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
 from ..optimize import Positive
+from ..linalg import hadamard
 
 # TODO:
 # - Remove the need to bases to know their params bounds, see #54 and #55
