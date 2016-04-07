@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-          ftol=1e-6, maxit=1000, verbose=True):
+          tol=1e-6, maxit=1000, verbose=True):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
@@ -51,7 +51,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             approximate posterior covariance with diagional matrix.
         verbose: bool, optional
             log learning status.
-        ftol: float, optional
+        tol: float, optional
             optimiser function tolerance convergence criterion.
         maxit: int, optional
             maximum number of iterations for the optimiser.
@@ -158,7 +158,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     bounds = append_or_extend([Positive(), Positive()], basis.bounds)
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
-               bounds=bounds, ftol=ftol, maxiter=maxit)
+               bounds=bounds, ftol=tol, maxiter=maxit)
     (var, regulariser), bparams = res.x[:2], res.x[2:]
 
     if verbose:
@@ -170,7 +170,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
 
 def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
-              gtol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
+              tol=1e-3, passes=100, rate=0.9, eta=1e-6, batchsize=100,
               verbose=True):
     """
     Learn the parameters and hyperparameters of an approximate Bayesian linear
@@ -194,7 +194,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
         diagcov: bool, optional
             approximate posterior covariance with diagional matrix (enables
             many features to be used by avoiding a matrix inversion).
-        gtol: float,
+        tol: float,
             SGD tolerance convergence criterion.
         passes: int, optional
             Number of complete passes through the data before optimization
@@ -324,7 +324,7 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
     res = nsgd(ELBO, vparams, Data=np.hstack((y[:, np.newaxis], X)), rate=rate,
-               eta=eta, bounds=bounds, gtol=gtol, passes=passes,
+               eta=eta, bounds=bounds, gtol=tol, passes=passes,
                batchsize=batchsize, eval_obj=True)
 
     (m, S, var, regulariser), bparams = res.x[:4], res.x[4:]

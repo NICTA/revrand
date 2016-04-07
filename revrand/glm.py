@@ -25,9 +25,9 @@ from .optimize import minimize, sgd, structured_sgd, structured_minimizer, \
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
-          use_sgd=True, maxit=1000, tol=1e-7, batchsize=100, rate=0.9,
-          eta=1e-5, verbose=True):
+def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
+          postcomp=10, use_sgd=True, maxit=1000, tol=1e-7, batchsize=100,
+          rate=0.9, eta=1e-5, verbose=True):
     """
     Learn the parameters of a Bayesian generalised linear model (GLM).
 
@@ -50,7 +50,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
             A basis object, see the basis_functions module.
         bparams: sequence
             A sequence of parameters of the basis object.
-        reg: float, optional
+        regulariser: float, optional
             weight regulariser (variance) initial value.
         postcomp: int, optional
             Number of diagonal Gaussian components to use to approximate the
@@ -223,7 +223,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
               likelihood.bounds]
     append_or_extend(bounds, basis.bounds)
 
-    vparams = [m, C, reg, lparams] + bparams
+    vparams = [m, C, regulariser, lparams] + bparams
 
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
@@ -236,12 +236,12 @@ def learn(X, y, likelihood, lparams, basis, bparams, reg=1., postcomp=10,
                    eta=eta, bounds=bounds, gtol=tol, passes=maxit,
                    batchsize=batchsize, eval_obj=True)
 
-    (m, C, reg, lparams), bparams = res.x[:4], res.x[4:]
+    (m, C, regulariser, lparams), bparams = res.x[:4], res.x[4:]
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "
                  "bparams = {}, message: {}."
-                 .format(-res.fun, reg, lparams, bparams, res.message))
+                 .format(-res.fun, regulariser, lparams, bparams, res.message))
 
     return m, C, lparams, bparams
 
