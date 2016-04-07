@@ -20,7 +20,8 @@ from ..optimize import Positive
 
 if sys.version_info[0] < 3:
     def count_args(func):
-        return len(inspect.getargspec(func)[0])
+        nargs = len(inspect.getargspec(func)[0])
+        return nargs - 1 if inspect.ismethod(func) else nargs  # remove self
 else:
     def count_args(func):
         return len((inspect.signature(func)).parameters)
@@ -30,7 +31,7 @@ else:
 # Basis objects
 #
 
-class Basis:
+class Basis(object):
     """ The base Basis class. To make other basis classes, make sure they are
         subclasses of this class to enable concatenation and operation with the
         machine learning algorithms.
