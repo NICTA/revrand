@@ -306,15 +306,9 @@ class RadialBasis(Basis):
 
         return dPhi
 
-    def from_vector(self, X, vec):
-        return self(X, vec[0])
-
-    def grad_from_vector(self, X, vec):
-        return self.grad(X, vec[0])
 
 # TODO: Might be worth creating a mixin or base class for basis functions
 # that require locations and scales
-
 
 class SigmoidalBasis(Basis):
     """Sigmoidal Basis"""
