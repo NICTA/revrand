@@ -76,7 +76,7 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </table>
 <dl class="function">
 <dt id="revrand.regression.learn">
-<code class="descclassname">revrand.regression.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>ftol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.regression.learn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.regression.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1.0</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>tol=1e-06</em>, <em>maxit=1000</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.regression.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -91,7 +91,7 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 <li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>diagcov</strong> (<em>bool, optional</em>) &#8211; approximate posterior covariance with diagional matrix.</li>
 <li><strong>verbose</strong> (<em>bool, optional</em>) &#8211; log learning status.</li>
-<li><strong>ftol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
+<li><strong>tol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
 <li><strong>maxit</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
 </ul>
 </td>
@@ -118,7 +118,7 @@ hyperparameters).</p>
 
 <dl class="function">
 <dt id="revrand.regression.learn_sgd">
-<code class="descclassname">revrand.regression.</code><code class="descname">learn_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>gtol=0.001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.regression.learn_sgd" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.regression.</code><code class="descname">learn_sgd</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>bparams</em>, <em>var=1</em>, <em>regulariser=1.0</em>, <em>diagcov=False</em>, <em>tol=0.001</em>, <em>passes=100</em>, <em>rate=0.9</em>, <em>eta=1e-06</em>, <em>batchsize=100</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.regression.learn_sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters and hyperparameters of an approximate Bayesian linear
 regressor using stochastic gradient descent for large scale problems.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -134,7 +134,7 @@ regressor using stochastic gradient descent for large scale problems.</p>
 <li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>diagcov</strong> (<em>bool, optional</em>) &#8211; approximate posterior covariance with diagional matrix (enables
 many features to be used by avoiding a matrix inversion).</li>
-<li><strong>gtol</strong> (<em>float,</em>) &#8211; SGD tolerance convergence criterion.</li>
+<li><strong>tol</strong> (<em>float,</em>) &#8211; SGD tolerance convergence criterion.</li>
 <li><strong>passes</strong> (<em>int, optional</em>) &#8211; Number of complete passes through the data before optimization
 terminates (unless it converges first).</li>
 <li><strong>rate</strong> (<em>float, optional</em>) &#8211; SGD decay rate, must be [0, 1].</li>

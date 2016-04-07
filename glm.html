@@ -73,7 +73,7 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </table>
 <dl class="function">
 <dt id="revrand.glm.learn">
-<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>lparams</em>, <em>basis</em>, <em>bparams</em>, <em>reg=1.0</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>lparams</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1.0</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters of a Bayesian generalised linear model (GLM).</p>
 <p>The learning algorithm uses nonparametric variational inference <a class="footnote-reference" href="#id2" id="id3">[1]</a>, and
 optionally stochastic gradients.</p>
@@ -90,7 +90,7 @@ likelihoods.Gaussian object takes a variance parameter, so this
 should be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
 <li><strong>basis</strong> (<a class="reference internal" href="generated/revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of parameters of the basis object.</li>
-<li><strong>reg</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
+<li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>postcomp</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
 posterior distribution.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; Optimiser relative tolerance convergence criterion.</li>
