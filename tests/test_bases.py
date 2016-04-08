@@ -128,3 +128,18 @@ def test_bases(make_data):
     assert P.ndim == 2
     for dp in dP:
         assert dp.shape[0] == N if not isinstance(dp, list) else dp == []
+
+
+def test_slicing(make_data):
+
+    X, _, _ = make_data
+    N, d = X.shape
+
+    base = bs.LinearBasis(onescol=False, apply_ind=[0]) \
+        + bs.RandomRBF(Xdim=1, nbases=1, apply_ind=[1])
+
+    P = base(X, 1.)
+    assert P.shape == (N, 3)
+
+    dP = base.grad(X, 1.)
+    assert list(dP)[0].shape == (N, 3)

@@ -8,6 +8,7 @@ from __future__ import division
 import sys
 import inspect
 import numpy as np
+from functools import wraps
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
@@ -19,6 +20,12 @@ from ..linalg import hadamard
 # - Remove the need to bases to know their params bounds, see #54 and #55
 # - Implement basis function input slicing, see #53
 
+
+#
+# Module Helper Functions
+#
+
+# For basis concatenation functionality
 if sys.version_info[0] < 3:
     def count_args(func):
         nargs = len(inspect.getargspec(func)[0])
@@ -26,6 +33,49 @@ if sys.version_info[0] < 3:
 else:
     def count_args(func):
         return len((inspect.signature(func)).parameters)
+
+
+# For basis function slicing
+def slice_init(func):
+
+    @wraps(func)
+    def new_init(self, *args, **kwargs):
+
+        apply_ind = kwargs.pop('apply_ind', None)
+        if np.isscalar(apply_ind):
+            apply_ind = [apply_ind]
+
+        func(self, *args, **kwargs)
+        self.apply_ind = apply_ind
+
+    return new_init
+
+
+def slice_call(func):
+
+    @wraps(func)
+    def new_call(self, X, *args, **kwargs):
+
+        X = X if self.apply_ind is None else X[:, self.apply_ind]
+        return func(self, X, *args, **kwargs)
+
+    return new_call
+
+
+# Calculating function gradients w.r.t. structured basis functions
+def apply_grad(fun, grad):
+
+    if inspect.isgenerator(grad):
+        fgrad = [apply_grad(fun, g) for g in grad]
+        return fgrad if len(fgrad) != 1 else fgrad[0]
+    elif len(grad) == 0:
+        return []
+    elif grad.ndim == 2:
+        return fun(grad)
+    elif grad.ndim == 3:
+        return np.array([fun(grad[:, :, i]) for i in range(grad.shape[2])])
+    else:
+        raise ValueError("Only 2d or 3d gradients allowed!")
 
 
 #
@@ -45,6 +95,7 @@ class Basis(object):
 
     _bounds = []
 
+    @slice_init
     def __init__(self):
         """
         Construct this an instance of this class. This is also a good place
@@ -70,6 +121,7 @@ class Basis(object):
         """
         pass
 
+    @slice_call
     def __call__(self, X):
         """ Return the basis function applied to X, i.e. Phi(X, params), where
             params can also optionally be used and learned.
@@ -86,6 +138,7 @@ class Basis(object):
         """
         return X
 
+    @slice_call
     def grad(self, X):
         """ Return the gradient of the basis function w.r.t.\ each of the
             parameters.
@@ -158,6 +211,7 @@ class LinearBasis(Basis):
         onto X.
     """
 
+    @slice_init
     def __init__(self, onescol=False):
         """ Construct a linear basis object.
 
@@ -167,6 +221,7 @@ class LinearBasis(Basis):
 
         self.onescol = onescol
 
+    @slice_call
     def __call__(self, X):
         """ Return this basis applied to X.
 
@@ -187,6 +242,7 @@ class PolynomialBasis(Basis):
         Phi = [X^0, X^1, ..., X^p] where p is specified in the constructor.
     """
 
+    @slice_init
     def __init__(self, order, include_bias=True):
         """ Construct a polynomial basis object.
 
@@ -205,6 +261,7 @@ class PolynomialBasis(Basis):
 
         self.include_bias = include_bias
 
+    @slice_call
     def __call__(self, X):
         """ Return this basis applied to X.
 
@@ -247,6 +304,7 @@ class RadialBasis(Basis):
         uncertainty and for deaggregation tasks!
     """
 
+    @slice_init
     def __init__(self, centres, lenscale_bounds=Positive()):
         """
         Construct a radial basis function (RBF) object.
@@ -262,6 +320,7 @@ class RadialBasis(Basis):
         self.C = centres
         self.bounds = lenscale_bounds
 
+    @slice_call
     def __call__(self, X, lenscale):
         """
         Apply the RBF to X.
@@ -282,6 +341,7 @@ class RadialBasis(Basis):
 
         return np.exp(- cdist(X, self.C, 'sqeuclidean') / (2 * lenscale**2))
 
+    @slice_call
     def grad(self, X, lenscale):
         """
         Get the gradients of this basis w.r.t.\ the length scale.
@@ -313,12 +373,13 @@ class RadialBasis(Basis):
 class SigmoidalBasis(Basis):
     """Sigmoidal Basis"""
 
+    @slice_init
     def __init__(self, centres, lenscale_bounds=Positive()):
         """Construct a sigmoidal basis function object.
 
         Arguments:
             centres: array of shape (Dxd) where D is the number of centres
-                for the bases, and d is the dimensionality of X.
+                for the_call_poparg bases, and d is the dimensionality of X.
             lenscale_bounds: a tuple of bounds for the basis function length
                 scales.
         """
@@ -327,6 +388,7 @@ class SigmoidalBasis(Basis):
         self.C = centres
         self.bounds = lenscale_bounds
 
+    @slice_call
     def __call__(self, X, lenscale):
         r"""Apply the sigmoid basis function to X.
 
@@ -357,6 +419,7 @@ class SigmoidalBasis(Basis):
 
         return expit(cdist(X, self.C, 'seuclidean') / lenscale)
 
+    @slice_call
     def grad(self, X, lenscale):
         r"""Get the gradients of this basis w.r.t.\ the length scale.
 
@@ -401,6 +464,7 @@ class RandomRBF(RadialBasis):
     covariance function.
     """
 
+    @slice_init
     def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
         """
         Construct a random radial basis function (RBF) object.
@@ -417,6 +481,7 @@ class RandomRBF(RadialBasis):
         self.W = np.random.randn(self.d, self.n)
         self.bounds = lenscale_bounds
 
+    @slice_call
     def __call__(self, X, lenscale):
         """
         Apply the random RBF to X.
@@ -439,6 +504,7 @@ class RandomRBF(RadialBasis):
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
+    @slice_call
     def grad(self, X, lenscale):
         """
         Get the gradients of this basis w.r.t.\ the length scale.
@@ -476,6 +542,7 @@ class RandomRBF_ARD(RandomRBF):
         ARD-RBF covariance function.
     """
 
+    @slice_init
     def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
         """ Construct a random radial basis function (RBF) object, with ARD.
 
@@ -490,6 +557,7 @@ class RandomRBF_ARD(RandomRBF):
         lenscale_bounds.shape = Xdim
         self.bounds = lenscale_bounds
 
+    @slice_call
     def __call__(self, X, lenscales):
         """ Apply the random ARD-RBF to X.
 
@@ -511,6 +579,7 @@ class RandomRBF_ARD(RandomRBF):
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
+    @slice_call
     def grad(self, X, lenscales):
         """ Get the gradients of this basis w.r.t.\ the length scales.
 
@@ -557,6 +626,7 @@ class FastFood(RandomRBF):
     covariance function.
     """
 
+    @slice_init
     def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
         """
         Construct a random radial basis function (RBF) object.
@@ -585,6 +655,7 @@ class FastFood(RandomRBF):
         results = [self.__sample_params() for i in range(self.k)]
         self.B, self.G, self.PI, self.S = tuple(zip(*results))
 
+    @slice_call
     def __call__(self, X, lenscale):
         """
         Apply the Fast Food RBF basis to X.
@@ -607,6 +678,7 @@ class FastFood(RandomRBF):
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
         return Phi
 
+    @slice_call
     def grad(self, X, lenscale):
         """
         Get the gradients of this basis w.r.t.\ the length scale.
@@ -655,25 +727,6 @@ class FastFood(RandomRBF):
                       * np.sqrt(self.d2))
 
         return np.hstack(VX)
-
-
-#
-# Basis helper functions
-#
-
-def apply_grad(fun, grad):
-
-    if inspect.isgenerator(grad):
-        fgrad = [apply_grad(fun, g) for g in grad]
-        return fgrad if len(fgrad) != 1 else fgrad[0]
-    elif len(grad) == 0:
-        return []
-    elif grad.ndim == 2:
-        return fun(grad)
-    elif grad.ndim == 3:
-        return np.array([fun(grad[:, :, i]) for i in range(grad.shape[2])])
-    else:
-        raise ValueError("Only 2d or 3d gradients allowed!")
 
 
 #

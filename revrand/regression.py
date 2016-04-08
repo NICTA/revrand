@@ -150,9 +150,6 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
 
-        # if len(_theta) > 0:
-        #     import IPython; IPython.embed()
-
         return -ELBO, append_or_extend([-dvar, -dlambda], dtheta)
 
     bounds = append_or_extend([Positive(), Positive()], basis.bounds)
