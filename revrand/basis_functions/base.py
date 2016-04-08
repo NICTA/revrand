@@ -18,7 +18,6 @@ from ..linalg import hadamard
 
 # TODO:
 # - Remove the need to bases to know their params bounds, see #54 and #55
-# - Implement basis function input slicing, see #53
 
 
 #
