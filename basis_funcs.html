@@ -71,28 +71,37 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.html#module-revrand.basis_functions.base" title="revrand.basis_functions.base"><code class="xref py py-obj docutils literal"><span class="pre">base</span></code></a></td>
 <td>Various basis function objects specialised for parameter learning.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><code class="xref py py-obj docutils literal"><span class="pre">base.Basis</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.slice_init.html#revrand.basis_functions.base.slice_init" title="revrand.basis_functions.base.slice_init"><code class="xref py py-obj docutils literal"><span class="pre">base.slice_init</span></code></a>(func)</td>
+<td>Decorator for adding partial application functionality to a basis object.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.slice_call.html#revrand.basis_functions.base.slice_call" title="revrand.basis_functions.base.slice_call"><code class="xref py py-obj docutils literal"><span class="pre">base.slice_call</span></code></a>(func,&nbsp;self,&nbsp;X,&nbsp;*vargs,&nbsp;**kwargs)</td>
+<td>Decorator for implementing partial application.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.apply_grad.html#revrand.basis_functions.base.apply_grad" title="revrand.basis_functions.base.apply_grad"><code class="xref py py-obj docutils literal"><span class="pre">base.apply_grad</span></code></a>(fun,&nbsp;grad)</td>
+<td>Apply a function that takes a gradient matrix to a sequence of 2 or 3 dimensional gradients.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><code class="xref py py-obj docutils literal"><span class="pre">base.Basis</span></code></a>()</td>
 <td>The base Basis class.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.LinearBasis.html#revrand.basis_functions.base.LinearBasis" title="revrand.basis_functions.base.LinearBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.LinearBasis</span></code></a>([onescol])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.LinearBasis.html#revrand.basis_functions.base.LinearBasis" title="revrand.basis_functions.base.LinearBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.LinearBasis</span></code></a>([onescol])</td>
 <td>Linear basis class, basically this just prepending a columns of ones onto X.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.PolynomialBasis.html#revrand.basis_functions.base.PolynomialBasis" title="revrand.basis_functions.base.PolynomialBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.PolynomialBasis</span></code></a>(order[,&nbsp;include_bias])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.PolynomialBasis.html#revrand.basis_functions.base.PolynomialBasis" title="revrand.basis_functions.base.PolynomialBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.PolynomialBasis</span></code></a>(order[,&nbsp;include_bias])</td>
 <td>Polynomial basis class, this essentially creates the concatenation, Phi = [X^0, X^1, ..., X^p] where p is specified in the constructor.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.RadialBasis.html#revrand.basis_functions.base.RadialBasis" title="revrand.basis_functions.base.RadialBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.RadialBasis</span></code></a>(centres[,&nbsp;lenscale_bounds,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.RadialBasis.html#revrand.basis_functions.base.RadialBasis" title="revrand.basis_functions.base.RadialBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.RadialBasis</span></code></a>(centres[,&nbsp;lenscale_bounds,&nbsp;...])</td>
 <td>Radial basis class.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.RandomRBF.html#revrand.basis_functions.base.RandomRBF" title="revrand.basis_functions.base.RandomRBF"><code class="xref py py-obj docutils literal"><span class="pre">base.RandomRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.RandomRBF.html#revrand.basis_functions.base.RandomRBF" title="revrand.basis_functions.base.RandomRBF"><code class="xref py py-obj docutils literal"><span class="pre">base.RandomRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;...])</td>
 <td>Random RBF Basis, otherwise known as Random Kitchen Sinks.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.RandomRBF_ARD.html#revrand.basis_functions.base.RandomRBF_ARD" title="revrand.basis_functions.base.RandomRBF_ARD"><code class="xref py py-obj docutils literal"><span class="pre">base.RandomRBF_ARD</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.RandomRBF_ARD.html#revrand.basis_functions.base.RandomRBF_ARD" title="revrand.basis_functions.base.RandomRBF_ARD"><code class="xref py py-obj docutils literal"><span class="pre">base.RandomRBF_ARD</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;...])</td>
 <td>Random RBF Basis, otherwise known as Random Kitchen Sinks, with automatic relevance determination (ARD).</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.FastFood.html#revrand.basis_functions.base.FastFood" title="revrand.basis_functions.base.FastFood"><code class="xref py py-obj docutils literal"><span class="pre">base.FastFood</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.FastFood.html#revrand.basis_functions.base.FastFood" title="revrand.basis_functions.base.FastFood"><code class="xref py py-obj docutils literal"><span class="pre">base.FastFood</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;...])</td>
 <td>Fast Food basis function, which is an approximation of the random radial basis function for a large number of bases.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.base.SigmoidalBasis.html#revrand.basis_functions.base.SigmoidalBasis" title="revrand.basis_functions.base.SigmoidalBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.SigmoidalBasis</span></code></a>(centres[,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.base.SigmoidalBasis.html#revrand.basis_functions.base.SigmoidalBasis" title="revrand.basis_functions.base.SigmoidalBasis"><code class="xref py py-obj docutils literal"><span class="pre">base.SigmoidalBasis</span></code></a>(centres[,&nbsp;...])</td>
 <td>Sigmoidal Basis</td>
 </tr>
 </tbody>

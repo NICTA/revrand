@@ -14,9 +14,7 @@ revrand.basis_functions.base.FastFood
    .. autosummary::
    
       ~FastFood.__init__
-      ~FastFood.from_vector
       ~FastFood.grad
-      ~FastFood.grad_from_vector
    
    
 

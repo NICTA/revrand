@@ -1,0 +1,6 @@
+revrand.basis_functions.base.slice_call
+=======================================
+
+.. currentmodule:: revrand.basis_functions.base
+
+.. autofunction:: slice_call

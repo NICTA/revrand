@@ -26,7 +26,7 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="revrand.basis_functions.base.Basis" href="revrand.basis_functions.base.Basis.html" />
+    <link rel="next" title="revrand.basis_functions.base.slice_init" href="revrand.basis_functions.base.slice_init.html" />
     <link rel="prev" title="Basis Functions" href="../basis_funcs.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,7 +47,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.Basis.html" title="revrand.basis_functions.base.Basis"
+          <a href="revrand.basis_functions.base.slice_init.html" title="revrand.basis_functions.base.slice_init"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../basis_funcs.html" title="Basis Functions"
@@ -73,20 +73,32 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">apply_grad</span></code>(fun,&nbsp;grad)</td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.apply_grad.html#revrand.basis_functions.base.apply_grad" title="revrand.basis_functions.base.apply_grad"><code class="xref py py-obj docutils literal"><span class="pre">apply_grad</span></code></a>(fun,&nbsp;grad)</td>
+<td>Apply a function that takes a gradient matrix to a sequence of 2 or 3 dimensional gradients.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">cdist</span></code>(XA,&nbsp;XB[,&nbsp;metric,&nbsp;p,&nbsp;V,&nbsp;VI,&nbsp;w])</td>
 <td>Computes distance between each pair of the two collections of inputs.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">count_args</span></code>(func)</td>
-<td></td>
+<td>Count the number of arguments in a function/method.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">hadamard</span></code>(Y[,&nbsp;ordering])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">decorator</span></code>(caller[,&nbsp;_func])</td>
+<td>decorator(caller) converts a caller function into a decorator</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">hadamard</span></code>(Y[,&nbsp;ordering])</td>
 <td><em>Very fast</em> Hadamard transform for single vector at a time</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">norm</span></code>(a[,&nbsp;ord,&nbsp;axis,&nbsp;keepdims])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">norm</span></code>(a[,&nbsp;ord,&nbsp;axis,&nbsp;keepdims])</td>
 <td>Matrix or vector norm.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.basis_functions.base.slice_call.html#revrand.basis_functions.base.slice_call" title="revrand.basis_functions.base.slice_call"><code class="xref py py-obj docutils literal"><span class="pre">slice_call</span></code></a>(func,&nbsp;self,&nbsp;X,&nbsp;*vargs,&nbsp;**kwargs)</td>
+<td>Decorator for implementing partial application.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="revrand.basis_functions.base.slice_init.html#revrand.basis_functions.base.slice_init" title="revrand.basis_functions.base.slice_init"><code class="xref py py-obj docutils literal"><span class="pre">slice_init</span></code></a>(func)</td>
+<td>Decorator for adding partial application functionality to a basis object.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">wraps</span></code>(wrapped[,&nbsp;assigned,&nbsp;updated])</td>
+<td>Decorator factory to apply update_wrapper() to a wrapper function</td>
 </tr>
 </tbody>
 </table>
@@ -141,8 +153,8 @@
   <p class="topless"><a href="../basis_funcs.html"
                         title="previous chapter">Basis Functions</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.base.Basis.html"
-                        title="next chapter">revrand.basis_functions.base.Basis</a></p>
+  <p class="topless"><a href="revrand.basis_functions.base.slice_init.html"
+                        title="next chapter">revrand.basis_functions.base.slice_init</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -167,7 +179,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.Basis.html" title="revrand.basis_functions.base.Basis"
+          <a href="revrand.basis_functions.base.slice_init.html" title="revrand.basis_functions.base.slice_init"
              >next</a> |</li>
         <li class="right" >
           <a href="../basis_funcs.html" title="Basis Functions"

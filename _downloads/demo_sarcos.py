@@ -59,7 +59,7 @@ y_train_sub = y_train[train_ind]
 #
 
 base = basis_functions.RandomRBF_ARD(nbases, D)
-lenARD = lenscale * np.ones(D)
+lenARD = [lenscale * np.ones(D)]
 
 if useSGD:
     log.info("Using SGD regressor")

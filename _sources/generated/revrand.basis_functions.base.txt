@@ -12,8 +12,12 @@ revrand.basis_functions.base
       apply_grad
       cdist
       count_args
+      decorator
       hadamard
       norm
+      slice_call
+      slice_init
+      wraps
    
    
 

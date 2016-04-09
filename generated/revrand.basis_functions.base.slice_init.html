@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.base.FastFood &mdash; revrand 0.1 documentation</title>
+    <title>revrand.basis_functions.base.slice_init &mdash; revrand 0.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="revrand.basis_functions.base.SigmoidalBasis" href="revrand.basis_functions.base.SigmoidalBasis.html" />
-    <link rel="prev" title="revrand.basis_functions.base.RandomRBF_ARD" href="revrand.basis_functions.base.RandomRBF_ARD.html" />
+    <link rel="next" title="revrand.basis_functions.base.slice_call" href="revrand.basis_functions.base.slice_call.html" />
+    <link rel="prev" title="revrand.basis_functions.base" href="revrand.basis_functions.base.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -47,10 +47,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
+          <a href="revrand.basis_functions.base.slice_call.html" title="revrand.basis_functions.base.slice_call"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.RandomRBF_ARD.html" title="revrand.basis_functions.base.RandomRBF_ARD"
+          <a href="revrand.basis_functions.base.html" title="revrand.basis_functions.base"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
@@ -62,64 +62,21 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="revrand-basis-functions-base-fastfood">
-<h1>revrand.basis_functions.base.FastFood<a class="headerlink" href="#revrand-basis-functions-base-fastfood" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="revrand.basis_functions.base.FastFood">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.base.</code><code class="descname">FastFood</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.base.FastFood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fast Food basis function, which is an approximation of the random
-radial basis function for a large number of bases.</p>
-<p>This will make a linear regression model approximate a GP with an RBF
-covariance function.</p>
-<dl class="method">
-<dt id="revrand.basis_functions.base.FastFood.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.base.FastFood.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct a random radial basis function (RBF) object.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>nbases</strong> &#8211; a scalar for how many random bases to create
-approximately, this actually will be to the neareset larger
-two power.</li>
-<li><strong>Xdim</strong> &#8211; the dimension (d) of the observations.
-lenscale_bounds: a tuple of bounds for the RBFs&#8217; length
-scales.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.base.FastFood.__init__" title="revrand.basis_functions.base.FastFood.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_bounds,&nbsp;upper])</td>
-<td>Construct a random radial basis function (RBF) object.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X,&nbsp;lenscale)</td>
-<td>Get the gradients of this basis w.r.t.the length scale.</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">bounds</span></code></td>
-<td>Get this objects parameter bounds.</td>
-</tr>
-</tbody>
-</table>
+  <div class="section" id="revrand-basis-functions-base-slice-init">
+<h1>revrand.basis_functions.base.slice_init<a class="headerlink" href="#revrand-basis-functions-base-slice-init" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="revrand.basis_functions.base.slice_init">
+<code class="descclassname">revrand.basis_functions.base.</code><code class="descname">slice_init</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.base.slice_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for adding partial application functionality to a basis object.</p>
+<p>This will add an &#8220;apply_ind&#8221; argument to a basis object initialiser that
+can be used to apply the basis function to only the dimensions specified in
+apply_ind. E.g.,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">apply_ind</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(100, 10)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -131,11 +88,11 @@ scales.</li>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.base.RandomRBF_ARD.html"
-                        title="previous chapter">revrand.basis_functions.base.RandomRBF_ARD</a></p>
+  <p class="topless"><a href="revrand.basis_functions.base.html"
+                        title="previous chapter">revrand.basis_functions.base</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.base.SigmoidalBasis.html"
-                        title="next chapter">revrand.basis_functions.base.SigmoidalBasis</a></p>
+  <p class="topless"><a href="revrand.basis_functions.base.slice_call.html"
+                        title="next chapter">revrand.basis_functions.base.slice_call</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -160,10 +117,10 @@ scales.</li>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.SigmoidalBasis.html" title="revrand.basis_functions.base.SigmoidalBasis"
+          <a href="revrand.basis_functions.base.slice_call.html" title="revrand.basis_functions.base.slice_call"
              >next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.base.RandomRBF_ARD.html" title="revrand.basis_functions.base.RandomRBF_ARD"
+          <a href="revrand.basis_functions.base.html" title="revrand.basis_functions.base"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 

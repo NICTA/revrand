@@ -14,9 +14,7 @@ revrand.basis_functions.base.RandomRBF
    .. autosummary::
    
       ~RandomRBF.__init__
-      ~RandomRBF.from_vector
       ~RandomRBF.grad
-      ~RandomRBF.grad_from_vector
    
    
 

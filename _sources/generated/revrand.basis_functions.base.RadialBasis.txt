@@ -14,9 +14,7 @@ revrand.basis_functions.base.RadialBasis
    .. autosummary::
    
       ~RadialBasis.__init__
-      ~RadialBasis.from_vector
       ~RadialBasis.grad
-      ~RadialBasis.grad_from_vector
    
    
 
