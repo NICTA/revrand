@@ -8,7 +8,8 @@ from __future__ import division
 import sys
 import inspect
 import numpy as np
-from functools import wraps
+from six import wraps
+from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
@@ -35,6 +36,7 @@ else:
 
 
 # For basis function slicing
+
 def slice_init(func):
 
     @wraps(func)
@@ -50,15 +52,11 @@ def slice_init(func):
     return new_init
 
 
-def slice_call(func):
+@decorator  # This needs to be signature preseving for concatenation
+def slice_call(func, self, X, *vargs, **kwargs):
 
-    @wraps(func)
-    def new_call(self, X, *args, **kwargs):
-
-        X = X if self.apply_ind is None else X[:, self.apply_ind]
-        return func(self, X, *args, **kwargs)
-
-    return new_call
+    X = X if self.apply_ind is None else X[:, self.apply_ind]
+    return func(self, X, *vargs, **kwargs)
 
 
 # Calculating function gradients w.r.t. structured basis functions
@@ -743,6 +741,8 @@ class BasisCat(object):
 
         Phi = []
         args = params
+
+        # import IPython; IPython.embed()
 
         for base in self.bases:
             phi, args = base._call_popargs(X, *args)

@@ -153,7 +153,7 @@ def hadamard(Y, ordering=True):
     # dot is a sum product over the last axis of a and the second-to-last of b.
     # Transpose - can specify axes, default transposes a[0] and a[1] hmm
     n_vectors, n_Y = Y.shape
-    matching = (n_vectors, 2, n_Y / 2)
+    matching = (n_vectors, 2, int(n_Y / 2))
     H = np.array([[1, 1], [1, -1]]) / 2.  # Julia uses 2 and not sqrt(2)?
     steps = int(log(n_Y) / log(2))
     assert(2**steps == n_Y)  # required

@@ -136,10 +136,11 @@ def test_slicing(make_data):
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False, apply_ind=[0]) \
-        + bs.RandomRBF(Xdim=1, nbases=1, apply_ind=[1])
+        + bs.RandomRBF(Xdim=1, nbases=1, apply_ind=[1]) \
+        + bs.RandomRBF_ARD(Xdim=d, nbases=3, apply_ind=[1, 0])
 
-    P = base(X, 1.)
-    assert P.shape == (N, 3)
+    P = base(X, 1., np.ones(d))
+    assert P.shape == (N, 9)
 
-    dP = base.grad(X, 1.)
-    assert list(dP)[0].shape == (N, 3)
+    dP = base.grad(X, 1., np.ones(d))
+    assert list(dP)[0].shape == (N, 9)

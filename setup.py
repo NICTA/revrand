@@ -26,7 +26,7 @@ class PyTest(TestCommand, object):
 
 setup(
     name='revrand',
-    version='0.1rc1',
+    version='0.1',
     description='A library of scalable Bayesian generalised linear models with'
                 ' fancy features',
     author='Daniel Steinberg',
@@ -41,6 +41,7 @@ setup(
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',
         'six >= 1.9.0',
+        'decorator >= 4.0.9'
         # NLopt >= 2.4.2
     ],
     extras_require={
