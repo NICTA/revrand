@@ -137,8 +137,9 @@ def main():
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
     params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
-                           reg=reg, use_sgd=True, rate=rate, postcomp=10,
-                           eta=eta, batchsize=batchsize, maxit=passes)
+                           regulariser=reg, use_sgd=True, rate=rate,
+                           postcomp=10, eta=eta, batchsize=batchsize,
+                           maxit=passes)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]

@@ -7,6 +7,9 @@ Basis Functions
    :toctree: generated/
 
    base
+   base.slice_init
+   base.slice_call
+   base.apply_grad
    base.Basis
    base.LinearBasis
    base.PolynomialBasis

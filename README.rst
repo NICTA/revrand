@@ -40,7 +40,7 @@ or install with ``pip``:
 
 .. code:: console
 
-   $ pip install git+https://github.com/nicta/revrand.git@release
+   $ pip install git+https://github.com/nicta/revrand.git
 
 Refer to `docs/installation.rst <docs/installation.rst>`_ for advanced 
 installation instructions.
@@ -157,6 +157,54 @@ associated with the prediction.
 This script will output something like the following,
 
 .. image:: glm_sgd_demo.png
+
+
+Feature Composition Framework
+.............................
+
+We have implemented an easy to use and extensible feature-building framework
+within revrand. You have already seen the basics demonstrated in the above
+examples, i.e. concatenation of basis functions,
+
+.. code:: python
+
+    >>> X = np.random.randn(100, 5)
+    >>> N, d = X.shape
+    >>> base = LinearBasis(onescol=True) + RandomRBF(Xdim=d, nbases=100)
+    >>> lenscale = 1.
+    >>> Phi = base(X, lenscale)
+    >>> Phi.shape
+    (100, 206)
+
+There are a few things at work in this example:
+ - Both `LinearBasis` and `RandomRBF` are applied to all of `X`, and the
+   result is concatenated.
+ - `LinearBasis` has pre-pended a column of ones onto `X` so a subsequent
+   algorithm can learn a "bias" term.
+ - `RandomRBF` is actually approximating a radial basis *kernel* function [3]_
+   so we can approximate how a kernel machine functions with a basis function!
+   This also outputs 2*:code:`nbases` number of basis functions.
+ - Hence the resulting basis function has a shape of
+   :code:`(N, d + 1 + 2 * nbases)`.
+
+We call also use *partial application* of basis functions, e.g.
+
+.. code:: python
+
+    >>> base = LinearBasis(onescol=True, apply_ind=slice(0, 2)) \
+        + RandomRBF(Xdim=d, nbases=100, apply_ind=slice(2, 5))
+    >>> Phi = base(X, lenscale)
+    >>> Phi.shape
+    (100, 203)
+
+Now the basis functions are applied to seperate dimensions of the input, `X`.
+That is, `LinearBasis` takes dimensions 0 and 1, and `RandomRBF` takes the
+rest, and again the results are concatenated.
+
+Finally, if we use these basis functions with any of the algorithms in this
+revrand, *the parameters of the basis functions are learned* as well! So
+really in the above example :code:`lenscale = 1.` is just an initial value for
+the kernel function length-scale!
 
 
 Useful Links

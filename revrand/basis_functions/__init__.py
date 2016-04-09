@@ -3,8 +3,28 @@ The :mod:`revrand.basis_function` module implements basis functions
 and mechanisms for creating higher-order basis functions.
 """
 
-# TODO: Make this specific
-from .base import *
+from .base import (slice_init,
+                   slice_call,
+                   apply_grad,
+                   Basis,
+                   LinearBasis,
+                   PolynomialBasis,
+                   RadialBasis,
+                   SigmoidalBasis,
+                   RandomRBF,
+                   RandomRBF_ARD,
+                   FastFood
+                   )
 
-# TODO: Fill out
-__all__ = []
+__all__ = ['slice_init',
+           'slice_call',
+           'apply_grad',
+           'Basis',
+           'LinearBasis',
+           'PolynomialBasis',
+           'RadialBasis',
+           'SigmoidalBasis',
+           'RandomRBF',
+           'RandomRBF_ARD',
+           'FastFood',
+           ]

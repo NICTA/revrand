@@ -92,8 +92,8 @@ bparams = [lenscale]
 #
 
 params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
-                   postcomp=postcomp, reg=reg, use_sgd=use_sgd, rate=rate,
-                   eta=eta, batchsize=batchsize, maxit=passes)
+                   postcomp=postcomp, regulariser=reg, use_sgd=use_sgd,
+                   rate=rate, eta=eta, batchsize=batchsize, maxit=passes)
 Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
 plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
 y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)

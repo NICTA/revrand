@@ -28,16 +28,54 @@ from ..linalg import hadamard
 # For basis concatenation functionality
 if sys.version_info[0] < 3:
     def count_args(func):
+        """
+        Count the number of arguments in a function/method.
+
+        Parameters
+        ----------
+        func: callable
+            a function or class method
+
+        Returns
+        -------
+        int:
+            the number of arguments, excluding self
+        """
         nargs = len(inspect.getargspec(func)[0])
         return nargs - 1 if inspect.ismethod(func) else nargs  # remove self
 else:
     def count_args(func):
+        """
+        Count the number of arguments in a function/method.
+
+        Parameters
+        ----------
+        func: callable
+            a function or class method
+
+        Returns
+        -------
+        int:
+            the number of arguments, excluding self
+        """
         return len((inspect.signature(func)).parameters)
 
 
 # For basis function slicing
 
 def slice_init(func):
+    """
+    Decorator for adding partial application functionality to a basis object.
+
+    This will add an "apply_ind" argument to a basis object initialiser that
+    can be used to apply the basis function to only the dimensions specified in
+    apply_ind. E.g.,
+
+    >>> X = np.ones((100, 20))
+    >>> base = LinearBasis(onescol=False, apply_ind=slice(0, 10))
+    >>> base(X).shape
+    (100, 10)
+    """
 
     @wraps(func)
     def new_init(self, *args, **kwargs):
@@ -54,6 +92,12 @@ def slice_init(func):
 
 @decorator  # This needs to be signature preseving for concatenation
 def slice_call(func, self, X, *vargs, **kwargs):
+    """
+    Decorator for implementing partial application.
+
+    This must decorate the :code:`__call__` and :code:`grad` methods of basis
+    objects if the :code:`slice_init` decorator was used.
+    """
 
     X = X if self.apply_ind is None else X[:, self.apply_ind]
     return func(self, X, *vargs, **kwargs)
@@ -61,6 +105,37 @@ def slice_call(func, self, X, *vargs, **kwargs):
 
 # Calculating function gradients w.r.t. structured basis functions
 def apply_grad(fun, grad):
+    """
+    Apply a function that takes a gradient matrix to a sequence of 2 or 3
+    dimensional gradients.
+
+    This is partucularly useful when the gradient of a basis concatenation
+    object is quite complex, eg.
+
+    >>> X = np.random.randn(100, 3)
+    >>> y = np.random.randn(100)
+    >>> N, d = X.shape
+    >>> base = RandomRBF(Xdim=d, nbases=5) + RandomRBF_ARD(Xdim=d, nbases=5)
+    >>> Phi = base(X, 1., np.ones(d))
+    >>> dffun = lambda dPhi: y.dot(Phi).dot(dPhi.T).dot(y)
+    >>> df = apply_grad(dffun, base.grad(X, 1., np.ones(d)))
+    >>> np.isscalar(df[0])
+    True
+    >>> df[1].shape
+    (3,)
+
+    Parameters
+    ----------
+    fun: callable
+        the function too apply to the (2d) gradient.
+    grad: ndarray or generator
+        the gradient of the basis function (output of base.grad).
+
+    Returns
+    -------
+    scalar, ndarray or sequence:
+        the result of applying fun(grad) for a structured grad.
+    """
 
     if inspect.isgenerator(grad):
         fgrad = [apply_grad(fun, g) for g in grad]
