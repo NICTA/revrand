@@ -176,16 +176,16 @@ examples, i.e. concatenation of basis functions,
     >>> Phi.shape
     (100, 206)
 
-
 There are a few things at work in this example:
+
  - Both `LinearBasis` and `RandomRBF` are applied to all of `X`, and the
    result is concatenated.
  - `LinearBasis` has pre-pended a column of ones onto `X` so a subsequent
    algorithm can learn a "bias" term.
  - `RandomRBF` is actually approximating a radial basis *kernel* function [3]_
    so we can approximate how a kernel machine functions with a basis function!
-   This also outputs 2*`nbases` number of basis functions.
- - Hence the resulting basis function has a shape of `(N, d + 1 + 2 * nbases)`.
+   This also outputs `2 * nbases` number of basis functions.
+ - Hence the resulting basis function has a shape of `(N, d + 1 + 2 * nbases)`
 
 We call also use *partial application* of basis functions, e.g.
 
