@@ -188,7 +188,7 @@ There are a few things at work in this example:
 - Hence the resulting basis function has a shape of 
   ``(N, d + 1 + 2 * nbases)``.
 
-We call also use *partial application* of basis functions, e.g.
+We can also use *partial application* of basis functions, e.g.
 
 
 .. code:: python
