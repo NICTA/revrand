@@ -63,10 +63,6 @@ lenARD = [lenscale * np.ones(D)]
 
 if useSGD:
     log.info("Using SGD regressor")
-    # params = regression.learn_sgd(X_train, y_train, base, lenARD,
-    #                               rate=rate, var=noise**2, rank=rank,
-    #                               regulariser=regulariser, eta=eta,
-    #                               passes=passes, batchsize=batchsize)
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
     params = glm.learn(X_train, y_train, llhood, lparams, base, lenARD,
@@ -97,8 +93,6 @@ hyper_params = gp.learn(X_train_sub, y_train_sub, kdef, verbose=True,
 # Predict Revrand
 #
 
-# Ey, Vf, Vy = regression.predict(X_test, base, *params)
-# Sy = np.sqrt(Vy)
 Ey, Vf, _, _ = glm.predict_meanvar(X_test, llhood, base, *params)
 Vy = Vf + params[2][0]
 Sy = np.sqrt(Vy)
