@@ -61,7 +61,7 @@ Or,
 Bayesian Linear Regression Example
 ..................................
 
-Here is a very quick example of how to use Bayesian linear regression with SGD
+Here is a very quick example of how to use Bayesian linear regression with
 optimisation of the likelihood noise, regulariser and basis function
 parameters. Assuming we already have training noisy targets ``y``, inputs 
 ``X``, and some query inputs ``Xs`` (as well as the true noiseless function
@@ -72,7 +72,7 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
     import matplotlib.pyplot as pl
     import numpy as np
     from revrand.basis_functions import LinearBasis, RandomRBF
-    from revrand.regression import learn_sgd, predict
+    from revrand.regression import learn, predict
 
     ...
     
@@ -81,18 +81,18 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
     init_lenscale = 1.0
 
     # Learn regression parameters and predict
-    params = learn_sgd(X, y, basis, [init_lenscale])
-    Eys, Vfs, Vys = predict(Xs, basis, *params) 
+    params = regression.learn(X, y, basis, [init_lenscale])
+    Eys, Vfs, Vys = regression.predict(Xs, basis, *params) 
 
     # Training/Truth
     pl.plot(X, y, 'k.', label='Training')
     pl.plot(Xs, f, 'k-', label='Truth')
 
-    # SGD Regressor
+    # Plot Regressor
     Sys = np.sqrt(Vys)
-    pl.plot(Xs, Eys, 'r-', label='SGD Bayes linear reg.')
+    pl.plot(Xs, Eys, 'g-', label='Bayesian linear regression')
     pl.fill_between(Xs, Eys - 2 * Sys, Eys + 2 * Sys, facecolor='none',
-                    edgecolor='r', linestyle='--', label=None)
+                    edgecolor='g', linestyle='--', label=None)
 
     pl.legend()
 
@@ -104,7 +104,7 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
 
 This script will output something like the following,
 
-.. image:: blr_sgd_demo.png
+.. image:: blr_demo.png
 
 
 Bayesian Generalised Linear Model Example
@@ -141,7 +141,7 @@ associated with the prediction.
     pl.plot(X, y, 'k.', label='Training')
     pl.plot(Xs, f, 'k-', label='Truth')
 
-    # GLM SGD Regressor
+    # Plot GLM SGD Regressor
     pl.plot(Xs, Eys, 'b-', label='GLM mean.')
     pl.fill_between(Xs, y95n, y95x, facecolor='none',
                     edgecolor='b', linestyle='--', label=None)
@@ -156,7 +156,54 @@ associated with the prediction.
 
 This script will output something like the following,
 
+.. image:: glm_demo.png
+
+
+Large-scale Learning with Stochastic Gradients
+..............................................
+
+By default the GLM uses stochastic gradients to learn all of its
+parameters/hyperparameters and does not require any matrix inversion, and so it
+can be used to learn from large datasets with lots of features
+(regression.learn uses L-BFGS and requires a matrix inversion). We can also use
+the GLM to approximate and scale up regular Bayesian linear regression. For
+instance, if we modify the Bayesian linear regression example from before,
+
+.. code:: python
+
+    ...
+
+    from revrand import glm, likelihoods
+
+    ...
+
+    # Set up the likelihood of the GLM
+    llhood = likelihoods.Gaussian()
+    var = 1.
+
+    # Learn regression parameters and predict
+    params = glm.learn(X, y, llhood, [var], basis, [init_lenscale])
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base, *params)
+
+    ...
+
+    # Plot GLM SGD Regressor
+    Sy_g = np.sqrt(Vy_g)
+    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    pl.fill_between(Xs, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+                    edgecolor='m', linestyle='--', label=None)
+
+    ...
+
+This script will output something like the following,
+
 .. image:: glm_sgd_demo.png
+
+We can see the approximation from the GLM is pretty good - this is because it
+uses a mixture of diagonal Gaussians posterior (thereby avoiding a full matrix
+inversion) to approximate the full Gaussian posterior covariance over the
+weights. This also has the advantage of allowing the model to learn multi-modal
+posterior distributions when non-Gaussian likelihoods are required.
 
 
 Feature Composition Framework

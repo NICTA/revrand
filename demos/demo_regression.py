@@ -33,7 +33,6 @@ def main():
     passes = 1000
     batchsize = 100
     reg = 1
-    diagcov = False
 
     # np.random.seed(100)
 
@@ -116,16 +115,7 @@ def main():
     else:
         raise ValueError('Invalid basis!')
 
-    # Evidence lower-bound A la Carte learning
-    params_sgd = regression.learn_sgd(Xtrain, ytrain, base, hypers,
-                                      var=noise**2, rate=rate, eta=eta,
-                                      passes=passes, regulariser=reg,
-                                      diagcov=diagcov, batchsize=batchsize)
-    Ey_s, Vf_s, Vy_s = regression.predict(Xtest, base, *params_sgd)
-    Sy_s = np.sqrt(Vy_s)
-
-    params_elbo = regression.learn(Xtrain, ytrain, base, hypers,
-                                   diagcov=diagcov, var=noise**2,
+    params_elbo = regression.learn(Xtrain, ytrain, base, hypers, var=noise**2,
                                    regulariser=reg)
     Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
@@ -168,18 +158,14 @@ def main():
     # Evaluate LL and SMSE
     #
 
-    LL_sgd = mll(ftest, Ey_s, Vf_s)
     LL_elbo = mll(ftest, Ey_e, Vf_e)
     LL_gp = mll(ftest, Ey_gp, Vf_gp)
     LL_g = mll(ftest, Ey_g, Vy_g)
 
-    smse_sgd = smse(ftest, Ey_s)
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
     smse_glm = smse(ftest, Ey_g)
 
-    log.info("A la Carte (SGD), LL: {}, smse = {}, noise: {}, hypers: {}"
-             .format(LL_sgd, smse_sgd, np.sqrt(params_sgd[3]), params_sgd[2]))
     log.info("A la Carte, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
                      params_elbo[2]))
@@ -200,21 +186,16 @@ def main():
     pl.plot(Xpl_t, ytrain, 'k.', label='Training')
     pl.plot(Xpl_s, ftest, 'k-', label='Truth')
 
-    # SGD Regressor
-    pl.plot(Xpl_s, Ey_s, 'r-', label='SGD Bayes linear reg.')
-    pl.fill_between(Xpl_s, Ey_s - 2 * Sy_s, Ey_s + 2 * Sy_s, facecolor='none',
-                    edgecolor='r', linestyle='--', label=None)
-
     # ELBO Regressor
-    pl.plot(Xpl_s, Ey_e, 'g-', label='Bayes linear reg')
+    pl.plot(Xpl_s, Ey_e, 'g-', label='Bayesian linear regression')
     pl.fill_between(Xpl_s, Ey_e - 2 * Sy_e, Ey_e + 2 * Sy_e, facecolor='none',
                     edgecolor='g', linestyle='--', label=None)
 
     # GP
-    pl.plot(Xpl_s, Ey_gp, 'b-', label='GP')
-    pl.fill_between(Xpl_s, Ey_gp - 2 * Sy_gp, Ey_gp + 2 * Sy_gp,
-                    facecolor='none', edgecolor='b', linestyle='--',
-                    label=None)
+    # pl.plot(Xpl_s, Ey_gp, 'b-', label='GP')
+    # pl.fill_between(Xpl_s, Ey_gp - 2 * Sy_gp, Ey_gp + 2 * Sy_gp,
+    #                 facecolor='none', edgecolor='b', linestyle='--',
+    #                 label=None)
 
     # GLM Regressor
     pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
@@ -227,14 +208,6 @@ def main():
     pl.title('Regression demo')
     pl.ylabel('y')
     pl.xlabel('x')
-
-    # f, (ax1, ax2) = pl.subplots(2)
-    # ax1.imshow(params_sgd[1], interpolation='none')
-    # ax1.set_title('SGD')
-
-    # ax2.imshow(params_elbo[1], interpolation='none')
-    # ax2.set_title('ELBO')
-    # pl.colorbar
 
     pl.show()
 

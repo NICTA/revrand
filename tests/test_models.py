@@ -15,19 +15,9 @@ def test_regression(make_data):
 
     assert rsquare(Ey, y) > 0.9
 
-    params = regression.learn_sgd(X, y, basis, [], passes=1000)
-    Ey, Vf, Vy = regression.predict(X, basis, *params)
-
-    assert rsquare(Ey, y) > 0.9
-
     basis = LinearBasis(onescol=False) + RandomRBF(nbases=10, Xdim=X.shape[1])
 
     params = regression.learn(X, y, basis, [1.])
-    Ey, Vf, Vy = regression.predict(X, basis, *params)
-
-    assert rsquare(Ey, y) > 0.9
-
-    params = regression.learn_sgd(X, y, basis, [1.], passes=1000)
     Ey, Vf, Vy = regression.predict(X, basis, *params)
 
     assert rsquare(Ey, y) > 0.9
