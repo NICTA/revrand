@@ -243,7 +243,10 @@ def learn_sgd(X, y, basis, bparams, var=1, regulariser=1., diagcov=False,
     minit = np.random.randn(D)
     Sinit = gamma.rvs(2, scale=0.5, size=D)
     if not diagcov:
-        Sinit = np.diag(np.sqrt(Sinit))[np.tril_indices(D)]
+        Sinit = np.diag(np.sqrt(Sinit))
+        offdiag = np.random.randn(int(((D - 1) * D) / 2)) / 10
+        Sinit[np.tril_indices(D, -1)] = offdiag
+        Sinit = Sinit[np.tril_indices(D)]
 
     def ELBO(m, S, _var, _lambda, *args):
 

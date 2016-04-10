@@ -30,7 +30,7 @@ def main():
     order = 7  # For polynomial basis
     rate = 0.9
     eta = 1e-5
-    passes = 500
+    passes = 1000
     batchsize = 100
     reg = 1
     diagcov = False
