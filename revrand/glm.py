@@ -214,7 +214,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         return -L2, append_or_extend([-dm, -dC, -dreg, dlp], dbp)
 
     # Intialise m and C
-    m = np.random.randn(D, K) + np.arange(K) - K / 2
+    m = np.random.randn(D, K) + np.arange(K) / K - 0.5
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     bounds = [Bound(shape=m.shape),

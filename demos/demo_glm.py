@@ -28,10 +28,9 @@ lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
 rate = 0.9
 eta = 1e-5
-passes = 400
-batchsize = 100
+passes = 100
+batchsize = 10
 reg = 1
-postcomp = 5
 use_sgd = True
 
 N = 500
@@ -83,8 +82,6 @@ else:
 
 basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
 bparams = [lenscale]
-# basis = basis_functions.PolynomialBasis(order=4)
-# bparams = []
 
 
 #
@@ -92,8 +89,8 @@ bparams = [lenscale]
 #
 
 params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
-                   postcomp=postcomp, regulariser=reg, use_sgd=use_sgd,
-                   rate=rate, eta=eta, batchsize=batchsize, maxit=passes)
+                   regulariser=reg, use_sgd=use_sgd, rate=rate, eta=eta,
+                   batchsize=batchsize, maxit=passes)
 Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
 plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
 y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
@@ -115,8 +112,7 @@ Xpl_s = Xtest.flatten()
 pl.plot(Xpl_s, Ey, 'b-', label='GLM mean.')
 pl.fill_between(Xpl_s, Ey - Sy2, Ey + Sy2, facecolor='b', edgecolor='none',
                 label=None, alpha=0.3)
-# pl.fill_between(Xpl_s, Eyn, Eyx, facecolor='b', edgecolor='none', label=None,
-#                 alpha=0.3)
+
 pl.fill_between(Xpl_s, y95n, y95x, facecolor='none', edgecolor='b', label=None,
                 linestyle='--')
 

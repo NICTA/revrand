@@ -30,8 +30,8 @@ def main():
     order = 7  # For polynomial basis
     rate = 0.9
     eta = 1e-5
-    passes = 1000
-    batchsize = 100
+    passes = 100
+    batchsize = 10
     reg = 1
 
     # np.random.seed(100)
@@ -148,18 +148,15 @@ def main():
     regressor = gp.condition(Xtrain, ytrain, kdef, hyper_params)
     query = gp.query(regressor, Xtest)
     Ey_gp = gp.mean(query)
-    Vf_gp = gp.variance(query)
     Vy_gp = gp.variance(query, noise=True)
     Sy_gp = np.sqrt(Vy_gp)
-
-    # import ipdb; ipdb.set_trace()
 
     #
     # Evaluate LL and SMSE
     #
 
-    LL_elbo = mll(ftest, Ey_e, Vf_e)
-    LL_gp = mll(ftest, Ey_gp, Vf_gp)
+    LL_elbo = mll(ftest, Ey_e, Vy_e)
+    LL_gp = mll(ftest, Ey_gp, Vy_gp)
     LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_elbo = smse(ftest, Ey_e)
@@ -192,10 +189,10 @@ def main():
                     edgecolor='g', linestyle='--', label=None)
 
     # GP
-    # pl.plot(Xpl_s, Ey_gp, 'b-', label='GP')
-    # pl.fill_between(Xpl_s, Ey_gp - 2 * Sy_gp, Ey_gp + 2 * Sy_gp,
-    #                 facecolor='none', edgecolor='b', linestyle='--',
-    #                 label=None)
+    pl.plot(Xpl_s, Ey_gp, 'b-', label='GP')
+    pl.fill_between(Xpl_s, Ey_gp - 2 * Sy_gp, Ey_gp + 2 * Sy_gp,
+                    facecolor='none', edgecolor='b', linestyle='--',
+                    label=None)
 
     # GLM Regressor
     pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
