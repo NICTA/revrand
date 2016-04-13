@@ -6,7 +6,6 @@ and also supports custom optimization methods.
 
 from .sgd import sgd
 from .base import (Bound, Positive,
-                   minimize,
                    minimize_bounded_start,
                    structured_minimizer,
                    structured_sgd,
@@ -19,7 +18,6 @@ __all__ = [
     'Bound',
     'Positive',
     'sgd',
-    'minimize',
     'minimize_bounded_start',
     'structured_minimizer',
     'structured_sgd',

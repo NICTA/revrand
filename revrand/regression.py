@@ -15,12 +15,12 @@ from __future__ import division
 import numpy as np
 import logging
 
+from scipy.optimize import minimize
 from scipy.linalg import cho_solve
 
 from .utils import append_or_extend
 from .linalg import jitchol, cho_log_det
-from .optimize import minimize, Positive, structured_minimizer, \
-    logtrick_minimizer
+from .optimize import Positive, structured_minimizer, logtrick_minimizer
 from .basis_functions import apply_grad
 
 # Set up logging
@@ -154,7 +154,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     bounds = append_or_extend([Positive(), Positive()], basis.bounds)
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
-               bounds=bounds, ftol=tol, maxiter=maxit)
+               bounds=bounds, tol=tol, options={'maxiter': maxit})
     (var, regulariser), bparams = res.x[:2], res.x[2:]
 
     if verbose:

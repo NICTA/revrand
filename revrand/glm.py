@@ -13,13 +13,13 @@ import numpy as np
 import logging
 from multiprocessing import Pool
 from scipy.stats.distributions import gamma
-from scipy.optimize import brentq
+from scipy.optimize import brentq, minimize
 
 from .utils import append_or_extend
 from .basis_functions import apply_grad
 from .transforms import logsumexp
-from .optimize import minimize, sgd, structured_sgd, structured_minimizer, \
-    logtrick_sgd, logtrick_minimizer, Bound, Positive
+from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
+    logtrick_minimizer, Bound, Positive
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -227,7 +227,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
 
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
-        res = nmin(L2, vparams, ftol=tol, maxiter=maxit,
+        res = nmin(L2, vparams, tol=tol, options={'maxiter': maxit},
                    method='L-BFGS-B', jac=True, bounds=bounds,
                    args=(np.hstack((y[:, np.newaxis], X)),))
     else:
