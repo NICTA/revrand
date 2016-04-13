@@ -6,7 +6,8 @@ import numpy as np
 from . import linalg
 from . import dtypes
 # Now using the revrand optimize toolkit
-from revrand.optimize import minimize, structured_minimizer, Bound
+from scipy.optimize import minimize
+from revrand.optimize import structured_minimizer, Bound
 # import scipy.linalg as la
 import logging
 
@@ -46,7 +47,7 @@ def learn(X, y, kerneldef, opt_criterion=None, verbose=False, ftol=1e-8,
     # up to here
     nmin = structured_minimizer(minimize)
     result = nmin(criterion, theta0, backend='scipy',
-                  ftol=ftol, maxiter=maxiter, jac=False,
+                  tol=ftol, options={'maxiter': maxiter}, jac=False,
                   bounds=bounds, method='L-BFGS-B')
     print(result)
     return result.x
