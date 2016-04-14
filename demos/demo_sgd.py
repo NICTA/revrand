@@ -4,7 +4,8 @@
 
 import numpy as np
 import matplotlib.pyplot as pl
-from revrand.optimize import minimize, sgd
+from scipy.optimize import minimize
+from revrand.optimize import sgd, AdaDelta
 from revrand.basis_functions import RadialBasis
 
 
@@ -28,8 +29,8 @@ def sgd_demo():
     nQueries = 500
     passes = 200
     min_grad_norm = 0.01
-    rate = 0.9
-    eta = 1e-5
+    rho = 0.9
+    epsilon = 1e-5
 
     # Create dataset
     X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
@@ -52,8 +53,9 @@ def sgd_demo():
 
     # SGD for learning w
     w0 = np.random.randn(Phi.shape[1])
+    updater = AdaDelta(rho=rho, epsilon=epsilon)
     results = sgd(f, w0, train_dat, passes=passes, batchsize=batchsize,
-                  eval_obj=True, gtol=min_grad_norm, rate=rate, eta=eta)
+                  eval_obj=True, gtol=min_grad_norm, updater=updater)
     w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
 
     Ys_sgd = Phi_s.dot(w_sgd)

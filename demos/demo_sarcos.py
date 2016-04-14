@@ -24,8 +24,8 @@ regulariser = 1
 nbases = 300
 gp_Ntrain = 1024
 passes = 100
-rate = 0.9
-eta = 1e-6
+rho = 0.9
+epsilon = 1e-6
 batchsize = 100
 rank = 0
 
@@ -66,8 +66,9 @@ if useSGD:
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
     params = glm.learn(X_train, y_train, llhood, lparams, base, lenARD,
-                       postcomp=5, reg=regulariser, use_sgd=True, rate=rate,
-                       eta=eta, batchsize=batchsize, maxit=passes)
+                       postcomp=5, regulariser=regulariser, use_sgd=True,
+                       rho=rho, epsilon=epsilon, batchsize=batchsize,
+                       maxit=passes)
 else:
     log.info("Using full variational regressor")
     params = regression.learn(X_train, y_train, base, lenARD,
