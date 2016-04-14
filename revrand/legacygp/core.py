@@ -46,9 +46,8 @@ def learn(X, y, kerneldef, opt_criterion=None, verbose=False, ftol=1e-8,
 
     # up to here
     nmin = structured_minimizer(minimize)
-    result = nmin(criterion, theta0, backend='scipy',
-                  tol=ftol, options={'maxiter': maxiter}, jac=False,
-                  bounds=bounds, method='L-BFGS-B')
+    result = nmin(criterion, theta0, tol=ftol, options={'maxiter': maxiter},
+                  jac=False, bounds=bounds, method='L-BFGS-B')
     print(result)
     return result.x
 

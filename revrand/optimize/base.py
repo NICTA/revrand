@@ -617,7 +617,8 @@ def logtrick_minimizer(minimizer):
     """
 
     @wraps(minimizer)
-    def new_minimizer(fun, x0, jac=True, bounds=None, **minimizer_kwargs):
+    def new_minimizer(fun, x0, jac=True, bounds=None, *minimizer_args,
+                      **minimizer_kwargs):
 
         if bounds is None:
             return minimizer(fun, x0, jac=jac, bounds=bounds,
@@ -643,7 +644,7 @@ def logtrick_minimizer(minimizer):
 
         # Transform the final result
         result = minimizer(new_fun, logx(x0), jac=new_jac, bounds=bounds,
-                           **minimizer_kwargs)
+                           *minimizer_args, **minimizer_kwargs)
         result['x'] = expx(result['x'])
         return result
 
