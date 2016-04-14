@@ -19,7 +19,7 @@ from .utils import append_or_extend
 from .basis_functions import apply_grad
 from .transforms import logsumexp
 from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
-    logtrick_minimizer, Bound, Positive
+    logtrick_minimizer, Bound, Positive, AdaDelta
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 
 def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
           postcomp=10, use_sgd=True, maxit=1000, tol=1e-7, batchsize=100,
-          rate=0.9, eta=1e-5, verbose=True):
+          rho=0.9, epsilon=1e-5, verbose=True):
     """
     Learn the parameters of a Bayesian generalised linear model (GLM).
 
@@ -68,9 +68,9 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         batchsize: int, optional
             number of observations to use per SGD batch. Ignored if
             :code:`use_sgd=False`.
-        rate: float, optional
+        rho: float, optional
             SGD decay rate, must be [0, 1]. Ignored if :code:`use_sgd=False`.
-        eta: float, optional
+        epsilon: float, optional
             Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
         verbose: bool, optional
             log the learning status.
@@ -214,7 +214,8 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         return -L2, append_or_extend([-dm, -dC, -dreg, dlp], dbp)
 
     # Intialise m and C
-    m = np.random.randn(D, K) + np.arange(K) / K - 0.5
+    # m = np.random.randn(D, K) + np.arange(K) / K - 0.5
+    m = np.random.randn(D, K) + np.random.randn(K)
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     bounds = [Bound(shape=m.shape),
@@ -232,8 +233,9 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                    args=(np.hstack((y[:, np.newaxis], X)),))
     else:
         nsgd = structured_sgd(logtrick_sgd(sgd))
-        res = nsgd(L2, vparams, np.hstack((y[:, np.newaxis], X)), rate=rate,
-                   eta=eta, bounds=bounds, gtol=tol, passes=maxit,
+        updater = AdaDelta(rho=rho, epsilon=epsilon)
+        res = nsgd(L2, vparams, np.hstack((y[:, np.newaxis], X)),
+                   bounds=bounds, gtol=tol, passes=maxit, updater=updater,
                    batchsize=batchsize, eval_obj=True)
 
     (m, C, regulariser, lparams), bparams = res.x[:4], res.x[4:]

@@ -4,7 +4,7 @@ popular optimization libraries and tools, such as NLopt and ``scipy.optimize``,
 and also supports custom optimization methods.
 """
 
-from .sgd import sgd
+from .sgd import sgd, AdaDelta, AdaGrad, Momentum
 from .base import (Bound, Positive,
                    minimize_bounded_start,
                    structured_minimizer,
@@ -18,6 +18,9 @@ __all__ = [
     'Bound',
     'Positive',
     'sgd',
+    'AdaDelta',
+    'AdaGrad',
+    'Momentum',
     'minimize_bounded_start',
     'structured_minimizer',
     'structured_sgd',

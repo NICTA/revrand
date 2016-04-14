@@ -4,8 +4,8 @@ from __future__ import division
 import numpy as np
 from scipy.optimize import minimize
 
-from revrand.optimize import sgd, structured_minimizer, \
-    logtrick_minimizer, structured_sgd, logtrick_sgd, Bound, Positive
+from revrand.optimize import sgd, structured_minimizer, logtrick_minimizer, \
+    structured_sgd, logtrick_sgd, Bound, Positive, AdaDelta, Momentum, AdaGrad
 from revrand.utils import flatten
 
 
@@ -14,12 +14,15 @@ def test_unbounded(make_quadratic):
     a, b, c, data, _ = make_quadratic
     w0 = np.random.randn(3)
 
+    # import IPython; IPython.embed()
+
     assert_opt = lambda Ea, Eb, Ec: \
         np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
-    res = sgd(qobj, w0, data, eval_obj=True, gtol=1e-4, passes=1000, rate=0.95,
-              eta=1e-7)
-    assert_opt(*res['x'])
+    for updater in [AdaDelta, AdaGrad, Momentum]:
+        res = sgd(qobj, w0, data, eval_obj=True, gtol=1e-4, passes=1000,
+                  updater=updater())
+        assert_opt(*res['x'])
 
     res = minimize(qobj, w0, args=(data,), jac=True, method='L-BFGS-B')
     assert_opt(*res['x'])
@@ -41,7 +44,7 @@ def test_bounded(make_quadratic):
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
 
     res = sgd(qobj, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
-              passes=1000, rate=0.95, eta=1e-6)
+              passes=1000)
     Ea_sgd, Eb_sgd, Ec_sgd = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs),
@@ -65,7 +68,7 @@ def test_structured_params(make_quadratic):
 
     nsgd = structured_sgd(sgd)
     res = nsgd(qobj_struc, w0, data, bounds=None, eval_obj=True, gtol=1e-4,
-               passes=1000, rate=0.95, eta=1e-6)
+               passes=1000)
     assert_opt(*res.x)
 
     qf_struc = lambda w12, w3, data: q_struc(w12, w3, data, qfun)
@@ -90,7 +93,7 @@ def test_log_params(make_quadratic):
 
     nsgd = logtrick_sgd(sgd)
     res = nsgd(qobj, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
-               passes=1000, rate=0.95, eta=1e-6)
+               passes=1000)
     assert_opt(*res.x)
 
     nmin = logtrick_minimizer(minimize)
@@ -116,7 +119,7 @@ def test_logstruc_params(make_quadratic):
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
     res = nsgd(qobj_struc, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
-               passes=1000, rate=0.95, eta=1e-6)
+               passes=1000)
     assert_opt(*res.x)
 
     qf_struc = lambda w12, w3, data: q_struc(w12, w3, data, qfun)

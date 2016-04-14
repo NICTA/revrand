@@ -26,10 +26,10 @@ log = logging.getLogger(__name__)
 nbases = 100
 lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
-rate = 0.9
-eta = 1e-5
-passes = 100
-batchsize = 10
+rho = 0.9
+epsilon = 1e-5
+passes = 500
+batchsize = 100
 reg = 1
 use_sgd = True
 
@@ -89,7 +89,7 @@ bparams = [lenscale]
 #
 
 params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
-                   regulariser=reg, use_sgd=use_sgd, rate=rate, eta=eta,
+                   regulariser=reg, use_sgd=use_sgd, rho=rho, epsilon=epsilon,
                    batchsize=batchsize, maxit=passes)
 Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
 plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)

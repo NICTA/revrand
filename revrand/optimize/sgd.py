@@ -6,63 +6,247 @@ import numpy as np
 from scipy.optimize import OptimizeResult
 
 
-def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
-        eta=1e-5, gtol=1e-3, passes=10, eval_obj=False):
+#
+# SGD updater classes for different learning rate methods
+#
+
+class SGDUpdater:
+    """ Base class for SGD learning rate algorithms. """
+
+    def __init__(self):
+        self.name = 'SGD'
+
+    def __call__(self, x, grad):
+        """
+        Get a new parameter value
+
+        Parameters
+        ----------
+        x: ndarray
+            input parameters to optimise
+        grad: ndarray
+            gradient of x
+
+        Returns
+        -------
+        x_new: ndarray
+            the new value for x
+        """
+
+        return x - grad
+
+    def name(self):
+        return self.name
+
+
+class AdaDelta(SGDUpdater):
+    """ AdaDelta Algorithm """
+
+    def __init__(self, rho=0.95, epsilon=1e-6):
+        """
+        Construct an AdaDelta updater object.
+
+        Parameters
+        ----------
+            rho: float, optional
+                smoothing/decay rate parameter, must be [0, 1].
+            epsilon: float, optional
+                "jitter" term to ensure continued learning (should be small).
+        """
+
+        if rho < 0 or rho > 1:
+            raise ValueError("Decay rate 'rho' must be between 0 and 1!")
+
+        if epsilon <= 0:
+            raise ValueError("Constant 'epsilon' must be > 0!")
+
+        self.name = 'ADADELTA'
+        self.rho = rho
+        self.epsilon = epsilon
+        self.Eg2 = 0
+        self.Edx2 = 0
+
+    def __call__(self, x, grad):
+        """
+        Get a new parameter value from AdaDelta
+
+        Parameters
+        ----------
+        x: ndarray
+            input parameters to optimise
+        grad: ndarray
+            gradient of x
+
+        Returns
+        -------
+        x_new: ndarray
+            the new value for x
+        """
+
+        self.Eg2 = self.rho * self.Eg2 + (1 - self.rho) * grad**2
+        dx = - grad * np.sqrt(self.Edx2 + self.epsilon) \
+            / np.sqrt(self.Eg2 + self.epsilon)
+        self.Edx2 = self.rho * self.Edx2 + (1 - self.rho) * dx**2
+        return x + dx
+
+
+class AdaGrad(SGDUpdater):
+    """ AdaGrad Algorithm """
+
+    def __init__(self, eta=1, epsilon=1e-6):
+        """
+        Construct an AdaGrad updater object.
+
+        Parameters
+        ----------
+            eta: float, optional
+                smoothing/decay rate parameter, must be [0, 1].
+            epsilon: float, optional
+                small constant term to prevent divide-by-zeros
+        """
+
+        if eta <= 0:
+            raise ValueError("Learning rate 'eta' must be > 0!")
+
+        if epsilon <= 0:
+            raise ValueError("Constant 'epsilon' must be > 0!")
+
+        self.name = 'ADAGRAD'
+        self.eta = eta
+        self.epsilon = epsilon
+        self.g2_hist = 0
+
+    def __call__(self, x, grad):
+        """
+        Get a new parameter value from AdaGrad
+
+        Parameters
+        ----------
+        x: ndarray
+            input parameters to optimise
+        grad: ndarray
+            gradient of x
+
+        Returns
+        -------
+        x_new: ndarray
+            the new value for x
+        """
+
+        self.g2_hist += np.power(grad, 2)
+        return x - self.eta * grad / (self.epsilon + np.sqrt(self.g2_hist))
+
+
+class Momentum(SGDUpdater):
+    """ Momentum Algorithm """
+
+    def __init__(self, rho=0.5, eta=0.01):
+        """
+        Construct a Momentum updater object.
+
+        Parameters
+        ----------
+            rho: float, optional
+                smoothing/decay rate parameter, must be [0, 1].
+            eta: float, optional
+                weight to give to the momentum term
+        """
+
+        if eta <= 0:
+            raise ValueError("Learning rate 'eta' must be > 0!")
+
+        if rho < 0 or rho > 1:
+            raise ValueError("Decay rate 'rho' must be between 0 and 1!")
+
+        self.name = 'Momentum'
+        self.eta = eta
+        self.rho = rho
+        self.dx = 0
+
+    def __call__(self, x, grad):
+        """
+        Get a new parameter value from the Momentum algorithm
+
+        Parameters
+        ----------
+        x: ndarray
+            input parameters to optimise
+        grad: ndarray
+            gradient of x
+
+        Returns
+        -------
+        x_new: ndarray
+            the new value for x
+        """
+
+        self.dx = self.rho * self.dx - self.eta * grad
+        return x + self.dx
+
+
+#
+# SGD minimizer
+#
+
+def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, passes=10,
+        updater=None, gtol=1e-3, eval_obj=False):
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
         rate.
 
-        Arguments:
-            fun: the function to evaluate, this must have the signature
+        Parameters
+        ----------
+        fun: callable
+            the function to evaluate, this must have the signature
                 `[obj,] grad = fun(x, Data, ...)`, where the `eval_obj`
                 argument tells `sgd` if an objective function value is going to
                 be returned by `fun`.
-            x0: a sequence/1D array of initial values for the parameters to
-                learn.
-            Data: a numpy array or sequence of data to input into `fun`. This
-                will be split along the first axis (axis=0), and then input
-                into `fun`.
-            args: an optional sequence of arguments to give to fun.
-            bounds: sequence, optional. Bounds for variables, (min, max) pairs
-                for each element in x, defining the bounds on that parameter.
-                Use None for one of min or max when there is no bound in that
-                direction.
-            batchsize: (int), optional. The number of observations in an SGD
-                batch.
-            rate, (float): ADADELTA smoothing/decay rate parameter, must be [0,
-                1].
-            eta, (float): ADADELTA "jitter" term to ensure continued learning
-                (should be small).
-            gtol, (float): optional. The norm of the gradient of x that will
-                trigger a convergence condition.
-            passes, (int): Number of complete passes through the data before
-                optimization terminates (unless it converges first).
-            eval_obj, (bool): optional. This indicates whether or not `fun`
-                also evaluates and returns the objective function value. If
-                this is true, `fun` must return `(obj, grad)` and then a list
-                of objective function values is also returned.
+        x0: ndarray
+            a sequence/1D array of initial values for the parameters to learn.
+        Data: ndarray
+            a numpy array or sequence of data to input into `fun`. This will be
+            split along the first axis (axis=0), and then input into `fun`.
+        args: sequence, optional
+            an optional sequence of arguments to give to fun.
+        bounds: sequence, optional
+            Bounds for variables, (min, max) pairs for each element in x,
+            defining the bounds on that parameter.  Use None for one of min or
+            max when there is no bound in that direction.
+        batchsize: int, optional
+            The number of observations in an SGD batch.
+        passes: int, optional
+            Number of complete passes through the data before optimization
+            terminates (unless it converges first).
+        updater: SGDUpdater, optional
+            The type of gradient update to use, by default this is AdaDelta
+        gtol: float, optional
+            The norm of the gradient of x that will trigger a convergence
+            condition.
+        eval_obj: bool, optional
+            This indicates whether or not `fun` also evaluates and returns the
+            objective function value. If this is true, `fun` must return
+            `(obj, grad)` and then a list of objective function values is also
+            returned.
 
-        Returns:
-            (dict): with members:
-
-                'x' (array): the final result
-                'norms' (list): the list of gradient norms
-                'message' (str): the convergence condition ('converge' or
-                    'maxiter')
-                'objs' (list): the list of objective function evaluations of
-                    `eval_obj` is True.
-                'fun' (float): the final objective function evaluation if
-                    `eval_obj` is True.
+        Returns
+        -------
+        res: OptimizeResult
+            x: narray
+                the final result
+            norms: list
+                the list of gradient norms
+            message: str
+                the convergence condition ('converge' or 'maxiter')
+            objs: list
+                the list of objective function evaluations if :code:`eval_obj`
+                is True.
+            fun: float
+                the final objective function evaluation if :code:`eval_obj` is
+                True.
     """
 
     N = Data.shape[0]
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
-
-    if rate < 0 or rate > 1:
-        raise ValueError("rate must be between 0 and 1!")
-
-    if eta <= 0:
-        raise ValueError("eta must be > 0!")
 
     # Make sure we have a valid batch size
     if N < batchsize:
@@ -76,10 +260,8 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
         lower = np.array([-np.inf if b[0] is None else b[0] for b in bounds])
         upper = np.array([np.inf if b[1] is None else b[1] for b in bounds])
 
-    # Initialise
-    gnorm = np.inf
-    Eg2 = 0
-    Edx2 = 0
+    if updater is None:
+        updater = AdaDelta()
 
     # Learning Records
     obj = None
@@ -102,11 +284,8 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
                 xupper = x >= upper
                 grad[xupper] = np.maximum(grad[xupper], 0)
 
-            # ADADELTA
-            Eg2 = rate * Eg2 + (1 - rate) * grad**2
-            dx = - grad * np.sqrt(Edx2 + eta) / np.sqrt(Eg2 + eta)
-            Edx2 = rate * Edx2 + (1 - rate) * dx**2
-            x += dx
+            # perform update
+            x = updater(x, grad)
 
             # Trucate steps if bounded
             if bounds is not None:
@@ -132,6 +311,10 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, rate=0.9,
 
     return res
 
+
+#
+# Module Helpers
+#
 
 def _sgd_batches(N, batchsize):
     """ Batch index generator for SGD that will yeild random batches, and touch

@@ -28,10 +28,10 @@ def main():
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
     order = 7  # For polynomial basis
-    rate = 0.9
-    eta = 1e-5
-    passes = 100
-    batchsize = 10
+    rho = 0.9
+    epsilon = 1e-5
+    passes = 500
+    batchsize = 100
     reg = 1
 
     # np.random.seed(100)
@@ -127,9 +127,8 @@ def main():
     llhood = likelihoods.Gaussian()
     lparams = [noise**2]
     params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
-                           regulariser=reg, use_sgd=True, rate=rate,
-                           postcomp=10, eta=eta, batchsize=batchsize,
-                           maxit=passes)
+                           regulariser=reg, use_sgd=True, rho=rho, postcomp=10,
+                           epsilon=epsilon, batchsize=batchsize, maxit=passes)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]

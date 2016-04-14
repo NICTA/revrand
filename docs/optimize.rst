@@ -17,6 +17,9 @@ Optimization
    base.candidate_start_points_random
 
    sgd.sgd
+   sgd.AdaDelta
+   sgd.AdaGrad
+   sgd.Momentum
 
 
 Candidate Starting Points Example
