@@ -16,10 +16,7 @@ Optional
 Benchmarking
   - scikit-learn 
 
-Nonlinear Optimization (mainly for `BOBYQA`)
-  - nlopt
-
-Downloading and cachin datasets
+Downloading and caching datasets
   - requests
   - unipath
 
