@@ -157,6 +157,8 @@ def hadamard(Y, ordering=True):
     >>> y = np.array([[1, 0, 1, 0, 0, 1, 1, 0]])
     >>> hadamard(y, ordering=False)
     array([[ 0.5 ,  0.25,  0.  , -0.25,  0.  ,  0.25,  0.  ,  0.25]])
+    >>> hadamard(y, ordering=True)
+    array([[ 0.5 ,  0.  ,  0.  ,  0.  , -0.25,  0.25,  0.25,  0.25]])
     """
     # dot is a sum product over the last axis of a and the second-to-last of b.
     # Transpose - can specify axes, default transposes a[0] and a[1] hmm
@@ -171,38 +173,6 @@ def hadamard(Y, ordering=True):
     if ordering:
         Y = Y[:, _sequency(n_Y)]
     return Y
-
-
-def hadamard_basic(Y, ordering=True):
-    """
-    Fast Hadamard transform using vectorised indices
-
-    Parameters
-    ----------
-    Y: ndarray
-        the n*2^k data to be 1d hadamard transformed
-    ordering: bool, optional
-        reorder from Walsh to sequence
-
-    Returns
-    -------
-    H: ndarray
-        hadamard transformed data.
-    """
-
-    Y = Y.T
-    n = len(Y) / 2
-    r = np.arange(len(Y))
-    while n >= 1:
-        ind = (r / n).astype(int) % 2 == 0
-        a = (Y[ind] + Y[~ind]) / 2.
-        b = (Y[ind] - Y[~ind]) / 2.
-        Y[ind] = a
-        Y[~ind] = b
-        n /= 2
-    if ordering:
-        Y = Y[_sequency(len(Y))]
-    return Y.T
 
 
 def _sequency(length):

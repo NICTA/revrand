@@ -3,50 +3,102 @@
 from __future__ import division
 
 import numpy as np
+from scipy.stats import norm
 
 
 def smse(y_true, y_predict):
-    """ Standardised mean squared error.
+    """
+    Standardised mean squared error.
 
-        Arguments:
-            y_true: vector of true targest
-            y_predict: vector of predicted targets
+    Parameters
+    ----------
+    y_true: ndarray
+        vector of true targest
+    y_predict: ndarray
+        vector of predicted targets
 
-        Returns:
-            SMSE of predictions vs truth (scalar)
+    Returns
+    -------
+    float:
+        SMSE of predictions vs truth (scalar)
+
+    Example
+    -------
+    >>> y_true = np.random.randn(100)
+    >>> smse(y_true, y_true)
+    0.0
+    >>> smse(y_true, np.random.randn(100)) >= 1.0
+    True
     """
 
     N = y_true.shape[0]
-    var = y_true.var()
-
-    return ((y_true - y_predict)**2).sum() / (N * var)
+    return ((y_true - y_predict)**2).sum() / (N * y_true.var())
 
 
 def mll(y_true, y_predict, y_var):
-    """ Mean log likelihood.
+    """
+    Mean (negative) log likelihood under a Gaussian distribution.
 
-        TODO:
+    Parameters
+    ----------
+    y_true: ndarray
+        vector of true targest
+    y_predict: ndarray
+        vector of predicted targets
+    y_var: float or ndarray
+        predicted variances
+
+    Returns
+    -------
+    float:
+        The mean negative log likelihood
+
+    Example
+    -------
+    >>> y_true = np.random.randn(100)
+    >>> mean_prob = - norm.logpdf(1e-2, loc=0)  # -ve log prob close to mean
+    >>> mll(y_true, y_true, 1) <= mean_prob  # Should be good predictor
+    True
+    >>> mll(y_true, np.random.randn(100), 1) >= mean_prob  # naive predictor
+    True
     """
 
-    return normll(y_true, y_predict, y_var).mean()
+    return - norm.logpdf(y_true, loc=y_predict, scale=np.sqrt(y_var)).mean()
 
 
 def msll(y_true, y_predict, y_var, y_train):
-    """ Mean standardised log likelihood.
+    """
+    Mean standardised (negative) log likelihood under a Gaussian distribution.
 
-        TODO:
+    Parameters
+    ----------
+    y_true: ndarray
+        vector of true targest
+    y_predict: ndarray
+        vector of predicted targets
+    y_var: float or ndarray
+        predicted variances
+    y_train: ndarray
+        vector of *training* targets by which to standardise
+
+    Returns
+    -------
+    float:
+        The negative mean standardised log likelihood
+
+    Example
+    -------
+    >>> y_true = np.random.randn(100)
+    >>> msll(y_true, y_true, 1, y_true) < 0  # Should be good predictor
+    True
+    >>> msll(y_true, np.random.randn(100), 1, y_true) >= 0  # naive predictor
+    True
     """
 
-    var = y_train.var(ddof=1)
-    mu = y_true.mean()
-    logp_naive = -0.5 * (np.log(2 * np.pi * var) + (y_true - mu)**2 / var)
-    return -(normll(y_true, y_predict, y_var) - logp_naive).mean()
+    var = y_train.var()
+    mu = y_train.mean()
 
+    ll_naive = norm.logpdf(y_true, loc=mu, scale=np.sqrt(var))
+    ll_mod = norm.logpdf(y_true, loc=y_predict, scale=np.sqrt(y_var))
 
-def normll(y_true, y_predict, y_var):
-    """ Gaussian log likelihood.
-
-        TODO:
-    """
-
-    return -0.5 * (np.log(2 * np.pi * y_var) + (y_true - y_predict)**2 / y_var)
+    return - (ll_mod - ll_naive).mean()
