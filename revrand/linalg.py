@@ -77,7 +77,8 @@ def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
     >>> jitchol(c) # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
-    LinAlgError: Exceeded maximum jitter limit, yet a is still not positive semidefinite!
+    LinAlgError: Exceeded maximum jitter limit, yet a is still not positive
+    semidefinite!
     """
 
     try:
@@ -161,24 +162,8 @@ def hadamard(Y, ordering=True):
         Y = np.transpose(Y.reshape(matching), (0, 2, 1)).dot(H)
     Y = Y.reshape((n_vectors, n_Y))
     if ordering:
-        Y = Y[:, sequency(n_Y)]
+        Y = Y[:, _sequency(n_Y)]
     return Y
-
-
-def sequency(length):
-    # http://fourier.eng.hmc.edu/e161/lectures/wht/node3.html
-    # Although this incorrectly explains grey codes...
-    s = np.arange(length).astype(int)
-    s = (s >> 1) ^ s  # Grey code ...
-    # Reverse bits
-    order = np.zeros(s.shape).astype(int)
-    n = int(1)
-    m = length // 2
-    while n < length:
-        order |= m * (n & s) // n
-        n <<= 1
-        m >>= 1
-    return order
 
 
 def hadamard_basic(Y, ordering=True):
@@ -209,5 +194,21 @@ def hadamard_basic(Y, ordering=True):
         Y[~ind] = b
         n /= 2
     if ordering:
-        Y = Y[sequency(len(Y))]
+        Y = Y[_sequency(len(Y))]
     return Y.T
+
+
+def _sequency(length):
+    # http://fourier.eng.hmc.edu/e161/lectures/wht/node3.html
+    # Although this incorrectly explains grey codes...
+    s = np.arange(length).astype(int)
+    s = (s >> 1) ^ s  # Grey code ...
+    # Reverse bits
+    order = np.zeros(s.shape).astype(int)
+    n = int(1)
+    m = length // 2
+    while n < length:
+        order |= m * (n & s) // n
+        n <<= 1
+        m >>= 1
+    return order

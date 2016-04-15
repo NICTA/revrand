@@ -142,12 +142,12 @@ def apply_grad(fun, grad):
         return fgrad if len(fgrad) != 1 else fgrad[0]
     elif len(grad) == 0:
         return []
-    elif grad.ndim == 2:
+    elif (grad.ndim == 1) or (grad.ndim == 2):
         return fun(grad)
     elif grad.ndim == 3:
         return np.array([fun(grad[:, :, i]) for i in range(grad.shape[2])])
     else:
-        raise ValueError("Only 2d or 3d gradients allowed!")
+        raise ValueError("Only up to 3d gradients allowed!")
 
 
 #

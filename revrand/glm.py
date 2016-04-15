@@ -15,7 +15,7 @@ from multiprocessing import Pool
 from scipy.stats.distributions import gamma
 from scipy.optimize import brentq, minimize
 
-from .utils import append_or_extend
+from .utils import couple, append_or_extend, atleast_list
 from .basis_functions import apply_grad
 from .transforms import logsumexp
 from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
@@ -131,6 +131,10 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
     dC = np.zeros((D, K))
     H = np.empty((D, K))
 
+    # Make sure we get list output from likelihood parameter gradients
+    lgrads = couple(lambda *a: atleast_list(likelihood.dp(*a)),
+                    lambda *a: atleast_list(likelihood.dpd2f(*a)))
+
     # Objective function Eq. 10 from [1], and gradients of ALL params
     def L2(_m, _C, _reg, _lparams, *args):
 
@@ -178,11 +182,10 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                         - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
-            dp = likelihood.dp(y, f[:, k], *_lparams)
-            dp2df = likelihood.dpd2f(y, f[:, k], *_lparams)
-            for l in range(len(_lparams)):
-                dpH = dp2df[l].dot(Phi2)
-                dlp[l] -= B * (dp[l].sum() + 0.5 * (_C[:, k] * dpH).sum()) / K
+            for l, (dp, dp2df) in \
+                    enumerate(zip(*lgrads(y, f[:, k], *_lparams))):
+                dlp[l] -= B * (dp.sum()
+                               + 0.5 * (_C[:, k] * dp2df.dot(Phi2)).sum()) / K
 
         # Regulariser gradient
         dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
@@ -214,7 +217,6 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         return -L2, append_or_extend([-dm, -dC, -dreg, dlp], dbp)
 
     # Intialise m and C
-    # m = np.random.randn(D, K) + np.arange(K) / K - 0.5
     m = np.random.randn(D, K) + np.random.randn(K)
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 

@@ -4,6 +4,7 @@ import numpy as np
 from six.moves import map, range, zip
 from functools import partial
 from itertools import tee
+from inspect import isgenerator
 
 
 class Bunch(dict):
@@ -34,9 +35,42 @@ class Bunch(dict):
 
 
 def append_or_extend(mylist, obj):
+    """
+    Append an object to a list, or extend the list if the object is a list.
+
+    Parameters
+    ----------
+    mylist: list
+        list to extend
+    obj: object
+        object to append to the list if not a list, else concatenate the lists
+
+    Returns
+    -------
+    list
+        the extended list.
+    """
 
     mylist.extend(obj if isinstance(obj, list) else [obj])
     return mylist
+
+
+def atleast_list(a):
+    """
+    Promote an object to a list if not a list or generator
+
+    Parameters
+    ----------
+    a: object
+        any object you want to at least be a list with one element
+
+    Returns
+    -------
+    list or generator:
+        untounched if :code:`a` was a generator or list, otherwise :code:`[a]`.
+    """
+
+    return a if isinstance(a, list) or isgenerator(a) else [a]
 
 
 def couple(f, g):
@@ -49,7 +83,8 @@ def couple(f, g):
     -----
     Equivalent to::
 
-        lambda f, g: lambda *args, **kwargs: (f(*args, **kwargs), g(*args, **kwargs))
+        lambda f, g: lambda *args, **kwargs: (f(*args, **kwargs),
+                                              g(*args, **kwargs))
 
     Examples
     --------
@@ -340,7 +375,10 @@ def unflatten(ary, shapes, order='C'):
     -----
     Equivalent to::
 
-        lambda ary, shapes, order='C': map(partial(custom_reshape, order=order), np.hsplit(ary, np.cumsum(map(partial(np.prod, dtype=int), shapes))), shapes)
+        lambda ary, shapes, order='C': \
+            map(partial(custom_reshape, order=order),
+                np.hsplit(ary, np.cumsum(map(partial(np.prod, dtype=int),
+                                             shapes))), shapes)
 
     Examples
     --------
@@ -422,7 +460,8 @@ def map_indices(fn, iterable, indices):
     -----
     Roughly equivalent to, though more efficient than::
 
-        lambda fn, iterable, *indices: (fn(arg) if i in indices else arg for i, arg in enumerate(iterable))
+        lambda fn, iterable, *indices: (fn(arg) if i in indices else arg
+                                        for i, arg in enumerate(iterable))
 
     Examples
     --------
@@ -433,7 +472,8 @@ def map_indices(fn, iterable, indices):
     >>> list(map_indices(partial(mul, 3), a, [0, 3, 5]))
     [12, 6, 7, 3, 6, 24, 2]
 
-    >>> b = [9., np.array([5., 6., 2.]), np.array([[5., 6., 2.], [2., 3., 9.]])]
+    >>> b = [9., np.array([5., 6., 2.]),
+    ...      np.array([[5., 6., 2.], [2., 3., 9.]])]
 
     >>> list(map_indices(np.log, b, [0, 2])) # doctest: +NORMALIZE_WHITESPACE
     [2.1972245773362196,
