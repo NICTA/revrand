@@ -150,6 +150,13 @@ def hadamard(Y, ordering=True):
     -------
     H: ndarray
         hadamard transformed data.
+
+    Examples
+    --------
+    from https://en.wikipedia.org/wiki/Hadamard_transform with normalisation
+    >>> y = np.array([[1, 0, 1, 0, 0, 1, 1, 0]])
+    >>> hadamard(y, ordering=False)
+    array([[ 0.5 ,  0.25,  0.  , -0.25,  0.  ,  0.25,  0.  ,  0.25]])
     """
     # dot is a sum product over the last axis of a and the second-to-last of b.
     # Transpose - can specify axes, default transposes a[0] and a[1] hmm
