@@ -6,7 +6,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss, accuracy_score
 
 from revrand.utils.datasets import fetch_gpml_usps_resampled_data
-# from revrand.validation import loglosscat, errrate
 from revrand import basis_functions, glm, likelihoods
 
 import logging
@@ -22,12 +21,12 @@ dig1 = 3
 dig2 = 5
 
 # A la Carte classifier setting
-nbases = 600
+nbases = 200
 lenscale = 10
 reg = 1
 doSGD = True
-passes = 10
-batchsize = 10
+passes = 100
+batchsize = 100
 
 #
 # Load data

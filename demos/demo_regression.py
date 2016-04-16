@@ -23,15 +23,15 @@ def main():
     #
 
     # Algorithmic properties
-    nbases = 50
+    nbases = 300
     lenscale = 1  # For all basis functions that take lengthscales
     lenscale2 = 0.5  # For the Combo basis
     noise = 1
     order = 7  # For polynomial basis
     rho = 0.9
     epsilon = 1e-5
-    passes = 500
-    batchsize = 100
+    passes = 50
+    batchsize = 10
     reg = 1
 
     # np.random.seed(100)

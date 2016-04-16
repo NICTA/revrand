@@ -34,7 +34,7 @@ class Bunch(dict):
         self.__dict__ = self
 
 
-def append_or_extend(mylist, obj):
+def append_or_extend(mylist, *objs):
     """
     Append an object to a list, or extend the list if the object is a list.
 
@@ -42,8 +42,9 @@ def append_or_extend(mylist, obj):
     ----------
     mylist: list
         list to extend
-    obj: object
-        object to append to the list if not a list, else concatenate the lists
+    objs: object(s)
+        object(s) to append to the list if not a list, else concatenate the
+        lists
 
     Returns
     -------
@@ -51,7 +52,8 @@ def append_or_extend(mylist, obj):
         the extended list.
     """
 
-    mylist.extend(obj if isinstance(obj, list) else [obj])
+    for obj in objs:
+        mylist.extend(obj if isinstance(obj, list) else [obj])
     return mylist
 
 

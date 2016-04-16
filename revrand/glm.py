@@ -122,9 +122,11 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         can use SGD straight-forwardly.
     """
 
+    # Shapes of things
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
     K = postcomp
+    nlpams, nbpams = len(lparams), len(bparams)
 
     # Pre-allocate here
     dm = np.zeros((D, K))
@@ -136,10 +138,11 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                     lambda *a: atleast_list(likelihood.dpd2f(*a)))
 
     # Objective function Eq. 10 from [1], and gradients of ALL params
-    def L2(_m, _C, _reg, _lparams, *args):
+    def L2(_m, _C, _reg, *args):
 
         # Extract data, parameters, etc
-        _bparams, y, X = args[:-1], args[-1][:, 0], args[-1][:, 1:]
+        _lpars, _bpars, = args[:nlpams], args[nlpams:(nlpams + nbpams)]
+        y, X = args[-1][:, 0], args[-1][:, 1:]
 
         # Dimensions
         M, d = X.shape
@@ -147,7 +150,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         B = N / M
 
         # Basis function stuff
-        Phi = basis(X, *_bparams)  # M x D
+        Phi = basis(X, *_bpars)  # M x D
         Phi2 = Phi**2
         Phi3 = Phi**3
         f = Phi.dot(_m)  # M x K
@@ -160,15 +163,15 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
 
         # Big loop though posterior mixtures for calculating stuff
         ll = 0
-        dlp = [np.zeros_like(p) for p in _lparams]
+        dlp = [np.zeros_like(p) for p in _lpars]
 
         for k in range(K):
 
             # Common likelihood calculations
-            ll += B * likelihood.loglike(y, f[:, k], *_lparams).sum()
-            df[:, k] = B * likelihood.df(y, f[:, k], *_lparams)
-            d2f[:, k] = B * likelihood.d2f(y, f[:, k], *_lparams)
-            d3f[:, k] = B * likelihood.d3f(y, f[:, k], *_lparams)
+            ll += B * likelihood.loglike(y, f[:, k], *_lpars).sum()
+            df[:, k] = B * likelihood.df(y, f[:, k], *_lpars)
+            d2f[:, k] = B * likelihood.d2f(y, f[:, k], *_lpars)
+            d3f[:, k] = B * likelihood.d3f(y, f[:, k], *_lpars)
             H[:, k] = d2f[:, k].dot(Phi2) - 1. / _reg
 
             # Posterior mean and covariance gradients
@@ -182,8 +185,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                         - _m[:, k] / _reg) / K
 
             # Likelihood parameter gradients
-            for l, (dp, dp2df) in \
-                    enumerate(zip(*lgrads(y, f[:, k], *_lparams))):
+            for l, (dp, dp2df) in enumerate(zip(*lgrads(y, f[:, k], *_lpars))):
                 dlp[l] -= B * (dp.sum()
                                + 0.5 * (_C[:, k] * dp2df.dot(Phi2)).sum()) / K
 
@@ -201,7 +203,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                 dt -= (df[:, k].dot(dPhimk) + (_C[:, k] * dPhiH).sum()) / K
             return dt
 
-        dbp = apply_grad(dtheta, basis.grad(X, *_bparams))
+        dbp = apply_grad(dtheta, basis.grad(X, *_bpars))
 
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (ll
@@ -212,22 +214,20 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
 
         if verbose:
             log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
-                     .format(L2, _reg, _lparams, _bparams))
+                     .format(L2, _reg, _lpars, _bpars))
 
-        return -L2, append_or_extend([-dm, -dC, -dreg, dlp], dbp)
+        return -L2, append_or_extend([-dm, -dC, -dreg], dlp, dbp)
 
     # Intialise m and C
-    m = np.random.randn(D, K) + np.random.randn(K)
+    m = np.random.randn(D, K) + np.random.randn(K)  # V. important for perform.
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
-    bounds = [Bound(shape=m.shape),
-              Positive(shape=C.shape),
-              Positive(),
-              likelihood.bounds]
-    append_or_extend(bounds, basis.bounds)
+    # Pack bounds and params
+    bounds = [Bound(shape=m.shape), Positive(shape=C.shape), Positive()]
+    append_or_extend(bounds, likelihood.bounds, basis.bounds)
+    vparams = [m, C, regulariser] + lparams + bparams
 
-    vparams = [m, C, regulariser, lparams] + bparams
-
+    # Optimisation method
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
         res = nmin(L2, vparams, tol=tol, options={'maxiter': maxit},
@@ -240,7 +240,9 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                    bounds=bounds, gtol=tol, passes=maxit, updater=updater,
                    batchsize=batchsize, eval_obj=True)
 
-    (m, C, regulariser, lparams), bparams = res.x[:4], res.x[4:]
+    # Unpack params
+    m, C, regulariser = res.x[:3]
+    lparams, bparams = res.x[3:(3 + nlpams)], res.x[(3 + nlpams):]
 
     if verbose:
         log.info("Finished! Objective = {}, reg = {}, lparams = {}, "

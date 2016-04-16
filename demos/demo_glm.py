@@ -2,13 +2,11 @@
 """ GLM Demo """
 
 import matplotlib.pyplot as pl
-# import computers.gp as gp
 import numpy as np
 import logging
 from scipy.stats import poisson, bernoulli
 
 from revrand import basis_functions, glm, likelihoods, transforms
-# from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 
 # Set up logging
@@ -28,7 +26,7 @@ lenscale = 1  # For all basis functions that take lengthscales
 noise = 1
 rho = 0.9
 epsilon = 1e-5
-passes = 500
+passes = 400
 batchsize = 100
 reg = 1
 use_sgd = True
