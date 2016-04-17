@@ -392,7 +392,7 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
 
     if multiproc:
         pool = Pool()
-        res = pool.starmap(_rootfinding, work)
+        res = pool.map(_star_rootfinding, work)
         pool.close()
         pool.join()
     else:
@@ -405,6 +405,12 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
 #
 #  Internal Module Utilities
 #
+
+# For python 2.7 compatibility
+def _star_rootfinding(args):
+
+    return _rootfinding(*args)
+
 
 def _rootfinding(fn, likelihood, lparams, alpha):
 
