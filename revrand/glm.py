@@ -415,7 +415,7 @@ def _rootfinding(fn, likelihood, lparams, alpha):
     lpercent = (1 - alpha) / 2
     upercent = 1 - lpercent
     Eyn = likelihood.Ey(fn, *lparams).mean()
-    lb, ub = -100 * max(Eyn, 1), 100 * max(Eyn, 1)
+    lb, ub = -1000 * max(Eyn, 1), 1000 * max(Eyn, 1)
 
     try:
         qln = brentq(predCDF, a=lb, b=ub, args=(fn, lpercent))
