@@ -406,7 +406,7 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
 #  Internal Module Utilities
 #
 
-# For python 2.7 compatibility
+# For python 2.7 compatibility instead of pool.starmap
 def _star_rootfinding(args):
 
     return _rootfinding(*args)
