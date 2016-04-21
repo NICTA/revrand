@@ -5,9 +5,11 @@ import matplotlib.pyplot as pl
 import numpy as np
 import logging
 from scipy.stats import poisson, bernoulli
+from scipy.special import expit
 
-from revrand import basis_functions, glm, likelihoods, transforms
+from revrand import basis_functions, glm, likelihoods
 from revrand.utils.datasets import gen_gausprocess_se
+from revrand.utils import softplus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -54,13 +56,13 @@ Xtrain, ytrain, Xtest, ftest = \
 
 if like == 'Bernoulli':
 
-    ytrain = bernoulli.rvs(transforms.logistic(20 * ytrain))
-    ftest = transforms.logistic(20 * ftest)
+    ytrain = bernoulli.rvs(expit(20 * ytrain))
+    ftest = expit(20 * ftest)
 
 elif like == 'Poisson':
 
-    ytrain = poisson.rvs(transforms.softplus(5 * ytrain))
-    ftest = transforms.softplus(5 * ftest)
+    ytrain = poisson.rvs(softplus(5 * ytrain))
+    ftest = softplus(5 * ftest)
 
 #
 # Make Bases and Likelihood

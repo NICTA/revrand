@@ -18,7 +18,7 @@ import logging
 from scipy.optimize import minimize
 from scipy.linalg import cho_solve
 
-from .utils import append_or_extend
+from .utils import append_or_extend, safediv
 from .linalg import jitchol, cho_log_det
 from .optimize import Positive, structured_minimizer, logtrick_minimizer
 from .basis_functions import apply_grad
@@ -90,15 +90,19 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         Phi = basis(X, *_theta)                      # N x D
         PhiPhi = Phi.T.dot(Phi)
 
+        # Safe divide
+        ivar = safediv(1., _var)
+        ilambda = safediv(1., _lambda)
+
         # Posterior Parameters
         lower = False
-        LiC = jitchol(np.diag(np.ones(D) / _lambda) + PhiPhi / _var,
+        LiC = jitchol(np.diag(np.ones(D) * ilambda) + PhiPhi * ivar,
                       lower=lower)
-        m = cho_solve((LiC, lower), Phi.T.dot(y)) / _var
+        m = cho_solve((LiC, lower), Phi.T.dot(y)) * ivar
 
         # Common calcs dependent on form of C
         if diagcov:
-            C = 1. / (PhiPhi.diagonal() / _var + 1. / _lambda)
+            C = 1. / (PhiPhi.diagonal() * ivar + ilambda)
             TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
             logdetC = np.log(C).sum()
             TrC = C.sum()
@@ -115,9 +119,9 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         # Calculate ELBO
         ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
-                       + sqErr / _var
-                       + TrPhiPhiC / _var
-                       + (TrC + mm) / _lambda
+                       + sqErr * ivar
+                       + TrPhiPhiC * ivar
+                       + (TrC + mm) * ilambda
                        - logdetC
                        + D * np.log(_lambda)
                        - D)
@@ -137,15 +141,15 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
                      .format(ELBO, _var, _lambda, _theta))
 
         # Grad var
-        dvar = 0.5 / _var * (-N + (sqErr + TrPhiPhiC) / _var)
+        dvar = 0.5 * ivar * (-N + (sqErr + TrPhiPhiC) * ivar)
 
         # Grad reg
-        dlambda = 0.5 / _lambda * ((TrC + mm) / _lambda - D)
+        dlambda = 0.5 * ilambda * ((TrC + mm) * ilambda - D)
 
         # Get structured basis function gradients
         def dtheta(dPhi):
             dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
-            return - (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) / _var
+            return - (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) * ivar
 
         dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
 

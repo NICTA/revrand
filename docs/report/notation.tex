@@ -1,0 +1,85 @@
+%% Define bracket commands (normal, square and curly).
+\newcommand{\brac} [1]  {\ensuremath{\left({#1}\right)}}
+\newcommand{\sbrac}[1]  {\ensuremath{\left[{#1}\right]}}
+\newcommand{\cbrac}[1]  {\ensuremath{\left\{{#1}\right\}}}
+\newcommand{\abrac}[1]  {\ensuremath{\left\langle{#1}\right\rangle}}
+
+
+%% Symbols
+
+% General
+\newcommand{\test}       {\ensuremath{^{*}}}
+\newcommand{\testT}      {\ensuremath{^{*\top}\!}}
+\newcommand{\ttest}      {\ensuremath{^{**}}}
+\newcommand{\real}   [1] {\ensuremath{\mathbb{R}^{#1}}}
+\newcommand{\natu}   [1] {\ensuremath{\mathbb{N}^{#1}}}
+\newcommand{\ident}  [1] {\ensuremath{\mathbf{I}_{#1}}}
+
+% Variables
+\newcommand{\targs}     {\ensuremath{y}}
+\newcommand{\targ}      {\ensuremath{\mathbf{y}}}
+\newcommand{\targd}     {\ensuremath{\mathbf{y}\test}}
+\newcommand{\targdT}    {\ensuremath{\mathbf{y}\testT}}
+\newcommand{\ins}       {\ensuremath{\mathbf{X}}}
+\newcommand{\inss}      {\ensuremath{\mathbf{x}}}
+\newcommand{\locs}      {\ensuremath{\mathbf{z}}}
+\newcommand{\minibatch}  {\ensuremath{\mathbf{B}}}
+\newcommand{\feats}     {\ensuremath{\boldsymbol\Phi}}
+\newcommand{\featfunc}  {\ensuremath{\boldsymbol\phi}}
+\newcommand{\weights}   {\ensuremath{\mathbf{w}}}
+\newcommand{\cov}       {\ensuremath{\boldsymbol{\Sigma}}}
+\newcommand{\pocov}     {\ensuremath{\mathbf{C}}}
+\newcommand{\lapcov}    {\ensuremath{\hat{\mathbf{C}}}}
+\newcommand{\mcov}      {\ensuremath{\mathbf{S}}}
+\newcommand{\jacob}[1]  {\ensuremath{\mathbf{J}_{#1}}}
+\newcommand{\hess}[1]   {\ensuremath{\mathbf{H}_{#1}}}
+\newcommand{\reg}       {\ensuremath{\lambda}}
+\newcommand{\param}     {\ensuremath{\theta}}
+\newcommand{\hyper}     {\ensuremath{\alpha}}
+\newcommand{\lrate}     {\ensuremath{\eta}}
+
+% Gaussian Process
+\newcommand{\kernl}     {\ensuremath{k}}
+\newcommand{\Kernl}     {\ensuremath{\mathbf{k}}}
+\newcommand{\KERNL}     {\ensuremath{\mathbf{K}}}
+
+
+%% Operations
+\newcommand{\T}          {\ensuremath{^{\!\top}}}
+\newcommand{\inv}        {\ensuremath{^{\text{-}1}}}
+\newcommand{\deter}[1]   {\ensuremath{\left|{#1}\right|}}
+\newcommand{\trace}[1]   {\ensuremath{\text{tr}\!\brac{#1}}}
+\newcommand{\diag}[1]    {\ensuremath{\text{diag}\!\brac{#1}}}
+\newcommand{\expec}[2]   {\ensuremath{\abrac{#2}_{\!{#1}}}}
+\newcommand{\expece}[2]  {\ensuremath{\mathbb{E}_{#1}\!\sbrac{#2}}}
+\newcommand{\evar} [2]   {\ensuremath{\mathbb{V}_{#1}\!\sbrac{#2}}}
+\newcommand{\KL}[2]      {\ensuremath{\text{KL}\!\sbrac{{#1}\!\parallel\!{#2}}}}
+\newcommand{\entropy}[1] {\ensuremath{\mathbb{H}\sbrac{#1}}}
+\newcommand{\lnorm}[2]   {\ensuremath{\left\|{#2}\right\|_{{#1}}}}
+
+
+%% Functions, PDFs etc
+\newcommand{\func}  [2] {\ensuremath{f_{#2}\!\brac{{#1}}}}
+\newcommand{\ofunc} [3] {\ensuremath{{#1}_{#3}\!\brac{{#2}}}}
+\newcommand{\Prob}  [1] {\ensuremath{P\!\brac{#1}}}
+\newcommand{\ProbC} [2] {\ensuremath{P\!\left({#1}\middle\vert{#2}\right)}}
+\newcommand{\iProb}  [1] {\ensuremath{P\inv\!\brac{#1}}}
+\newcommand{\iProbC} [2] {\ensuremath{P\inv\!\left({#1}\middle\vert{#2}\right)}}
+\newcommand{\quant}  [1] {\ensuremath{Q\!\brac{#1}}}
+\newcommand{\prob}  [1] {\ensuremath{p\!\brac{#1}}}
+\newcommand{\probC} [2] {\ensuremath{p\!\left({#1}\middle\vert{#2}\right)}}
+\newcommand{\qrob}  [1] {\ensuremath{q\!\brac{#1}}}
+\newcommand{\qrobC} [2] {\ensuremath{q\!\left({#1}\middle\vert{#2}\right)}}
+\newcommand{\gaus}  [1] {\ensuremath{\mathcal{N}\!\brac{#1}}}
+\newcommand{\gausC} [2] {\ensuremath{\mathcal{N}\!\left({#1}\middle\vert{#2}\right)}}
+\newcommand{\bern}  [1] {\ensuremath{\textrm{Bern}\!\brac{#1}}}
+\newcommand{\bernC} [2] {\ensuremath{\textrm{Bern}\!\left({#1}\middle\vert{#2}\right)}}
+\newcommand{\kfunc} [2] {\ensuremath{\kernl\!\brac{{#1}, {#2}}}}
+\newcommand{\expon} [2] {\ensuremath{{#1}\!\times\!10^{#2}}}
+\newcommand{\bigo}  [1] {\ensuremath{\mathcal{O}\!\brac{{#1}}}}
+\newcommand{\elbo}      {\ensuremath{\mathcal{L}}}
+
+
+%% Operators
+\DeclareMathOperator*{\argmax}{\operatorname*{argmax}}
+\DeclareMathOperator*{\argmin}{\operatorname*{argmin}}

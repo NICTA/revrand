@@ -1,7 +1,21 @@
-""" Various nonlinear transformation functions. """
+""" Safe numerical operations. """
+
+from __future__ import division
 
 import numpy as np
 
+#
+# Module constants
+#
+
+eps = np.finfo(float).eps
+tiny = np.finfo(float).tiny
+small = 1e-100
+
+
+#
+# Special functions
+#
 
 def logsumexp(X, axis=0):
     """
@@ -33,41 +47,6 @@ def logsumexp(X, axis=0):
         mx = np.atleast_2d(mx).T if axis == 1 else np.atleast_2d(mx)
 
     return np.log(np.exp(X - mx).sum(axis=axis)) + np.ravel(mx)
-
-
-def logistic(X):
-    """
-    Pass X through a logistic sigmoid in a numerically stable way (using the
-    log-sum-exp trick).
-
-    The logistic sigmoid is
-
-    .. math::
-        \\frac{1}{1 + \exp\{-X\}}
-
-    Parameters
-    ----------
-        X: ndarray
-            (N,) array or shape (N, D) array of data.
-
-    Returns
-    -------
-        sig: ndarray
-            same shape of X with the result of logistic(X).
-    """
-
-    N = X.shape[0]
-
-    if X.ndim == 1:
-        return np.exp(-logsumexp(np.vstack((np.zeros(N), -X)).T, axis=1))
-    elif X.ndim == 2:
-        lgX = np.empty(X.shape, dtype=float)
-        for d in range(X.shape[1]):
-            lgX[:, d] = np.exp(-logsumexp(np.vstack((np.zeros(N),
-                                                     -X[:, d])).T, axis=1))
-        return lgX
-    else:
-        raise ValueError("This only works on up to 2D arrays.")
 
 
 def softmax(X, axis=0):
@@ -141,3 +120,29 @@ def softplus(X):
         return sftX
     else:
         raise ValueError("This only works on up to 2D arrays.")
+
+
+#
+# Numerically "safe" functions 
+#
+
+def safediv(num, den, min_den=eps):
+
+    if np.isscalar(den):
+        return num / max(den, min_den)
+    else:
+        return num / np.fmax(den, min_den)
+
+
+def safelog(x, min_x=tiny):
+
+    cx = x.copy()
+    cx[cx < min_x] = min_x
+    return np.log(cx)
+
+
+def safesoftplus(x, min_x=small):
+
+    g = softplus(x)
+    g[g < min_x] = min_x
+    return g

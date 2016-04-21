@@ -2,7 +2,7 @@ from __future__ import division
 
 import numpy as np
 
-import revrand.transforms as tfms
+import revrand.utils.math as tfms
 
 
 def test_logsumexp():
@@ -33,20 +33,6 @@ def test_softmax():
     # Axis 1
     sma1 = tfms.softmax(X, axis=1)
     assert np.allclose(sma1.sum(axis=1), np.ones(10))
-
-
-def test_logistic():
-
-    # Function validity test
-    X = np.random.randn(10, 3)
-    sig_actual = 1 / (1 + np.exp(-X))
-    sig_test = tfms.logistic(X)
-
-    assert np.allclose(sig_actual, sig_test)
-
-    # Extreme value tests
-    assert np.allclose(tfms.logistic(np.array([1e3])), np.ones(1))
-    assert np.allclose(tfms.logistic(np.array([-1e3])), np.zeros(1))
 
 
 def test_sofplus():

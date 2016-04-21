@@ -15,9 +15,8 @@ from multiprocessing import Pool
 from scipy.stats.distributions import gamma
 from scipy.optimize import brentq, minimize
 
-from .utils import couple, append_or_extend, atleast_list
+from .utils import couple, append_or_extend, atleast_list, logsumexp, safediv
 from .basis_functions import apply_grad
-from .transforms import logsumexp
 from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
     logtrick_minimizer, Bound, Positive, AdaDelta
 
@@ -143,6 +142,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         # Extract data, parameters, etc
         _lpars, _bpars, = args[:nlpams], args[nlpams:(nlpams + nbpams)]
         y, X = args[-1][:, 0], args[-1][:, 1:]
+        ireg = safediv(1., _reg)
 
         # Dimensions
         M, d = X.shape
@@ -172,7 +172,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
             df[:, k] = B * likelihood.df(y, f[:, k], *_lpars)
             d2f[:, k] = B * likelihood.d2f(y, f[:, k], *_lpars)
             d3f[:, k] = B * likelihood.d3f(y, f[:, k], *_lpars)
-            H[:, k] = d2f[:, k].dot(Phi2) - 1. / _reg
+            H[:, k] = d2f[:, k].dot(Phi2) - 1. * ireg
 
             # Posterior mean and covariance gradients
             mkmj = _m[:, k][:, np.newaxis] - _m
@@ -182,7 +182,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
             dm[:, k] = (df[:, k].dot(Phi)
                         + 0.5 * _C[:, k] * d3f[:, k].dot(Phi3)
                         + (iCkCj * mkmj).dot(pz[:, k])
-                        - _m[:, k] / _reg) / K
+                        - _m[:, k] * ireg) / K
 
             # Likelihood parameter gradients
             for l, (dp, dp2df) in enumerate(zip(*lgrads(y, f[:, k], *_lpars))):
@@ -190,7 +190,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                                + 0.5 * (_C[:, k] * dp2df.dot(Phi2)).sum()) / K
 
         # Regulariser gradient
-        dreg = (((_m**2).sum() + _C.sum()) / _reg**2 - D * K / _reg) / (2 * K)
+        dreg = (((_m**2).sum() + _C.sum()) * ireg**2 - D * K * ireg) / (2 * K)
 
         # Basis function parameter gradients
         def dtheta(dPhi):
@@ -208,7 +208,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
         # Objective, Eq. 10 in [1]
         L2 = 1. / K * (ll
                        - 0.5 * D * K * np.log(2 * np.pi * _reg)
-                       - 0.5 * (_m**2).sum() / _reg
+                       - 0.5 * (_m**2).sum() * ireg
                        + 0.5 * (_C * H).sum()
                        - logqk.sum() + np.log(K))
 

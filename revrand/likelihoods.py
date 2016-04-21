@@ -7,10 +7,10 @@ from __future__ import division
 
 import numpy as np
 from scipy.stats import bernoulli, poisson, norm
-from scipy.special import gammaln
+from scipy.special import gammaln, expit
 
 from .optimize import Positive
-from .transforms import logistic, softplus
+from .utils import safesoftplus, safediv, softplus
 
 
 #
@@ -19,8 +19,6 @@ from .transforms import logistic, softplus
 
 tiny = np.finfo(float).tiny
 logtiny = np.log(tiny)
-small = 1e-100
-resol = np.finfo(float).resolution
 
 
 #
@@ -78,7 +76,7 @@ class Bernoulli():
                 likelihood.
         """
 
-        ll = bernoulli.logpmf(y, logistic(f))
+        ll = bernoulli.logpmf(y, expit(f))
         ll[np.isinf(ll)] = logtiny
         return ll
 
@@ -97,7 +95,7 @@ class Bernoulli():
                 expected value of y, :math:`\mathbb{E}[y|f]`.
         """
 
-        return logistic(f)
+        return expit(f)
 
     def df(self, y, f):
         """
@@ -117,7 +115,7 @@ class Bernoulli():
                 the derivative :math:`\partial \log p(y|f) / \partial f`
         """
 
-        return y - logistic(f)
+        return y - expit(f)
 
     def d2f(self, y, f):
         """
@@ -138,7 +136,7 @@ class Bernoulli():
                 :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
 
-        sig = logistic(f)
+        sig = expit(f)
         return (sig - 1) * sig
 
     def d3f(self, y, f):
@@ -160,7 +158,7 @@ class Bernoulli():
                 :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
 
-        sig = logistic(f)
+        sig = expit(f)
         return (2 * sig - 1) * (1 - sig) * sig
 
     def dp(self, y, f):
@@ -229,7 +227,7 @@ class Bernoulli():
                 Cumulative density function evaluated at y.
         """
 
-        return bernoulli.cdf(y, logistic(f))
+        return bernoulli.cdf(y, expit(f))
 
 
 class Gaussian(Bernoulli):
@@ -314,7 +312,7 @@ class Gaussian(Bernoulli):
                 the derivative :math:`\partial \log p(y|f) / \partial f`
         """
 
-        return (y - f) / var
+        return safediv(y - f, var)
 
     def d2f(self, y, f, var):
         """
@@ -337,7 +335,7 @@ class Gaussian(Bernoulli):
                 :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
 
-        return - np.ones_like(f) / var
+        return - safediv(np.ones_like(f), var)
 
     def d3f(self, y, f, var):
         """
@@ -385,7 +383,7 @@ class Gaussian(Bernoulli):
                 where :math:`sigma^2` is the variance.
         """
 
-        return 0.5 * (((y - f) / var)**2 - 1. / var)
+        return 0.5 * (safediv(y - f, var)**2 - safediv(1., var))
 
     def dpd2f(self, y, f, var):
         """
@@ -410,7 +408,7 @@ class Gaussian(Bernoulli):
                 :math:`\\sigma^2`.
         """
 
-        return np.ones_like(f) / var**2
+        return safediv(np.ones_like(f), var**2)
 
     def cdf(self, y, f, var):
         """
@@ -522,7 +520,7 @@ class Poisson(Bernoulli):
         if self.tranfcn == 'exp':
             return y - np.exp(f)
         else:
-            return logistic(f) * (y / _safesoftplus(f) - 1)
+            return expit(f) * (y / safesoftplus(f) - 1)
 
     def d2f(self, y, f):
         """
@@ -546,8 +544,8 @@ class Poisson(Bernoulli):
         if self.tranfcn == 'exp':
             return - np.exp(f)
         else:
-            g = _safesoftplus(f)
-            gp = logistic(f)
+            g = safesoftplus(f)
+            gp = expit(f)
             g2p = gp * (1 - gp)
             return (y - g) * g2p / g - y * (gp / g)**2
 
@@ -573,8 +571,8 @@ class Poisson(Bernoulli):
         if self.tranfcn == 'exp':
             return self.d2f(y, f)
         else:
-            g = _safesoftplus(f)
-            gp = logistic(f)
+            g = safesoftplus(f)
+            gp = expit(f)
             g2p = gp * (1 - gp)
             g3p = g2p * (1 - 2 * gp)
             return g3p * (y - g) / g + 2 * y * (gp / g)**3 \
@@ -600,21 +598,3 @@ class Poisson(Bernoulli):
 
         mu = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
         return poisson.cdf(y, mu=mu)
-
-
-#
-# Safe numerical operations
-#
-
-def _safelog(x):
-
-    cx = x.copy()
-    cx[cx < tiny] = tiny
-    return np.log(cx)
-
-
-def _safesoftplus(x):
-
-    g = softplus(x)
-    g[g < small] = small  # hack to avoid instability
-    return g

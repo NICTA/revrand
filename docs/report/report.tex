@@ -4,6 +4,7 @@
 \usepackage{sectsty}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{mathtools}
 
 % Package config
 \sectionfont{\normalfont\sffamily\bfseries}
@@ -13,6 +14,12 @@
     citecolor={blue!50!black},
     urlcolor={blue!80!black}
 }
+
+\usepackage[backend=bibtex, style=numeric, firstinits=true]{biblatex}
+\bibliography{report}
+
+% Notation and macros
+\input{notation.tex}
 
 % Preamble
 \title{\sffamily{\emph{revrand}: Technical Report}}
@@ -34,33 +41,133 @@
     library implements various Bayesian linear models (Bayesian linear
     regression), approximate Gaussian processes and generalised linear models.
     These algorithms have been implemented such that they can be used for
-    large-scale inference by using stochastic gradients, and are deployable on
-    computational clusters with Apache Spark. All of the algorithms in
-    \emph{revrand} use a unified feature composition framework, that allows for
-    easy composition of positive-definite covariance functions and easy
+    large-scale inference by using stochastic gradients. All of the algorithms
+    in \emph{revrand} use a unified feature composition framework, that allows
+    for easy composition of positive-definite covariance functions and easy
     manipulation and combination of regression basis functions.
 \end{abstract}
 
 \tableofcontents
 
-\section{Introduction}
-
 \section{Core Algorithms}
 
-\subsection{Stochastic Gradients}
+\subsection{Stochastic Gradients and Variational Objective Functions}
 
-\subsection{Variational Objective Functions}
+Stochastic Gradients is now a ubiquitous method for optimisation when a whole
+dataset does not fit in memory, or when optimisation has to be distributed
+amongst many computational nodes.
+
+When an objective function factorises over data,
+\begin{equation}
+    \func{\ins, \param}{} = \sum_{\inss \in \ins} \func{\inss, \param}{},
+\end{equation}
+a regular gradient descent would perform the following iterations to minimise
+the function w.r.t.\ $\param$,
+\begin{equation}
+    \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \ins}
+    \nabla_{\param} \func{\inss_n, \param}{}\!|_{\param = \param_{k-1}},
+\end{equation}
+where $\lrate_k$ is the learning rate (step size) at iteration $k$. Stochastic
+gradients proposes the following update,
+\begin{equation}
+    \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \minibatch}
+    \nabla_{\param} \func{\inss, \param}{}\!|_{\param = \param_{k-1}},
+    \label{eq:sg}
+\end{equation}
+where $\minibatch \subset \ins$ is a mini-batch of the original dataset, where
+$|\minibatch| \ll |\ins|$.
+
+Unfortunately some objective functions to not entirely decompose over the data,
+i.e. 
+\begin{equation}
+    \func{\ins, \param}{} = \sum_{\inss \in \ins} \func{\inss, \param}{}
+    + \ofunc{g}{\param}{}.
+    \label{eq:objwconst}
+\end{equation}
+Let $M = |\minibatch|$ and $N = |\ins|$, then we divide the contribution of the
+constant term amongst the mini-batches in stochastic gradients,
+\begin{equation}
+    \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \minibatch}
+    \nabla_{\param} \func{\inss, \param}{}\!|_{\param = \param_{k-1}}
+    - \lrate_k \frac{M}{N} \nabla_{\param} 
+    \ofunc{g}{\param}{}\!|_{\param = \param_{k-1}}.
+    \label{eq:wsg}
+\end{equation} 
+This is particularly relevant for variational inference where the evidence
+lower bound objective has a component independent of the data. For example, 
+lets consider the model,
+\begin{align}
+    \text{Likelihood:} \quad &\prod^N_{n=1} \probC{\targs_n}{\param}, \\
+    \text{prior:} \quad &\probC{\param}{\hyper},
+\end{align}
+where we want to learn the values of the hyper-parameters, $\hyper$. Minimising
+negative log-marginal likelihood is a good objective in this instance, since we
+don't care about the value(s) of $\param$,
+\begin{equation}
+    \argmin_\hyper - \log \int \prod^N_{n=1} \probC{\targs_n}{\param}
+    \probC{\param}{\hyper} d \param.
+    \label{eq:lml}
+\end{equation}
+There are two problems with this objective however, (1) it may not factor over
+data and (2) the integral may be intractable, like if the prior and likelihood
+are not conjugate. In variational inference we use Jensen's inequality to
+lower-bound log-marginal likelihood with a tractable objective function called
+the evidence lower bound (ELBO),
+\begin{align}
+    \log \probC{\targ}{\hyper} =& \log \int 
+        \prod^N_{n=1} \probC{\targs_n}{\param} 
+        \probC{\param}{\hyper} d \param \nonumber \\
+        =& \log \int 
+        \frac{\prod_n \probC{\targs_n}{\param} \probC{\param}{\hyper}}
+        {\qrob{\param}} \qrob{\param} d \param \nonumber \\
+        \geq& \int \qrob{\param} \log \sbrac{%
+            \frac{\prod_n \probC{\targs_n}{\param} 
+            \probC{\param}{\hyper}}{\qrob{\param}}}
+        d \param
+\end{align}
+where $\qrob{\param}$ is an approximation of $\probC{\param}{\hyper}$ that 
+makes inference easier. This can be re-written as,
+\begin{equation}
+    \elbo = \sum^N_{n=1} \expec{q}{\log\probC{\targs_n}{\param}} -
+    \KL{\qrob{\param}}{\probC{\param}{\hyper}},
+    \label{eq:elbo}
+\end{equation}
+which takes the form of Equation~\eqref{eq:objwconst}, and so we can weight the
+Kullback-Leibler term like the constant term, $\ofunc{g}{\cdot}{}$, from
+Equation~\eqref{eq:wsg} if we use stochastic gradients optimisation.
+Furthermore, if $\qrob{\param} = \probC{\param}{\hyper}$ then the lower bound
+is tight, and this will be equivalent to optimising log-marginal likelihood.
+
 
 \subsection{Bayesian Linear Regression}
 
+Quick summary of this using the elbo as an objective, can distribute the
+computation, but we still have to invert a matrix, unless we approximate the
+posterior. This leads onto the next section.
+
 \subsection{Bayesian Generalised Linear Models}
+
+A modification of the GLM in~\cite{gershman2012} to make it work with
+stochastic gradients.
 
 \subsection{Large Scale Gaussian Process Approximation}
 
+\subsubsection{With Bayesian Linear Regression}
+
+i.e.\ A la Carte~\cite{yang2014}
+
+we still need to invert a $D \times D$ matrix with stochastic gradients, so
+\bigo{D^3}, but that is where the GLM comes in.
+
+\subsubsection{With Bayesian GLMs}
+
+We only have to invert $K$ diagonal matrices of dimension $D \times D$, so
+\bigo{KD}.
+
 \section{Feature Composition Framework}
 
-\section{Apache Spark Bindings}
-
 \section{Future Functionality}
+
+\printbibliography%
 
 \end{document}

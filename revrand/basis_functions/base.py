@@ -16,6 +16,7 @@ from scipy.spatial.distance import cdist
 
 from ..optimize import Positive
 from ..linalg import hadamard
+from ..utils import safediv
 
 # TODO:
 # - Remove the need to bases to know their params bounds, see #54 and #55
@@ -411,7 +412,8 @@ class RadialBasis(Basis):
         if self.D != D:
             raise ValueError("X has inconsistent dimensionality!")
 
-        return np.exp(- cdist(X, self.C, 'sqeuclidean') / (2 * lenscale**2))
+        return np.exp(- safediv(cdist(X, self.C, 'sqeuclidean'),
+                                (2 * lenscale**2)))
 
     @slice_call
     def grad(self, X, lenscale):
@@ -434,7 +436,8 @@ class RadialBasis(Basis):
             raise ValueError("X has inconsistent dimensionality!")
 
         sdist = cdist(X, self.C, 'sqeuclidean')
-        dPhi = np.exp(- sdist / (2 * lenscale**2)) * sdist / lenscale**3
+        dPhi = np.exp(- safediv(sdist, 2 * lenscale**2)) \
+            * safediv(sdist, lenscale**3)
 
         return dPhi
 
@@ -489,7 +492,7 @@ class SigmoidalBasis(Basis):
             raise ValueError("Expected X of dimensionality {0}, got {1}"
                              .format(self.D, D))
 
-        return expit(cdist(X, self.C, 'seuclidean') / lenscale)
+        return expit(safediv(cdist(X, self.C, 'seuclidean'), lenscale))
 
     @slice_call
     def grad(self, X, lenscale):
@@ -521,9 +524,9 @@ class SigmoidalBasis(Basis):
 
         dist = cdist(X, self.C, 'seuclidean')
 
-        sigma = expit(dist / lenscale)
+        sigma = expit(safediv(dist, lenscale))
 
-        dPhi = - dist * sigma * (1 - sigma) / lenscale**2
+        dPhi = - dist * sigma * safediv((1 - sigma), lenscale**2)
 
         return dPhi
 
@@ -572,7 +575,7 @@ class RandomRBF(RadialBasis):
         N, D = X.shape
         self._checkD(D)
 
-        WX = np.dot(X, self.W / lenscale)
+        WX = np.dot(X, safediv(self.W, lenscale))
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
@@ -595,8 +598,8 @@ class RandomRBF(RadialBasis):
         N, D = X.shape
         self._checkD(D)
 
-        WX = np.dot(X, self.W / lenscale)
-        dWX = WX / lenscale
+        WX = np.dot(X, safediv(self.W, lenscale))
+        dWX = safediv(WX, lenscale)
 
         return np.hstack((dWX * np.sin(WX), -dWX * np.cos(WX))) \
             / np.sqrt(self.n)
@@ -647,7 +650,7 @@ class RandomRBF_ARD(RandomRBF):
         N, D = X.shape
         self._checkD(D, len(lenscales))
 
-        WX = np.dot(X, self.W / np.asarray(lenscales)[:, np.newaxis])
+        WX = np.dot(X, safediv(self.W, lenscales[:, np.newaxis]))
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
@@ -670,13 +673,13 @@ class RandomRBF_ARD(RandomRBF):
         N, D = X.shape
         self._checkD(D, len(lenscales))
 
-        WX = np.dot(X, self.W / np.asarray(lenscales)[:, np.newaxis])
+        WX = np.dot(X, safediv(self.W, lenscales[:, np.newaxis]))
         sinWX = - np.sin(WX)
         cosWX = np.cos(WX)
 
         dPhi = []
         for i, l in enumerate(lenscales):
-            dWX = np.outer(X[:, i], - 1. / l**2 * self.W[i, :])
+            dWX = np.outer(X[:, i], - safediv(self.W[i, :], l**2))
             dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX))
                         / np.sqrt(self.n))
 
@@ -746,7 +749,7 @@ class FastFood(RandomRBF):
 
         self._checkD(X.shape[1])
 
-        VX = self.__makeVX(X) / lenscale
+        VX = safediv(self.__makeVX(X), lenscale)
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
         return Phi
 
@@ -769,8 +772,8 @@ class FastFood(RandomRBF):
 
         self._checkD(X.shape[1])
 
-        VX = self.__makeVX(X) / lenscale
-        dVX = - VX / lenscale
+        VX = safediv(self.__makeVX(X), lenscale)
+        dVX = - safediv(VX, lenscale)
 
         return np.hstack((-dVX * np.sin(VX), dVX * np.cos(VX))) \
             / np.sqrt(self.n)
