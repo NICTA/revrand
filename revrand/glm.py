@@ -173,7 +173,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
             df[:, k] = B * likelihood.df(y, f[:, k], *_lpars)
             d2f[:, k] = B * likelihood.d2f(y, f[:, k], *_lpars)
             d3f[:, k] = B * likelihood.d3f(y, f[:, k], *_lpars)
-            H[:, k] = d2f[:, k].dot(Phi2) - 1. * ireg
+            H[:, k] = d2f[:, k].dot(Phi2) - ireg
 
             # Posterior mean and covariance gradients
             mkmj = _m[:, k][:, np.newaxis] - _m
@@ -191,7 +191,7 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
                                + 0.5 * (_C[:, k] * dp2df.dot(Phi2)).sum()) / K
 
         # Regulariser gradient
-        dreg = (((_m**2).sum() + _C.sum()) * ireg**2 - D * K * ireg) / (2 * K)
+        dreg = 0.5 * (((_m**2).sum() + _C.sum()) * ireg**2 / K - D * ireg)
 
         # Basis function parameter gradients
         def dtheta(dPhi):

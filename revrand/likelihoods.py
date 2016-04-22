@@ -10,15 +10,7 @@ from scipy.stats import bernoulli, poisson, norm
 from scipy.special import gammaln, expit
 
 from .optimize import Positive
-from .math.special import safesoftplus, safediv, softplus
-
-
-#
-# Module constants
-#
-
-tiny = np.finfo(float).tiny
-logtiny = np.log(tiny)
+from .math.special import safesoftplus, safediv, softplus, logtiny
 
 
 #
@@ -383,7 +375,8 @@ class Gaussian(Bernoulli):
                 where :math:`sigma^2` is the variance.
         """
 
-        return 0.5 * (safediv(y - f, var)**2 - safediv(1., var))
+        ivar = safediv(1., var)
+        return 0.5 * (((y - f) * ivar)**2 - ivar)
 
     def dpd2f(self, y, f, var):
         """
