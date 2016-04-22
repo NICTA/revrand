@@ -23,7 +23,7 @@
 
 % Preamble
 \title{\sffamily{\emph{revrand}: Technical Report}}
-\author{Daniel Steinberg, Louis Tiao, Dave Cole\\ 
+\author{Daniel Steinberg, Louis Tiao \\
     Data61 $|$ CSIRO \\
     email: \texttt{\{firstname.lastname\}@data61.csiro.au}
 }
@@ -140,6 +140,14 @@ is tight, and this will be equivalent to optimising log-marginal likelihood.
 
 
 \subsection{Bayesian Linear Regression}
+
+The first machine learning algorithm in revrand is a simple Bayesian linear
+regressor of the following form,
+\begin{align}
+    \text{Likelihood:} \quad &\prod^N_{n=1} \probC{\targs_n}{\param}, \\
+    \text{prior:} \quad &\probC{\param}{\hyper},
+\end{align}
+
 
 Quick summary of this using the elbo as an objective, can distribute the
 computation, but we still have to invert a matrix, unless we approximate the

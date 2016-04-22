@@ -28,8 +28,8 @@ from .basis_functions import apply_grad
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
-          tol=1e-6, maxit=1000, verbose=True):
+def learn(X, y, basis, bparams, var=1., regulariser=1., tol=1e-6, maxit=1000,
+          verbose=True):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
@@ -47,8 +47,6 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             observation variance initial value.
         regulariser: float, optional
             weight regulariser (variance) initial value.
-        diagcov: bool, optional
-            approximate posterior covariance with diagional matrix.
         verbose: bool, optional
             log learning status.
         tol: float, optional
@@ -62,7 +60,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
             (D,) array of posterior weight means (D is the dimension of the
             features).
         C: ndarray
-            (D,) array of posterior weight variances.
+            (D, D) array of posterior weight variances.
         bparams: sequence
             learned sequence of basis object hyperparameters.
         float:
@@ -83,7 +81,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
     # Caches for returning optimal params
     ELBOcache = [-np.inf]
     mcache = np.zeros(D)
-    Ccache = np.zeros(D) if diagcov else np.zeros((D, D))
+    Ccache = np.zeros((D, D))
 
     def ELBO(_var, _lambda, *_theta):
 
@@ -99,21 +97,13 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
         lower = False
         LiC = jitchol(np.diag(np.ones(D) * ilambda) + PhiPhi * ivar,
                       lower=lower)
-        m = cho_solve((LiC, lower), Phi.T.dot(y)) * ivar
+        C = cho_solve((LiC, lower), np.eye(D))
+        m = C.dot(Phi.T.dot(y)) * ivar
 
-        # Common calcs dependent on form of C
-        if diagcov:
-            C = 1. / (PhiPhi.diagonal() * ivar + ilambda)
-            TrPhiPhiC = (PhiPhi.diagonal() * C).sum()
-            logdetC = np.log(C).sum()
-            TrC = C.sum()
-        else:
-            C = cho_solve((LiC, lower), np.eye(D))
-            TrPhiPhiC = (PhiPhi * C).sum()
-            logdetC = -cho_log_det(LiC)
-            TrC = np.trace(C)
-
-        # Common computations
+        # Common calcs
+        TrPhiPhiC = (PhiPhi * C).sum()
+        logdetC = -cho_log_det(LiC)
+        TrC = np.trace(C)
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
         mm = (m**2).sum()
@@ -149,8 +139,8 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., diagcov=False,
 
         # Get structured basis function gradients
         def dtheta(dPhi):
-            dPhiPhi = (dPhi * Phi).sum(axis=0) if diagcov else dPhi.T.dot(Phi)
-            return - (m.T.dot(Err.dot(dPhi)) - (dPhiPhi * C).sum()) * ivar
+            return - (m.T.dot(Err.dot(dPhi)) 
+                      - (dPhi.T.dot(Phi) * C).sum()) * ivar
 
         dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
 
@@ -183,7 +173,7 @@ def predict(Xs, basis, m, C, bparams, var):
         m: ndarray
             (D,) array of regression weights (posterior).
         C: ndarray
-            (D,) or (D, D) array of regression weight covariances (posterior).
+            (D, D) array of regression weight covariances (posterior).
         bparams: sequence
             A sequence of hyperparameters of the basis object.
         var: float
@@ -205,9 +195,6 @@ def predict(Xs, basis, m, C, bparams, var):
     Phi_s = basis(Xs, *bparams)
 
     Ey = Phi_s.dot(m)
-    if C.ndim == 2:
-        Vf = (Phi_s.dot(C) * Phi_s).sum(axis=1)
-    else:
-        Vf = ((Phi_s * C) * Phi_s).sum(axis=1)
+    Vf = (Phi_s.dot(C) * Phi_s).sum(axis=1)
 
     return Ey, Vf, Vf + var

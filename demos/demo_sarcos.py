@@ -30,7 +30,6 @@ batchsize = 100
 rank = 0
 
 useSGD = True
-diagcov = True
 
 
 #
@@ -72,8 +71,7 @@ if useSGD:
 else:
     log.info("Using full variational regressor")
     params = regression.learn(X_train, y_train, base, lenARD,
-                              var=noise**2, diagcov=diagcov,
-                              regulariser=regulariser)
+                              var=noise**2, regulariser=regulariser)
 
 
 #
