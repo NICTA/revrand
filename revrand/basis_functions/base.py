@@ -15,8 +15,8 @@ from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
 from ..optimize import Positive
-from ..linalg import hadamard
-from ..utils import safediv
+from ..math.linalg import hadamard
+from ..math.special import safediv
 
 # TODO:
 # - Remove the need to bases to know their params bounds, see #54 and #55

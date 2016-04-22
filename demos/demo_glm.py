@@ -9,7 +9,7 @@ from scipy.special import expit
 
 from revrand import basis_functions, glm, likelihoods
 from revrand.utils.datasets import gen_gausprocess_se
-from revrand.utils import softplus
+from revrand.math.special import softplus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

@@ -18,8 +18,9 @@ import logging
 from scipy.optimize import minimize
 from scipy.linalg import cho_solve
 
-from .utils import append_or_extend, safediv
-from .linalg import jitchol, cho_log_det
+from .utils import append_or_extend 
+from .math.linalg import jitchol, cho_log_det
+from .math.special import safediv
 from .optimize import Positive, structured_minimizer, logtrick_minimizer
 from .basis_functions import apply_grad
 

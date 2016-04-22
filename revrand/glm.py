@@ -15,7 +15,8 @@ from multiprocessing import Pool
 from scipy.stats.distributions import gamma
 from scipy.optimize import brentq, minimize
 
-from .utils import couple, append_or_extend, atleast_list, logsumexp, safediv
+from .utils import couple, append_or_extend, atleast_list
+from .math.special import logsumexp, safediv
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
     logtrick_minimizer, Bound, Positive, AdaDelta

@@ -10,7 +10,7 @@ from scipy.stats import bernoulli, poisson, norm
 from scipy.special import gammaln, expit
 
 from .optimize import Positive
-from .utils import safesoftplus, safediv, softplus
+from .math.special import safesoftplus, safediv, softplus
 
 
 #

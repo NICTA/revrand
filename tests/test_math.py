@@ -2,7 +2,7 @@ from __future__ import division
 
 import numpy as np
 
-import revrand.utils.math as tfms
+import revrand.math.special as tfms
 
 
 def test_logsumexp():

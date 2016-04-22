@@ -1,8 +1,9 @@
-""" Safe numerical operations. """
+""" Special Numerical Operations. """
 
 from __future__ import division
 
 import numpy as np
+
 
 #
 # Module constants
@@ -10,6 +11,7 @@ import numpy as np
 
 eps = np.finfo(float).eps
 tiny = np.finfo(float).tiny
+logtiny = np.log(tiny)
 small = 1e-100
 
 
@@ -123,7 +125,7 @@ def softplus(X):
 
 
 #
-# Numerically "safe" functions 
+# Numerically "safe" functions
 #
 
 def safediv(num, den, min_den=eps):
