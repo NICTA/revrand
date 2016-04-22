@@ -4,7 +4,7 @@
 \usepackage{sectsty}
 \usepackage{hyperref}
 \usepackage{xcolor}
-\usepackage{mathtools}
+\usepackage{mathtools, amsfonts}
 
 % Package config
 \sectionfont{\normalfont\sffamily\bfseries}
@@ -144,14 +144,42 @@ is tight, and this will be equivalent to optimising log-marginal likelihood.
 The first machine learning algorithm in revrand is a simple Bayesian linear
 regressor of the following form,
 \begin{align}
-    \text{Likelihood:} \quad &\prod^N_{n=1} \probC{\targs_n}{\param}, \\
-    \text{prior:} \quad &\probC{\param}{\hyper},
+    \text{Likelihood:} \quad &\prod^N_{n=1} 
+    \gausC{\targs_n}{\feats_n\T\weights, \var}, \\
+    \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \reg\ident{D}},
 \end{align}
+where $\feats_n := \ofunc{\featfunc}{\inss_n, \param}{}$ is a feature function
+that $\featfunc: \real{d} \to \real{D}$. This is, for all intents and purposes
+the same algorithm described in~\cite[Chapter 2]{Rasmussen2006}.
 
+We then:
+\begin{itemize}
+    \item Solve analytically for the posterior over weights, $\weights | \targ
+        \sim \gaus{\pomean, \pocov}$,
+    \item Optimise $\var, \reg$ and $\param$ w.r.t.\ log-marginal likelihood,
+        which is tractable,
+    \item Use the (analytically solvable) predictive distribution
+        \begin{equation}
+            \probC{\targs\test}{\targ, \ins, \inss\test} = \int
+            \gausC{\targs\test}{\feats\testT\weights, \var}
+            \gausC{\weights}{\pomean, \pocov} d\weights
+        \end{equation}
+        for query inputs, $\inss\test$.
+\end{itemize}
 
-Quick summary of this using the elbo as an objective, can distribute the
-computation, but we still have to invert a matrix, unless we approximate the
-posterior. This leads onto the next section.
+It is actually easier to use the ELBO form with stochastic gradients for
+learning the parameters of this algorithm, rather than log-marginal likelihood.
+This is simply because it is plainly in the same form as Equation
+\eqref{eq:objwconst}, though it would give the same result as log-marginal
+likelihood, since no approximation is made about the posterior.
+
+We have not implemented a stochastic gradient version of this algorithm since
+it still requires a matrix solve involving a $D \times D$ matrix, and so is
+\bigo{D^3} in complexity, per iteration. This is true even if we optimise the
+posterior covariance directly (or some triangular form). The GLM presented in
+the next section circumvents this issue, and is more suited to really large $N$
+and $D$ problems.
+
 
 \subsection{Bayesian Generalised Linear Models}
 
