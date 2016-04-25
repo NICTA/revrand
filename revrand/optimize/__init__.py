@@ -5,8 +5,8 @@ and also supports custom optimization methods.
 """
 
 from .sgd import sgd, AdaDelta, AdaGrad, Momentum
-from .base import (Bound, Positive,
-                   minimize_bounded_start,
+from .btypes import Bound, Positive
+from .base import (minimize_bounded_start,
                    structured_minimizer,
                    structured_sgd,
                    logtrick_minimizer,
