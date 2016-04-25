@@ -52,19 +52,15 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
     """
 
     def __new__(cls, lower=None, upper=None, shape=()):
-        # Shape is unused, but we have to have the same signature as the init
-        # We need new because named tuples are immutable
 
         if lower is not None and upper is not None:
             if lower > upper:
                 raise ValueError('lower bound cannot be greater than upper '
                                  'bound!')
-        return super(Bound, cls).__new__(cls, lower, upper)
+        obj = super(Bound, cls).__new__(cls, lower, upper)
+        obj.shape = shape
 
-    def __init__(self, lower=None, upper=None, shape=()):
-        # This init is just for copying this class.
-
-        self.shape = shape
+        return obj
 
     def flatten(self):
 
@@ -84,9 +80,9 @@ class Positive(Bound):
 
     Parameters
     ---------
-    lower : float
-        The smallest value allowed for the optimiser to evaluate (if
-        not using the log trick).
+    upper : float
+        The largest value allowed for the optimiser to evaluate (if not using
+        the log trick).
 
     Examples
     --------
@@ -97,28 +93,15 @@ class Positive(Bound):
     Since ``tuple`` (and by extension its descendents) are immutable,
     the lower bound for all instances of ``Positive`` are guaranteed to
     be positive.
-
-    .. admonition::
-
-       Actually this is not totally true. Something like
-       ``b._replace(lower=-42)`` would actually thwart this. Should
-       delete this method from ``namedtuple`` when inheriting.
-
-    >>> c = Positive(lower=-10)
-    Traceback (most recent call last):
-        ...
-    ValueError: lower bound must be positive!
     """
-    def __new__(cls, lower=1e-14, shape=()):
+    def __new__(cls, upper=None, shape=()):
 
-        if lower <= 0:
-            raise ValueError('lower bound must be positive!')
-
-        return super(Positive, cls).__new__(cls, lower, None, shape)
+        return super(Positive, cls).__new__(cls, lower=1e-14, upper=upper,
+                                            shape=shape)
 
     def __getnewargs__(self):
         """Required for pickling!"""
-        return (self.lower,)
+        return (self.upper,)
 
 
 def candidate_start_points_random(bounds, n_candidates=1000,
@@ -746,7 +729,8 @@ def _logtrick_gen(bounds):
                                       for lxi, gi, pos in zip(logx, g, ispos)])
 
     # Redefine bounds as appropriate for new ranges
-    bounds = [Bound() if pos else b for b, pos in zip(bounds, ispos)]
+    bounds = [Bound(upper=np.log(b.upper) if b.upper is not None else None)
+              if pos else b for b, pos in zip(bounds, ispos)]
 
     return logx, expx, gradx, bounds
 
