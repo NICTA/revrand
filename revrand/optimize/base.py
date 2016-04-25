@@ -1,107 +1,11 @@
 import numpy as np
 
-from ..utils import flatten, unflatten
-from ..externals import check_random_state
-
-from collections import namedtuple
 from itertools import repeat
 from six import wraps
 
-
-class Bound(namedtuple('Bound', ['lower', 'upper'])):
-    """
-    Define bounds on a variable for the optimiser. This defaults to all
-    real values allowed (i.e. no bounds).
-
-    Parameters
-    ----------
-    lower : float
-        The lower bound.
-    upper : float
-        The upper bound.
-
-    Attributes
-    ----------
-    lower : float
-        The lower bound.
-    upper : float
-        The upper bound.
-
-    Examples
-    --------
-    >>> b = Bound(1e-10, upper=1e-5)
-    >>> b
-    Bound(lower=1e-10, upper=1e-05)
-    >>> b.lower
-    1e-10
-    >>> b.upper
-    1e-05
-    >>> isinstance(b, tuple)
-    True
-    >>> tuple(b)
-    (1e-10, 1e-05)
-    >>> lower, upper = b
-    >>> lower
-    1e-10
-    >>> upper
-    1e-05
-    >>> Bound(42, 10)
-    Traceback (most recent call last):
-        ...
-    ValueError: lower bound cannot be greater than upper bound!
-    """
-
-    def __new__(cls, lower=None, upper=None, shape=()):
-
-        if lower is not None and upper is not None:
-            if lower > upper:
-                raise ValueError('lower bound cannot be greater than upper '
-                                 'bound!')
-        obj = super(Bound, cls).__new__(cls, lower, upper)
-        obj.shape = shape
-
-        return obj
-
-    def flatten(self):
-
-        if self.shape == ():
-            return [self]
-
-        cpy = self.__class__(shape=())
-
-        return [cpy for _ in range(np.prod(self.shape))]
-
-
-class Positive(Bound):
-    """
-    Define a positive only bound for the optimiser. This may induce the
-    'log trick' in the optimiser (when using an appropriate decorator), which
-    will ignore the 'smallest' value (but will stay above 0).
-
-    Parameters
-    ---------
-    upper : float
-        The largest value allowed for the optimiser to evaluate (if not using
-        the log trick).
-
-    Examples
-    --------
-    >>> b = Positive()
-    >>> b # doctest: +SKIP
-    Positive(lower=1e-14, upper=None)
-
-    Since ``tuple`` (and by extension its descendents) are immutable,
-    the lower bound for all instances of ``Positive`` are guaranteed to
-    be positive.
-    """
-    def __new__(cls, upper=None, shape=()):
-
-        return super(Positive, cls).__new__(cls, lower=1e-14, upper=upper,
-                                            shape=shape)
-
-    def __getnewargs__(self):
-        """Required for pickling!"""
-        return (self.upper,)
+from ..utils import flatten, unflatten
+from ..externals import check_random_state
+from .btypes import Bound, Positive
 
 
 def candidate_start_points_random(bounds, n_candidates=1000,
@@ -343,95 +247,6 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     return minimize_bounded_start_dec
 
 
-def flatten_func_grad(func):
-    """
-    Examples
-    --------
-    >>> def cost(w, lambda_):
-    ...     sq_norm = w.T.dot(w)
-    ...     return .5 * lambda_ * sq_norm, [lambda_ * w, .5 * sq_norm]
-    >>> val, grad = cost(np.array([.5, .1, -.2]), .25)
-
-    >>> np.isclose(val, 0.0375)
-    True
-
-    >>> len(grad)
-    2
-    >>> grad_w, grad_lambda = grad
-    >>> np.shape(grad_w)
-    (3,)
-    >>> np.shape(grad_lambda)
-    ()
-    >>> grad_w
-    array([ 0.125,  0.025, -0.05 ])
-    >>> np.isclose(grad_lambda, 0.15)
-    True
-
-    >>> cost_new = flatten_func_grad(cost)
-    >>> val_new, grad_new = cost_new(np.array([.5, .1, -.2]), .25)
-    >>> val == val_new
-    True
-    >>> grad_new
-    array([ 0.125,  0.025, -0.05 ,  0.15 ])
-    """
-    @wraps(func)
-    def new_func(*args, **kwargs):
-        val, grad = func(*args, **kwargs)
-        return val, flatten(grad, returns_shapes=False)
-
-    return new_func
-
-
-def flatten_args(shapes, order='C'):
-    """
-    Examples
-    --------
-    >>> @flatten_args([(5,), ()])
-    ... def f(w, lambda_):
-    ...     return .5 * lambda_ * w.T.dot(w)
-    >>> np.isclose(f(np.array([2., .5, .6, -.2, .9, .2])), .546)
-    True
-
-    >>> w = np.array([2., .5, .6, -.2, .9])
-    >>> lambda_ = .2
-    >>> np.isclose(.5 * lambda_ * w.T.dot(w), .546)
-    True
-
-    Some other curious applications
-
-    >>> from operator import mul
-    >>> flatten_args_dec = flatten_args([(), (3,)])
-    >>> func = flatten_args_dec(mul)
-    >>> func(np.array([3.1, .6, 1.71, -1.2]))
-    array([ 1.86 ,  5.301, -3.72 ])
-    >>> 3.1 * np.array([.6, 1.71, -1.2])
-    array([ 1.86 ,  5.301, -3.72 ])
-
-    >>> flatten_args_dec = flatten_args([(9,), (15,)])
-    >>> func = flatten_args_dec(np.meshgrid)
-    >>> x, y = func(np.arange(-5, 7, .5)) # 7 - (-5) / 0.5 = 24 = 9 + 15
-    >>> x.shape
-    (15, 9)
-    >>> x[0, :]
-    array([-5. , -4.5, -4. , -3.5, -3. , -2.5, -2. , -1.5, -1. ])
-    >>> y.shape
-    (15, 9)
-    >>> y[:, 0]
-    array([-0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5,  3. ,  3.5,  4. ,  4.5,
-            5. ,  5.5,  6. ,  6.5])
-    """
-    def flatten_args_dec(func):
-
-        @wraps(func)
-        def new_func(array1d, *args, **kwargs):
-            args = tuple(unflatten(array1d, shapes, order)) + args
-            return func(*args, **kwargs)
-
-        return new_func
-
-    return flatten_args_dec
-
-
 def structured_minimizer(minimizer):
     """
     Allow an optimizer to accept a list of parameters to optimize, rather than
@@ -469,7 +284,7 @@ def structured_minimizer(minimizer):
 
         array1d, shapes = flatten(ndarrays)
         fbounds = _flatten_bounds(bounds)
-        flatten_args_dec = flatten_args(shapes)
+        flatten_args_dec = _flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
 
@@ -478,7 +293,7 @@ def structured_minimizer(minimizer):
         else:
             new_jac = jac
             if bool(jac):
-                new_fun = flatten_func_grad(new_fun)
+                new_fun = _flatten_func_grad(new_fun)
 
         result = minimizer(new_fun, array1d, jac=new_jac, bounds=fbounds,
                            *minimizer_args, **minimizer_kwargs)
@@ -541,12 +356,12 @@ def structured_sgd(sgd):
 
         array1d, shapes = flatten(ndarrays)
         fbounds = _flatten_bounds(bounds)
-        flatten_args_dec = flatten_args(shapes)
+        flatten_args_dec = _flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
 
         if bool(eval_obj):
-            new_fun = flatten_func_grad(new_fun)
+            new_fun = _flatten_func_grad(new_fun)
         else:
             new_fun = flatten(new_fun, returns_shapes=False)
 
@@ -753,3 +568,89 @@ def _flatten_bounds(bounds):
     unwrap(flat_bounds, bounds)
 
     return flat_bounds
+
+
+def _flatten_func_grad(func):
+    """
+    Examples
+    --------
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return .5 * lambda_ * sq_norm, [lambda_ * w, .5 * sq_norm]
+    >>> val, grad = cost(np.array([.5, .1, -.2]), .25)
+
+    >>> np.isclose(val, 0.0375)
+    True
+
+    >>> len(grad)
+    2
+    >>> grad_w, grad_lambda = grad
+    >>> np.shape(grad_w)
+    (3,)
+    >>> np.shape(grad_lambda)
+    ()
+    >>> grad_w
+    array([ 0.125,  0.025, -0.05 ])
+    >>> np.isclose(grad_lambda, 0.15)
+    True
+
+    >>> cost_new = _flatten_func_grad(cost)
+    >>> val_new, grad_new = cost_new(np.array([.5, .1, -.2]), .25)
+    >>> val == val_new
+    True
+    >>> grad_new
+    array([ 0.125,  0.025, -0.05 ,  0.15 ])
+    """
+    @wraps(func)
+    def new_func(*args, **kwargs):
+        val, grad = func(*args, **kwargs)
+        return val, flatten(grad, returns_shapes=False)
+
+    return new_func
+
+
+def _flatten_args(shapes, order='C'):
+    """
+    Examples
+    --------
+    >>> @_flatten_args([(5,), ()])
+    ... def f(w, lambda_):
+    ...     return .5 * lambda_ * w.T.dot(w)
+    >>> np.isclose(f(np.array([2., .5, .6, -.2, .9, .2])), .546)
+    True
+    >>> w = np.array([2., .5, .6, -.2, .9])
+    >>> lambda_ = .2
+    >>> np.isclose(.5 * lambda_ * w.T.dot(w), .546)
+    True
+
+    Some other curious applications
+    >>> from operator import mul
+    >>> flatten_args_dec = _flatten_args([(), (3,)])
+    >>> func = flatten_args_dec(mul)
+    >>> func(np.array([3.1, .6, 1.71, -1.2]))
+    array([ 1.86 ,  5.301, -3.72 ])
+    >>> 3.1 * np.array([.6, 1.71, -1.2])
+    array([ 1.86 ,  5.301, -3.72 ])
+    >>> flatten_args_dec = _flatten_args([(9,), (15,)])
+    >>> func = flatten_args_dec(np.meshgrid)
+    >>> x, y = func(np.arange(-5, 7, .5)) # 7 - (-5) / 0.5 = 24 = 9 + 15
+    >>> x.shape
+    (15, 9)
+    >>> x[0, :]
+    array([-5. , -4.5, -4. , -3.5, -3. , -2.5, -2. , -1.5, -1. ])
+    >>> y.shape
+    (15, 9)
+    >>> y[:, 0]
+    array([-0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5,  3. ,  3.5,  4. ,  4.5,
+            5. ,  5.5,  6. ,  6.5])
+    """
+    def flatten_args_dec(func):
+
+        @wraps(func)
+        def new_func(array1d, *args, **kwargs):
+            args = tuple(unflatten(array1d, shapes, order)) + args
+            return func(*args, **kwargs)
+
+        return new_func
+
+    return flatten_args_dec
