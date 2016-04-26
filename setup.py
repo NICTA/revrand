@@ -42,13 +42,13 @@ setup(
         'numpy >= 1.8.2',
         'six >= 1.9.0',
         'decorator >= 4.0.9'
-        # NLopt >= 2.4.2
     ],
     extras_require={
-        # 'nonlinear': ['NLopt'],
         'demos': [
             'unipath',
             'requests',
+            'matplotlib',
+            'scikit-learn'
         ],
     },
     license="Apache Software License 2.0",
