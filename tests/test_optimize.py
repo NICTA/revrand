@@ -1,11 +1,11 @@
 from __future__ import division
-# from warnings import warn
 
 import numpy as np
 from scipy.optimize import minimize
 
 from revrand.optimize import sgd, structured_minimizer, logtrick_minimizer, \
-    structured_sgd, logtrick_sgd, Bound, Positive, AdaDelta, Momentum, AdaGrad
+    structured_sgd, logtrick_sgd, AdaDelta, Momentum, AdaGrad
+from revrand.btypes import Bound, Positive, Parameter
 from revrand.utils import flatten
 
 
@@ -13,8 +13,6 @@ def test_unbounded(make_quadratic):
 
     a, b, c, data, _ = make_quadratic
     w0 = np.random.randn(3)
-
-    # import IPython; IPython.embed()
 
     assert_opt = lambda Ea, Eb, Ec: \
         np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
@@ -55,26 +53,25 @@ def test_bounded(make_quadratic):
 def test_structured_params(make_quadratic):
 
     a, b, c, data, _ = make_quadratic
-    w0 = [np.random.randn(2), np.random.randn(1)[0]]
+    w0 = [Parameter(np.random.randn(2), Bound()),
+          Parameter(np.random.randn(1), Bound())
+          ]
 
     qobj_struc = lambda w12, w3, data: q_struc(w12, w3, data, qobj)
     assert_opt = lambda Eab, Ec: \
         np.allclose((a, b, c), (Eab[0], Eab[1], Ec), atol=1e-3, rtol=0)
 
     nmin = structured_minimizer(minimize)
-    res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=None,
-               method='L-BFGS-B')
+    res = nmin(qobj_struc, w0, args=(data,), jac=True, method='L-BFGS-B')
     assert_opt(*res.x)
 
     nsgd = structured_sgd(sgd)
-    res = nsgd(qobj_struc, w0, data, bounds=None, eval_obj=True, gtol=1e-4,
-               passes=1000)
+    res = nsgd(qobj_struc, w0, data, eval_obj=True, gtol=1e-4, passes=1000)
     assert_opt(*res.x)
 
     qf_struc = lambda w12, w3, data: q_struc(w12, w3, data, qfun)
     qg_struc = lambda w12, w3, data: q_struc(w12, w3, data, qgrad)
-    res = nmin(qf_struc, w0, args=(data,), jac=qg_struc, bounds=None,
-               method='L-BFGS-B')
+    res = nmin(qf_struc, w0, args=(data,), jac=qg_struc, method='L-BFGS-B')
     assert_opt(*res.x)
 
 
@@ -83,49 +80,49 @@ def test_log_params(make_quadratic):
     a, b, c, data, _ = make_quadratic
     w0 = np.abs(np.random.randn(3))
     bounds = [Positive(), Bound(), Positive()]
+
     assert_opt = lambda Ea, Eb, Ec: \
         np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
     nmin = logtrick_minimizer(minimize)
-    res = nmin(qobj, w0, args=(data,), jac=True, bounds=bounds,
-               method='L-BFGS-B')
+    res = nmin(qobj, w0, args=(data,), jac=True, method='L-BFGS-B',
+               bounds=bounds)
     assert_opt(*res.x)
 
     nsgd = logtrick_sgd(sgd)
-    res = nsgd(qobj, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
-               passes=1000)
+    res = nsgd(qobj, w0, data, eval_obj=True, gtol=1e-4, passes=1000,
+               bounds=bounds)
     assert_opt(*res.x)
 
     nmin = logtrick_minimizer(minimize)
-    res = nmin(qfun, w0, args=(data,), jac=qgrad, bounds=bounds,
-               method='L-BFGS-B')
+    res = nmin(qfun, w0, args=(data,), jac=qgrad, method='L-BFGS-B',
+               bounds=bounds)
     assert_opt(*res.x)
 
 
 def test_logstruc_params(make_quadratic):
 
     a, b, c, data, _ = make_quadratic
-    w0 = [np.abs(np.random.randn(2)), np.abs(np.random.randn(1))[0]]
-    bounds = [Positive(shape=(2,)), Bound()]
+
+    w0 = [Parameter(np.random.randn(2), Positive()),
+          Parameter(np.random.randn(1), Bound())
+          ]
 
     qobj_struc = lambda w12, w3, data: q_struc(w12, w3, data, qobj)
     assert_opt = lambda Eab, Ec: \
         np.allclose((a, b, c), (Eab[0], Eab[1], Ec), atol=1e-3, rtol=0)
 
     nmin = structured_minimizer(logtrick_minimizer(minimize))
-    res = nmin(qobj_struc, w0, args=(data,), jac=True, bounds=bounds,
-               method='L-BFGS-B')
+    res = nmin(qobj_struc, w0, args=(data,), jac=True, method='L-BFGS-B')
     assert_opt(*res.x)
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
-    res = nsgd(qobj_struc, w0, data, bounds=bounds, eval_obj=True, gtol=1e-4,
-               passes=1000)
+    res = nsgd(qobj_struc, w0, data, eval_obj=True, gtol=1e-4, passes=1000)
     assert_opt(*res.x)
 
     qf_struc = lambda w12, w3, data: q_struc(w12, w3, data, qfun)
     qg_struc = lambda w12, w3, data: q_struc(w12, w3, data, qgrad)
-    res = nmin(qf_struc, w0, args=(data,), jac=qg_struc, bounds=None,
-               method='L-BFGS-B')
+    res = nmin(qf_struc, w0, args=(data,), jac=qg_struc, method='L-BFGS-B')
     assert_opt(*res.x)
 
 

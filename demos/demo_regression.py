@@ -7,9 +7,11 @@ import revrand.legacygp.kernels as kern
 import numpy as np
 import logging
 
-from revrand import basis_functions, regression, glm, likelihoods
+from revrand import regression  # , glm, likelihoods
 from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
+from revrand.btypes import Parameter, Positive
+from revrand import basis_functions as bs
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -47,12 +49,12 @@ def main():
     lenscale_true = 0.7  # For the gpdraw dataset
     noise_true = 0.1
 
-    basis = 'RKS'
+    # basis = 'RKS'
     # basis = 'FF'
     # basis = 'RBF'
     # basis = 'Linear'
     # basis = 'Poly'
-    # basis = 'Combo'
+    basis = 'Combo'
 
     #
     # Make Data
@@ -78,20 +80,23 @@ def main():
     # Make Bases
     #
 
+    plen = Parameter(lenscale, Positive())
+    plen2 = Parameter(lenscale2, Positive())
+
     if basis == 'FF':
-        base = basis_functions.FastFood(nbases, Xtrain.shape[1])
+        base = bs.FastFood(nbases, Xtrain.shape[1], plen)
     elif basis == 'RKS':
-        base = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
+        base = bs.RandomRBF(nbases, Xtrain.shape[1], plen)
     elif basis == 'RBF':
-        base = basis_functions.RadialBasis(Xtrain)
+        base = bs.RadialBasis(Xtrain, plen)
     elif basis == 'Linear':
-        base = basis_functions.LinearBasis(onescol=True)
+        base = bs.LinearBasis(onescol=True)
     elif basis == 'Poly':
-        base = basis_functions.PolynomialBasis(order)
+        base = bs.PolynomialBasis(order)
     elif basis == 'Combo':
-        base1 = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
-        base2 = basis_functions.LinearBasis(onescol=True)
-        base3 = basis_functions.FastFood(nbases, Xtrain.shape[1])
+        base1 = bs.RandomRBF(nbases, Xtrain.shape[1], plen)
+        base2 = bs.LinearBasis(onescol=True)
+        base3 = bs.FastFood(nbases, Xtrain.shape[1], plen2)
         base = base1 + base2 + base3
     else:
         raise ValueError('Invalid basis!')
@@ -100,17 +105,18 @@ def main():
     # Learn regression parameters and predict
     #
 
-    if basis == 'Linear' or basis == 'Poly':
-        hypers = []
-    elif basis == 'FF' or basis == 'RKS' or basis == 'RBF':
-        hypers = [lenscale]
-    elif basis == 'Combo':
-        hypers = [lenscale, lenscale2]
-    else:
-        raise ValueError('Invalid basis!')
+    # if basis == 'Linear' or basis == 'Poly':
+    #     hypers = []
+    # elif basis == 'FF' or basis == 'RKS' or basis == 'RBF':
+    #     hypers = [lenscale]
+    # elif basis == 'Combo':
+    #     hypers = [lenscale, lenscale2]
+    # else:
+    #     raise ValueError('Invalid basis!')
 
-    params_elbo = regression.learn(Xtrain, ytrain, base, hypers, var=noise**2,
-                                   regulariser=reg)
+    params_elbo = regression.learn(Xtrain, ytrain, base,
+                                   var=Parameter(noise**2, Positive()),
+                                   regulariser=Parameter(reg, Positive()))
     Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
@@ -118,15 +124,15 @@ def main():
     # Nonparametric variational inference GLM
     #
 
-    llhood = likelihoods.Gaussian()
-    lparams = [noise**2]
-    params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
-                           regulariser=reg, use_sgd=True, rho=rho, postcomp=10,
-                           epsilon=epsilon, batchsize=batchsize, maxit=passes)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
-                                               *params_glm)
-    Vy_g = Vf_g + params_glm[2][0]
-    Sy_g = np.sqrt(Vy_g)
+    # llhood = likelihoods.Gaussian()
+    # lparams = [noise**2]
+    # params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
+    #                        regulariser=reg, use_sgd=True, rho=rho, postcomp=10,
+    #                        epsilon=epsilon, batchsize=batchsize, maxit=passes)
+    # Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
+    #                                            *params_glm)
+    # Vy_g = Vf_g + params_glm[2][0]
+    # Sy_g = np.sqrt(Vy_g)
 
     #
     # Learn GP and predict
@@ -150,20 +156,20 @@ def main():
 
     LL_elbo = mll(ftest, Ey_e, Vy_e)
     LL_gp = mll(ftest, Ey_gp, Vy_gp)
-    LL_g = mll(ftest, Ey_g, Vy_g)
+    # LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
-    smse_glm = smse(ftest, Ey_g)
+    # smse_glm = smse(ftest, Ey_g)
 
     log.info("A la Carte, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
-    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
-             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
-                     params_glm[3]))
+    # log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+    #          .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+    #                  params_glm[3]))
 
     #
     # Plot
@@ -188,9 +194,9 @@ def main():
                     label=None)
 
     # GLM Regressor
-    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
-    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
-                    edgecolor='m', linestyle='--', label=None)
+    # pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    # pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+                    # edgecolor='m', linestyle='--', label=None)
 
     pl.legend()
 

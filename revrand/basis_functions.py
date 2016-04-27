@@ -14,12 +14,9 @@ from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
 
-from ..optimize import Positive
-from ..math.linalg import hadamard
-from ..math.special import safediv
-
-# TODO:
-# - Remove the need to bases to know their params bounds, see #54 and #55
+from .btypes import Positive, Parameter
+from .math.linalg import hadamard
+from .math.special import safediv
 
 
 #
@@ -166,7 +163,7 @@ class Basis(object):
                 ConcatBasis = MyBasis1(properties1) + MyBasis2(properties2)
     """
 
-    _bounds = []
+    _params = []
 
     @slice_init
     def __init__(self):
@@ -255,20 +252,20 @@ class Basis(object):
         return selfargs, otherargs
 
     @property
-    def bounds(self):
+    def params(self):
         """ Get this objects parameter bounds. This is a list of pairs of upper
             and lower bounds, with the same length as the total number of
             scalars in all of the parameters combined (and in order).
         """
-        return self._bounds
+        return self._params
 
-    @bounds.setter
-    def bounds(self, bounds):
+    @params.setter
+    def params(self, params):
         """ Set this objects parameter bounds. This is a list of pairs of upper
             and lower bounds, with the same length as the total number of
             scalars in all of the parameters combined (and in order).
         """
-        self._bounds = bounds
+        self._params = params
 
     def __add__(self, other):
 
@@ -378,7 +375,7 @@ class RadialBasis(Basis):
     """
 
     @slice_init
-    def __init__(self, centres, lenscale_bounds=Positive()):
+    def __init__(self, centres, lenscale_init=Parameter(1., Positive())):
         """
         Construct a radial basis function (RBF) object.
 
@@ -386,12 +383,12 @@ class RadialBasis(Basis):
             centres:    array of shape (Dxd) where D is the number of centres
                         for the radial bases, and d is the dimensionality of X.
 
-            lenscale_bounds: a tuple of bounds for the RBFs' length scales.
+            lenscale_init: a tuple of bounds for the RBFs' length scales.
         """
 
         self.M, self.D = centres.shape
         self.C = centres
-        self.bounds = lenscale_bounds
+        self.params = lenscale_init
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -449,19 +446,19 @@ class SigmoidalBasis(Basis):
     """Sigmoidal Basis"""
 
     @slice_init
-    def __init__(self, centres, lenscale_bounds=Positive()):
+    def __init__(self, centres, lenscale_init=Parameter(1., Positive())):
         """Construct a sigmoidal basis function object.
 
         Arguments:
             centres: array of shape (Dxd) where D is the number of centres
                 for the_call_poparg bases, and d is the dimensionality of X.
-            lenscale_bounds: a tuple of bounds for the basis function length
+            lenscale_init: a tuple of bounds for the basis function length
                 scales.
         """
 
         self.M, self.D = centres.shape
         self.C = centres
-        self.bounds = lenscale_bounds
+        self.params = lenscale_init
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -540,7 +537,7 @@ class RandomRBF(RadialBasis):
     """
 
     @slice_init
-    def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
+    def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
         """
         Construct a random radial basis function (RBF) object.
 
@@ -549,12 +546,12 @@ class RandomRBF(RadialBasis):
 
             Xdim: the dimension (d) of the observations.
 
-            lenscale_bounds: a tuple of bounds for the RBFs' length scales.
+            lenscale_init: a tuple of bounds for the RBFs' length scales.
         """
         self.d = Xdim
         self.n = nbases
         self.W = np.random.randn(self.d, self.n)
-        self.bounds = lenscale_bounds
+        self.params = lenscale_init
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -618,19 +615,24 @@ class RandomRBF_ARD(RandomRBF):
     """
 
     @slice_init
-    def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
+    def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
         """ Construct a random radial basis function (RBF) object, with ARD.
 
             Arguments:
                 nbases: a scalar for how many random bases to create.
                 Xdim: the dimension (d) of the observations.
-                lenscale_bounds: a tuple of bounds for the RBFs' length scales.
+                lenscale_init: a tuple of bounds for the RBFs' length scales.
         """
 
-        # lenscale_bounds.shape = Xdim
-        super(RandomRBF_ARD, self).__init__(nbases, Xdim, lenscale_bounds)
-        lenscale_bounds.shape = Xdim
-        self.bounds = lenscale_bounds
+        super(RandomRBF_ARD, self).__init__(nbases, Xdim, lenscale_init)
+        if lenscale_init.shape == (1,):
+            lenscale_init = Parameter(lenscale_init.value * np.ones(Xdim),
+                                      lenscale_init.bounds)
+
+        if lenscale_init.shape != (Xdim,):
+            raise ValueError("Parameter dimension doesn't agree with Xdim!")
+
+        self.params = lenscale_init
 
     @slice_call
     def __call__(self, X, lenscales):
@@ -702,7 +704,7 @@ class FastFood(RandomRBF):
     """
 
     @slice_init
-    def __init__(self, nbases, Xdim, lenscale_bounds=Positive()):
+    def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
         """
         Construct a random radial basis function (RBF) object.
 
@@ -712,11 +714,11 @@ class FastFood(RandomRBF):
                     two power.
 
             Xdim:   the dimension (d) of the observations.
-                    lenscale_bounds: a tuple of bounds for the RBFs' length
+                    lenscale_init: a tuple of bounds for the RBFs' length
                     scales.
         """
 
-        self.bounds = lenscale_bounds
+        self.params = lenscale_init
 
         # Make sure our dimensions are powers of 2
         l = int(np.ceil(np.log2(Xdim)))
@@ -820,8 +822,6 @@ class BasisCat(object):
         Phi = []
         args = params
 
-        # import IPython; IPython.embed()
-
         for base in self.bases:
             phi, args = base._call_popargs(X, *args)
             Phi.append(phi)
@@ -858,11 +858,11 @@ class BasisCat(object):
             yield dPhi
 
     @property
-    def bounds(self):
+    def params(self):
 
-        bounds = [b.bounds for b in self.bases if len(b.bounds) > 0]
+        params = [b.params for b in self.bases if b.params != []]
 
-        return bounds[0] if len(bounds) == 1 else bounds
+        return params[0] if len(params) == 1 else params
 
     def __add__(self, other):
 

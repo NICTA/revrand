@@ -5,7 +5,6 @@ and also supports custom optimization methods.
 """
 
 from .sgd import sgd, AdaDelta, AdaGrad, Momentum
-from .btypes import Bound, Positive
 from .base import (minimize_bounded_start,
                    structured_minimizer,
                    structured_sgd,
@@ -15,8 +14,6 @@ from .base import (minimize_bounded_start,
                    candidate_start_points_random)
 
 __all__ = [
-    'Bound',
-    'Positive',
     'sgd',
     'AdaDelta',
     'AdaGrad',

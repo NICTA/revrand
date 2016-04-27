@@ -21,14 +21,16 @@ from scipy.linalg import cho_solve
 from .utils import append_or_extend 
 from .math.linalg import jitchol, cho_log_det
 from .math.special import safediv
-from .optimize import Positive, structured_minimizer, logtrick_minimizer
+from .optimize import structured_minimizer, logtrick_minimizer
+from .btypes import Parameter, Positive, get_values
 from .basis_functions import apply_grad
 
 # Set up logging
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, basis, bparams, var=1., regulariser=1., tol=1e-6, maxit=1000,
+def learn(X, y, basis, var=Parameter(1., Positive), 
+          regulariser=Parameter(1., Positive), tol=1e-6, maxit=1000,
           verbose=True):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
@@ -41,8 +43,6 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., tol=1e-6, maxit=1000,
             (N,) array targets (N samples)
         basis: Basis
             A basis object, see the basis_functions module.
-        bparams: sequence
-            A sequence of parameters of the basis object.
         var: float, optional
             observation variance initial value.
         regulariser: float, optional
@@ -76,7 +76,7 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., tol=1e-6, maxit=1000,
     """
 
     N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+    D = basis(np.atleast_2d(X[0, :]), *get_values(basis.params)).shape[1]
 
     # Caches for returning optimal params
     ELBOcache = [-np.inf]
@@ -146,21 +146,21 @@ def learn(X, y, basis, bparams, var=1., regulariser=1., tol=1e-6, maxit=1000,
 
         return -ELBO, append_or_extend([-dvar, -dlambda], dtheta)
 
-    bounds = append_or_extend([Positive(), Positive()], basis.bounds)
+    params = append_or_extend([var, regulariser], basis.params)
     nmin = structured_minimizer(logtrick_minimizer(minimize))
-    res = nmin(ELBO, [var, regulariser] + bparams, method='L-BFGS-B', jac=True,
-               bounds=bounds, tol=tol, options={'maxiter': maxit})
-    (var, regulariser), bparams = res.x[:2], res.x[2:]
+    res = nmin(ELBO, params, method='L-BFGS-B', jac=True, tol=tol,
+               options={'maxiter': maxit})
+    (var, regulariser), hypers = res.x[:2], res.x[2:]
 
     if verbose:
-        log.info("Done! ELBO = {}, var = {}, reg = {}, bparams = {}, "
+        log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, "
                  "message = {}."
-                 .format(-res['fun'], var, regulariser, bparams, res.message))
+                 .format(-res['fun'], var, regulariser, hypers, res.message))
 
-    return mcache, Ccache, bparams, var
+    return mcache, Ccache, hypers, var
 
 
-def predict(Xs, basis, m, C, bparams, var):
+def predict(Xs, basis, m, C, hypers, var):
     """
     Predict using Bayesian linear regression.
 
@@ -174,7 +174,7 @@ def predict(Xs, basis, m, C, bparams, var):
             (D,) array of regression weights (posterior).
         C: ndarray
             (D, D) array of regression weight covariances (posterior).
-        bparams: sequence
+        hypers: sequence
             A sequence of hyperparameters of the basis object.
         var: float
             observation variance.
@@ -192,7 +192,7 @@ def predict(Xs, basis, m, C, bparams, var):
             X_star of shape (N_star,).
     """
 
-    Phi_s = basis(Xs, *bparams)
+    Phi_s = basis(Xs, *hypers)
 
     Ey = Phi_s.dot(m)
     Vf = (Phi_s.dot(C) * Phi_s).sum(axis=1)

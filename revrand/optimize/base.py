@@ -5,7 +5,7 @@ from six import wraps
 
 from ..utils import flatten, unflatten
 from ..externals import check_random_state
-from .btypes import Bound, Positive
+from ..btypes import Bound, Positive, get_values, flatten_bounds
 
 
 def candidate_start_points_random(bounds, n_candidates=1000,
@@ -279,11 +279,10 @@ def structured_minimizer(minimizer):
     """
 
     @wraps(minimizer)
-    def new_minimizer(fun, ndarrays, jac=True, bounds=None, *minimizer_args,
-                      **minimizer_kwargs):
+    def new_minimizer(fun, parameters, jac=True, **minimizer_kwargs):
 
-        array1d, shapes = flatten(ndarrays)
-        fbounds = _flatten_bounds(bounds)
+        array1d, shapes = flatten(get_values(parameters))
+        fbounds = flatten_bounds(parameters)
         flatten_args_dec = _flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -296,7 +295,7 @@ def structured_minimizer(minimizer):
                 new_fun = _flatten_func_grad(new_fun)
 
         result = minimizer(new_fun, array1d, jac=new_jac, bounds=fbounds,
-                           *minimizer_args, **minimizer_kwargs)
+                           **minimizer_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
 
         if bool(jac):
@@ -351,11 +350,10 @@ def structured_sgd(sgd):
     """
 
     @wraps(sgd)
-    def new_sgd(fun, ndarrays, Data, bounds=None, eval_obj=False,
-                **sgd_kwargs):
+    def new_sgd(fun, parameters, Data, eval_obj=False, **sgd_kwargs):
 
-        array1d, shapes = flatten(ndarrays)
-        fbounds = _flatten_bounds(bounds)
+        array1d, shapes = flatten(get_values(parameters))
+        fbounds = flatten_bounds(parameters)
         flatten_args_dec = _flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -415,8 +413,7 @@ def logtrick_minimizer(minimizer):
     """
 
     @wraps(minimizer)
-    def new_minimizer(fun, x0, jac=True, bounds=None, *minimizer_args,
-                      **minimizer_kwargs):
+    def new_minimizer(fun, x0, jac=True, bounds=None, **minimizer_kwargs):
 
         if bounds is None:
             return minimizer(fun, x0, jac=jac, bounds=bounds,
@@ -442,7 +439,7 @@ def logtrick_minimizer(minimizer):
 
         # Transform the final result
         result = minimizer(new_fun, logx(x0), jac=new_jac, bounds=bounds,
-                           *minimizer_args, **minimizer_kwargs)
+                           **minimizer_kwargs)
         result['x'] = expx(result['x'])
         return result
 
@@ -548,26 +545,6 @@ def _logtrick_gen(bounds):
               if pos else b for b, pos in zip(bounds, ispos)]
 
     return logx, expx, gradx, bounds
-
-
-def _flatten_bounds(bounds):
-
-    if bounds is None:
-        return None
-
-    def unwrap(flatb, bounds):
-        for b in bounds:
-            if type(b) is tuple:
-                flatb.append(b)
-            elif type(b) is list:
-                unwrap(flatb, b)
-            else:
-                flatb.extend(b.flatten())
-
-    flat_bounds = []
-    unwrap(flat_bounds, bounds)
-
-    return flat_bounds
 
 
 def _flatten_func_grad(func):

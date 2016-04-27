@@ -7,8 +7,8 @@ from . import linalg
 from . import dtypes
 # Now using the revrand optimize toolkit
 from scipy.optimize import minimize
-from revrand.optimize import structured_minimizer, Bound
-# import scipy.linalg as la
+from revrand.optimize import structured_minimizer
+from revrand.btypes import Bound, Parameter
 import logging
 
 log = logging.getLogger('GP')
@@ -33,8 +33,9 @@ def learn(X, y, kerneldef, opt_criterion=None, verbose=False, ftol=1e-8,
     # Automatically determine the range
     meta = get_meta(kerneldef)
 
-    bounds = [Bound(l, h) for l, h in zip(meta.lower_bound, meta.upper_bound)]
-    theta0 = meta.initial_val
+    params = [Parameter(i, Bound(l, h)) for i, l, h in zip(meta.initial_val,
+                                                           meta.lower_bound,
+                                                           meta.upper_bound)]
 
     def criterion(*theta):
         K = cov_fn(X, X, theta, True)  # learn with noise!
@@ -46,8 +47,8 @@ def learn(X, y, kerneldef, opt_criterion=None, verbose=False, ftol=1e-8,
 
     # up to here
     nmin = structured_minimizer(minimize)
-    result = nmin(criterion, theta0, tol=ftol, options={'maxiter': maxiter},
-                  jac=False, bounds=bounds, method='L-BFGS-B')
+    result = nmin(criterion, params, tol=ftol, options={'maxiter': maxiter},
+                  jac=False, method='L-BFGS-B')
     print(result)
     return result.x
 

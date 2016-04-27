@@ -45,25 +45,17 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
     ValueError: lower bound cannot be greater than upper bound!
     """
 
-    def __new__(cls, lower=None, upper=None, shape=()):
+    def __new__(cls, lower=None, upper=None):
 
         if lower is not None and upper is not None:
             if lower > upper:
                 raise ValueError('lower bound cannot be greater than upper '
                                  'bound!')
         obj = super(Bound, cls).__new__(cls, lower, upper)
-        obj.shape = shape
 
         return obj
 
-    def flatten(self):
-
-        if self.shape == ():
-            return [self]
-
-        cpy = self.__class__(shape=())
-
-        return [cpy for _ in range(np.prod(self.shape))]
+    # TODO: Transformation details for optimiser (logistic/identity)
 
 
 class Positive(Bound):
@@ -88,14 +80,15 @@ class Positive(Bound):
     the lower bound for all instances of ``Positive`` are guaranteed to
     be positive.
     """
-    def __new__(cls, upper=None, shape=()):
+    def __new__(cls, upper=None):
 
-        return super(Positive, cls).__new__(cls, lower=1e-14, upper=upper,
-                                            shape=shape)
+        return super(Positive, cls).__new__(cls, lower=1e-14, upper=upper)
 
     def __getnewargs__(self):
         """Required for pickling!"""
         return (self.upper,)
+
+    # TODO: Transformation details for optimiser (log)
 
 
 class Parameter(object):
@@ -103,6 +96,23 @@ class Parameter(object):
     def __init__(self, value, bounds=Bound()):
 
         self.value = value
-        self.shape = () if np.isscalar(value) else value.shape
-        self.bounds = Bound()
-        self.bounds.shape = self.shape
+        self.shape = (1,) if np.isscalar(value) else value.shape
+        self.bounds = bounds
+
+
+def get_values(parameters):
+
+    if isinstance(parameters, Parameter):
+        return parameters.value
+
+    return [p.value for p in parameters]
+
+
+def flatten_bounds(parameters):
+
+    inflate = lambda p: [p.bounds for _ in range(np.prod(p.shape))]
+
+    if isinstance(parameters, Parameter):
+        return inflate(parameters)
+
+    return [b for p in parameters for b in inflate(p)]
