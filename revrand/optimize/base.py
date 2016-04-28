@@ -255,6 +255,7 @@ def structured_minimizer(minimizer):
     Examples
     --------
     >>> from scipy.optimize import minimize as sp_min
+    >>> from ..btypes import Parameter, Bound
 
     Define a cost function that returns a pair. The first element is the cost
     value and the second element is the gradient represented by a tuple. Even
@@ -271,8 +272,8 @@ def structured_minimizer(minimizer):
 
     Initial values
 
-    >>> w_0 = np.array([.5, .1, .2])
-    >>> lambda_0 = .25
+    >>> w_0 = Parameter(np.array([.5, .1, .2]), Bound())
+    >>> lambda_0 = Parameter(.25, Bound())
 
     >>> res = new_min(cost, (w_0, lambda_0), method='L-BFGS-B', jac=True)
     >>> res_w, res_lambda = res.x
@@ -314,6 +315,7 @@ def structured_sgd(sgd):
     Examples
     --------
     >>> from ..optimize import sgd
+    >>> from ..btypes import Parameter, Bound
 
     Define a cost function that returns a pair. The first element is the cost
     value and the second element is the gradient represented by a sequence.
@@ -342,8 +344,8 @@ def structured_sgd(sgd):
 
     Initial values
 
-    >>> w_0 = np.array([1., 1.])
-    >>> lambda_0 = .25
+    >>> w_0 = Parameter(np.array([1., 1.]), Bound())
+    >>> lambda_0 = Parameter(.25, Bound())
 
     >>> res = new_sgd(cost, [w_0, lambda_0], data, batchsize=10, eval_obj=True)
     >>> res_w, res_lambda = res.x
@@ -382,7 +384,7 @@ def logtrick_minimizer(minimizer):
     Examples
     --------
     >>> from scipy.optimize import minimize as sp_min
-    >>> from ..optimize import Bound, Positive
+    >>> from ..btypes import Bound, Positive
 
     This is a simple cost function where we need to enforce particular
     variabled are positive-only bounded.
@@ -456,7 +458,8 @@ def logtrick_sgd(sgd):
 
     Examples
     --------
-    >>> from ..optimize import sgd, Bound, Positive
+    >>> from ..optimize import sgd
+    >>> from ..btypes import Bound, Positive
 
     This is a simple cost function where we need to enforce particular
     variabled are positive-only bounded.

@@ -103,7 +103,7 @@ class Parameter(object):
 def get_values(parameters):
 
     if isinstance(parameters, Parameter):
-        return parameters.value
+        return [parameters.value]
 
     return [p.value for p in parameters]
 

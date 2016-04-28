@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 """ A Small demo to try out SGD on a Maximum likelihood regression problem. """
 
 

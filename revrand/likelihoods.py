@@ -9,7 +9,7 @@ import numpy as np
 from scipy.stats import bernoulli, poisson, norm
 from scipy.special import gammaln, expit
 
-from .optimize import Positive
+from .btypes import Parameter, Positive
 from .math.special import safesoftplus, safediv, softplus, logtiny
 
 
@@ -25,29 +25,29 @@ class Bernoulli():
     the GLM prior into a probability.
     """
 
-    _bounds = []
+    _params = []
 
     def __init__(self):
 
         pass
 
     @property
-    def bounds(self):
+    def params(self):
         """
         Get this object's parameter bounds. This is a list of pairs of upper
         and lower bounds, with the same length as the total number of scalars
         in all of the parameters combined (and in order).
         """
-        return self._bounds
+        return self._params
 
-    @bounds.setter
-    def bounds(self, bounds):
+    @params.setter
+    def params(self, params):
         """
         Set this object's parameter bounds. This is a list of pairs of upper
         and lower bounds, with the same length as the total number of scalars
         in all of the parameters combined (and in order).
         """
-        self._bounds = bounds
+        self._params = params
 
     def loglike(self, y, f):
         """
@@ -230,7 +230,7 @@ class Gaussian(Bernoulli):
     prior.
     """
 
-    def __init__(self, var_bounds=Positive()):
+    def __init__(self, var_init=Parameter(1., Positive())):
         """
         Construct an instance of the Gaussian likelihood class.
 
@@ -240,7 +240,7 @@ class Gaussian(Bernoulli):
                 A tuple of (upper, lower) bounds of the variance.
         """
 
-        self.bounds = [var_bounds]
+        self.params = var_init
 
     def loglike(self, y, f, var):
         """

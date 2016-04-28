@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 """ GLM Demo """
 
 import matplotlib.pyplot as pl
@@ -7,7 +7,9 @@ import logging
 from scipy.stats import poisson, bernoulli
 from scipy.special import expit
 
-from revrand import basis_functions, glm, likelihoods
+from revrand import glm, likelihoods
+from revrand.basis_functions import RandomRBF
+from revrand.btypes import Parameter, Positive
 from revrand.utils.datasets import gen_gausprocess_se
 from revrand.math.special import softplus
 
@@ -30,7 +32,6 @@ rho = 0.9
 epsilon = 1e-5
 passes = 400
 batchsize = 100
-reg = 1
 use_sgd = True
 
 N = 500
@@ -69,8 +70,7 @@ elif like == 'Poisson':
 #
 
 if like == 'Gaussian':
-    llhood = likelihoods.Gaussian()
-    lparams = [noise**2]
+    llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
 elif like == 'Bernoulli':
     llhood = likelihoods.Bernoulli()
     lparams = []
@@ -80,17 +80,16 @@ elif like == 'Poisson':
 else:
     raise ValueError("Invalid likelihood, {}!".format(like))
 
-basis = basis_functions.RandomRBF(nbases, Xtrain.shape[1])
-bparams = [lenscale]
+basis = RandomRBF(nbases, Xtrain.shape[1],
+                  lenscale_init=Parameter(lenscale, Positive()))
 
 
 #
 # Inference
 #
 
-params = glm.learn(Xtrain, ytrain, llhood, lparams, basis, bparams,
-                   regulariser=reg, use_sgd=use_sgd, rho=rho, epsilon=epsilon,
-                   batchsize=batchsize, maxit=passes)
+params = glm.learn(Xtrain, ytrain, llhood, basis, use_sgd=use_sgd, rho=rho,
+                   epsilon=epsilon, batchsize=batchsize, maxit=passes)
 Ey, Vy, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, basis, *params)
 plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
 y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)

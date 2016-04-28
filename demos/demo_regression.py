@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 """ A La Carte GP and basis function demo. """
 
 import matplotlib.pyplot as pl
@@ -7,7 +7,7 @@ import revrand.legacygp.kernels as kern
 import numpy as np
 import logging
 
-from revrand import regression  # , glm, likelihoods
+from revrand import regression, glm, likelihoods
 from revrand.validation import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 from revrand.btypes import Parameter, Positive
@@ -49,12 +49,12 @@ def main():
     lenscale_true = 0.7  # For the gpdraw dataset
     noise_true = 0.1
 
-    # basis = 'RKS'
+    basis = 'RKS'
     # basis = 'FF'
     # basis = 'RBF'
     # basis = 'Linear'
     # basis = 'Poly'
-    basis = 'Combo'
+    # basis = 'Combo'
 
     #
     # Make Data
@@ -105,15 +105,6 @@ def main():
     # Learn regression parameters and predict
     #
 
-    # if basis == 'Linear' or basis == 'Poly':
-    #     hypers = []
-    # elif basis == 'FF' or basis == 'RKS' or basis == 'RBF':
-    #     hypers = [lenscale]
-    # elif basis == 'Combo':
-    #     hypers = [lenscale, lenscale2]
-    # else:
-    #     raise ValueError('Invalid basis!')
-
     params_elbo = regression.learn(Xtrain, ytrain, base,
                                    var=Parameter(noise**2, Positive()),
                                    regulariser=Parameter(reg, Positive()))
@@ -124,15 +115,15 @@ def main():
     # Nonparametric variational inference GLM
     #
 
-    # llhood = likelihoods.Gaussian()
-    # lparams = [noise**2]
-    # params_glm = glm.learn(Xtrain, ytrain, llhood, lparams, base, hypers,
-    #                        regulariser=reg, use_sgd=True, rho=rho, postcomp=10,
-    #                        epsilon=epsilon, batchsize=batchsize, maxit=passes)
-    # Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
-    #                                            *params_glm)
-    # Vy_g = Vf_g + params_glm[2][0]
-    # Sy_g = np.sqrt(Vy_g)
+    llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
+    params_glm = glm.learn(Xtrain, ytrain, llhood, base,
+                           regulariser=Parameter(reg, Positive()),
+                           use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
+                           batchsize=batchsize, maxit=passes)
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
+                                               *params_glm)
+    Vy_g = Vf_g + params_glm[2][0]
+    Sy_g = np.sqrt(Vy_g)
 
     #
     # Learn GP and predict
@@ -156,20 +147,20 @@ def main():
 
     LL_elbo = mll(ftest, Ey_e, Vy_e)
     LL_gp = mll(ftest, Ey_gp, Vy_gp)
-    # LL_g = mll(ftest, Ey_g, Vy_g)
+    LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_elbo = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
-    # smse_glm = smse(ftest, Ey_g)
+    smse_glm = smse(ftest, Ey_g)
 
     log.info("A la Carte, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
                      params_elbo[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
-    # log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
-    #          .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
-    #                  params_glm[3]))
+    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+                     params_glm[3]))
 
     #
     # Plot
@@ -194,9 +185,9 @@ def main():
                     label=None)
 
     # GLM Regressor
-    # pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
-    # pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
-                    # edgecolor='m', linestyle='--', label=None)
+    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+                    edgecolor='m', linestyle='--', label=None)
 
     pl.legend()
 

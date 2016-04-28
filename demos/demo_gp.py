@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 """ simple_regression.py
     This demo shows how to construct a simple regression by composing a kernel
     and optimising its hyperparameters.

@@ -29,8 +29,8 @@ from .basis_functions import apply_grad
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, basis, var=Parameter(1., Positive), 
-          regulariser=Parameter(1., Positive), tol=1e-6, maxit=1000,
+def learn(X, y, basis, var=Parameter(1., Positive()), 
+          regulariser=Parameter(1., Positive()), tol=1e-6, maxit=1000,
           verbose=True):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.

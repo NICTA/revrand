@@ -19,13 +19,14 @@ from .utils import couple, append_or_extend, atleast_list
 from .math.special import logsumexp, safediv
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
-    logtrick_minimizer, Bound, Positive, AdaDelta
+    logtrick_minimizer, AdaDelta
+from .btypes import Bound, Positive, Parameter, get_values
 
 # Set up logging
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
+def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
           postcomp=10, use_sgd=True, maxit=1000, tol=1e-7, batchsize=100,
           rho=0.9, epsilon=1e-5, verbose=True):
     """
@@ -42,14 +43,8 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
             (N,) array targets (N samples)
         likelihood: Object
             A likelihood object, see the likelihoods module.
-        lparams: sequence
-            a sequence of parameters for the likelihood object, e.g. the
-            likelihoods.Gaussian object takes a variance parameter, so this
-            should be :code:`[var]`.
         basis: Basis
             A basis object, see the basis_functions module.
-        bparams: sequence
-            A sequence of parameters of the basis object.
         regulariser: float, optional
             weight regulariser (variance) initial value.
         postcomp: int, optional
@@ -124,9 +119,10 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
 
     # Shapes of things
     N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *bparams).shape[1]
+    D = basis(np.atleast_2d(X[0, :]), *get_values(basis.params)).shape[1]
     K = postcomp
-    nlpams, nbpams = len(lparams), len(bparams)
+    nlpams = len(atleast_list(get_values(likelihood.params)))
+    nbpams = len(atleast_list(get_values(basis.params)))
 
     # Pre-allocate here
     dm = np.zeros((D, K))
@@ -223,22 +219,21 @@ def learn(X, y, likelihood, lparams, basis, bparams, regulariser=1.,
     m = np.random.randn(D, K) + np.random.randn(K)  # V. important for perform.
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
-    # Pack bounds and params
-    bounds = [Bound(shape=m.shape), Positive(shape=C.shape), Positive()]
-    append_or_extend(bounds, likelihood.bounds, basis.bounds)
-    vparams = [m, C, regulariser] + lparams + bparams
+    # Pack params
+    params = append_or_extend([Parameter(m, Bound()), Parameter(C, Positive()),
+                               regulariser], likelihood.params, basis.params)
 
     # Optimisation method
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
-        res = nmin(L2, vparams, tol=tol, options={'maxiter': maxit},
-                   method='L-BFGS-B', jac=True, bounds=bounds,
+        res = nmin(L2, params, tol=tol, options={'maxiter': maxit},
+                   method='L-BFGS-B', jac=True,
                    args=(np.hstack((y[:, np.newaxis], X)),))
     else:
         nsgd = structured_sgd(logtrick_sgd(sgd))
         updater = AdaDelta(rho=rho, epsilon=epsilon)
-        res = nsgd(L2, vparams, np.hstack((y[:, np.newaxis], X)),
-                   bounds=bounds, gtol=tol, passes=maxit, updater=updater,
+        res = nsgd(L2, params, np.hstack((y[:, np.newaxis], X)),
+                   gtol=tol, passes=maxit, updater=updater,
                    batchsize=batchsize, eval_obj=True)
 
     # Unpack params
