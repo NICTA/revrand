@@ -53,14 +53,16 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
             if lower > upper:
                 raise ValueError('lower bound cannot be greater than upper '
                                  'bound!')
-        obj = super(Bound, cls).__new__(cls, lower, upper)
+        return super(Bound, cls).__new__(cls, lower, upper)
 
-        return obj
+    def __getnewargs__(self):
+        """Required for pickling!"""
+        return (self.lower, self.upper)
 
     # TODO: Transformation details for optimiser (logistic/identity)
 
 
-class Positive(Bound):
+class Positive(namedtuple('Positive', ['lower', 'upper'])):
     """
     Define a positive only bound for the optimiser. This may induce the
     'log trick' in the optimiser (when using an appropriate decorator), which
@@ -75,7 +77,7 @@ class Positive(Bound):
     Examples
     --------
     >>> b = Positive()
-    >>> b # doctest: +SKIP
+    >>> b
     Positive(lower=1e-14, upper=None)
 
     Since ``tuple`` (and by extension its descendents) are immutable,
@@ -84,11 +86,18 @@ class Positive(Bound):
     """
     def __new__(cls, upper=None):
 
-        return super(Positive, cls).__new__(cls, lower=1e-14, upper=upper)
+        lower = 1e-14
+        if upper is not None:
+            if lower > upper:
+                raise ValueError('Upper bound must be greater than {}'
+                                 .format(lower))    
+
+        return super(Positive, cls).__new__(cls, lower=lower, upper=upper)
 
     def __getnewargs__(self):
         """Required for pickling!"""
         return (self.upper,)
+
 
     # TODO: Transformation details for optimiser (log)
 
