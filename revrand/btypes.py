@@ -1,3 +1,5 @@
+""" Bound types and bounded parameter types. """
+
 import numpy as np
 from collections import namedtuple
 
@@ -92,8 +94,33 @@ class Positive(Bound):
 
 
 class Parameter(object):
+    """
+    A Parameter class that associates a value (scalar or ndarray) with a bound.
+
+    Attributes
+    ----------
+    value: scalar or ndarray
+        a value to associate with this parameter. This is typically used as an
+        initial value for an optimizer.
+    bound: Bound
+        a Bound tuple that describes the valid range for all of the elements in
+        value
+    shape: tuple
+        the shape of value, returning (1,) if value is scalar
+    """
 
     def __init__(self, value, bounds=Bound()):
+        """
+        Initialise a Parameter.
+
+        Parameters
+        ----------
+        value: scalar or ndarray
+            a value to associate with this parameter.
+        bound: Bound, optional
+            a Bound tuple that describes the valid range for all of the 
+            elements in value
+        """
 
         self.value = value
         self.shape = (1,) if np.isscalar(value) else value.shape
@@ -101,6 +128,25 @@ class Parameter(object):
 
 
 def get_values(parameters):
+    """ 
+    Get all of the values in a sequence of Parameter instances.
+
+    Parameters
+    ----------
+    parameters: sequence or Parameter
+        A sequence of Parameter objects or a single Parameter object
+
+    Returns
+    -------
+    list:
+        returns a list of Parameter.value calls, even for a single parameter
+
+    Examples
+    --------
+    >>> params = [Parameter(np.ones(2), Bound()), Parameter(2., Positive())]
+    >>> get_values(params)
+    [array([ 1.,  1.]), 2.0]
+    """
 
     if isinstance(parameters, Parameter):
         return [parameters.value]
@@ -109,6 +155,28 @@ def get_values(parameters):
 
 
 def flatten_bounds(parameters):
+    """
+    Return flattened bounds for all of the Parameters in a sequence
+
+    Parameters
+    ----------
+    parameters: sequence or Parameter
+        A sequence of Parameter objects or a single Parameter object
+
+    Returns
+    -------
+    list:
+        a list of Bounds objects/tuples that is the length of the *total*
+        number of elements in all of the Parameters values. This is a list
+        even if parameters is a single parameter object
+
+    Examples
+    --------
+    >>> params = [Parameter(np.ones(2), Bound()), Parameter(2., Positive())]
+    >>> flatten_bounds(params)
+    [Bound(lower=None, upper=None), Bound(lower=None, upper=None), Positive(lower=1e-14, upper=None)]
+
+    """
 
     inflate = lambda p: [p.bounds for _ in range(np.prod(p.shape))]
 

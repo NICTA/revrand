@@ -33,20 +33,12 @@ class Bernoulli():
 
     @property
     def params(self):
-        """
-        Get this object's parameter bounds. This is a list of pairs of upper
-        and lower bounds, with the same length as the total number of scalars
-        in all of the parameters combined (and in order).
-        """
+        """ Get this object's Parameter types. """
         return self._params
 
     @params.setter
     def params(self, params):
-        """
-        Set this object's parameter bounds. This is a list of pairs of upper
-        and lower bounds, with the same length as the total number of scalars
-        in all of the parameters combined (and in order).
-        """
+        """ Set this object's Parameter types. """
         self._params = params
 
     def loglike(self, y, f):
@@ -55,17 +47,17 @@ class Bernoulli():
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            logp: ndarray
-                the log likelihood of each y given each f under this
-                likelihood.
+        logp: ndarray
+            the log likelihood of each y given each f under this
+            likelihood.
         """
 
         ll = bernoulli.logpmf(y, expit(f))
@@ -77,14 +69,14 @@ class Bernoulli():
 
         Parameters
         ----------
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            Ey: ndarray
-                expected value of y, :math:`\mathbb{E}[y|f]`.
+        Ey: ndarray
+            expected value of y, :math:`\mathbb{E}[y|f]`.
         """
 
         return expit(f)
@@ -95,16 +87,16 @@ class Bernoulli():
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            df: ndarray
-                the derivative :math:`\partial \log p(y|f) / \partial f`
+        df: ndarray
+            the derivative :math:`\partial \log p(y|f) / \partial f`
         """
 
         return y - expit(f)
@@ -115,17 +107,17 @@ class Bernoulli():
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            df: ndarray
-                the second derivative
-                :math:`\partial^2 \log p(y|f)/ \partial f^2`
+        df: ndarray
+            the second derivative
+            :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
 
         sig = expit(f)
@@ -137,17 +129,17 @@ class Bernoulli():
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            df: ndarray
-                the third derivative
-                :math:`\partial^3 \log p(y|f)/ \partial f^3`
+        df: ndarray
+            the third derivative
+            :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
 
         sig = expit(f)
@@ -160,19 +152,19 @@ class Bernoulli():
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            dp: list, float or ndarray
-                the derivative
-                :math:`\partial \log p(y|f, \\theta)/ \partial \\theta` for
-                each parameter. If there is only one parameter, this is not a
-                list.
+        dp: list, float or ndarray
+            the derivative
+            :math:`\partial \log p(y|f, \\theta)/ \partial \\theta` for
+            each parameter. If there is only one parameter, this is not a
+            list.
         """
 
         return []
@@ -185,18 +177,18 @@ class Bernoulli():
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            dpd2f: list or ndarray
-                the derivative of the likelihood Hessian w.r.t.\
-                :math:`\\theta` for each parameter. If there is only one
-                parameter, this is not a list.
+        dpd2f: list or ndarray
+            the derivative of the likelihood Hessian w.r.t.\
+            :math:`\\theta` for each parameter. If there is only one
+            parameter, this is not a list.
         """
 
         return []
@@ -207,16 +199,16 @@ class Bernoulli():
 
         Parameters
         ----------
-            y: ndarray
-                query quantiles, i.e.\  :math:`P(Y \leq y)`.
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            query quantiles, i.e.\  :math:`P(Y \leq y)`.
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            cdf: ndarray
-                Cumulative density function evaluated at y.
+        cdf: ndarray
+            Cumulative density function evaluated at y.
         """
 
         return bernoulli.cdf(y, expit(f))
@@ -236,8 +228,9 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            var_bounds: tuple, optional
-                A tuple of (upper, lower) bounds of the variance.
+        var_init: Parameter, optional
+            A scalar Parameter describing the initial point and bounds for
+            an optimiser to learn the variance parameter of this object.
         """
 
         self.params = var_init
@@ -248,19 +241,19 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            logp: ndarray
-                the log likelihood of each y given each f under this
-                likelihood.
+        logp: ndarray
+            the log likelihood of each y given each f under this
+            likelihood.
         """
 
         return norm.logpdf(y, loc=f, scale=np.sqrt(var))
@@ -270,16 +263,16 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            Ey: ndarray
-                expected value of y, :math:`\mathbb{E}[y|f]`.
+        Ey: ndarray
+            expected value of y, :math:`\mathbb{E}[y|f]`.
         """
 
         return f
@@ -290,18 +283,18 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            df: ndarray
-                the derivative :math:`\partial \log p(y|f) / \partial f`
+        df: ndarray
+            the derivative :math:`\partial \log p(y|f) / \partial f`
         """
 
         return safediv(y - f, var)
@@ -312,19 +305,19 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            df: ndarray
-                the second derivative
-                :math:`\partial^2 \log p(y|f)/ \partial f^2`
+        df: ndarray
+            the second derivative
+            :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
 
         return - safediv(np.ones_like(f), var)
@@ -335,19 +328,19 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            df: ndarray
-                the third derivative
-                :math:`\partial^3 \log p(y|f)/ \partial f^3`
+        df: ndarray
+            the third derivative
+            :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
 
         return np.zeros_like(f)
@@ -359,20 +352,20 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            dp: float
-                the derivative
-                :math:`\partial \log p(y|f, \\sigma^2)/ \partial \\sigma^2`
-                where :math:`sigma^2` is the variance.
+        dp: float
+            the derivative
+            :math:`\partial \log p(y|f, \\sigma^2)/ \partial \\sigma^2`
+            where :math:`sigma^2` is the variance.
         """
 
         ivar = safediv(1., var)
@@ -386,19 +379,19 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            dpd2f: ndarray
-                the derivative of the likelihood Hessian w.r.t.\ the variance
-                :math:`\\sigma^2`.
+        dpd2f: ndarray
+            the derivative of the likelihood Hessian w.r.t.\ the variance
+            :math:`\\sigma^2`.
         """
 
         return safediv(np.ones_like(f), var**2)
@@ -409,18 +402,18 @@ class Gaussian(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                query quantiles, i.e.\  :math:`P(Y \leq y)`.
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
-            var: float, ndarray
-                The variance of the distribution
+        y: ndarray
+            query quantiles, i.e.\  :math:`P(Y \leq y)`.
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
+        var: float, ndarray
+            The variance of the distribution
 
         Returns
         -------
-            cdf: ndarray
-                Cumulative density function evaluated at y.
+        cdf: ndarray
+            Cumulative density function evaluated at y.
         """
 
         return norm.cdf(y, loc=f, scale=np.sqrt(var))
@@ -441,9 +434,9 @@ class Poisson(Bernoulli):
 
         Parameters
         ----------
-            tranfcn: string, optional
-                this may be 'exp' for an exponential transformation function,
-                or 'softplus' for a softplut transformation function.
+        tranfcn: string, optional
+            this may be 'exp' for an exponential transformation function,
+            or 'softplus' for a softplut transformation function.
         """
 
         if tranfcn == 'exp' or tranfcn == 'softplus':
@@ -457,17 +450,17 @@ class Poisson(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of integer targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of integer targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            logp: ndarray
-                the log likelihood of each y given each f under this
-                likelihood.
+        logp: ndarray
+            the log likelihood of each y given each f under this
+            likelihood.
         """
 
         g = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
@@ -480,14 +473,14 @@ class Poisson(Bernoulli):
 
         Parameters
         ----------
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            Ey: ndarray
-                expected value of y, :math:`\mathbb{E}[y|f]`.
+        Ey: ndarray
+            expected value of y, :math:`\mathbb{E}[y|f]`.
         """
 
         return np.exp(f) if self.tranfcn == 'exp' else softplus(f)
@@ -498,16 +491,16 @@ class Poisson(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            df: ndarray
-                the derivative :math:`\partial \log p(y|f) / \partial f`
+        df: ndarray
+            the derivative :math:`\partial \log p(y|f) / \partial f`
         """
 
         if self.tranfcn == 'exp':
@@ -521,17 +514,17 @@ class Poisson(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            df: ndarray
-                the second derivative
-                :math:`\partial^2 \log p(y|f)/ \partial f^2`
+        df: ndarray
+            the second derivative
+            :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
 
         if self.tranfcn == 'exp':
@@ -548,17 +541,17 @@ class Poisson(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                array of 0, 1 valued integers of targets
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            array of 0, 1 valued integers of targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            df: ndarray
-                the third derivative
-                :math:`\partial^3 \log p(y|f)/ \partial f^3`
+        df: ndarray
+            the third derivative
+            :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
 
         if self.tranfcn == 'exp':
@@ -577,16 +570,16 @@ class Poisson(Bernoulli):
 
         Parameters
         ----------
-            y: ndarray
-                query quantiles, i.e.\  :math:`P(Y \leq y)`.
-            f: ndarray
-                latent function from the GLM prior (:math:`\mathbf{f} =
-                \\boldsymbol\Phi \mathbf{w}`)
+        y: ndarray
+            query quantiles, i.e.\  :math:`P(Y \leq y)`.
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \\boldsymbol\Phi \mathbf{w}`)
 
         Returns
         -------
-            cdf: ndarray
-                Cumulative density function evaluated at y.
+        cdf: ndarray
+            Cumulative density function evaluated at y.
         """
 
         mu = np.exp(f) if self.tranfcn == 'exp' else softplus(f)

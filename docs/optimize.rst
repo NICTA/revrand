@@ -7,8 +7,6 @@ Optimization
    :toctree: generated/
 
    base
-   base.Bound
-   base.Positive
    base.structured_minimizer
    base.structured_sgd
    base.logtrick_minimizer

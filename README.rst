@@ -73,15 +73,17 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
     import numpy as np
     from revrand.basis_functions import LinearBasis, RandomRBF
     from revrand.regression import learn, predict
+    from revrand.btypes import Parameter, Positive
 
     ...
     
     # Concatenate a linear basis and a Random radial basis (GP approx)
-    basis = LinearBasis(onescol=True) + RandomRBF(nbases=300, Xdim=X.shape[1])
-    init_lenscale = 1.0
+    init_lenscale = Parameter(1.0, Positive())  # init val and bounds 
+    basis = LinearBasis(onescol=True) \
+        + RandomRBF(nbases=300, Xdim=X.shape[1], init_lenscale)
 
     # Learn regression parameters and predict
-    params = regression.learn(X, y, basis, [init_lenscale])
+    params = regression.learn(X, y, basis)
     Eys, Vfs, Vys = regression.predict(Xs, basis, *params) 
 
     # Training/Truth
@@ -126,14 +128,14 @@ associated with the prediction.
     ...
     
     # Random radial basis (GP approx)
-    basis = RandomRBF(nbases=100, Xdim=X.shape[1])
-    init_lenscale = 1.0
+    init_lenscale = Parameter(1.0, Positive())  # init val and bounds 
+    basis = RandomRBF(nbases=100, Xdim=X.shape[1], init_lenscale)
 
     # Set up the likelihood of the GLM
     llhood = likelihoods.Poisson(tranfcn='exp')  # log link
 
     # Learn regression parameters and predict
-    params = learn(X, y, llhood, [], basis, [init_lenscale])
+    params = learn(X, y, llhood, basis)
     Eys, _, _, _ = predict_meanvar(Xs, llhood, basis, *params) 
     y95n, y95x = predict_interval(0.95, Xs, llhood, basis, *params)
 
@@ -178,11 +180,10 @@ instance, if we modify the Bayesian linear regression example from before,
     ...
 
     # Set up the likelihood of the GLM
-    llhood = likelihoods.Gaussian()
-    var = 1.
+    llhood = likelihoods.Gaussian(var_init=Parameter(1., Positive()))
 
     # Learn regression parameters and predict
-    params = glm.learn(X, y, llhood, [var], basis, [init_lenscale])
+    params = glm.learn(X, y, llhood, basis)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base, *params)
 
     ...

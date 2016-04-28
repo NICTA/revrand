@@ -249,8 +249,8 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
 
 def structured_minimizer(minimizer):
     """
-    Allow an optimizer to accept a list of parameters to optimize, rather than
-    just a flattened array.
+    Allow an optimizer to accept a list of Parameter types to optimize, rather
+    than just a flattened array.
 
     Examples
     --------
@@ -309,7 +309,7 @@ def structured_minimizer(minimizer):
 
 def structured_sgd(sgd):
     """
-    Allow stochastic gradients to accept a list of parameters to optimize,
+    Allow stochastic gradients to accept a list of Parameter types to optimize,
     rather than just a flattened array.
 
     Examples

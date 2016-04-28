@@ -12,3 +12,4 @@ Likelihood Classes
 
 .. automodule:: revrand.likelihoods
    :members:
+   :special-members: __init__

@@ -43,9 +43,9 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
             (N,) array targets (N samples)
         basis: Basis
             A basis object, see the basis_functions module.
-        var: float, optional
+        var: Parameter, optional
             observation variance initial value.
-        regulariser: float, optional
+        regulariser: Parameter, optional
             weight regulariser (variance) initial value.
         verbose: bool, optional
             log learning status.

@@ -45,7 +45,7 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
             A likelihood object, see the likelihoods module.
         basis: Basis
             A basis object, see the basis_functions module.
-        regulariser: float, optional
+        regulariser: Parameter, optional
             weight regulariser (variance) initial value.
         postcomp: int, optional
             Number of diagonal Gaussian components to use to approximate the
