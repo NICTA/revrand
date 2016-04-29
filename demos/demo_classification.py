@@ -66,7 +66,7 @@ params = glm.learn(X, Y, llhood, Phi, use_sgd=doSGD,
                    maxit=passes, batchsize=batchsize)
 
 # Predict
-pys_l, Vpy, Epn, Epx = glm.predict_meanvar(Xs, llhood, Phi, *params)
+pys_l, Vpy, Epn, Epx = glm.predict_moments(Xs, llhood, Phi, *params)
 pys_l = np.vstack((1 - pys_l, pys_l)).T
 Eys_l = pys_l[:, 0] >= 0.5
 

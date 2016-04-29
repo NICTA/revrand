@@ -154,6 +154,7 @@ def hadamard(Y, ordering=True):
     Examples
     --------
     from https://en.wikipedia.org/wiki/Hadamard_transform with normalisation
+
     >>> y = np.array([[1, 0, 1, 0, 0, 1, 1, 0]])
     >>> hadamard(y, ordering=False)
     array([[ 0.5 ,  0.25,  0.  , -0.25,  0.  ,  0.25,  0.  ,  0.25]])

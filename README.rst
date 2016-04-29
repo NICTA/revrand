@@ -123,7 +123,7 @@ associated with the prediction.
     import matplotlib.pyplot as pl
     import numpy as np
     from revrand.basis_functions import RandomRBF
-    from revrand.glm import learn, predict_meanvar, predict_interval
+    from revrand.glm import learn, predict_moments, predict_interval
 
     ...
     
@@ -136,7 +136,7 @@ associated with the prediction.
 
     # Learn regression parameters and predict
     params = learn(X, y, llhood, basis)
-    Eys, _, _, _ = predict_meanvar(Xs, llhood, basis, *params) 
+    Eys, _, _, _ = predict_moments(Xs, llhood, basis, *params) 
     y95n, y95x = predict_interval(0.95, Xs, llhood, basis, *params)
 
     # Training/Truth
@@ -184,7 +184,7 @@ instance, if we modify the Bayesian linear regression example from before,
 
     # Learn regression parameters and predict
     params = glm.learn(X, y, llhood, basis)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base, *params)
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base, *params)
 
     ...
 

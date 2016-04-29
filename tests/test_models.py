@@ -30,13 +30,13 @@ def test_glm(make_data):
     lhood = Gaussian()
 
     params = glm.learn(X, y, lhood, basis)
-    Ey, _, _, _ = glm.predict_meanvar(X, lhood, basis, *params)
+    Ey, _, _, _ = glm.predict_moments(X, lhood, basis, *params)
     assert smse(y, Ey) < 0.1
 
     basis = LinearBasis(onescol=False) + RandomRBF(nbases=10, Xdim=X.shape[1])
 
     params = glm.learn(X, y, lhood, basis)
-    Ey, _, _, _ = glm.predict_meanvar(X, lhood, basis, *params)
+    Ey, _, _, _ = glm.predict_moments(X, lhood, basis, *params)
     assert smse(y, Ey) < 0.1
 
     # Test upper quantile estimates

@@ -283,18 +283,15 @@ class Basis(object):
 class LinearBasis(Basis):
     """ 
     Linear basis class, basically this just prepending a columns of ones onto X
+
+    Parameters
+    ----------
+    onescol: bool, optional
+        If true, prepend a column of ones onto X.
     """
 
     @slice_init
     def __init__(self, onescol=False):
-        """ 
-        Construct a linear basis object.
-
-        Parameters
-        ----------
-        onescol: bool, optional
-            If true, prepend a column of ones onto X.
-        """
 
         self.onescol = onescol
 
@@ -322,23 +319,21 @@ class LinearBasis(Basis):
 class PolynomialBasis(Basis):
     """
     Polynomial basis class, this essentially creates the concatenation,
-    Phi = [X^0, X^1, ..., X^p] where p is specified in the constructor.
+    :math:`\\boldsymbol\Phi = [\mathbf{X}^0, \mathbf{X}^1, ..., \mathbf{X}^p]`
+    where :math:`p` is the :code:`order` of the polynomial.
+
+    Parameters
+    ----------
+    order: int
+        the order of the polynomial to create, i.e. the last power to raise
+        X to in the concatenation Phi = [X^0, X^1, ..., X^order].
+    include_bias: bool, optional
+        If True (default), include the bias column (column of ones which
+        acts as the intercept term in a linear model)
     """
 
     @slice_init
     def __init__(self, order, include_bias=True):
-        """
-        Construct a polynomial basis object.
-
-        Parameters
-        ----------
-        order: int
-            the order of the polynomial to create, i.e. the last power to raise
-            X to in the concatenation Phi = [X^0, X^1, ..., X^order].
-        include_bias: bool, optional
-            If True (default), include the bias column (column of ones which
-            acts as the intercept term in a linear model)
-        """
 
         if order < 0:
             raise ValueError("Polynomial order must be positive")
@@ -389,24 +384,22 @@ class RadialBasis(Basis):
     """
     Radial basis class.
 
-    Note:
-        This will have relevance vector machine-like behaviour with uncertainty
+    Parameters
+    ----------
+    centres: ndarray 
+        array of shape (Dxd) where D is the number of centres for the
+        radial bases, and d is the dimensionality of X.
+    lenscale_init: Parameter, optional
+        A scalar parameter to bound and initialise the length scales for
+        optimization
+
+    Note
+    ----
+    This will have relevance vector machine-like behaviour with uncertainty.
     """
 
     @slice_init
     def __init__(self, centres, lenscale_init=Parameter(1., Positive())):
-        """
-        Construct a radial basis function (RBF) object.
-
-        Parameters
-        ----------
-        centres: ndarray 
-            array of shape (Dxd) where D is the number of centres for the
-            radial bases, and d is the dimensionality of X.
-        lenscale_init: Parameter, optional
-            A scalar parameter to bound and initialise the length scales for
-            optimization
-        """
 
         self.M, self.D = centres.shape
         self.C = centres
@@ -473,22 +466,21 @@ class RadialBasis(Basis):
 # that require locations and scales
 
 class SigmoidalBasis(Basis):
-    """Sigmoidal Basis"""
+    """
+    Sigmoidal Basis
+
+    Parameters
+    ----------
+    centres: ndarray
+        array of shape (Dxd) where D is the number of centres for 
+        the bases, and d is the dimensionality of X.
+    lenscale_init: Parameter, optional
+        A scalar parameter to bound and initialise the length scales for
+        optimization
+    """
 
     @slice_init
     def __init__(self, centres, lenscale_init=Parameter(1., Positive())):
-        """
-        Construct a sigmoidal basis function object.
-
-        Parameters
-        ----------
-        centres: ndarray
-            array of shape (Dxd) where D is the number of centres for 
-            the bases, and d is the dimensionality of X.
-        lenscale_init: Parameter, optional
-            A scalar parameter to bound and initialise the length scales for
-            optimization
-        """
 
         self.M, self.D = centres.shape
         self.C = centres
@@ -578,24 +570,22 @@ class RandomRBF(RadialBasis):
 
     This will make a linear regression model approximate a GP with an RBF
     covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        how many unique random bases to create (twice this number will be
+        actually created, i.e. real and imaginary components for each base)
+    Xdim: int
+        the dimension (d) of the observations
+    lenscale_init: Parameter, optional
+        A scalar parameter to bound and initialise the length scales for
+        optimization
     """
 
     @slice_init
     def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
-        """
-        Construct a random radial basis function (RBF) object.
 
-        Parameters
-        ----------
-        nbases: int
-            how many unique random bases to create (twice this number will be
-            actually created, i.e. real and imaginary components for each base)
-        Xdim: int
-            the dimension (d) of the observations
-        lenscale_init: Parameter, optional
-            A scalar parameter to bound and initialise the length scales for
-            optimization
-        """
         self.d = Xdim
         self.n = nbases
         self.W = np.random.randn(self.d, self.n)
@@ -663,28 +653,27 @@ class RandomRBF(RadialBasis):
 
 
 class RandomRBF_ARD(RandomRBF):
-    """ Random RBF Basis, otherwise known as Random Kitchen Sinks, with
-        automatic relevance determination (ARD).
+    """ 
+    Random RBF Basis, otherwise known as Random Kitchen Sinks, with automatic
+    relevance determination (ARD).
 
-        This will make a linear regression model approximate a GP with an
-        ARD-RBF covariance function.
+    This will make a linear regression model approximate a GP with an ARD-RBF
+    covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        how many unique random bases to create (twice this number will be
+        actually created, i.e. real and imaginary components for each base)
+    Xdim: int
+        the dimension (d) of the observations
+    lenscale_init: Parameter, optional
+        A scalar or vector of shape (d,) Parameter to bound and initialise
+        the length scales for optimization
     """
 
     @slice_init
     def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
-        """ Construct a random radial basis function (RBF) object, with ARD.
-
-        Parameters
-        ----------
-        nbases: int
-            how many unique random bases to create (twice this number will be
-            actually created, i.e. real and imaginary components for each base)
-        Xdim: int
-            the dimension (d) of the observations
-        lenscale_init: Parameter, optional
-            A scalar or vector of shape (d,) Parameter to bound and initialise
-            the length scales for optimization
-        """
 
         super(RandomRBF_ARD, self).__init__(nbases, Xdim, lenscale_init)
         if lenscale_init.shape == (1,):
@@ -698,7 +687,8 @@ class RandomRBF_ARD(RandomRBF):
 
     @slice_call
     def __call__(self, X, lenscales):
-        """ Apply the random ARD-RBF to X.
+        """
+        Apply the random ARD-RBF to X.
 
         Parameters
         ----------
@@ -724,7 +714,8 @@ class RandomRBF_ARD(RandomRBF):
 
     @slice_call
     def grad(self, X, lenscales):
-        """ Get the gradients of this basis w.r.t.\ the length scales.
+        """
+        Get the gradients of this basis w.r.t.\ the length scales.
 
         Parameters
         ----------
@@ -770,24 +761,21 @@ class FastFood(RandomRBF):
 
     This will make a linear regression model approximate a GP with an RBF
     covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        a scalar for how many random bases to create approximately, this
+        actually will be to the neareset larger two power.
+    Xdim: int   
+        the dimension (d) of the observations.
+    lenscale_init: Parameter, optional
+        A scalar parameter to bound and initialise the length scales for
+        optimization
     """
 
     @slice_init
     def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
-        """
-        Construct a random radial basis function (RBF) object.
-
-        Parameters
-        ----------
-        nbases: int
-            a scalar for how many random bases to create approximately, this
-            actually will be to the neareset larger two power.
-        Xdim: int   
-            the dimension (d) of the observations.
-        lenscale_init: Parameter, optional
-            A scalar parameter to bound and initialise the length scales for
-            optimization
-        """
 
         self.params = lenscale_init
 

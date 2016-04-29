@@ -248,10 +248,37 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
     return m, C, lparams, bparams
 
 
-def predict_meanvar(Xs, likelihood, basis, m, C, lparams, bparams,
+def predict_moments(Xs, likelihood, basis, m, C, lparams, bparams,
                     nsamples=100):
     """
-    Predictive mean and variance of a Bayesian GLM.
+    Predictive moments, in particular mean and variance, of a Bayesian GLM.
+
+    This function uses Monte-Carlo sampling to evaluate the predictive mean and
+    variance of a Bayesian GLM. The exact expressions evaluated are,
+
+    .. math ::
+
+        \mathbb{E}[y^*] = \int g(\mathbf{w}^T \\boldsymbol\phi^{*})
+            p(\mathbf{w} | \mathbf{y}, \\boldsymbol\Phi) d\mathbf{w},
+        
+        \mathbb{V}[y^*] = \int \left(g(\mathbf{w}^T \\boldsymbol\phi^{*})
+            - \mathbb{E}[y^*]\\right)^2 
+            p(\mathbf{w} | \mathbf{y}, \\boldsymbol\Phi) d\mathbf{w},
+
+    where :math:`g(\cdot)` is the activation (inverse link) link function used
+    by the GLM, and :math:`p(\mathbf{w} | \mathbf{y}, \\boldsymbol\Phi)` is the
+    posterior distribution over weights (from :code:`learn`). Here are few
+    concrete examples of how we can use these values,
+
+    - Gaussian likelihood: these are just the predicted mean and variance, see
+      :code:`revrand.regression.predict`
+    - Bernoulli likelihood: The expected value is the probability, :math:`p(y^*
+      = 1)`, i.e. the probability of class one. The variance may not be so
+      useful.
+    - Poisson likelihood: The expected value is similar conceptually to the
+      Gaussian case, and is also a *continuous* value. The median (50%
+      quantile) from :code:`predict_interval` is a discrete value. Again, the
+      variance in this instance may not be so useful.
 
     Parameters
     ----------

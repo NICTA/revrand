@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from six.moves import map, range, zip
@@ -104,6 +103,9 @@ def couple(f, g):
 
 def decouple(fn):
     """
+    Create two functions of one argument and one return from a function that
+    takes two arguments and has two returns
+
     Examples
     --------
     >>> h = lambda x: (2*x**3, 6*x**2)
@@ -458,6 +460,8 @@ def custom_reshape(a, newshape, order='C'):
 
 def map_indices(fn, iterable, indices):
     """
+    Map a function across indices of an iterable
+
     Notes
     -----
     Roughly equivalent to, though more efficient than::

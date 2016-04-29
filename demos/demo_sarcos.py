@@ -89,7 +89,7 @@ hyper_params = gp.learn(X_train_sub, y_train_sub, kdef, verbose=True,
 # Predict Revrand
 #
 
-Ey, Vf, _, _ = glm.predict_meanvar(X_test, llhood, base, *params)
+Ey, Vf, _, _ = glm.predict_moments(X_test, llhood, base, *params)
 Vy = Vf + params[2][0]
 Sy = np.sqrt(Vy)
 

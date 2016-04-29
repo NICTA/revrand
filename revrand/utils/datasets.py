@@ -57,6 +57,8 @@ def make_regression(func, n_samples=100, n_features=1, bias=0.0, noise=0.0,
 def make_polynomial(degree=3, n_samples=100, bias=0.0, noise=0.0,
                     return_coefs=False, random_state=None):
     """
+    Generate a noisy polynomial for a regression problem
+
     Examples
     --------
     >>> X, y, coefs = make_polynomial(degree=3, n_samples=200, noise=.5,
@@ -106,7 +108,8 @@ def get_data_home(data_home=None):
 
 def fetch_gpml_sarcos_data(transpose_data=True, data_home=None):
     """
-    TODO: Make a little bit more DRY...
+    Fetch the SARCOS dataset from the internet and parse appropriately into
+    python arrays
 
     >>> gpml_sarcos = fetch_gpml_sarcos_data()
 
@@ -154,6 +157,9 @@ def fetch_gpml_sarcos_data(transpose_data=True, data_home=None):
 
 def fetch_gpml_usps_resampled_data(transpose_data=True, data_home=None):
     """
+    Fetch the USPS handwritten digits dataset from the internet and parse
+    appropriately into python arrays
+
     >>> usps_resampled = fetch_gpml_usps_resampled_data()
 
     >>> usps_resampled.train.targets.shape
@@ -220,6 +226,9 @@ def fetch_gpml_usps_resampled_data(transpose_data=True, data_home=None):
 
 def gen_gausprocess_se(ntrain, ntest, noise=1., lenscale=1., scale=1.,
                        xmin=-10, xmax=10):
+    """
+    Generate a random (noisy) draw from a Gaussian Process with a RBF kernel.
+    """
 
     Xtrain = np.linspace(xmin, xmax, ntrain)[:, np.newaxis]
     Xtest = np.linspace(xmin, xmax, ntest)[:, np.newaxis]

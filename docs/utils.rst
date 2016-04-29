@@ -18,3 +18,6 @@ Utilities
 
    datasets.make_regression
    datasets.make_polynomial
+   datasets.gen_gausprocess_se
+   datasets.fetch_gpml_usps_resampled_data
+   datasets.fetch_gpml_sarcos_data

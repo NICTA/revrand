@@ -220,18 +220,15 @@ class Gaussian(Bernoulli):
 
     No transformation function is needed since this is conjugate to the GLM
     prior.
+
+    Parameters
+    ----------
+    var_init: Parameter, optional
+        A scalar Parameter describing the initial point and bounds for
+        an optimiser to learn the variance parameter of this object.
     """
 
     def __init__(self, var_init=Parameter(1., Positive())):
-        """
-        Construct an instance of the Gaussian likelihood class.
-
-        Parameters
-        ----------
-        var_init: Parameter, optional
-            A scalar Parameter describing the initial point and bounds for
-            an optimiser to learn the variance parameter of this object.
-        """
 
         self.params = var_init
 
@@ -425,18 +422,19 @@ class Poisson(Bernoulli):
 
     An exponential transformation function and a softplus transformation
     function have been implemented.
-
+    
+    Parameters
+    ----------
+    tranfcn: string, optional
+        this may be 'exp' for an exponential transformation function,
+        or 'softplus' for a softplut transformation function.
     """
 
     def __init__(self, tranfcn='exp'):
         """
         Construct an instance of the Poisson likelihood class.
 
-        Parameters
-        ----------
-        tranfcn: string, optional
-            this may be 'exp' for an exponential transformation function,
-            or 'softplus' for a softplut transformation function.
+
         """
 
         if tranfcn == 'exp' or tranfcn == 'softplus':

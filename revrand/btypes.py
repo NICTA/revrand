@@ -119,17 +119,6 @@ class Parameter(object):
     """
 
     def __init__(self, value, bounds=Bound()):
-        """
-        Initialise a Parameter.
-
-        Parameters
-        ----------
-        value: scalar or ndarray
-            a value to associate with this parameter.
-        bound: Bound, optional
-            a Bound tuple that describes the valid range for all of the 
-            elements in value
-        """
 
         self.value = value
         self.shape = (1,) if np.isscalar(value) else value.shape

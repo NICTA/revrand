@@ -120,7 +120,7 @@ def main():
                            regulariser=Parameter(reg, Positive()),
                            use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
                            batchsize=batchsize, maxit=passes)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_meanvar(Xtest, llhood, base,
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]
     Sy_g = np.sqrt(Vy_g)
