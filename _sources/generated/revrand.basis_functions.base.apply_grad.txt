@@ -1,6 +1,0 @@
-revrand.basis_functions.base.apply_grad
-=======================================
-
-.. currentmodule:: revrand.basis_functions.base
-
-.. autofunction:: apply_grad

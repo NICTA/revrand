@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Optimization &mdash; revrand 0.1 documentation</title>
+    <title>Optimization &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="index.html" />
     <link rel="next" title="revrand.optimize.base" href="generated/revrand.optimize.base.html" />
-    <link rel="prev" title="Linear Algebra Routines" href="linalg.html" />
+    <link rel="prev" title="Bound and Parameter Types" href="btypes.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -49,9 +49,9 @@
           <a href="generated/revrand.optimize.base.html" title="revrand.optimize.base"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="linalg.html" title="Linear Algebra Routines"
+          <a href="btypes.html" title="Bound and Parameter Types"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,99 +71,38 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.html#module-revrand.optimize.base" title="revrand.optimize.base"><code class="xref py py-obj docutils literal"><span class="pre">base</span></code></a></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.minimize.html#revrand.optimize.base.minimize" title="revrand.optimize.base.minimize"><code class="xref py py-obj docutils literal"><span class="pre">base.minimize</span></code></a>(fun,&nbsp;x0[,&nbsp;args,&nbsp;method,&nbsp;jac,&nbsp;...])</td>
-<td>Scipy.optimize.minimize-style wrapper for NLopt and scipy&#8217;s minimize.</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.structured_minimizer.html#revrand.optimize.base.structured_minimizer" title="revrand.optimize.base.structured_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">base.structured_minimizer</span></code></a>(minimizer)</td>
+<td>Allow an optimizer to accept a list of Parameter types to optimize, rather than just a flattened array.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.Bound.html#revrand.optimize.base.Bound" title="revrand.optimize.base.Bound"><code class="xref py py-obj docutils literal"><span class="pre">base.Bound</span></code></a>([lower,&nbsp;upper,&nbsp;shape])</td>
-<td>Define bounds on a variable for the optimiser.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.structured_sgd.html#revrand.optimize.base.structured_sgd" title="revrand.optimize.base.structured_sgd"><code class="xref py py-obj docutils literal"><span class="pre">base.structured_sgd</span></code></a>(sgd)</td>
+<td>Allow stochastic gradients to accept a list of Parameter types to optimize, rather than just a flattened array.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.Positive.html#revrand.optimize.base.Positive" title="revrand.optimize.base.Positive"><code class="xref py py-obj docutils literal"><span class="pre">base.Positive</span></code></a>([lower,&nbsp;upper,&nbsp;shape])</td>
-<td>Define a positive only bound for the optimiser.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.structured_minimizer.html#revrand.optimize.base.structured_minimizer" title="revrand.optimize.base.structured_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">base.structured_minimizer</span></code></a>(minimizer)</td>
-<td>Allow an optimizer to accept a list of parameters to optimize, rather than just a flattened array.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.structured_sgd.html#revrand.optimize.base.structured_sgd" title="revrand.optimize.base.structured_sgd"><code class="xref py py-obj docutils literal"><span class="pre">base.structured_sgd</span></code></a>(sgd)</td>
-<td>Allow stochastic gradients to accept a list of parameters to optimize, rather than just a flattened array.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.logtrick_minimizer.html#revrand.optimize.base.logtrick_minimizer" title="revrand.optimize.base.logtrick_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">base.logtrick_minimizer</span></code></a>(minimizer)</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.logtrick_minimizer.html#revrand.optimize.base.logtrick_minimizer" title="revrand.optimize.base.logtrick_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">base.logtrick_minimizer</span></code></a>(minimizer)</td>
 <td>Log-Trick decorator for optimizers.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.logtrick_sgd.html#revrand.optimize.base.logtrick_sgd" title="revrand.optimize.base.logtrick_sgd"><code class="xref py py-obj docutils literal"><span class="pre">base.logtrick_sgd</span></code></a>(sgd)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.logtrick_sgd.html#revrand.optimize.base.logtrick_sgd" title="revrand.optimize.base.logtrick_sgd"><code class="xref py py-obj docutils literal"><span class="pre">base.logtrick_sgd</span></code></a>(sgd)</td>
 <td>Log-Trick decorator for stochastic gradients.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_lattice.html#revrand.optimize.base.candidate_start_points_lattice" title="revrand.optimize.base.candidate_start_points_lattice"><code class="xref py py-obj docutils literal"><span class="pre">base.candidate_start_points_lattice</span></code></a>(bounds)</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_lattice.html#revrand.optimize.base.candidate_start_points_lattice" title="revrand.optimize.base.candidate_start_points_lattice"><code class="xref py py-obj docutils literal"><span class="pre">base.candidate_start_points_lattice</span></code></a>(bounds)</td>
 <td>Generate candidate starting points on a uniform grid within a hyperrectangle.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_random.html#revrand.optimize.base.candidate_start_points_random" title="revrand.optimize.base.candidate_start_points_random"><code class="xref py py-obj docutils literal"><span class="pre">base.candidate_start_points_random</span></code></a>(bounds[,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_random.html#revrand.optimize.base.candidate_start_points_random" title="revrand.optimize.base.candidate_start_points_random"><code class="xref py py-obj docutils literal"><span class="pre">base.candidate_start_points_random</span></code></a>(bounds[,&nbsp;...])</td>
 <td>Randomly generate candidate starting points uniformly within a hyperrectangle.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.sgd.sgd.html#revrand.optimize.sgd.sgd" title="revrand.optimize.sgd.sgd"><code class="xref py py-obj docutils literal"><span class="pre">sgd.sgd</span></code></a>(fun,&nbsp;x0,&nbsp;Data[,&nbsp;args,&nbsp;bounds,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.sgd.sgd.html#revrand.optimize.sgd.sgd" title="revrand.optimize.sgd.sgd"><code class="xref py py-obj docutils literal"><span class="pre">sgd.sgd</span></code></a>(fun,&nbsp;x0,&nbsp;Data[,&nbsp;args,&nbsp;bounds,&nbsp;...])</td>
 <td>Stochastic Gradient Descent, using ADADELTA for setting the learning rate.</td>
 </tr>
-</tbody>
-</table>
-<div class="section" id="optimizer-equivalency-table">
-<h2>Optimizer Equivalency Table<a class="headerlink" href="#optimizer-equivalency-table" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="docutils">
-<colgroup>
-<col width="30%" />
-<col width="70%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">scipy.optimize</th>
-<th class="head">NLopt</th>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.sgd.AdaDelta.html#revrand.optimize.sgd.AdaDelta" title="revrand.optimize.sgd.AdaDelta"><code class="xref py py-obj docutils literal"><span class="pre">sgd.AdaDelta</span></code></a>([rho,&nbsp;epsilon])</td>
+<td>AdaDelta Algorithm</td>
 </tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>Nelder-Mead</td>
-<td>LN_NELDERMEAD</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.sgd.AdaGrad.html#revrand.optimize.sgd.AdaGrad" title="revrand.optimize.sgd.AdaGrad"><code class="xref py py-obj docutils literal"><span class="pre">sgd.AdaGrad</span></code></a>([eta,&nbsp;epsilon])</td>
+<td>AdaGrad Algorithm</td>
 </tr>
-<tr class="row-odd"><td>Powell</td>
-<td>?</td>
-</tr>
-<tr class="row-even"><td>CG</td>
-<td>?</td>
-</tr>
-<tr class="row-odd"><td>BFGS</td>
-<td>LD_LBFGS</td>
-</tr>
-<tr class="row-even"><td>Newton-CG</td>
-<td><div class="first last line-block">
-<div class="line"><strong>LD_TNEWTON_PRECOND_RESTART</strong></div>
-<div class="line">LD_TNEWTON_PRECOND</div>
-<div class="line">LD_TNEWTON_RESTART</div>
-<div class="line">LD_TNEWTON</div>
-</div>
-</td>
-</tr>
-<tr class="row-odd"><td>L-BFGS-B</td>
-<td>LD_LBFGS</td>
-</tr>
-<tr class="row-even"><td>TNC</td>
-<td><div class="first last line-block">
-<div class="line"><strong>LD_TNEWTON_PRECOND_RESTART</strong></div>
-<div class="line">LD_TNEWTON_PRECOND</div>
-<div class="line">LD_TNEWTON_RESTART</div>
-<div class="line">LD_TNEWTON</div>
-</div>
-</td>
-</tr>
-<tr class="row-odd"><td>COBYLA</td>
-<td>LN_COBYLA</td>
-</tr>
-<tr class="row-even"><td>SLSQP</td>
-<td>LD_SLSQP</td>
-</tr>
-<tr class="row-odd"><td>dogleg</td>
-<td><em>Requires second-order gradients</em></td>
-</tr>
-<tr class="row-even"><td>trust-ncg</td>
-<td><em>Requires second-order gradients</em></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.sgd.Momentum.html#revrand.optimize.sgd.Momentum" title="revrand.optimize.sgd.Momentum"><code class="xref py py-obj docutils literal"><span class="pre">sgd.Momentum</span></code></a>([rho,&nbsp;eta])</td>
+<td>Momentum Algorithm</td>
 </tr>
 </tbody>
 </table>
-</div>
 <div class="section" id="candidate-starting-points-example">
 <h2>Candidate Starting Points Example<a class="headerlink" href="#candidate-starting-points-example" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
@@ -277,15 +216,14 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Optimization</a><ul>
-<li><a class="reference internal" href="#optimizer-equivalency-table">Optimizer Equivalency Table</a></li>
 <li><a class="reference internal" href="#candidate-starting-points-example">Candidate Starting Points Example</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="linalg.html"
-                        title="previous chapter">Linear Algebra Routines</a></p>
+  <p class="topless"><a href="btypes.html"
+                        title="previous chapter">Bound and Parameter Types</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="generated/revrand.optimize.base.html"
                         title="next chapter">revrand.optimize.base</a></p>
@@ -316,9 +254,9 @@
           <a href="generated/revrand.optimize.base.html" title="revrand.optimize.base"
              >next</a> |</li>
         <li class="right" >
-          <a href="linalg.html" title="Linear Algebra Routines"
+          <a href="btypes.html" title="Bound and Parameter Types"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

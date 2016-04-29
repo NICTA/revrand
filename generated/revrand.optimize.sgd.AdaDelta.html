@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>revrand.optimize.sgd.AdaDelta &mdash; revrand 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
+    <link rel="up" title="Optimization" href="../optimize.html" />
+    <link rel="next" title="revrand.optimize.sgd.AdaGrad" href="revrand.optimize.sgd.AdaGrad.html" />
+    <link rel="prev" title="revrand.optimize.sgd.sgd" href="revrand.optimize.sgd.sgd.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.sgd.AdaGrad.html" title="revrand.optimize.sgd.AdaGrad"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.sgd.sgd.html" title="revrand.optimize.sgd.sgd"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="revrand-optimize-sgd-adadelta">
+<h1>revrand.optimize.sgd.AdaDelta<a class="headerlink" href="#revrand-optimize-sgd-adadelta" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="revrand.optimize.sgd.AdaDelta">
+<em class="property">class </em><code class="descclassname">revrand.optimize.sgd.</code><code class="descname">AdaDelta</code><span class="sig-paren">(</span><em>rho=0.95</em>, <em>epsilon=1e-06</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.AdaDelta" title="Permalink to this definition">¶</a></dt>
+<dd><p>AdaDelta Algorithm</p>
+<dl class="method">
+<dt id="revrand.optimize.sgd.AdaDelta.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>rho=0.95</em>, <em>epsilon=1e-06</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.AdaDelta.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an AdaDelta updater object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rho</strong> (<em>float, optional</em>) &#8211; smoothing/decay rate parameter, must be [0, 1].</li>
+<li><strong>epsilon</strong> (<em>float, optional</em>) &#8211; &#8220;jitter&#8221; term to ensure continued learning (should be small).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#revrand.optimize.sgd.AdaDelta.__init__" title="revrand.optimize.sgd.AdaDelta.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([rho,&nbsp;epsilon])</td>
+<td>Construct an AdaDelta updater object.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">name</span></code>()</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="revrand.optimize.sgd.sgd.html"
+                        title="previous chapter">revrand.optimize.sgd.sgd</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="revrand.optimize.sgd.AdaGrad.html"
+                        title="next chapter">revrand.optimize.sgd.AdaGrad</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.sgd.AdaGrad.html" title="revrand.optimize.sgd.AdaGrad"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="revrand.optimize.sgd.sgd.html" title="revrand.optimize.sgd.sgd"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

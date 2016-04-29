@@ -1,0 +1,29 @@
+revrand.basis_functions.LinearBasis
+===================================
+
+.. currentmodule:: revrand.basis_functions
+
+.. autoclass:: LinearBasis
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LinearBasis.__init__
+      ~LinearBasis.grad
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LinearBasis.params
+   
+   

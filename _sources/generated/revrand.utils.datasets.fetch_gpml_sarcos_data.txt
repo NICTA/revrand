@@ -1,0 +1,6 @@
+revrand.utils.datasets.fetch_gpml_sarcos_data
+=============================================
+
+.. currentmodule:: revrand.utils.datasets
+
+.. autofunction:: fetch_gpml_sarcos_data

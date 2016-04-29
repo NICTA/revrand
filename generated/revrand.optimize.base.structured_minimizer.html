@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.optimize.base.structured_minimizer &mdash; revrand 0.1 documentation</title>
+    <title>revrand.optimize.base.structured_minimizer &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,10 +24,10 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Optimization" href="../optimize.html" />
     <link rel="next" title="revrand.optimize.base.structured_sgd" href="revrand.optimize.base.structured_sgd.html" />
-    <link rel="prev" title="revrand.optimize.base.Positive" href="revrand.optimize.base.Positive.html" />
+    <link rel="prev" title="revrand.optimize.base" href="revrand.optimize.base.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -50,9 +50,9 @@
           <a href="revrand.optimize.base.structured_sgd.html" title="revrand.optimize.base.structured_sgd"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="revrand.optimize.base.Positive.html" title="revrand.optimize.base.Positive"
+          <a href="revrand.optimize.base.html" title="revrand.optimize.base"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
       </ul>
     </div>  
@@ -67,10 +67,11 @@
 <dl class="function">
 <dt id="revrand.optimize.base.structured_minimizer">
 <code class="descclassname">revrand.optimize.base.</code><code class="descname">structured_minimizer</code><span class="sig-paren">(</span><em>minimizer</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.base.structured_minimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Allow an optimizer to accept a list of parameters to optimize, rather than
-just a flattened array.</p>
+<dd><p>Allow an optimizer to accept a list of Parameter types to optimize, rather
+than just a flattened array.</p>
 <p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">minimize</span> <span class="k">as</span> <span class="n">sp_min</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">..btypes</span> <span class="k">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Bound</span>
 </pre></div>
 </div>
 <p>Define a cost function that returns a pair. The first element is the cost
@@ -87,8 +88,8 @@ tuple containing one element.</p>
 </pre></div>
 </div>
 <p>Initial values</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">w_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">lambda_0</span> <span class="o">=</span> <span class="o">.</span><span class="mi">25</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">w_0</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">]),</span> <span class="n">Bound</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lambda_0</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="n">Bound</span><span class="p">())</span>
 </pre></div>
 </div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">new_min</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="p">(</span><span class="n">w_0</span><span class="p">,</span> <span class="n">lambda_0</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;L-BFGS-B&#39;</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -106,8 +107,8 @@ tuple containing one element.</p>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="revrand.optimize.base.Positive.html"
-                        title="previous chapter">revrand.optimize.base.Positive</a></p>
+  <p class="topless"><a href="revrand.optimize.base.html"
+                        title="previous chapter">revrand.optimize.base</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="revrand.optimize.base.structured_sgd.html"
                         title="next chapter">revrand.optimize.base.structured_sgd</a></p>
@@ -138,9 +139,9 @@ tuple containing one element.</p>
           <a href="revrand.optimize.base.structured_sgd.html" title="revrand.optimize.base.structured_sgd"
              >next</a> |</li>
         <li class="right" >
-          <a href="revrand.optimize.base.Positive.html" title="revrand.optimize.base.Positive"
+          <a href="revrand.optimize.base.html" title="revrand.optimize.base"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
       </ul>
     </div>

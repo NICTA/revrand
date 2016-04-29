@@ -1,6 +1,0 @@
-revrand.basis_functions.base.slice_init
-=======================================
-
-.. currentmodule:: revrand.basis_functions.base
-
-.. autofunction:: slice_init

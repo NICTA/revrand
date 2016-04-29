@@ -6,15 +6,13 @@ Basis Functions
 .. autosummary::
    :toctree: generated/
 
-   base
-   base.slice_init
-   base.slice_call
-   base.apply_grad
-   base.Basis
-   base.LinearBasis
-   base.PolynomialBasis
-   base.RadialBasis 
-   base.RandomRBF
-   base.RandomRBF_ARD
-   base.FastFood
-   base.SigmoidalBasis
+   LinearBasis
+   PolynomialBasis
+   SigmoidalBasis
+   RandomRBF
+   RandomRBF_ARD
+   FastFood
+
+.. automodule:: revrand.basis_functions
+   :members:
+   :special-members: __call__

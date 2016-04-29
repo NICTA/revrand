@@ -1,0 +1,6 @@
+revrand.utils.base.atleast_list
+===============================
+
+.. currentmodule:: revrand.utils.base
+
+.. autofunction:: atleast_list

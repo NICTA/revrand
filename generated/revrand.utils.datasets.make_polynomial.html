@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.datasets.make_polynomial &mdash; revrand 0.1 documentation</title>
+    <title>revrand.utils.datasets.make_polynomial &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
-    <link rel="next" title="Demos" href="../demo.html" />
+    <link rel="next" title="revrand.utils.datasets.gen_gausprocess_se" href="revrand.utils.datasets.gen_gausprocess_se.html" />
     <link rel="prev" title="revrand.utils.datasets.make_regression" href="revrand.utils.datasets.make_regression.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../demo.html" title="Demos"
+          <a href="revrand.utils.datasets.gen_gausprocess_se.html" title="revrand.utils.datasets.gen_gausprocess_se"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="revrand.utils.datasets.make_regression.html" title="revrand.utils.datasets.make_regression"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -67,7 +67,8 @@
 <dl class="function">
 <dt id="revrand.utils.datasets.make_polynomial">
 <code class="descclassname">revrand.utils.datasets.</code><code class="descname">make_polynomial</code><span class="sig-paren">(</span><em>degree=3</em>, <em>n_samples=100</em>, <em>bias=0.0</em>, <em>noise=0.0</em>, <em>return_coefs=False</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.datasets.make_polynomial" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Examples</p>
+<dd><p>Generate a noisy polynomial for a regression problem</p>
+<p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">coefs</span> <span class="o">=</span> <span class="n">make_polynomial</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">noise</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span>
 <span class="gp">... </span>                              <span class="n">return_coefs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
@@ -86,8 +87,8 @@
   <p class="topless"><a href="revrand.utils.datasets.make_regression.html"
                         title="previous chapter">revrand.utils.datasets.make_regression</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../demo.html"
-                        title="next chapter">Demos</a></p>
+  <p class="topless"><a href="revrand.utils.datasets.gen_gausprocess_se.html"
+                        title="next chapter">revrand.utils.datasets.gen_gausprocess_se</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -112,12 +113,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../demo.html" title="Demos"
+          <a href="revrand.utils.datasets.gen_gausprocess_se.html" title="revrand.utils.datasets.gen_gausprocess_se"
              >next</a> |</li>
         <li class="right" >
           <a href="revrand.utils.datasets.make_regression.html" title="revrand.utils.datasets.make_regression"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>

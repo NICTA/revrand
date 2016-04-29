@@ -31,6 +31,6 @@ revrand.likelihoods.Poisson
 
    .. autosummary::
    
-      ~Poisson.bounds
+      ~Poisson.params
    
    

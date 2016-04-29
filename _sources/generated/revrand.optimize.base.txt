@@ -13,18 +13,14 @@ revrand.optimize.base
       candidate_start_points_random
       check_random_state
       flatten
-      flatten_args
-      flatten_func_grad
-      get_minimize
+      flatten_bounds
+      get_values
       logtrick_minimizer
       logtrick_sgd
-      minimize
       minimize_bounded_start
-      namedtuple
       structured_minimizer
       structured_sgd
       unflatten
-      warn
       wraps
    
    

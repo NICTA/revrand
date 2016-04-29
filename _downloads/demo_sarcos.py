@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 """ A La Carte GP Application to SARCOS dataset. """
 
 import logging
@@ -6,7 +6,10 @@ import numpy as np
 import revrand.legacygp as gp
 import revrand.legacygp.kernels as kern
 
-from revrand import regression, glm, basis_functions, likelihoods
+from revrand import regression, glm
+from revrand.basis_functions import RandomRBF_ARD
+from revrand.likelihoods import Gaussian
+from revrand.btypes import Parameter, Positive
 from revrand.validation import smse, msll
 from revrand.utils.datasets import fetch_gpml_sarcos_data
 
@@ -18,19 +21,14 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 lenscale = 10
-sigma = 100
 noise = 1
-regulariser = 1
-nbases = 300
-gp_Ntrain = 1024
-passes = 100
-rate = 0.9
-eta = 1e-6
-batchsize = 100
-rank = 0
-
+nbases = 200
+gp_Ntrain = 1000
+passes = 5
+rho = 0.9
+epsilon = 1e-6
+batchsize = 10
 useSGD = True
-diagcov = True
 
 
 #
@@ -57,22 +55,20 @@ y_train_sub = y_train[train_ind]
 #
 # Train A la Carte
 #
-
-base = basis_functions.RandomRBF_ARD(nbases, D)
-lenARD = [lenscale * np.ones(D)]
+lenARD = lenscale * np.ones(D)
+base = RandomRBF_ARD(nbases, D,
+                     lenscale_init=Parameter(lenARD, Positive()))
 
 if useSGD:
     log.info("Using SGD regressor")
-    llhood = likelihoods.Gaussian()
+    llhood = Gaussian()
     lparams = [noise**2]
-    params = glm.learn(X_train, y_train, llhood, lparams, base, lenARD,
-                       postcomp=5, reg=regulariser, use_sgd=True, rate=rate,
-                       eta=eta, batchsize=batchsize, maxit=passes)
+    params = glm.learn(X_train, y_train, llhood, base, use_sgd=True, rho=rho,
+                       epsilon=epsilon, batchsize=batchsize, maxit=passes)
 else:
     log.info("Using full variational regressor")
-    params = regression.learn(X_train, y_train, base, lenARD,
-                              var=noise**2, diagcov=diagcov,
-                              regulariser=regulariser)
+    params = regression.learn(X_train, y_train, base,
+                              var=Parameter(noise**2, Positive()))
 
 
 #
@@ -93,7 +89,7 @@ hyper_params = gp.learn(X_train_sub, y_train_sub, kdef, verbose=True,
 # Predict Revrand
 #
 
-Ey, Vf, _, _ = glm.predict_meanvar(X_test, llhood, base, *params)
+Ey, Vf, _, _ = glm.predict_moments(X_test, llhood, base, *params)
 Vy = Vf + params[2][0]
 Sy = np.sqrt(Vy)
 

@@ -1,0 +1,6 @@
+revrand.utils.base.append_or_extend
+===================================
+
+.. currentmodule:: revrand.utils.base
+
+.. autofunction:: append_or_extend

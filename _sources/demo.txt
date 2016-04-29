@@ -36,6 +36,23 @@ using a random subset of data.
 (:download:`Source code <../demos/demo_sarcos.py>`)
 
 
+Classification
+--------------
+
+
+Classify `3` and `5` from the USPS digits dataset
+.................................................
+
+In this demo the GLM with a Bernoulli likelihood is compared against a logistic
+classifier from `scikit learn
+<http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_
+for classifying digits `3` and `5` from the USPS handwritten digits experiment
+used in [1]_.
+
+(:download:`Source code <../demos/demo_classification.py>`)
+
+
+
 Stochastic Gradient Descent
 ---------------------------
 

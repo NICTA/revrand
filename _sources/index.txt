@@ -16,10 +16,10 @@ Contents:
    regression
    glm
    likelihoods
-   transforms
-   linalg
+   btypes
    optimize
    utils
+   math
    demo
 
    dev/index.rst

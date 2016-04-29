@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>revrand.utils.datasets.fetch_gpml_usps_resampled_data &mdash; revrand 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
+    <link rel="up" title="Utilities" href="../utils.html" />
+    <link rel="next" title="revrand.utils.datasets.fetch_gpml_sarcos_data" href="revrand.utils.datasets.fetch_gpml_sarcos_data.html" />
+    <link rel="prev" title="revrand.utils.datasets.gen_gausprocess_se" href="revrand.utils.datasets.gen_gausprocess_se.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="revrand.utils.datasets.gen_gausprocess_se.html" title="revrand.utils.datasets.gen_gausprocess_se"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="revrand-utils-datasets-fetch-gpml-usps-resampled-data">
+<h1>revrand.utils.datasets.fetch_gpml_usps_resampled_data<a class="headerlink" href="#revrand-utils-datasets-fetch-gpml-usps-resampled-data" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="revrand.utils.datasets.fetch_gpml_usps_resampled_data">
+<code class="descclassname">revrand.utils.datasets.</code><code class="descname">fetch_gpml_usps_resampled_data</code><span class="sig-paren">(</span><em>transpose_data=True</em>, <em>data_home=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.datasets.fetch_gpml_usps_resampled_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch the USPS handwritten digits dataset from the internet and parse
+appropriately into python arrays</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span> <span class="o">=</span> <span class="n">fetch_gpml_usps_resampled_data</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(4649,)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">targets</span> 
+<span class="go">array([6, 0, 1, ..., 9, 2, 7])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(4649, 256)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">usps_resampled</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">usps_resampled</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(4649,)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(4649, 256)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span> <span class="o">=</span> <span class="n">fetch_gpml_usps_resampled_data</span><span class="p">(</span><span class="n">transpose_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">usps_resampled</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(256, 4649)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="revrand.utils.datasets.gen_gausprocess_se.html"
+                        title="previous chapter">revrand.utils.datasets.gen_gausprocess_se</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="revrand.utils.datasets.fetch_gpml_sarcos_data.html"
+                        title="next chapter">revrand.utils.datasets.fetch_gpml_sarcos_data</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="revrand.utils.datasets.gen_gausprocess_se.html" title="revrand.utils.datasets.gen_gausprocess_se"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

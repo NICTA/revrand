@@ -1,6 +1,0 @@
-revrand.optimize.base.minimize
-==============================
-
-.. currentmodule:: revrand.optimize.base
-
-.. autofunction:: minimize

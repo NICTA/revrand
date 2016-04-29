@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Math Utilities &mdash; revrand 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="revrand 0.3 documentation" href="index.html" />
+    <link rel="next" title="Demos" href="demo.html" />
+    <link rel="prev" title="revrand.utils.datasets.fetch_gpml_sarcos_data" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="demo.html" title="Demos"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="math-utilities">
+<h1>Math Utilities<a class="headerlink" href="#math-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-revrand.math.linalg">
+<span id="linear-algebra"></span><h2>Linear Algebra<a class="headerlink" href="#module-revrand.math.linalg" title="Permalink to this headline">¶</a></h2>
+<p>Various linear algebra utilities.</p>
+<p>Notes on the fast Hadamard transform (Alistair Reid, NICTA 2015):</p>
+<p>The Hadamard transform is a recursive application of sums and differences
+on a vector of length 2^n. The log(n) recursive application allow computation
+in n log(n) operations instead of the naive n^2 per vector that would result
+from computing and then multiplying a Hadamard matrix.</p>
+<p>Note: the Walsh ordering is naturally computed by the recursive algorithm. The
+sequence ordering requires a re-ordering afterwards incurring a similar
+overhead to the original computation.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Larger tests against calling Julia: [length 4*512 vectors:]</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">64</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">Julia</span><span class="p">:</span> <span class="mi">570</span><span class="n">us</span> <span class="p">(</span><span class="n">sequence</span> <span class="n">ordered</span><span class="p">)</span>
+    <span class="n">Al</span><span class="s1">&#39;s single optimised: 560us (sequence ordered), 30us (natural)</span>
+    <span class="n">Al</span><span class="s1">&#39;s basic vectorised: 1370us (sequence ordered)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="revrand.math.linalg.cho_log_det">
+<code class="descclassname">revrand.math.linalg.</code><code class="descname">cho_log_det</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.cho_log_det" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the log of the determinant of <cite>A</cite>, given its (upper or lower)
+Cholesky factorization <cite>c</cite>.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>              <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>              <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">]])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">cho_log_det</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">cho_log_det</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.math.linalg.hadamard">
+<code class="descclassname">revrand.math.linalg.</code><code class="descname">hadamard</code><span class="sig-paren">(</span><em>Y</em>, <em>ordering=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.hadamard" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Very fast</em> Hadamard transform for single vector at a time</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Y</strong> (<em>ndarray</em>) &#8211; the n*2^k data to be 1d hadamard transformed</li>
+<li><strong>ordering</strong> (<em>bool, optional</em>) &#8211; reorder from Walsh to sequence</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>H</strong> &#8211; hadamard transformed data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>from <a class="reference external" href="https://en.wikipedia.org/wiki/Hadamard_transform">https://en.wikipedia.org/wiki/Hadamard_transform</a> with normalisation</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hadamard</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ordering</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">array([[ 0.5 ,  0.25,  0.  , -0.25,  0.  ,  0.25,  0.  ,  0.25]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hadamard</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ordering</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">array([[ 0.5 ,  0.  ,  0.  ,  0.  , -0.25,  0.25,  0.25,  0.25]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.math.linalg.jitchol">
+<code class="descclassname">revrand.math.linalg.</code><code class="descname">jitchol</code><span class="sig-paren">(</span><em>a</em>, <em>jit=None</em>, <em>jit_max=0.001</em>, <em>returns_jit=False</em>, <em>lower=False</em>, <em>overwrite_a=False</em>, <em>check_finite=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.jitchol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do cholesky decomposition with a bit of diagonal jitter if needs be.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>A</strong> &#8211; a [NxN] positive definite symmetric matrix to be decomposed as
+A = L.dot(L.T).</li>
+<li><strong>lower</strong> &#8211; Return lower triangular factor, default False (upper).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An upper or lower triangular matrix factor, L, also [NxN].
+Also wheter or not a the matrix is lower triangular form,
+(L, lower).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="n">j</span><span class="p">],</span>
+<span class="gp">... </span>              <span class="p">[</span><span class="mi">2</span><span class="n">j</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jitchol</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">array([[ 1.+0.j,  0.+0.j],</span>
+<span class="go">       [ 0.+2.j,  1.+0.j]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="n">j</span><span class="p">],</span>
+<span class="gp">... </span>                      <span class="p">[</span><span class="mi">2</span><span class="n">j</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>              <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>              <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">U</span><span class="p">,</span> <span class="n">jit</span> <span class="o">=</span> <span class="n">jitchol</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">returns_jit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">U</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">array([[ 1.41, -0.71,  0.  ],</span>
+<span class="go">       [ 0.  ,  1.22, -0.82],</span>
+<span class="go">       [ 0.  ,  0.  ,  1.15]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jit</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Should remain unchanged</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
+<span class="go">array([[ 2, -1,  0],</span>
+<span class="go">       [-1,  2, -1],</span>
+<span class="go">       [ 0, -1,  2]])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>              <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jitchol</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> 
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">LinAlgError</span>: <span class="n">Exceeded maximum jitter limit, yet a is still not positive</span>
+<span class="go">semidefinite!</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-revrand.math.special">
+<span id="special-functions"></span><h2>Special Functions<a class="headerlink" href="#module-revrand.math.special" title="Permalink to this headline">¶</a></h2>
+<p>Special Numerical Operations.</p>
+<dl class="function">
+<dt id="revrand.math.special.logsumexp">
+<code class="descclassname">revrand.math.special.</code><code class="descname">logsumexp</code><span class="sig-paren">(</span><em>X</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.special.logsumexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log-sum-exp trick for matrix X for summation along a specified axis.</p>
+<p>This performs the following operation in a stable fashion,</p>
+<div class="math">
+\[\log \sum^K_{k=1} \exp\{x_k\}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; 2D array of shape (N, D) to apply the log-sum-exp trick.</li>
+<li><strong>axis</strong> (<em>int, optional</em>) &#8211; Axis to apply the summation along (works the same as axis in
+numpy.sum).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>lseX</strong> &#8211; results of applying the log-sum-exp trick, this will be shape (D,)
+if <code class="code docutils literal"><span class="pre">axis=0</span></code> or shape (N,) if <code class="code docutils literal"><span class="pre">axis=1</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.math.special.softmax">
+<code class="descclassname">revrand.math.special.</code><code class="descname">softmax</code><span class="sig-paren">(</span><em>X</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.special.softmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass X through a softmax function in a numerically stable way using the
+log-sum-exp trick.</p>
+<p>This transformation is:</p>
+<div class="math">
+\[\frac{\exp\{X_k\}}{\sum^K_{j=1} \exp\{X_j\}}\]</div>
+<p>and is appliedx to each row/column, <cite>k</cite>, of X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; 2D array of shape (N, D) to apply the log-sum-exp trick.</li>
+<li><strong>axis</strong> (<em>int, optional</em>) &#8211; Axis to apply the summation along (works the same as axis in
+numpy.sum).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>smX</strong> &#8211; results of applying the log-sum-exp trick, this will be shape
+(N, D), and each row will sum to 1 if <code class="code docutils literal"><span class="pre">axis=1</span></code> or each column
+will sum to 1 if <code class="code docutils literal"><span class="pre">axis=0</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.math.special.softplus">
+<code class="descclassname">revrand.math.special.</code><code class="descname">softplus</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.special.softplus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass X through a soft-plus function, , in a numerically
+stable way (using the log-sum-exp trick).</p>
+<p>The softplus transformation is:</p>
+<div class="math">
+\[\log(1 + \exp\{X\})\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; shape (N,) array or shape (N, D) array of data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>spX</strong> &#8211; array of same shape of X with the result of softmax(X).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Math Utilities</a><ul>
+<li><a class="reference internal" href="#module-revrand.math.linalg">Linear Algebra</a></li>
+<li><a class="reference internal" href="#module-revrand.math.special">Special Functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html"
+                        title="previous chapter">revrand.utils.datasets.fetch_gpml_sarcos_data</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="demo.html"
+                        title="next chapter">Demos</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="demo.html" title="Demos"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

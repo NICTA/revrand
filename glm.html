@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalised Linear Models &mdash; revrand 0.1 documentation</title>
+    <title>Generalised Linear Models &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
     <link rel="prev" title="Regression" href="regression.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="regression.html" title="Regression"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -73,7 +73,7 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </table>
 <dl class="function">
 <dt id="revrand.glm.learn">
-<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>lparams</em>, <em>basis</em>, <em>bparams</em>, <em>regulariser=1.0</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batchsize=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters of a Bayesian generalised linear model (GLM).</p>
 <p>The learning algorithm uses nonparametric variational inference <a class="footnote-reference" href="#id2" id="id3">[1]</a>, and
 optionally stochastic gradients.</p>
@@ -85,12 +85,8 @@ optionally stochastic gradients.</p>
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array input dataset (N samples, d dimensions).</li>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; (N,) array targets (N samples)</li>
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
-<li><strong>lparams</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
-likelihoods.Gaussian object takes a variance parameter, so this
-should be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
-<li><strong>basis</strong> (<a class="reference internal" href="generated/revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
-<li><strong>bparams</strong> (<em>sequence</em>) &#8211; A sequence of parameters of the basis object.</li>
-<li><strong>regulariser</strong> (<em>float, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
+<li><strong>basis</strong> (<a class="reference internal" href="basis_funcs.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>postcomp</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
 posterior distribution.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; Optimiser relative tolerance convergence criterion.</li>
@@ -102,8 +98,8 @@ passes through the data before optimization terminates (unless it
 converges first).</li>
 <li><strong>batchsize</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch. Ignored if
 <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
-<li><strong>rate</strong> (<em>float, optional</em>) &#8211; SGD decay rate, must be [0, 1]. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
-<li><strong>eta</strong> (<em>float, optional</em>) &#8211; Jitter term for adadelta SGD. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
+<li><strong>rho</strong> (<em>float, optional</em>) &#8211; SGD decay rate, must be [0, 1]. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
+<li><strong>epsilon</strong> (<em>float, optional</em>) &#8211; Jitter term for adadelta SGD. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
 <li><strong>verbose</strong> (<em>bool, optional</em>) &#8211; log the learning status.</li>
 </ul>
 </td>
@@ -163,7 +159,7 @@ can use SGD straight-forwardly.</p>
 \mathbf{X}, y)\)</span>.</li>
 <li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
-<li><strong>basis</strong> (<a class="reference internal" href="generated/revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>basis</strong> (<a class="reference internal" href="basis_funcs.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
 <li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
 <li><strong>lparams</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
@@ -203,7 +199,7 @@ GLM.</p>
 <li><strong>alpha</strong> (<em>float</em>) &#8211; The percentile confidence interval (e.g. 95%) to return.</li>
 <li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
-<li><strong>basis</strong> (<a class="reference internal" href="generated/revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>basis</strong> (<a class="reference internal" href="basis_funcs.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
 <li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
 <li><strong>lparams</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
@@ -228,9 +224,31 @@ approximate the predictive mean and variance.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.glm.predict_meanvar">
-<code class="descclassname">revrand.glm.</code><code class="descname">predict_meanvar</code><span class="sig-paren">(</span><em>Xs</em>, <em>likelihood</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>lparams</em>, <em>bparams</em>, <em>nsamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.predict_meanvar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Predictive mean and variance of a Bayesian GLM.</p>
+<dt id="revrand.glm.predict_moments">
+<code class="descclassname">revrand.glm.</code><code class="descname">predict_moments</code><span class="sig-paren">(</span><em>Xs</em>, <em>likelihood</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>lparams</em>, <em>bparams</em>, <em>nsamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.predict_moments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predictive moments, in particular mean and variance, of a Bayesian GLM.</p>
+<p>This function uses Monte-Carlo sampling to evaluate the predictive mean and
+variance of a Bayesian GLM. The exact expressions evaluated are,</p>
+<div class="math">
+\[ \begin{align}\begin{aligned}\mathbb{E}[y^*] = \int g(\mathbf{w}^T \boldsymbol\phi^{*})
+    p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},\\\mathbb{V}[y^*] = \int \left(g(\mathbf{w}^T \boldsymbol\phi^{*})
+    - \mathbb{E}[y^*]\right)^2
+    p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},\end{aligned}\end{align} \]</div>
+<p>where <span class="math">\(g(\cdot)\)</span> is the activation (inverse link) link function used
+by the GLM, and <span class="math">\(p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi)\)</span> is the
+posterior distribution over weights (from <code class="code docutils literal"><span class="pre">learn</span></code>). Here are few
+concrete examples of how we can use these values,</p>
+<ul class="simple">
+<li>Gaussian likelihood: these are just the predicted mean and variance, see
+<code class="code docutils literal"><span class="pre">revrand.regression.predict</span></code></li>
+<li>Bernoulli likelihood: The expected value is the probability, <span class="math">\(p(y^*
+= 1)\)</span>, i.e. the probability of class one. The variance may not be so
+useful.</li>
+<li>Poisson likelihood: The expected value is similar conceptually to the
+Gaussian case, and is also a <em>continuous</em> value. The median (50%
+quantile) from <code class="code docutils literal"><span class="pre">predict_interval</span></code> is a discrete value. Again, the
+variance in this instance may not be so useful.</li>
+</ul>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -238,7 +256,7 @@ approximate the predictive mean and variance.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
-<li><strong>basis</strong> (<a class="reference internal" href="generated/revrand.basis_functions.base.Basis.html#revrand.basis_functions.base.Basis" title="revrand.basis_functions.base.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>basis</strong> (<a class="reference internal" href="basis_funcs.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
 <li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
 <li><strong>lparams</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
@@ -307,7 +325,7 @@ the query inputs, Xs of shape (Ns,).</li>
         <li class="right" >
           <a href="regression.html" title="Regression"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

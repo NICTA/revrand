@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.optimize.base &mdash; revrand 0.1 documentation</title>
+    <title>revrand.optimize.base &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Optimization" href="../optimize.html" />
-    <link rel="next" title="revrand.optimize.base.minimize" href="revrand.optimize.base.minimize.html" />
+    <link rel="next" title="revrand.optimize.base.structured_minimizer" href="revrand.optimize.base.structured_minimizer.html" />
     <link rel="prev" title="Optimization" href="../optimize.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.optimize.base.minimize.html" title="revrand.optimize.base.minimize"
+          <a href="revrand.optimize.base.structured_minimizer.html" title="revrand.optimize.base.structured_minimizer"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../optimize.html" title="Optimization"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
       </ul>
     </div>  
@@ -83,47 +83,30 @@
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
 <td>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly heterogenous dimensions and shapes and concatenate them together into a flat (1d) array.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">flatten_args</span></code>(shapes[,&nbsp;order])</td>
-<td><p class="rubric">Examples</p>
-</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">flatten_bounds</span></code>(parameters)</td>
+<td>Return flattened bounds for all of the Parameters in a sequence</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">flatten_func_grad</span></code>(func)</td>
-<td><p class="rubric">Examples</p>
-</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_values</span></code>(parameters)</td>
+<td>Get all of the values in a sequence of Parameter instances.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_minimize</span></code>([backend])</td>
-<td><div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">minimize</span> <span class="o">=</span> <span class="n">get_minimize</span><span class="p">()</span> 
-</pre></div>
-</div>
-</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.optimize.base.logtrick_minimizer.html#revrand.optimize.base.logtrick_minimizer" title="revrand.optimize.base.logtrick_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">logtrick_minimizer</span></code></a>(minimizer)</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.optimize.base.logtrick_minimizer.html#revrand.optimize.base.logtrick_minimizer" title="revrand.optimize.base.logtrick_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">logtrick_minimizer</span></code></a>(minimizer)</td>
 <td>Log-Trick decorator for optimizers.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="revrand.optimize.base.logtrick_sgd.html#revrand.optimize.base.logtrick_sgd" title="revrand.optimize.base.logtrick_sgd"><code class="xref py py-obj docutils literal"><span class="pre">logtrick_sgd</span></code></a>(sgd)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.optimize.base.logtrick_sgd.html#revrand.optimize.base.logtrick_sgd" title="revrand.optimize.base.logtrick_sgd"><code class="xref py py-obj docutils literal"><span class="pre">logtrick_sgd</span></code></a>(sgd)</td>
 <td>Log-Trick decorator for stochastic gradients.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.optimize.base.minimize.html#revrand.optimize.base.minimize" title="revrand.optimize.base.minimize"><code class="xref py py-obj docutils literal"><span class="pre">minimize</span></code></a>(fun,&nbsp;x0[,&nbsp;args,&nbsp;method,&nbsp;jac,&nbsp;...])</td>
-<td>Scipy.optimize.minimize-style wrapper for NLopt and scipy&#8217;s minimize.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">minimize_bounded_start</span></code>([candidates_func])</td>
 <td><p class="rubric">Examples</p>
 </td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">namedtuple</span></code>(typename,&nbsp;field_names[,&nbsp;verbose,&nbsp;...])</td>
-<td>Returns a new subclass of tuple with named fields.</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.optimize.base.structured_minimizer.html#revrand.optimize.base.structured_minimizer" title="revrand.optimize.base.structured_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">structured_minimizer</span></code></a>(minimizer)</td>
+<td>Allow an optimizer to accept a list of Parameter types to optimize, rather than just a flattened array.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="revrand.optimize.base.structured_minimizer.html#revrand.optimize.base.structured_minimizer" title="revrand.optimize.base.structured_minimizer"><code class="xref py py-obj docutils literal"><span class="pre">structured_minimizer</span></code></a>(minimizer)</td>
-<td>Allow an optimizer to accept a list of parameters to optimize, rather than just a flattened array.</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.optimize.base.structured_sgd.html#revrand.optimize.base.structured_sgd" title="revrand.optimize.base.structured_sgd"><code class="xref py py-obj docutils literal"><span class="pre">structured_sgd</span></code></a>(sgd)</td>
+<td>Allow stochastic gradients to accept a list of Parameter types to optimize, rather than just a flattened array.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.optimize.base.structured_sgd.html#revrand.optimize.base.structured_sgd" title="revrand.optimize.base.structured_sgd"><code class="xref py py-obj docutils literal"><span class="pre">structured_sgd</span></code></a>(sgd)</td>
-<td>Allow stochastic gradients to accept a list of parameters to optimize, rather than just a flattened array.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">unflatten</span></code>(ary,&nbsp;shapes[,&nbsp;order])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">unflatten</span></code>(ary,&nbsp;shapes[,&nbsp;order])</td>
 <td>Given a flat (1d) array, and a list of shapes (represented as tuples), return a list of ndarrays with the specified shapes.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">warn</span></code></td>
-<td>Issue a warning, or maybe ignore it or raise an exception.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">wraps</span></code>(wrapped[,&nbsp;assigned,&nbsp;updated])</td>
 <td>Decorator factory to apply update_wrapper() to a wrapper function</td>
@@ -137,10 +120,10 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="revrand.optimize.base.Bound.html#revrand.optimize.base.Bound" title="revrand.optimize.base.Bound"><code class="xref py py-obj docutils literal"><span class="pre">Bound</span></code></a>([lower,&nbsp;upper,&nbsp;shape])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">Bound</span></code></td>
 <td>Define bounds on a variable for the optimiser.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.optimize.base.Positive.html#revrand.optimize.base.Positive" title="revrand.optimize.base.Positive"><code class="xref py py-obj docutils literal"><span class="pre">Positive</span></code></a>([lower,&nbsp;upper,&nbsp;shape])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">Positive</span></code></td>
 <td>Define a positive only bound for the optimiser.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">repeat</span></code>(...)</td>
@@ -160,8 +143,8 @@
   <p class="topless"><a href="../optimize.html"
                         title="previous chapter">Optimization</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.optimize.base.minimize.html"
-                        title="next chapter">revrand.optimize.base.minimize</a></p>
+  <p class="topless"><a href="revrand.optimize.base.structured_minimizer.html"
+                        title="next chapter">revrand.optimize.base.structured_minimizer</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -186,12 +169,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.optimize.base.minimize.html" title="revrand.optimize.base.minimize"
+          <a href="revrand.optimize.base.structured_minimizer.html" title="revrand.optimize.base.structured_minimizer"
              >next</a> |</li>
         <li class="right" >
           <a href="../optimize.html" title="Optimization"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
       </ul>
     </div>

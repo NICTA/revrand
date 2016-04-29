@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.likelihoods.Gaussian &mdash; revrand 0.1 documentation</title>
+    <title>revrand.likelihoods.Gaussian &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Likelihood Classes" href="../likelihoods.html" />
     <link rel="next" title="revrand.likelihoods.Poisson" href="revrand.likelihoods.Poisson.html" />
     <link rel="prev" title="revrand.likelihoods.Bernoulli" href="revrand.likelihoods.Bernoulli.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.likelihoods.Bernoulli.html" title="revrand.likelihoods.Bernoulli"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../likelihoods.html" accesskey="U">Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>  
@@ -66,23 +66,23 @@
 <h1>revrand.likelihoods.Gaussian<a class="headerlink" href="#revrand-likelihoods-gaussian" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="revrand.likelihoods.Gaussian">
-<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>var_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>var_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>A univariate Gaussian likelihood for general regression tasks.</p>
 <p>No transformation function is needed since this is conjugate to the GLM
 prior.</p>
-<dl class="method">
-<dt id="revrand.likelihoods.Gaussian.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>var_bounds=Positive(lower=1e-14</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct an instance of the Gaussian likelihood class.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var_bounds</strong> (<em>tuple, optional</em>) &#8211; A tuple of (upper, lower) bounds of the variance.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar Parameter describing the initial point and bounds for
+an optimiser to learn the variance parameter of this object.</td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
+<dl class="method">
+<dt id="revrand.likelihoods.Gaussian.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>var_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
@@ -94,8 +94,8 @@ prior.</p>
 <tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.Ey" title="revrand.likelihoods.Gaussian.Ey"><code class="xref py py-obj docutils literal"><span class="pre">Ey</span></code></a>(f,&nbsp;var)</td>
 <td>Expected value of the Gaussian likelihood.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Gaussian.__init__" title="revrand.likelihoods.Gaussian.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([var_bounds,&nbsp;upper])</td>
-<td>Construct an instance of the Gaussian likelihood class.</td>
+<tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Gaussian.__init__" title="revrand.likelihoods.Gaussian.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([var_init])</td>
+<td></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Gaussian.cdf" title="revrand.likelihoods.Gaussian.cdf"><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code></a>(y,&nbsp;f,&nbsp;var)</td>
 <td>Cumulative density function of the likelihood.</td>
@@ -127,8 +127,8 @@ prior.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">bounds</span></code></td>
-<td>Get this object&#8217;s parameter bounds.</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params</span></code></td>
+<td>Get this object&#8217;s Parameter types.</td>
 </tr>
 </tbody>
 </table>
@@ -177,7 +177,7 @@ prior.</p>
         <li class="right" >
           <a href="revrand.likelihoods.Bernoulli.html" title="revrand.likelihoods.Bernoulli"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../likelihoods.html" >Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>

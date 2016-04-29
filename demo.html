@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Demos &mdash; revrand 0.1 documentation</title>
+    <title>Demos &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="index.html" />
     <link rel="next" title="Developer’s Guide" href="dev/index.html" />
-    <link rel="prev" title="revrand.utils.datasets.make_polynomial" href="generated/revrand.utils.datasets.make_polynomial.html" />
+    <link rel="prev" title="Math Utilities" href="math.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -49,9 +49,9 @@
           <a href="dev/index.html" title="Developer’s Guide"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="generated/revrand.utils.datasets.make_polynomial.html" title="revrand.utils.datasets.make_polynomial"
+          <a href="math.html" title="Math Utilities"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -80,13 +80,13 @@ from a Gaussian process.</p>
 process, but now the sample is passed through a transformation function and is
 given noise from a non-Gaussian likelihood function. The noiseless transformed
 sample is then estimated using revrand&#8217;s generlised linear model (which is a
-modification of the GLM presented in <a class="footnote-reference" href="#id6" id="id1">[3]</a>).</p>
+modification of the GLM presented in <a class="footnote-reference" href="#id7" id="id1">[3]</a>).</p>
 <p>(<a class="reference external" href="./../demos/demo_glm.py">Source code</a>)</p>
-<div class="figure" id="id7">
+<div class="figure" id="id8">
 <img alt="_images/demo_glm_00.png" src="_images/demo_glm_00.png" />
 <p class="caption"><span class="caption-text">(<a class="reference external" href="./../demos/demo_glm_00.png">png</a>, <a class="reference external" href="./../demos/demo_glm_00.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_glm_00.pdf">pdf</a>)</span></p>
 </div>
-<div class="figure" id="id8">
+<div class="figure" id="id9">
 <img alt="_images/demo_glm_01.png" src="_images/demo_glm_01.png" />
 <p class="caption"><span class="caption-text">(<a class="reference external" href="./../demos/demo_glm_01.png">png</a>, <a class="reference external" href="./../demos/demo_glm_01.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_glm_01.pdf">pdf</a>)</span></p>
 </div>
@@ -94,9 +94,20 @@ modification of the GLM presented in <a class="footnote-reference" href="#id6" i
 <div class="section" id="learning-the-sarcos-robot-arm-dynamics">
 <h3>Learning the SARCOS robot arm dynamics<a class="headerlink" href="#learning-the-sarcos-robot-arm-dynamics" title="Permalink to this headline">¶</a></h3>
 <p>Here we run a large scale Gaussian process approximation algorithm on the
-SARCOS robot arm dataset from <a class="footnote-reference" href="#id4" id="id2">[1]</a>. We compare against a Gaussian process only
+SARCOS robot arm dataset from <a class="footnote-reference" href="#id5" id="id2">[1]</a>. We compare against a Gaussian process only
 using a random subset of data.</p>
 <p>(<a class="reference download internal" href="_downloads/demo_sarcos.py" download=""><code class="xref download docutils literal"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+</div>
+</div>
+<div class="section" id="classification">
+<h2>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="classify-3-and-5-from-the-usps-digits-dataset">
+<h3>Classify <cite>3</cite> and <cite>5</cite> from the USPS digits dataset<a class="headerlink" href="#classify-3-and-5-from-the-usps-digits-dataset" title="Permalink to this headline">¶</a></h3>
+<p>In this demo the GLM with a Bernoulli likelihood is compared against a logistic
+classifier from <a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">scikit learn</a>
+for classifying digits <cite>3</cite> and <cite>5</cite> from the USPS handwritten digits experiment
+used in <a class="footnote-reference" href="#id5" id="id3">[1]</a>.</p>
+<p>(<a class="reference download internal" href="_downloads/demo_classification.py" download=""><code class="xref download docutils literal"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
 </div>
 </div>
 <div class="section" id="stochastic-gradient-descent">
@@ -107,7 +118,7 @@ basis function weights,</p>
 <ul class="simple">
 <li>Linear solve (analytic solution)</li>
 <li>L-BFGS</li>
-<li>Stochastic gradient descent (ADADELTA <a class="footnote-reference" href="#id5" id="id3">[2]</a>).</li>
+<li>Stochastic gradient descent (ADADELTA <a class="footnote-reference" href="#id6" id="id4">[2]</a>).</li>
 </ul>
 <p>We also plot the results of each iteration of stochasistic gradient descent.</p>
 <p>(<a class="reference external" href="./../demos/demo_sgd.py">Source code</a>, <a class="reference external" href="./../demos/demo_sgd.png">png</a>, <a class="reference external" href="./../demos/demo_sgd.hires.png">hires.png</a>, <a class="reference external" href="./../demos/demo_sgd.pdf">pdf</a>)</p>
@@ -117,21 +128,21 @@ basis function weights,</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Carl Edward Rasmussen and Christopher KI Williams &#8220;Gaussian processes
-for machine learning.&#8221; the MIT Press 2.3 (2006): 4.</td></tr>
-</tbody>
-</table>
 <table class="docutils footnote" frame="void" id="id5" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Matthew D. Zeiler, &#8220;ADADELTA: An adaptive learning rate method.&#8221; arXiv
-preprint arXiv:1212.5701 (2012).</td></tr>
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Carl Edward Rasmussen and Christopher KI Williams &#8220;Gaussian processes
+for machine learning.&#8221; the MIT Press 2.3 (2006): 4.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>Matthew D. Zeiler, &#8220;ADADELTA: An adaptive learning rate method.&#8221; arXiv
+preprint arXiv:1212.5701 (2012).</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id1">[3]</a></td><td>Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
@@ -156,6 +167,10 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 <li><a class="reference internal" href="#learning-the-sarcos-robot-arm-dynamics">Learning the SARCOS robot arm dynamics</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#classification">Classification</a><ul>
+<li><a class="reference internal" href="#classify-3-and-5-from-the-usps-digits-dataset">Classify <cite>3</cite> and <cite>5</cite> from the USPS digits dataset</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#stochastic-gradient-descent">Stochastic Gradient Descent</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
@@ -163,8 +178,8 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="generated/revrand.utils.datasets.make_polynomial.html"
-                        title="previous chapter">revrand.utils.datasets.make_polynomial</a></p>
+  <p class="topless"><a href="math.html"
+                        title="previous chapter">Math Utilities</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="dev/index.html"
                         title="next chapter">Developer&#8217;s Guide</a></p>
@@ -195,9 +210,9 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
           <a href="dev/index.html" title="Developer’s Guide"
              >next</a> |</li>
         <li class="right" >
-          <a href="generated/revrand.utils.datasets.make_polynomial.html" title="revrand.utils.datasets.make_polynomial"
+          <a href="math.html" title="Math Utilities"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

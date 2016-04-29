@@ -1,0 +1,23 @@
+revrand.optimize.sgd.Momentum
+=============================
+
+.. currentmodule:: revrand.optimize.sgd
+
+.. autoclass:: Momentum
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Momentum.__init__
+      ~Momentum.name
+   
+   
+
+   
+   
+   

@@ -31,6 +31,6 @@ revrand.likelihoods.Gaussian
 
    .. autosummary::
    
-      ~Gaussian.bounds
+      ~Gaussian.params
    
    

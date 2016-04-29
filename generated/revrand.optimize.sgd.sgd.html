@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.1 documentation</title>
+    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Optimization" href="../optimize.html" />
-    <link rel="next" title="Utilities" href="../utils.html" />
+    <link rel="next" title="revrand.optimize.sgd.AdaDelta" href="revrand.optimize.sgd.AdaDelta.html" />
     <link rel="prev" title="revrand.optimize.base.candidate_start_points_random" href="revrand.optimize.base.candidate_start_points_random.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../utils.html" title="Utilities"
+          <a href="revrand.optimize.sgd.AdaDelta.html" title="revrand.optimize.sgd.AdaDelta"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
       </ul>
     </div>  
@@ -66,7 +66,7 @@
 <h1>revrand.optimize.sgd.sgd<a class="headerlink" href="#revrand-optimize-sgd-sgd" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="revrand.optimize.sgd.sgd">
-<code class="descclassname">revrand.optimize.sgd.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>Data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batchsize=100</em>, <em>rate=0.9</em>, <em>eta=1e-05</em>, <em>gtol=0.001</em>, <em>passes=10</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.sgd" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.optimize.sgd.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>Data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batchsize=100</em>, <em>passes=10</em>, <em>updater=None</em>, <em>gtol=0.001</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stochastic Gradient Descent, using ADADELTA for setting the learning
 rate.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -74,58 +74,57 @@ rate.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fun</strong> &#8211; the function to evaluate, this must have the signature
-<cite>[obj,] grad = fun(x, Data, ...)</cite>, where the <cite>eval_obj</cite>
+<li><strong>fun</strong> (<em>callable</em>) &#8211; <dl class="docutils">
+<dt>the function to evaluate, this must have the signature</dt>
+<dd><cite>[obj,] grad = fun(x, Data, ...)</cite>, where the <cite>eval_obj</cite>
 argument tells <cite>sgd</cite> if an objective function value is going to
-be returned by <cite>fun</cite>.</li>
-<li><strong>x0</strong> &#8211; a sequence/1D array of initial values for the parameters to
-learn.</li>
-<li><strong>Data</strong> &#8211; a numpy array or sequence of data to input into <cite>fun</cite>. This
-will be split along the first axis (axis=0), and then input
-into <cite>fun</cite>.</li>
-<li><strong>args</strong> &#8211; an optional sequence of arguments to give to fun.</li>
-<li><strong>bounds</strong> &#8211; sequence, optional. Bounds for variables, (min, max) pairs
-for each element in x, defining the bounds on that parameter.
-Use None for one of min or max when there is no bound in that
-direction.</li>
-<li><strong>batchsize</strong> &#8211; (int), optional. The number of observations in an SGD
-batch.</li>
-<li><strong>rate,</strong> (<em>float</em>) &#8211; ADADELTA smoothing/decay rate parameter, must be [0,
-1].</li>
-<li><strong>eta,</strong> (<em>float</em>) &#8211; ADADELTA &#8220;jitter&#8221; term to ensure continued learning
-(should be small).</li>
-<li><strong>gtol,</strong> (<em>float</em>) &#8211; optional. The norm of the gradient of x that will
-trigger a convergence condition.</li>
-<li><strong>passes,</strong> (<em>int</em>) &#8211; Number of complete passes through the data before
-optimization terminates (unless it converges first).</li>
-<li><strong>eval_obj,</strong> (<em>bool</em>) &#8211; optional. This indicates whether or not <cite>fun</cite>
-also evaluates and returns the objective function value. If
-this is true, <cite>fun</cite> must return <cite>(obj, grad)</cite> and then a list
-of objective function values is also returned.</li>
+be returned by <cite>fun</cite>.</dd>
+</dl>
+</li>
+<li><strong>x0</strong> (<em>ndarray</em>) &#8211; a sequence/1D array of initial values for the parameters to learn.</li>
+<li><strong>Data</strong> (<em>ndarray</em>) &#8211; a numpy array or sequence of data to input into <cite>fun</cite>. This will be
+split along the first axis (axis=0), and then input into <cite>fun</cite>.</li>
+<li><strong>args</strong> (<em>sequence, optional</em>) &#8211; an optional sequence of arguments to give to fun.</li>
+<li><strong>bounds</strong> (<em>sequence, optional</em>) &#8211; Bounds for variables, (min, max) pairs for each element in x,
+defining the bounds on that parameter.  Use None for one of min or
+max when there is no bound in that direction.</li>
+<li><strong>batchsize</strong> (<em>int, optional</em>) &#8211; The number of observations in an SGD batch.</li>
+<li><strong>passes</strong> (<em>int, optional</em>) &#8211; Number of complete passes through the data before optimization
+terminates (unless it converges first).</li>
+<li><strong>updater</strong> (<em>SGDUpdater, optional</em>) &#8211; The type of gradient update to use, by default this is AdaDelta</li>
+<li><strong>gtol</strong> (<em>float, optional</em>) &#8211; The norm of the gradient of x that will trigger a convergence
+condition.</li>
+<li><strong>eval_obj</strong> (<em>bool, optional</em>) &#8211; This indicates whether or not <cite>fun</cite> also evaluates and returns the
+objective function value. If this is true, <cite>fun</cite> must return
+<cite>(obj, grad)</cite> and then a list of objective function values is also
+returned.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>with members:</p>
-<blockquote>
-<div><p>&#8216;x&#8217; (array): the final result
-&#8216;norms&#8217; (list): the list of gradient norms
-&#8216;message&#8217; (str): the convergence condition (&#8216;converge&#8217; or</p>
-<blockquote>
-<div><p>&#8216;maxiter&#8217;)</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>res</strong> &#8211;</p>
 <dl class="docutils">
-<dt>&#8216;objs&#8217; (list): the list of objective function evaluations of</dt>
-<dd><p class="first last"><cite>eval_obj</cite> is True.</p>
+<dt>x: narray</dt>
+<dd><p class="first last">the final result</p>
 </dd>
-<dt>&#8216;fun&#8217; (float): the final objective function evaluation if</dt>
-<dd><p class="first last"><cite>eval_obj</cite> is True.</p>
+<dt>norms: list</dt>
+<dd><p class="first last">the list of gradient norms</p>
+</dd>
+<dt>message: str</dt>
+<dd><p class="first last">the convergence condition (&#8216;converge&#8217; or &#8216;maxiter&#8217;)</p>
+</dd>
+<dt>objs: list</dt>
+<dd><p class="first last">the list of objective function evaluations if <code class="code docutils literal"><span class="pre">eval_obj</span></code>
+is True.</p>
+</dd>
+<dt>fun: float</dt>
+<dd><p class="first last">the final objective function evaluation if <code class="code docutils literal"><span class="pre">eval_obj</span></code> is
+True.</p>
 </dd>
 </dl>
-</div></blockquote>
 </p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(dict)</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">OptimizeResult</p>
 </td>
 </tr>
 </tbody>
@@ -144,8 +143,8 @@ of objective function values is also returned.</li>
   <p class="topless"><a href="revrand.optimize.base.candidate_start_points_random.html"
                         title="previous chapter">revrand.optimize.base.candidate_start_points_random</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../utils.html"
-                        title="next chapter">Utilities</a></p>
+  <p class="topless"><a href="revrand.optimize.sgd.AdaDelta.html"
+                        title="next chapter">revrand.optimize.sgd.AdaDelta</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -170,12 +169,12 @@ of objective function values is also returned.</li>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../utils.html" title="Utilities"
+          <a href="revrand.optimize.sgd.AdaDelta.html" title="revrand.optimize.sgd.AdaDelta"
              >next</a> |</li>
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
       </ul>
     </div>

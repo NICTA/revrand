@@ -1,0 +1,23 @@
+revrand.optimize.sgd.AdaDelta
+=============================
+
+.. currentmodule:: revrand.optimize.sgd
+
+.. autoclass:: AdaDelta
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~AdaDelta.__init__
+      ~AdaDelta.name
+   
+   
+
+   
+   
+   

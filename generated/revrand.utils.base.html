@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.base &mdash; revrand 0.1 documentation</title>
+    <title>revrand.utils.base &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
     <link rel="next" title="revrand.utils.base.flatten" href="revrand.utils.base.flatten.html" />
     <link rel="prev" title="Utilities" href="../utils.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../utils.html" title="Utilities"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -71,25 +71,29 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">append_or_extend</span></code>(mylist,&nbsp;obj)</td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.append_or_extend.html#revrand.utils.base.append_or_extend" title="revrand.utils.base.append_or_extend"><code class="xref py py-obj docutils literal"><span class="pre">append_or_extend</span></code></a>(mylist,&nbsp;*objs)</td>
+<td>Append an object to a list, or extend the list if the object is a list.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.couple.html#revrand.utils.base.couple" title="revrand.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">couple</span></code></a>(f,&nbsp;g)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.atleast_list.html#revrand.utils.base.atleast_list" title="revrand.utils.base.atleast_list"><code class="xref py py-obj docutils literal"><span class="pre">atleast_list</span></code></a>(a)</td>
+<td>Promote an object to a list if not a list or generator</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.couple.html#revrand.utils.base.couple" title="revrand.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">couple</span></code></a>(f,&nbsp;g)</td>
 <td>Given a pair of functions that take the same arguments, return a single function that returns a pair consisting of the return values of each function.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">custom_reshape</span></code>(a,&nbsp;newshape[,&nbsp;order])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">custom_reshape</span></code>(a,&nbsp;newshape[,&nbsp;order])</td>
 <td>Identical to <cite>numpy.reshape</cite> except in the case where <cite>newshape</cite> is the empty tuple, in which case we return a scalar instead of a 0-dimensional array.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.decouple.html#revrand.utils.base.decouple" title="revrand.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">decouple</span></code></a>(fn)</td>
-<td><p class="rubric">Examples</p>
-</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.decouple.html#revrand.utils.base.decouple" title="revrand.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">decouple</span></code></a>(fn)</td>
+<td>Create two functions of one argument and one return from a function that</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.flatten.html#revrand.utils.base.flatten" title="revrand.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code></a>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.flatten.html#revrand.utils.base.flatten" title="revrand.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code></a>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
 <td>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly heterogenous dimensions and shapes and concatenate them together into a flat (1d) array.</td>
 </tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">isgenerator</span></code>(object)</td>
+<td>Return true if the object is a generator.</td>
+</tr>
 <tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.map_indices.html#revrand.utils.base.map_indices" title="revrand.utils.base.map_indices"><code class="xref py py-obj docutils literal"><span class="pre">map_indices</span></code></a>(fn,&nbsp;iterable,&nbsp;indices)</td>
-<td><p class="rubric">Notes</p>
-</td>
+<td>Map a function across indices of an iterable</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.nwise.html#revrand.utils.base.nwise" title="revrand.utils.base.nwise"><code class="xref py py-obj docutils literal"><span class="pre">nwise</span></code></a>(iterable,&nbsp;n)</td>
 <td>Iterator that acts like a sliding window of size <cite>n</cite>; slides over some iterable <cite>n</cite> items at a time.</td>
@@ -169,7 +173,7 @@
         <li class="right" >
           <a href="../utils.html" title="Utilities"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>

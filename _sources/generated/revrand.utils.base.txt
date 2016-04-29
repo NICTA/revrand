@@ -10,10 +10,12 @@ revrand.utils.base
    .. autosummary::
    
       append_or_extend
+      atleast_list
       couple
       custom_reshape
       decouple
       flatten
+      isgenerator
       map_indices
       nwise
       tee

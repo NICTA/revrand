@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.base.map_indices &mdash; revrand 0.1 documentation</title>
+    <title>revrand.utils.base.map_indices &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
-    <link rel="next" title="revrand.utils.datasets.make_regression" href="revrand.utils.datasets.make_regression.html" />
+    <link rel="next" title="revrand.utils.base.atleast_list" href="revrand.utils.base.atleast_list.html" />
     <link rel="prev" title="revrand.utils.base.nwise" href="revrand.utils.base.nwise.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.utils.datasets.make_regression.html" title="revrand.utils.datasets.make_regression"
+          <a href="revrand.utils.base.atleast_list.html" title="revrand.utils.base.atleast_list"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="revrand.utils.base.nwise.html" title="revrand.utils.base.nwise"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -67,9 +67,11 @@
 <dl class="function">
 <dt id="revrand.utils.base.map_indices">
 <code class="descclassname">revrand.utils.base.</code><code class="descname">map_indices</code><span class="sig-paren">(</span><em>fn</em>, <em>iterable</em>, <em>indices</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.base.map_indices" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Notes</p>
+<dd><p>Map a function across indices of an iterable</p>
+<p class="rubric">Notes</p>
 <p>Roughly equivalent to, though more efficient than:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">fn</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="o">*</span><span class="n">indices</span><span class="p">:</span> <span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span> <span class="k">else</span> <span class="n">arg</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iterable</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">fn</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="o">*</span><span class="n">indices</span><span class="p">:</span> <span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span> <span class="k">else</span> <span class="n">arg</span>
+                                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iterable</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="rubric">Examples</p>
@@ -81,7 +83,8 @@
 <span class="go">[12, 6, 7, 3, 6, 24, 2]</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">9.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">9.</span><span class="p">]])]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">9.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]),</span>
+<span class="gp">... </span>     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">9.</span><span class="p">]])]</span>
 </pre></div>
 </div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">map_indices</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span> 
@@ -117,8 +120,8 @@
   <p class="topless"><a href="revrand.utils.base.nwise.html"
                         title="previous chapter">revrand.utils.base.nwise</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.utils.datasets.make_regression.html"
-                        title="next chapter">revrand.utils.datasets.make_regression</a></p>
+  <p class="topless"><a href="revrand.utils.base.atleast_list.html"
+                        title="next chapter">revrand.utils.base.atleast_list</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -143,12 +146,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.utils.datasets.make_regression.html" title="revrand.utils.datasets.make_regression"
+          <a href="revrand.utils.base.atleast_list.html" title="revrand.utils.base.atleast_list"
              >next</a> |</li>
         <li class="right" >
           <a href="revrand.utils.base.nwise.html" title="revrand.utils.base.nwise"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>
