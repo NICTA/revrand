@@ -114,7 +114,8 @@ def apply_grad(fun, grad):
     >>> X = np.random.randn(100, 3)
     >>> y = np.random.randn(100)
     >>> N, d = X.shape
-    >>> base = RandomRBF(Xdim=d, nbases=5) + RandomRBF_ARD(Xdim=d, nbases=5)
+    >>> base = RandomRBF(Xdim=d, nbases=5) + RandomRBF(Xdim=d, nbases=5,
+    ... lenscale_init=Parameter(np.ones(d), Positive()))
     >>> Phi = base(X, 1., np.ones(d))
     >>> dffun = lambda dPhi: y.dot(Phi).dot(dPhi.T).dot(y)
     >>> df = apply_grad(dffun, base.grad(X, 1., np.ones(d)))
@@ -593,7 +594,7 @@ class RandomRBF(Basis):
         self.n = nbases
         self.W = self._weightsamples()
 
-        if lenscale_init.shape != (Xdim,) and lenscale_init.shape != 1:
+        if (lenscale_init.shape != (Xdim,)) and (lenscale_init.shape[0] != 1):
             raise ValueError("Parameter dimension doesn't agree with Xdim!")
 
         self.params = lenscale_init
@@ -601,7 +602,7 @@ class RandomRBF(Basis):
     @slice_call
     def __call__(self, X, lenscale):
         """
-        Apply the random ARD-RBF to X.
+        Apply the random RBF to X.
 
         Parameters
         ----------
@@ -661,7 +662,7 @@ class RandomRBF(Basis):
             dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX))
                         / np.sqrt(self.n))
 
-        return np.dstack(dPhi) if self.d != 1 else dPhi[0]
+        return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
     def _weightsamples(self):
         return np.random.randn(self.d, self.n)

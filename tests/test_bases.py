@@ -5,6 +5,7 @@ from operator import add
 from functools import reduce
 
 import revrand.basis_functions as bs
+from revrand.btypes import Parameter, Positive
 
 
 def test_simple_concat(make_data):
@@ -23,7 +24,8 @@ def test_simple_concat(make_data):
     assert P.shape == (N, d * 2 + N)
 
     D = 200
-    base += bs.RandomRBF_ARD(nbases=D, Xdim=d)
+    base += bs.RandomRBF(nbases=D, Xdim=d,
+                         lenscale_init=Parameter(np.ones(d), Positive()))
     P = base(X, 1., np.ones(d))
 
     assert P.shape == (N, (D + d) * 2 + N)
@@ -45,7 +47,8 @@ def test_grad_concat(make_data):
     assert list(G)[0].shape == (N, N + 2 * d)
 
     D = 200
-    base += bs.RandomRBF_ARD(nbases=D, Xdim=d)
+    base += bs.RandomRBF(nbases=D, Xdim=d,
+                         lenscale_init=Parameter(np.ones(d), Positive()))
     G = base.grad(X, 1., np.ones(d))
     dims = [(N, N + (D + d) * 2), (N, N + (D + d) * 2, d)]
 
@@ -74,13 +77,15 @@ def test_apply_grad(make_data):
     assert np.isscalar(bs.apply_grad(obj, base.grad(X, 1.)))
 
     D = 200
-    base = bs.RandomRBF_ARD(nbases=D, Xdim=d)
+    base = bs.RandomRBF(nbases=D, Xdim=d,
+                        lenscale_init=Parameter(np.ones(d), Positive()))
     obj = lambda dPhi: fun(base(X, np.ones(d)), dPhi)
 
     assert bs.apply_grad(obj, base.grad(X, np.ones(d))).shape == (d,)
 
     base = bs.LinearBasis(onescol=False) + bs.RadialBasis(centres=X) \
-        + bs.RandomRBF_ARD(nbases=D, Xdim=d)
+        + bs.RandomRBF(nbases=D, Xdim=d,
+                       lenscale_init=Parameter(np.ones(d), Positive()))
     obj = lambda dPhi: fun(base(X, 1., np.ones(d)), dPhi)
 
     gs = bs.apply_grad(obj, base.grad(X, 1., np.ones(d)))
@@ -98,7 +103,8 @@ def test_bases(make_data):
              bs.RadialBasis(centres=X[:10, :]),
              bs.SigmoidalBasis(centres=X[:10, :]),
              bs.RandomRBF(Xdim=d, nbases=10),
-             bs.RandomRBF_ARD(Xdim=d, nbases=10),
+             bs.RandomRBF(Xdim=d, nbases=10,
+                          lenscale_init=Parameter(np.ones(d), Positive())),
              bs.FastFood(Xdim=d, nbases=10),
              ]
 
@@ -137,7 +143,9 @@ def test_slicing(make_data):
 
     base = bs.LinearBasis(onescol=False, apply_ind=[0]) \
         + bs.RandomRBF(Xdim=1, nbases=1, apply_ind=[1]) \
-        + bs.RandomRBF_ARD(Xdim=d, nbases=3, apply_ind=[1, 0])
+        + bs.RandomRBF(Xdim=2, nbases=3,
+                       lenscale_init=Parameter(np.ones(2), Positive()),
+                       apply_ind=[1, 0])
 
     P = base(X, 1., np.ones(d))
     assert P.shape == (N, 9)

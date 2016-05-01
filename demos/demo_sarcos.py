@@ -7,7 +7,7 @@ import revrand.legacygp as gp
 import revrand.legacygp.kernels as kern
 
 from revrand import regression, glm
-from revrand.basis_functions import RandomRBF_ARD
+from revrand.basis_functions import RandomRBF
 from revrand.likelihoods import Gaussian
 from revrand.btypes import Parameter, Positive
 from revrand.validation import smse, msll
@@ -56,8 +56,7 @@ y_train_sub = y_train[train_ind]
 # Train A la Carte
 #
 lenARD = lenscale * np.ones(D)
-base = RandomRBF_ARD(nbases, D,
-                     lenscale_init=Parameter(lenARD, Positive()))
+base = RandomRBF(nbases, D, lenscale_init=Parameter(lenARD, Positive()))
 
 if useSGD:
     log.info("Using SGD regressor")
