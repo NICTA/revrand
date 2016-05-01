@@ -13,6 +13,7 @@ from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
+from scipy.stats import cauchy, laplace
 
 from .btypes import Positive, Parameter
 from .math.linalg import hadamard
@@ -564,12 +565,12 @@ class SigmoidalBasis(Basis):
         return dPhi
 
 
-class RandomRBF(RadialBasis):
-    """
+class RandomRBF(Basis):
+    """ 
     Random RBF Basis, otherwise known as Random Kitchen Sinks.
 
-    This will make a linear regression model approximate a GP with an RBF
-    covariance function.
+    This will make a linear regression model approximate a GP with an
+    (optionally ARD) RBF covariance function.
 
     Parameters
     ----------
@@ -579,8 +580,10 @@ class RandomRBF(RadialBasis):
     Xdim: int
         the dimension (d) of the observations
     lenscale_init: Parameter, optional
-        A scalar parameter to bound and initialise the length scales for
-        optimization
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
     """
 
     @slice_init
@@ -588,105 +591,15 @@ class RandomRBF(RadialBasis):
 
         self.d = Xdim
         self.n = nbases
-        self.W = np.random.randn(self.d, self.n)
-        self.params = lenscale_init
+        self.W = self._weightsamples()
 
-    @slice_call
-    def __call__(self, X, lenscale):
-        """
-        Apply the random RBF to X.
-
-        Parameters
-        ----------
-        X: ndarray
-            (N, d) array of observations where N is the number of samples, and
-            d is the dimensionality of X.
-        lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
-
-        Returns
-        -------
-        ndarray:
-            of shape (N, 2*nbases) where nbases is number of random bases to
-            use, given in the constructor.
-        """
-
-        N, D = X.shape
-        self._checkD(D)
-
-        WX = np.dot(X, safediv(self.W, lenscale))
-
-        return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
-
-    @slice_call
-    def grad(self, X, lenscale):
-        """
-        Get the gradients of this basis w.r.t.\ the length scale.
-
-        Parameters
-        ----------
-        X: ndarray
-            (N, d) array of observations where N is the number of samples, and
-            d is the dimensionality of X.
-        lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
-
-        Returns
-        -------
-        ndarray:
-            of shape (N, 2*nbases), this is
-            :math:`\partial \Phi(\mathbf{X}) / \partial l`
-        """
-
-        N, D = X.shape
-        self._checkD(D)
-
-        WX = np.dot(X, safediv(self.W, lenscale))
-        dWX = safediv(WX, lenscale)
-
-        return np.hstack((dWX * np.sin(WX), -dWX * np.cos(WX))) \
-            / np.sqrt(self.n)
-
-    def _checkD(self, D):
-        if D != self.d:
-            raise ValueError("Dimensions of data inconsistent!")
-
-
-class RandomRBF_ARD(RandomRBF):
-    """ 
-    Random RBF Basis, otherwise known as Random Kitchen Sinks, with automatic
-    relevance determination (ARD).
-
-    This will make a linear regression model approximate a GP with an ARD-RBF
-    covariance function.
-
-    Parameters
-    ----------
-    nbases: int
-        how many unique random bases to create (twice this number will be
-        actually created, i.e. real and imaginary components for each base)
-    Xdim: int
-        the dimension (d) of the observations
-    lenscale_init: Parameter, optional
-        A scalar or vector of shape (d,) Parameter to bound and initialise
-        the length scales for optimization
-    """
-
-    @slice_init
-    def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
-
-        super(RandomRBF_ARD, self).__init__(nbases, Xdim, lenscale_init)
-        if lenscale_init.shape == (1,):
-            lenscale_init = Parameter(lenscale_init.value * np.ones(Xdim),
-                                      lenscale_init.bounds)
-
-        if lenscale_init.shape != (Xdim,):
+        if lenscale_init.shape != (Xdim,) and lenscale_init.shape != 1:
             raise ValueError("Parameter dimension doesn't agree with Xdim!")
 
         self.params = lenscale_init
 
     @slice_call
-    def __call__(self, X, lenscales):
+    def __call__(self, X, lenscale):
         """
         Apply the random ARD-RBF to X.
 
@@ -695,8 +608,9 @@ class RandomRBF_ARD(RandomRBF):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscales: ndarray
-            array of shape (d,) length scales (one for each dimension of X).
+        lenscale: scalar or ndarray
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X).
 
         Returns
         -------
@@ -706,14 +620,14 @@ class RandomRBF_ARD(RandomRBF):
         """
 
         N, D = X.shape
-        self._checkD(D, len(lenscales))
+        lenscale = self._checkD(D, lenscale)
 
-        WX = np.dot(X, safediv(self.W, lenscales[:, np.newaxis]))
+        WX = np.dot(X, safediv(self.W, lenscale))
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
     @slice_call
-    def grad(self, X, lenscales):
+    def grad(self, X, lenscale):
         """
         Get the gradients of this basis w.r.t.\ the length scales.
 
@@ -722,39 +636,65 @@ class RandomRBF_ARD(RandomRBF):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscales: ndarray
-            array of shape (d,) length scales (one for each dimension of X).
+        lenscale: scalar or ndarray
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X).
 
         Returns
         -------
         ndarray:
-            of shape (N, 2*nbases, d) where d is number of lenscales. This is 
+            of shape (N, 2*nbases[, d]) where d is number of lenscales (if not
+            ARD, i.e. scalar lenscale, this is just a 2D array). This is
             :math:`\partial \Phi(\mathbf{X}) / \partial \mathbf{l}`
         """
 
         N, D = X.shape
-        self._checkD(D, len(lenscales))
+        lenscale = self._checkD(D, lenscale)
 
-        WX = np.dot(X, safediv(self.W, lenscales[:, np.newaxis]))
+        WX = np.dot(X, safediv(self.W, lenscale))
         sinWX = - np.sin(WX)
         cosWX = np.cos(WX)
 
         dPhi = []
-        for i, l in enumerate(lenscales):
+        for i, l in enumerate(lenscale):
             dWX = np.outer(X[:, i], - safediv(self.W[i, :], l**2))
             dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX))
                         / np.sqrt(self.n))
 
-        return np.dstack(dPhi)
+        return np.dstack(dPhi) if self.d != 1 else dPhi[0]
 
-    def _checkD(self, Xdim, lendim):
+    def _weightsamples(self):
+        return np.random.randn(self.d, self.n)
+
+    def _checkD(self, Xdim, lenscale):
         if Xdim != self.d:
             raise ValueError("Dimensions of data inconsistent!")
-        if lendim != self.d:
+
+        # Promote dimension of lenscale
+        if np.isscalar(lenscale):
+            lenscale = np.array([lenscale])
+        elif lenscale.ndim == 1:
+            lenscale = lenscale[:, np.newaxis]
+
+        if self.params.shape[0] != len(lenscale):
             raise ValueError("Dimensions of lenscale inconsistent!")
 
+        return lenscale
 
-class FastFood(RandomRBF):
+
+class RandomLaplace(RandomRBF):
+    
+    def _weightsamples(self):
+        return cauchy.rvs(size=(self.d, self.n))
+
+
+class RandomCauchy(RandomRBF):
+    
+    def _weightsamples(self):
+        return laplace.rvs(size=(self.d, self.n))
+
+
+class FastFood(Basis):
     """
     Fast Food basis function, which is an approximation of the random
     radial basis function for a large number of bases.
@@ -870,6 +810,10 @@ class FastFood(RandomRBF):
                       * np.sqrt(self.d2))
 
         return np.hstack(VX)
+
+    def _checkD(self, D):
+        if D != self.d:
+            raise ValueError("Dimensions of data inconsistent!")
 
 
 #
