@@ -568,7 +568,7 @@ class SigmoidalBasis(Basis):
 
 class RandomRBF(Basis):
     """ 
-    Random RBF Basis, otherwise known as Random Kitchen Sinks.
+    Random RBF Basis -- Approximates an RBF kernel function
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) RBF covariance function.
@@ -684,13 +684,50 @@ class RandomRBF(Basis):
 
 
 class RandomLaplace(RandomRBF):
+    """ 
+    Random Laplace Basis -- Approximates a Laplace kernel function
+
+    This will make a linear regression model approximate a GP with an
+    (optionally ARD) Laplace covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        how many unique random bases to create (twice this number will be
+        actually created, i.e. real and imaginary components for each base)
+    Xdim: int
+        the dimension (d) of the observations
+    lenscale_init: Parameter, optional
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
+    """
     
     def _weightsamples(self):
         return cauchy.rvs(size=(self.d, self.n))
 
 
 class RandomCauchy(RandomRBF):
-    
+    """ 
+    Random Cauchy Basis -- Approximates a Cauchy kernel function
+
+    This will make a linear regression model approximate a GP with an
+    (optionally ARD) Cauchy covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        how many unique random bases to create (twice this number will be
+        actually created, i.e. real and imaginary components for each base)
+    Xdim: int
+        the dimension (d) of the observations
+    lenscale_init: Parameter, optional
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
+    """ 
     def _weightsamples(self):
         return laplace.rvs(size=(self.d, self.n))
 
