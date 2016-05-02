@@ -13,7 +13,7 @@ from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
 from scipy.special import gammaincinv, expit
 from scipy.spatial.distance import cdist
-from scipy.stats import cauchy, laplace
+from scipy.stats import cauchy, laplace, t
 
 from .btypes import Positive, Parameter
 from .math.linalg import hadamard
@@ -730,6 +730,20 @@ class RandomCauchy(RandomRBF):
     """ 
     def _weightsamples(self):
         return laplace.rvs(size=(self.d, self.n))
+
+
+# FIXME: This is not quite right (see p84 of Rasmussen)
+class RandomMatern32(RandomRBF):
+
+    def _weightsamples(self):
+        return t.rvs(df=1.5, size=(self.d, self.n))
+
+
+# FIXME: This is not quite right (see p84 of Rasmussen)
+class RandomMatern52(RandomRBF):
+
+    def _weightsamples(self):
+        return t.rvs(df=2.5, size=(self.d, self.n))
 
 
 class FastFood(Basis):
