@@ -6,7 +6,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def smse(y_true, y_predict):
+def smse(y_true, y_pred):
     """
     Standardised mean squared error.
 
@@ -14,7 +14,7 @@ def smse(y_true, y_predict):
     ----------
     y_true: ndarray
         vector of true targest
-    y_predict: ndarray
+    y_pred: ndarray
         vector of predicted targets
 
     Returns
@@ -32,10 +32,10 @@ def smse(y_true, y_predict):
     """
 
     N = y_true.shape[0]
-    return ((y_true - y_predict)**2).sum() / (N * y_true.var())
+    return ((y_true - y_pred)**2).sum() / (N * y_true.var())
 
 
-def mll(y_true, y_predict, y_var):
+def mll(y_true, y_pred, y_var):
     """
     Mean (negative) log likelihood under a Gaussian distribution.
 
@@ -43,7 +43,7 @@ def mll(y_true, y_predict, y_var):
     ----------
     y_true: ndarray
         vector of true targest
-    y_predict: ndarray
+    y_pred: ndarray
         vector of predicted targets
     y_var: float or ndarray
         predicted variances
@@ -63,10 +63,10 @@ def mll(y_true, y_predict, y_var):
     True
     """
 
-    return - norm.logpdf(y_true, loc=y_predict, scale=np.sqrt(y_var)).mean()
+    return - norm.logpdf(y_true, loc=y_pred, scale=np.sqrt(y_var)).mean()
 
 
-def msll(y_true, y_predict, y_var, y_train):
+def msll(y_true, y_pred, y_var, y_train):
     """
     Mean standardised (negative) log likelihood under a Gaussian distribution.
 
@@ -74,7 +74,7 @@ def msll(y_true, y_predict, y_var, y_train):
     ----------
     y_true: ndarray
         vector of true targest
-    y_predict: ndarray
+    y_pred: ndarray
         vector of predicted targets
     y_var: float or ndarray
         predicted variances
@@ -99,6 +99,6 @@ def msll(y_true, y_predict, y_var, y_train):
     mu = y_train.mean()
 
     ll_naive = norm.logpdf(y_true, loc=mu, scale=np.sqrt(var))
-    ll_mod = norm.logpdf(y_true, loc=y_predict, scale=np.sqrt(y_var))
+    ll_mod = norm.logpdf(y_true, loc=y_pred, scale=np.sqrt(y_var))
 
     return - (ll_mod - ll_naive).mean()
