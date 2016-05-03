@@ -222,6 +222,8 @@ def get_repr(kerneldef):
 
         @staticmethod
         def txt_(a):
+            """ Returns a string
+            """
             if isinstance(a, float):
                 return "{0:.3f}".format(a)
             else:
@@ -241,10 +243,18 @@ def get_repr(kerneldef):
             return PrintTree_(PrintTree_.txt_(a) + '+' + PrintTree_.txt_(b))
 
         def __rmul__(b, a):
-            return PrintTree_.__mul__(a, b)
+            txta = PrintTree_.txt_(a)
+            txtb = PrintTree_.txt_(b)
+
+            if '+' in txta:
+                txta = '(' + txta + ')'
+            if '+' in txtb:
+                txtb = '(' + txtb + ')'
+            return PrintTree_(txta + '*' + txtb)
+
 
         def __radd__(b, a):
-            return PrintTree_.__add__(a, b)
+            return PrintTree_(PrintTree_.txt_(a) + '+' + PrintTree_.txt_(b))
 
     def print_fn(theta):
         theta_iter = iter(theta)
