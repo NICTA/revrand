@@ -786,7 +786,7 @@ class RandomMatern52(RandomRBF):
         return t.rvs(df=2 * 2.5, size=(self.d, self.n))
 
 
-class FastFood(Basis):
+class FastFood(RandomRBF):
     """
     Fast Food basis function, which is an approximation of the random
     radial basis function for a large number of bases.
@@ -820,7 +820,7 @@ class FastFood(Basis):
         self.n = self.d2 * self.k
 
         # Draw consistent samples from the covariance matrix
-        results = [self.__sample_params() for i in range(self.k)]
+        results = [self.__sample_matrices() for i in range(self.k)]
         self.B, self.G, self.PI, self.S = tuple(zip(*results))
 
     @slice_call
@@ -878,14 +878,20 @@ class FastFood(Basis):
         return np.hstack((-dVX * np.sin(VX), dVX * np.cos(VX))) \
             / np.sqrt(self.n)
 
-    def __sample_params(self):
+    def __sample_matrices(self):
 
         B = np.random.randint(2, size=self.d2) * 2 - 1  # uniform from [-1,1]
         G = np.random.randn(self.d2)  # mean 0 std 1
         PI = np.random.permutation(self.d2)
-        S = np.sqrt(2 * gammaincinv(np.ceil(self.d2 / 2),
-                                    np.random.rand(self.d2))) / norm(G)
+        S = self._weightsamples(G)
         return B, G, PI, S
+
+    def _weightsamples(self, G):
+        return np.sqrt(gammaincinv(np.ceil(self.d2 / 2), 
+                                       np.random.rand(self.d2)) / norm(G))
+        # return np.sqrt(2 * gammaincinv(np.ceil(self.d2 / 2),
+        #                                np.random.rand(self.d2))) / norm(G)
+
 
     def __makeVX(self, X):
         m, d0 = X.shape
