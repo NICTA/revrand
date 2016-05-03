@@ -732,18 +732,58 @@ class RandomCauchy(RandomRBF):
         return laplace.rvs(size=(self.d, self.n))
 
 
-# FIXME: This is not quite right (see p84 of Rasmussen)
 class RandomMatern32(RandomRBF):
+    """ 
+    Random Matern 3/2 Basis -- Approximates a Matern 3/2 kernel function
+
+    This will make a linear regression model approximate a GP with an
+    (optionally ARD) Matern covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        how many unique random bases to create (twice this number will be
+        actually created, i.e. real and imaginary components for each base)
+    Xdim: int
+        the dimension (d) of the observations
+    lenscale_init: Parameter, optional
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
+    """ 
 
     def _weightsamples(self):
-        return t.rvs(df=1.5, size=(self.d, self.n))
+        # p = 1, v = 1.5 and the two is a transformation of variables between
+        # Rasmussen 2006 p84 and the CF of a Student t (see wikipedia)
+        return t.rvs(df=2 * 1.5, size=(self.d, self.n))
 
 
-# FIXME: This is not quite right (see p84 of Rasmussen)
 class RandomMatern52(RandomRBF):
+    """ 
+    Random Matern 5/2 Basis -- Approximates a Matern 5/2 kernel function
+
+    This will make a linear regression model approximate a GP with an
+    (optionally ARD) Matern covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        how many unique random bases to create (twice this number will be
+        actually created, i.e. real and imaginary components for each base)
+    Xdim: int
+        the dimension (d) of the observations
+    lenscale_init: Parameter, optional
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
+    """ 
 
     def _weightsamples(self):
-        return t.rvs(df=2.5, size=(self.d, self.n))
+        # p = 2, v = 2.5 and the two is a transformation of variables between
+        # Rasmussen 2006 p84 and the CF of a Student t (see wikipedia)
+        return t.rvs(df=2 * 2.5, size=(self.d, self.n))
 
 
 class FastFood(Basis):
