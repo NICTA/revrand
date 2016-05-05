@@ -1,0 +1,29 @@
+revrand.basis_functions.RandomCauchy
+====================================
+
+.. currentmodule:: revrand.basis_functions
+
+.. autoclass:: RandomCauchy
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RandomCauchy.__init__
+      ~RandomCauchy.grad
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RandomCauchy.params
+   
+   

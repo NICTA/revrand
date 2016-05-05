@@ -17,6 +17,7 @@ Contents:
    glm
    likelihoods
    btypes
+   metrics
    optimize
    utils
    math

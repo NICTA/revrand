@@ -10,7 +10,10 @@ Basis Functions
    PolynomialBasis
    SigmoidalBasis
    RandomRBF
-   RandomRBF_ARD
+   RandomLaplace
+   RandomCauchy
+   RandomMatern32
+   RandomMatern52
    FastFood
 
 .. automodule:: revrand.basis_functions

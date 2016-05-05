@@ -1,0 +1,29 @@
+revrand.basis_functions.RandomLaplace
+=====================================
+
+.. currentmodule:: revrand.basis_functions
+
+.. autoclass:: RandomLaplace
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RandomLaplace.__init__
+      ~RandomLaplace.grad
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RandomLaplace.params
+   
+   

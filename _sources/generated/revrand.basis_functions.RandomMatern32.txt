@@ -1,0 +1,29 @@
+revrand.basis_functions.RandomMatern32
+======================================
+
+.. currentmodule:: revrand.basis_functions
+
+.. autoclass:: RandomMatern32
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RandomMatern32.__init__
+      ~RandomMatern32.grad
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RandomMatern32.params
+   
+   

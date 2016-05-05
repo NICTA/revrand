@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.RandomRBF &mdash; revrand 0.3 documentation</title>
+    <title>revrand.basis_functions.RandomMatern32 &mdash; revrand 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.3 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="revrand.basis_functions.RandomLaplace" href="revrand.basis_functions.RandomLaplace.html" />
-    <link rel="prev" title="revrand.basis_functions.SigmoidalBasis" href="revrand.basis_functions.SigmoidalBasis.html" />
+    <link rel="next" title="revrand.basis_functions.RandomMatern52" href="revrand.basis_functions.RandomMatern52.html" />
+    <link rel="prev" title="revrand.basis_functions.RandomCauchy" href="revrand.basis_functions.RandomCauchy.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -47,10 +47,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.RandomLaplace.html" title="revrand.basis_functions.RandomLaplace"
+          <a href="revrand.basis_functions.RandomMatern52.html" title="revrand.basis_functions.RandomMatern52"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.SigmoidalBasis.html" title="revrand.basis_functions.SigmoidalBasis"
+          <a href="revrand.basis_functions.RandomCauchy.html" title="revrand.basis_functions.RandomCauchy"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
@@ -62,14 +62,14 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="revrand-basis-functions-randomrbf">
-<h1>revrand.basis_functions.RandomRBF<a class="headerlink" href="#revrand-basis-functions-randomrbf" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="revrand-basis-functions-randommatern32">
+<h1>revrand.basis_functions.RandomMatern32<a class="headerlink" href="#revrand-basis-functions-randommatern32" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="revrand.basis_functions.RandomRBF">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomRBF" title="Permalink to this definition">¶</a></dt>
-<dd><p>Random RBF Basis &#8211; Approximates an RBF kernel function</p>
+<dt id="revrand.basis_functions.RandomMatern32">
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomMatern32</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomMatern32" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random Matern 3/2 Basis &#8211; Approximates a Matern 3/2 kernel function</p>
 <p>This will make a linear regression model approximate a GP with an
-(optionally ARD) RBF covariance function.</p>
+(optionally ARD) Matern covariance function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -88,8 +88,8 @@ learned.</li>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.RandomRBF.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomRBF.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.basis_functions.RandomMatern32.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomMatern32.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -99,10 +99,10 @@ learned.</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.RandomRBF.__init__" title="revrand.basis_functions.RandomRBF.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.RandomMatern32.__init__" title="revrand.basis_functions.RandomMatern32.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="../basis_funcs.html#revrand.basis_functions.RandomRBF.grad" title="revrand.basis_functions.RandomRBF.grad"><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code></a>(X,&nbsp;lenscale)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X,&nbsp;lenscale)</td>
 <td>Get the gradients of this basis w.r.t.the length scales.</td>
 </tr>
 </tbody>
@@ -130,11 +130,11 @@ learned.</li>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.SigmoidalBasis.html"
-                        title="previous chapter">revrand.basis_functions.SigmoidalBasis</a></p>
+  <p class="topless"><a href="revrand.basis_functions.RandomCauchy.html"
+                        title="previous chapter">revrand.basis_functions.RandomCauchy</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.RandomLaplace.html"
-                        title="next chapter">revrand.basis_functions.RandomLaplace</a></p>
+  <p class="topless"><a href="revrand.basis_functions.RandomMatern52.html"
+                        title="next chapter">revrand.basis_functions.RandomMatern52</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -159,10 +159,10 @@ learned.</li>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.RandomLaplace.html" title="revrand.basis_functions.RandomLaplace"
+          <a href="revrand.basis_functions.RandomMatern52.html" title="revrand.basis_functions.RandomMatern52"
              >next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.SigmoidalBasis.html" title="revrand.basis_functions.SigmoidalBasis"
+          <a href="revrand.basis_functions.RandomCauchy.html" title="revrand.basis_functions.RandomCauchy"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 
