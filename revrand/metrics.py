@@ -13,7 +13,7 @@ def smse(y_true, y_pred):
     Parameters
     ----------
     y_true: ndarray
-        vector of true targest
+        vector of true targets
     y_pred: ndarray
         vector of predicted targets
 
@@ -42,7 +42,7 @@ def mll(y_true, y_pred, y_var):
     Parameters
     ----------
     y_true: ndarray
-        vector of true targest
+        vector of true targets
     y_pred: ndarray
         vector of predicted targets
     y_var: float or ndarray
@@ -73,7 +73,7 @@ def msll(y_true, y_pred, y_var, y_train):
     Parameters
     ----------
     y_true: ndarray
-        vector of true targest
+        vector of true targets
     y_pred: ndarray
         vector of predicted targets
     y_var: float or ndarray
@@ -102,3 +102,32 @@ def msll(y_true, y_pred, y_var, y_train):
     ll_mod = norm.logpdf(y_true, loc=y_pred, scale=np.sqrt(y_var))
 
     return - (ll_mod - ll_naive).mean()
+
+
+def lins_ccc(y_true, y_pred):
+    """
+    Lin's Concordance Correlation Coefficient. 
+
+    See https://en.wikipedia.org/wiki/Concordance_correlation_coefficient
+
+    Parameters
+    ----------
+    y_true: ndarray
+        vector of true targets
+    y_pred: ndarray
+        vector of predicted targets
+
+    Returns
+    -------
+    float:
+        1.0 for a perfect match between :code:`y_true` and :code:`y_pred`, less
+        otherwise
+    """
+
+    t = y_true.mean()
+    p = y_pred.mean()
+    St = y_true.var()
+    Sp = y_pred.var()
+    Spt = np.mean((y_true - t) * (y_pred - p))
+
+    return 2 * Spt / (St + Sp + (t - p)**2)

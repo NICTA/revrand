@@ -10,7 +10,7 @@ from revrand import regression, glm
 from revrand.basis_functions import RandomRBF
 from revrand.likelihoods import Gaussian
 from revrand.btypes import Parameter, Positive
-from revrand.validation import smse, msll
+from revrand.metrics import smse, msll
 from revrand.utils.datasets import fetch_gpml_sarcos_data
 
 #

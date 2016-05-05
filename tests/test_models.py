@@ -2,7 +2,7 @@ import numpy as np
 from revrand import regression, glm
 from revrand.likelihoods import Gaussian
 from revrand.basis_functions import LinearBasis, RandomRBF
-from revrand.validation import smse
+from revrand.metrics import smse
 
 
 def test_regression(make_data):
