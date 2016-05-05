@@ -8,7 +8,7 @@ import numpy as np
 import logging
 
 from revrand import regression, glm, likelihoods
-from revrand.validation import mll, smse
+from revrand.metrics import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 from revrand.btypes import Parameter, Positive
 from revrand import basis_functions as bs
