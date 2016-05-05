@@ -122,6 +122,14 @@ def lins_ccc(y_true, y_pred):
     float:
         1.0 for a perfect match between :code:`y_true` and :code:`y_pred`, less
         otherwise
+
+    Example
+    -------
+    >>> y_true = np.random.randn(100)
+    >>> lins_ccc(y_true, y_true) > 0.99  # Should be good predictor
+    True
+    >>> lins_ccc(y_true, np.zeros_like(y_true)) < 0.01  # Bad predictor
+    True
     """
 
     t = y_true.mean()
