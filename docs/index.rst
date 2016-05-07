@@ -13,7 +13,7 @@ Contents:
 
    installation
    basis_funcs
-   regression
+   slm
    glm
    likelihoods
    btypes

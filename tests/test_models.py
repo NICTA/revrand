@@ -1,24 +1,24 @@
 import numpy as np
-from revrand import regression, glm
+from revrand import slm, glm
 from revrand.likelihoods import Gaussian
 from revrand.basis_functions import LinearBasis, RandomRBF
 from revrand.metrics import smse
 
 
-def test_regression(make_data):
+def test_slm(make_data):
 
     X, y, w = make_data
 
     basis = LinearBasis(onescol=False)
 
-    params = regression.learn(X, y, basis)
-    Ey, Vf, Vy = regression.predict(X, basis, *params)
+    params = slm.learn(X, y, basis)
+    Ey, Vf, Vy = slm.predict(X, basis, *params)
     assert smse(y, Ey) < 0.1
 
     basis = LinearBasis(onescol=False) + RandomRBF(nbases=10, Xdim=X.shape[1])
 
-    params = regression.learn(X, y, basis)
-    Ey, Vf, Vy = regression.predict(X, basis, *params)
+    params = slm.learn(X, y, basis)
+    Ey, Vf, Vy = slm.predict(X, basis, *params)
     assert smse(y, Ey) < 0.1
 
 

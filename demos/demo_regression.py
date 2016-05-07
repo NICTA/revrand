@@ -2,16 +2,16 @@
 """ A La Carte GP and basis function demo. """
 
 import matplotlib.pyplot as pl
-import revrand.legacygp as gp
-import revrand.legacygp.kernels as kern
 import numpy as np
 import logging
 
-from revrand import regression, glm, likelihoods
+from revrand import slm, glm, likelihoods
 from revrand.metrics import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 from revrand.btypes import Parameter, Positive
 from revrand import basis_functions as bs
+import revrand.legacygp as gp
+import revrand.legacygp.kernels as kern
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -105,10 +105,10 @@ def main():
     # Learn regression parameters and predict
     #
 
-    params_elbo = regression.learn(Xtrain, ytrain, base,
-                                   var=Parameter(noise**2, Positive()),
-                                   regulariser=Parameter(reg, Positive()))
-    Ey_e, Vf_e, Vy_e = regression.predict(Xtest, base, *params_elbo)
+    params_elbo = slm.learn(Xtrain, ytrain, base,
+                            var=Parameter(noise**2, Positive()),
+                            regulariser=Parameter(reg, Positive()))
+    Ey_e, Vf_e, Vy_e = slm.predict(Xtest, base, *params_elbo)
     Sy_e = np.sqrt(Vy_e)
 
     #
