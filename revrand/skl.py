@@ -21,18 +21,15 @@ class StandardLinearModel(BaseEstimator):
 
     def fit(self, X, y):
 
-        m, C, bparams, var = slm.learn(X, y,
-                                       basis=self.basis,
-                                       var=self.var,
-                                       regulariser=self.regulariser,
-                                       tol=self.tol,
-                                       maxit=self.maxit,
-                                       verbose=self.verbose
-                                       )
-        self.m = m
-        self.C = C
-        self.bparams = bparams
-        self.optvar = var
+        self.m, self.C, self.bparams, self.optvar = \
+            slm.learn(X, y,
+                      basis=self.basis,
+                      var=self.var,
+                      regulariser=self.regulariser,
+                      tol=self.tol,
+                      maxit=self.maxit,
+                      verbose=self.verbose
+                      )
 
         return self
 
@@ -47,3 +44,64 @@ class StandardLinearModel(BaseEstimator):
                                  )
 
         return (Ey, Vf, Vy) if uncertainty else Ey
+
+
+class GeneralisedLinearModel(BaseEstimator):
+
+    def __init__(self, likelihood, basis, 
+                 regulariser=Parameter(1., Positive()), postcomp=10,
+                 use_sgd=True, maxit=1000, tol=1e-7, batchsize=100, rho=0.9,
+                 epsilon=1e-5, verbose=True):
+
+        self.likelihood = likelihood
+        self.basis = basis
+        self.regulariser = regulariser
+        self.postcomp = postcomp
+        self.use_sgd = use_sgd
+        self.maxit = maxit
+        self.tol = tol
+        self.batchsize = batchsize
+        self.rho = rho
+        self.epsilon = epsilon
+        self.verbose = verbose
+
+    def fit(self, X, y):
+
+        self.m, self.C, self.lparams, self.bparams = \
+            glm.learn(X, y,
+                      likelihood=self.likelihood,
+                      basis=self.basis, 
+                      regulariser=self.regulariser,
+                      postcomp=self.postcomp,
+                      use_sgd=self.use_sgd,
+                      maxit=self.maxit,
+                      tol=self.tol,
+                      batchsize=self.batchsize,
+                      rho=self.rho,
+                      epsilon=self.epsilon,
+                      verbose=self.verbose)
+
+        return self
+
+    def predict(self, X, prediction_type=None, *args, **kwargs):
+
+        predargs = [X,
+                    self.likelihood, 
+                    self.basis,
+                    self.m,
+                    self.C,
+                    self.lparams,
+                    self.bparams]
+
+        Ey, Vy, _, _ = glm.predict_moments(*predargs)
+
+        if prediction_type is None:
+            return Ey
+        elif prediction_type == 'variance':
+            return Ey, Vy
+        elif prediction_type == 'interval':
+            raise NotImplementedError()
+        elif prediction_type == 'cdf':
+            raise NotImplementedError()
+        else:
+            raise ValueError("Invalid prediction type input.")
