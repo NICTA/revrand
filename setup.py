@@ -36,7 +36,7 @@ setup(
     cmdclass={
         'test': PyTest
     },
-    tests_require=['pytest'],
+    tests_require=['pytest', 'scikit-learn'],
     install_requires=[
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',
