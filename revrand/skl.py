@@ -21,7 +21,7 @@ class StandardLinearModel(BaseEstimator):
 
     def fit(self, X, y):
 
-        self.m, self.C, self.bparams, self.optvar = \
+        self.m, self.C, self.hypers, self.optvar = \
             slm.learn(X, y,
                       basis=self.basis,
                       var=self.var,
@@ -33,14 +33,22 @@ class StandardLinearModel(BaseEstimator):
 
         return self
 
-    def predict(self, X, uncertainty=False):
+    def predict(self, X):
+
+        return self._predict(X)
+
+    def predict_proba(self, X):
+
+        return self._predict(X, uncertainty=True)
+
+    def _predict(self, X, uncertainty=False):
 
         Ey, Vf, Vy = slm.predict(X,
-                                 self.basis,
-                                 self.m,
-                                 self.C,
-                                 self.bparams,
-                                 self.optvar
+                                 basis=self.basis,
+                                 m=self.m,
+                                 C=self.C,
+                                 hypers=self.hypers,
+                                 var=self.optvar
                                  )
 
         return (Ey, Vf, Vy) if uncertainty else Ey
@@ -51,7 +59,7 @@ class GeneralisedLinearModel(BaseEstimator):
     def __init__(self, likelihood, basis, 
                  regulariser=Parameter(1., Positive()), postcomp=10,
                  use_sgd=True, maxit=1000, tol=1e-7, batchsize=100, rho=0.9,
-                 epsilon=1e-5, verbose=True):
+                 epsilon=1e-5, alpha=0.95, verbose=True):
 
         self.likelihood = likelihood
         self.basis = basis
@@ -63,6 +71,7 @@ class GeneralisedLinearModel(BaseEstimator):
         self.batchsize = batchsize
         self.rho = rho
         self.epsilon = epsilon
+        self.alpha = alpha
         self.verbose = verbose
 
     def fit(self, X, y):
@@ -83,25 +92,29 @@ class GeneralisedLinearModel(BaseEstimator):
 
         return self
 
-    def predict(self, X, prediction_type=None, *args, **kwargs):
+    def predict(self, X):
 
-        predargs = [X,
-                    self.likelihood, 
-                    self.basis,
-                    self.m,
-                    self.C,
-                    self.lparams,
-                    self.bparams]
+        Ey, _, _, _ = glm.predict_moments(X,
+                                          likelihood=self.likelihood, 
+                                          basis=self.basis,
+                                          m=self.m,
+                                          C=self.C,
+                                          lparams=self.lparams,
+                                          bparams=self.bparams
+                                          )
+        return Ey
 
-        Ey, Vy, _, _ = glm.predict_moments(*predargs)
+    def predict_proba(self, X):
 
-        if prediction_type is None:
-            return Ey
-        elif prediction_type == 'variance':
-            return Ey, Vy
-        elif prediction_type == 'interval':
-            raise NotImplementedError()
-        elif prediction_type == 'cdf':
-            raise NotImplementedError()
-        else:
-            raise ValueError("Invalid prediction type input.")
+        Ey = self.predict(X)
+        ql, qu =  glm.predict_interval(alpha=self.alpha,
+                                       Xs=X,
+                                       likelihood=self.likelihood, 
+                                       basis=self.basis,
+                                       m=self.m,
+                                       C=self.C,
+                                       lparams=self.lparams,
+                                       bparams=self.bparams
+                                       )
+
+        return Ey, ql, qu
