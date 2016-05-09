@@ -7,7 +7,7 @@ python:
 addons:
   apt:
     packages:
-    - libblas-dev
+    - libopenblas-dev
     - liblapack-dev
     - libatlas-base-dev
     - gfortran
@@ -16,7 +16,7 @@ install:
   - cd $TRAVIS_BUILD_DIR
   - pip install --upgrade pip
   - pip install --upgrade pytest pytest-cov
-  - pip install codecov unipath requests
+  - pip install codecov unipath requests, scikit-learn
   - python setup.py install
 
 script:
