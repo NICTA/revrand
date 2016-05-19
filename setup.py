@@ -41,7 +41,7 @@ setup(
         'scipy >= 0.14.1',
         'numpy >= 1.8.2',
         'six >= 1.9.0',
-        'decorator >= 4.0.9'
+        'decorator >= 4.0.6'
     ],
     extras_require={
         'demos': [

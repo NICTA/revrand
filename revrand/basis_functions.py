@@ -89,7 +89,7 @@ def slice_init(func):
     return new_init
 
 
-@decorator  # This needs to be signature preseving for concatenation
+@decorator  # This needs to be signature preserving for concatenation
 def slice_call(func, self, X, *vargs, **kwargs):
     """
     Decorator for implementing partial application.

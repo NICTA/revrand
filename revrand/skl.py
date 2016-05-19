@@ -1,12 +1,13 @@
 """ Scikit learn interface -- compatible with pipelines """
 
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 
 from . import slm, glm
+from . import basis_functions as bf
 from .btypes import Parameter, Positive
 
 
-class StandardLinearModel(BaseEstimator):
+class StandardLinearModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, basis, var=Parameter(1., Positive()),
                  regulariser=Parameter(1., Positive()), tol=1e-6, maxit=500,
@@ -54,7 +55,7 @@ class StandardLinearModel(BaseEstimator):
         return (Ey, Vf, Vy) if uncertainty else Ey
 
 
-class GeneralisedLinearModel(BaseEstimator):
+class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, likelihood, basis, 
                  regulariser=Parameter(1., Positive()), postcomp=10,
@@ -118,3 +119,42 @@ class GeneralisedLinearModel(BaseEstimator):
                                        )
 
         return Ey, ql, qu
+
+
+class _BaseBasis(BaseEstimator, TransformerMixin, bf.Basis):
+
+    def __init__(self):
+
+        self.kwparams = {}
+
+    def fit(self, X, y=None):
+        """ 
+        A do-nothing fit function that just maintains compatibility with
+        scikit-learn's tranformer interface.
+        """
+
+        return self
+
+    def transform(self, X, y=None):
+
+        return self(X, **self.kwparams)
+
+    def fit_transform(self, X, y=none, **fit_params):
+
+        if not fit_params:
+            return self.transform(X, y)
+        else:
+            return self(X, **fit_params)
+
+
+class LinearBasis(bf.LinearBasis, _BaseBasis):
+
+    pass
+
+
+class RandomRBF(bf.RandomRBF, _BaseBasis):
+
+    def __init__(self, nbases, Xdim, lenscale=1):
+
+        super(RandomRBF, self).__init__(Xdim=Xdim, nbases=nbases)
+        self.kwparams = {'lenscale': lenscale}
