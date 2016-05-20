@@ -82,13 +82,16 @@ def test_pipeline_bases(make_data):
 
         assert pipe.transform(X).shape == bfbase(**inits)(X, **params).shape
 
-    # Test Pickling
-    # for _, sklbase, inits, params in (exactbases + randombases):
+    # Test setting params
+    for _, sklbase, inits, params in (exactbases + randombases):
 
-    #     estimators = [('base', sklbase(**dict_join(inits, params)))]
+        estimators = [('base', sklbase(**dict_join(inits, params)))]
 
-    #     pipe = Pipeline(estimators)
-    #     pipe.fit(X)  # Should do nothing really
+        pipe = Pipeline(estimators)
+        pipe.set_params(**pipe.get_params())
+        pipe.fit(X)  # Should do nothing really
+
+        assert pipe.transform(X).shape[0] == X.shape[0]
 
 
 def dict_join(*dicts):
