@@ -157,6 +157,18 @@ class LinearBasis(bf.LinearBasis, _BaseBasis):
         super(LinearBasis, self).__init__(onescol=onescol)
 
 
+class PolynomialBasis(bf.PolynomialBasis, _BaseBasis):
+
+    def __init__(self, order, include_bias=True):
+
+        self.order = order
+        self.include_bias = include_bias
+        self.kwparams = {}
+
+        super(PolynomialBasis, self).__init__(order=order,
+                                              include_bias=include_bias)
+
+
 class RandomRBF(bf.RandomRBF, _BaseBasis):
 
     def __init__(self, nbases, Xdim, lenscale=1):
@@ -166,3 +178,23 @@ class RandomRBF(bf.RandomRBF, _BaseBasis):
         self.Xdim = Xdim
         self.lenscale = lenscale
         super(RandomRBF, self).__init__(Xdim=Xdim, nbases=nbases)
+
+
+class RandomLaplace(bf.RandomLaplace, RandomRBF):
+
+    pass
+
+
+class RandomCauchy(bf.RandomCauchy, RandomRBF):
+
+    pass
+
+
+class RandomMatern32(bf.RandomMatern32, RandomRBF):
+
+    pass
+
+
+class RandomMatern52(bf.RandomMatern52, RandomRBF):
+
+    pass
