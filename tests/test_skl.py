@@ -54,11 +54,46 @@ def test_pipeline_bases(make_data):
                    skl.LinearBasis,
                    {'onescol': True},
                    {}
+                   ),
+                  (bf.PolynomialBasis,
+                   skl.PolynomialBasis,
+                   {'include_bias': True, 'order': 3},
+                   {}
+                   ),
+                  (bf.RadialBasis,
+                   skl.RadialBasis,
+                   {'centres': X[[10, 40, 70], :]},
+                   {'lenscale': 1.}
+                   ),
+                  (bf.SigmoidalBasis,
+                   skl.SigmoidalBasis,
+                   {'centres': X[[10, 40, 70], :]},
+                   {'lenscale': 1.}
                    )
                   ]
 
     randombases = [(bf.RandomRBF,
                     skl.RandomRBF,
+                    {'nbases': 20, 'Xdim': X.shape[1]},
+                    {'lenscale': 1.}
+                    ),
+                   (bf.RandomCauchy,
+                    skl.RandomCauchy,
+                    {'nbases': 20, 'Xdim': X.shape[1]},
+                    {'lenscale': 1.}
+                    ),
+                   (bf.RandomLaplace,
+                    skl.RandomLaplace,
+                    {'nbases': 20, 'Xdim': X.shape[1]},
+                    {'lenscale': 1.}
+                    ),
+                   (bf.RandomMatern32,
+                    skl.RandomMatern32,
+                    {'nbases': 20, 'Xdim': X.shape[1]},
+                    {'lenscale': 1.}
+                    ),
+                   (bf.RandomMatern52,
+                    skl.RandomMatern52,
                     {'nbases': 20, 'Xdim': X.shape[1]},
                     {'lenscale': 1.}
                     )

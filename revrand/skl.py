@@ -168,15 +168,30 @@ class PolynomialBasis(bf.PolynomialBasis, _BaseBasis):
         super(PolynomialBasis, self).__init__(order=order,
                                               include_bias=include_bias)
 
+class RadialBasis(bf.RadialBasis, _BaseBasis):
+
+    def __init__(self, centres, lenscale):
+
+        self.centres = centres
+        self.lenscale = lenscale
+        self.kwparams = {'lenscale': lenscale}
+
+        super(RadialBasis, self).__init__(centres=centres)
+
+
+class SigmoidalBasis(bf.SigmoidalBasis, RadialBasis):
+
+    pass
+
 
 class RandomRBF(bf.RandomRBF, _BaseBasis):
 
-    def __init__(self, nbases, Xdim, lenscale=1):
+    def __init__(self, nbases, Xdim, lenscale):
 
-        self.kwparams = {'lenscale': lenscale}
         self.nbases = nbases
         self.Xdim = Xdim
         self.lenscale = lenscale
+        self.kwparams = {'lenscale': lenscale}
         super(RandomRBF, self).__init__(Xdim=Xdim, nbases=nbases)
 
 

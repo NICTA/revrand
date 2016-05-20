@@ -464,10 +464,7 @@ class RadialBasis(Basis):
         return dPhi
 
 
-# TODO: Might be worth creating a mixin or base class for basis functions
-# that require locations and scales
-
-class SigmoidalBasis(Basis):
+class SigmoidalBasis(RadialBasis):
     """
     Sigmoidal Basis
 
@@ -480,13 +477,6 @@ class SigmoidalBasis(Basis):
         A scalar parameter to bound and initialise the length scales for
         optimization
     """
-
-    @slice_init
-    def __init__(self, centres, lenscale_init=Parameter(1., Positive())):
-
-        self.M, self.D = centres.shape
-        self.C = centres
-        self.params = lenscale_init
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -522,7 +512,7 @@ class SigmoidalBasis(Basis):
             raise ValueError("Expected X of dimensionality {0}, got {1}"
                              .format(self.D, D))
 
-        return expit(safediv(cdist(X, self.C, 'seuclidean'), lenscale))
+        return expit(safediv(cdist(X, self.C, 'euclidean'), lenscale))
 
     @slice_call
     def grad(self, X, lenscale):
@@ -557,7 +547,7 @@ class SigmoidalBasis(Basis):
             raise ValueError("Expected X of dimensionality {0}, got {1}"
                              .format(self.D, D))
 
-        dist = cdist(X, self.C, 'seuclidean')
+        dist = cdist(X, self.C, 'euclidean')
 
         sigma = expit(safediv(dist, lenscale))
 
