@@ -139,7 +139,7 @@ class _BaseBasis(BaseEstimator, TransformerMixin, bf.Basis):
 
         return self(X, **self.kwparams)
 
-    def fit_transform(self, X, y=none, **fit_params):
+    def fit_transform(self, X, y=None, **fit_params):
 
         if not fit_params:
             return self.transform(X, y)
@@ -149,12 +149,20 @@ class _BaseBasis(BaseEstimator, TransformerMixin, bf.Basis):
 
 class LinearBasis(bf.LinearBasis, _BaseBasis):
 
-    pass
+    def __init__(self, onescol=False):
+
+        self.onescol = onescol
+        self.kwparams = {}
+
+        super(LinearBasis, self).__init__(onescol=onescol)
 
 
 class RandomRBF(bf.RandomRBF, _BaseBasis):
 
     def __init__(self, nbases, Xdim, lenscale=1):
 
-        super(RandomRBF, self).__init__(Xdim=Xdim, nbases=nbases)
         self.kwparams = {'lenscale': lenscale}
+        self.nbases = nbases
+        self.Xdim = Xdim
+        self.lenscale = lenscale
+        super(RandomRBF, self).__init__(Xdim=Xdim, nbases=nbases)
