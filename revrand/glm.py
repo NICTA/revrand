@@ -404,9 +404,9 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, lparams, bparams,
 
     Returns
     -------
-        a: ndarray
+        ql: ndarray
             The lower end point of the interval with shape (Ns,)
-        b: ndarray
+        qu: ndarray
             The upper end point of the interval with shape (Ns,)
     """
 

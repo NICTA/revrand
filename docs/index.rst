@@ -21,6 +21,7 @@ Contents:
    optimize
    utils
    math
+   skl
    demo
 
    dev/index.rst

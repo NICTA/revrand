@@ -284,7 +284,7 @@ class Basis(object):
 
 class LinearBasis(Basis):
     """ 
-    Linear basis class, basically this just prepending a columns of ones onto X
+    Linear basis class, basically this just prepends a columns of ones onto X
 
     Parameters
     ----------
