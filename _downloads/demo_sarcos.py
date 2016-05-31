@@ -6,7 +6,7 @@ import numpy as np
 import revrand.legacygp as gp
 import revrand.legacygp.kernels as kern
 
-from revrand import regression, glm
+from revrand import slm, glm
 from revrand.basis_functions import RandomRBF
 from revrand.likelihoods import Gaussian
 from revrand.btypes import Parameter, Positive
@@ -66,8 +66,8 @@ if useSGD:
                        epsilon=epsilon, batchsize=batchsize, maxit=passes)
 else:
     log.info("Using full variational regressor")
-    params = regression.learn(X_train, y_train, base,
-                              var=Parameter(noise**2, Positive()))
+    params = slm.learn(X_train, y_train, base,
+                       var=Parameter(noise**2, Positive()))
 
 
 #

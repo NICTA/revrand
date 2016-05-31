@@ -13,7 +13,7 @@ Contents:
 
    installation
    basis_funcs
-   regression
+   slm
    glm
    likelihoods
    btypes
@@ -21,6 +21,7 @@ Contents:
    optimize
    utils
    math
+   skl
    demo
 
    dev/index.rst

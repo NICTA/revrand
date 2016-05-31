@@ -13,7 +13,7 @@ Minimal
 Optional
 ********
 
-Benchmarking
+Benchmarking/demos and scikit-learn compatibility interface
   - scikit-learn 
 
 Downloading and caching datasets
