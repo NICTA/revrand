@@ -264,8 +264,8 @@ Scikit Learn Interface and Pipeline Compatibility
 .................................................
 
 We also provide the ability to use the standard and generalised linear models,
-and our basis function objects with Scikit Learn pipelines. Have a look at 
-the `revrand.skl` module for the compatible interfaces. You can also use these
+and our basis function objects with Scikit Learn pipelines. Have a look at the
+``revrand.skl`` module for the compatible interfaces. You can also use these
 interfaces if you prefer the Scikit Learn class paradigm (fit, predict,
 transform etc methods), instead of our function-based paradigm (learn, predict
 functions).
