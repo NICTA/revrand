@@ -27,7 +27,7 @@ regression) and generalised linear models. A few features of this library are:
 - Non-Gaussian likelihoods with Bayesian generalised linear models using a
   modified version of the nonparametric variational inference algorithm
   presented in [4]_.
-- Large scale learning using stochastic gradient descent (ADADELTA).
+- Large scale learning using stochastic gradient descent (ADADELTA and more).
 
 
 Quickstart
@@ -75,7 +75,7 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
     import matplotlib.pyplot as pl
     import numpy as np
     from revrand.basis_functions import LinearBasis, RandomRBF
-    from revrand.regression import learn, predict
+    from revrand.slm import learn, predict
     from revrand.btypes import Parameter, Positive
 
     ...
@@ -86,8 +86,8 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
         + RandomRBF(nbases=300, Xdim=X.shape[1], init_lenscale)
 
     # Learn regression parameters and predict
-    params = regression.learn(X, y, basis)
-    Eys, Vfs, Vys = regression.predict(Xs, basis, *params) 
+    params = slm.learn(X, y, basis)
+    Eys, Vfs, Vys = slm.predict(Xs, basis, *params) 
 
     # Training/Truth
     pl.plot(X, y, 'k.', label='Training')
@@ -170,7 +170,7 @@ Large-scale Learning with Stochastic Gradients
 By default the GLM uses stochastic gradients to learn all of its
 parameters/hyperparameters and does not require any matrix inversion, and so it
 can be used to learn from large datasets with lots of features
-(regression.learn uses L-BFGS and requires a matrix inversion). We can also use
+(slm.learn uses L-BFGS and requires a matrix inversion). We can also use
 the GLM to approximate and scale up regular Bayesian linear regression. For
 instance, if we modify the Bayesian linear regression example from before,
 
@@ -258,6 +258,17 @@ Finally, if we use these basis functions with any of the algorithms in this
 revrand, *the parameters of the basis functions are learned* as well! So
 really in the above example ``lenscale = 1.`` is just an initial value for
 the kernel function length-scale!
+
+
+Scikit Learn Interface and Pipeline Compatibility
+.................................................
+
+We also provide the ability to use the standard and generalised linear models,
+and our basis function objects with Scikit Learn pipelines. Have a look at 
+the `revrand.skl` module for the compatible interfaces. You can also use these
+interfaces if you prefer the Scikit Learn class paradigm (fit, predict,
+transform etc methods), instead of our function-based paradigm (learn, predict
+functions).
 
 
 Useful Links
