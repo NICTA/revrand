@@ -19,7 +19,8 @@ from scipy.optimize import minimize
 from scipy.linalg import cho_solve
 
 from .utils import append_or_extend 
-from .math.linalg import jitchol, cho_log_det
+# from .math.linalg import jitchol, cho_log_det
+from .math.linalg import solve_posdef
 from .math.special import safediv
 from .optimize import structured_minimizer, logtrick_minimizer
 from .btypes import Parameter, Positive, get_values
@@ -94,15 +95,16 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
         ilambda = safediv(1., _lambda)
 
         # Posterior Parameters
-        lower = False
-        LiC = jitchol(np.diag(np.ones(D) * ilambda) + PhiPhi * ivar,
-                      lower=lower)
-        C = cho_solve((LiC, lower), np.eye(D))
+        iC = np.diag(np.ones(D) * ilambda) + PhiPhi * ivar
+        C, logdetC = solve_posdef(iC, np.eye(D))
+        # lower = False
+        # LiC = jitchol(iC, lower=lower)
+        # C = cho_solve((LiC, lower), np.eye(D))
         m = C.dot(Phi.T.dot(y)) * ivar
 
         # Common calcs
         TrPhiPhiC = (PhiPhi * C).sum()
-        logdetC = -cho_log_det(LiC)
+        # logdetC = -cho_log_det(LiC)
         TrC = np.trace(C)
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()

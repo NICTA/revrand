@@ -25,115 +25,157 @@ from __future__ import division
 
 import numpy as np
 from math import log
-from scipy.linalg import cholesky, LinAlgError
+from scipy.linalg import cholesky, cho_solve, svd, LinAlgError
 
 
-def jitchol(a, jit=None, jit_max=1e-3, returns_jit=False, lower=False,
-            overwrite_a=False, check_finite=True):
+# Numerical constants / thresholds
+singvalthresh = 1. / np.finfo(float).eps
+cholthresh = 1e-5
+
+
+def cho_log_det(L):
     """
-    Do cholesky decomposition with a bit of diagonal jitter if needs be.
+    Compute the log of the determinant of :math:`A`, given its (upper or lower)
+    Cholesky factorization :math:`LL^T`.
 
-    Arguments:
-        A: a [NxN] positive definite symmetric matrix to be decomposed as
-            A = L.dot(L.T).
-        lower: Return lower triangular factor, default False (upper).
-
-    Returns:
-        An upper or lower triangular matrix factor, L, also [NxN].
-        Also wheter or not a the matrix is lower triangular form,
-        (L, lower).
+    Parameters
+    ----------
+    L: ndarray
+        an upper or lower Cholesky factor
 
     Examples
     --------
-    >>> a = np.array([[1, -2j],
-    ...               [2j, 5]])
-    >>> jitchol(a, lower=True)
-    array([[ 1.+0.j,  0.+0.j],
-           [ 0.+2.j,  1.+0.j]])
-    >>> np.all(a == np.array([[1, -2j],
-    ...                       [2j, 5]]))
-    True
-
-    >>> b = np.array([[ 2, -1,  0],
+    >>> A = np.array([[ 2, -1,  0],
     ...               [-1,  2, -1],
     ...               [ 0, -1,  2]])
-    >>> U, jit = jitchol(b, returns_jit=True)
-    >>> U.round(2)
-    array([[ 1.41, -0.71,  0.  ],
-           [ 0.  ,  1.22, -0.82],
-           [ 0.  ,  0.  ,  1.15]])
-    >>> jit is None
+
+    >>> Lt = cholesky(A)
+    >>> np.isclose(cho_log_det(Lt), np.log(np.linalg.det(A)))
     True
 
-    Should remain unchanged
+    >>> L = cholesky(A, lower=True)
+    >>> np.isclose(cho_log_det(L), np.log(np.linalg.det(A)))
+    True
+    """
+    return 2 * np.sum(np.log(L.diagonal()))
 
-    >>> b
-    array([[ 2, -1,  0],
-           [-1,  2, -1],
-           [ 0, -1,  2]])
 
-    >>> c = np.array([[1, 2],
-    ...               [2, 1]])
-    >>> jitchol(c) # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):
-        ...
-    LinAlgError: Exceeded maximum jitter limit, yet a is still not positive
-    semidefinite!
+def svd_log_det(s):
+    """
+    Compute the log of the determinant of :math:`A`, given its singular values
+    from an SVD factorisation (i.e. :code:`s` from :code:`U, s, Ut = svd(A)`).
+
+    Parameters
+    ----------
+    s: ndarray
+        the singular values from an SVD decomposition
+
+    Examples
+    --------
+    >>> A = np.array([[ 2, -1,  0],
+    ...               [-1,  2, -1],
+    ...               [ 0, -1,  2]])
+
+    >>> _, s, _ = np.linalg.svd(A)
+    >>> np.isclose(svd_log_det(s), np.log(np.linalg.det(A)))
+    True
+    """
+    return np.sum(np.log(s))
+
+
+def solve_posdef(A, b):
+    """
+    Solve the system :math:`A X = b` for :math:`X` where :math:`A` is a
+    positive semi-definite matrix.
+
+    This first tries cholesky, and if numerically unstable with solve using a
+    truncated SVD (see solve_posdef_svd).
+
+    The log-determinant of :math:`A` is also returned since it requires minimal
+    overhead.
+
+    Parameters
+    ----------
+    A: ndarray
+        A positive semi-definite matrix.
+    b: ndarray
+        An array or matrix
+
+    Returns
+    -------
+    X: ndarray
+        The result of :math:`X = A^-1 b`
+    logdet: float
+        The log-determinant of :math:`A`
     """
 
+    # Try cholesky for speed
     try:
-        chol = cholesky(a, lower=lower, overwrite_a=overwrite_a,
-                        check_finite=check_finite)
-        if returns_jit:
-            return chol, jit
-        else:
-            return chol
+        lower = False
+        L = cholesky(A, lower=lower)
+        if any(L.diagonal() < cholthresh):
+            raise LinAlgError("Unstable cholesky factor detected")
+        X = cho_solve((L, lower), b)
+        logdet = cho_log_det(L)
 
+    # Failed cholesky, use (truncated) svd to do the inverse
     except LinAlgError:
+        U, s, _ = svd(A)
+        X, okind = svd_solve(U, s, b)
+        logdet = svd_log_det(s[okind])
 
-        if jit is None:
-            jit = 1e-16
-
-        if jit > jit_max:
-            raise LinAlgError('Exceeded maximum jitter limit, yet a is still'
-                              ' not positive semidefinite!')
-
-        diag = np.diag(a)
-        diag_mean = diag.mean()
-        diag_delta = jit * diag_mean
-
-        if overwrite_a:
-            diag_ind = np.diag_indices_from(a)
-            a[diag_ind] += diag_delta
-            return jitchol(a, jit=10 * jit, jit_max=jit_max,
-                           returns_jit=returns_jit, lower=lower,
-                           overwrite_a=overwrite_a, check_finite=check_finite)
-
-        return jitchol(a + diag_delta * np.eye(*a.shape), jit=10 * jit,
-                       jit_max=jit_max, returns_jit=returns_jit, lower=lower,
-                       overwrite_a=overwrite_a, check_finite=check_finite)
+    return X, logdet
 
 
-def cho_log_det(c):
+def svd_solve(U, s, b):
     """
-    Compute the log of the determinant of `A`, given its (upper or lower)
-    Cholesky factorization `c`.
+    Solve the system :math:`A X = b` for :math:`X` where :math:`A` is a
+    positive semi-definite matrix using the singular value decomposition.
 
-    Examples
-    --------
-    >>> a = np.array([[ 2, -1,  0],
-    ...               [-1,  2, -1],
-    ...               [ 0, -1,  2]])
+    This truncates the SVD so only dimensions corresponding to non-negative and
+    sufficiently large singular values are used.
 
-    >>> u = cholesky(a)
-    >>> np.isclose(cho_log_det(u), np.log(np.linalg.det(a)))
-    True
+    Parameters
+    ----------
+    U: ndarray
+        The :code:`U` factor of :code:`U, s, Ut = svd(A)` positive
+        semi-definite matrix.
+    s: ndarray
+        The :code:`s` factor of :code:`U, s, Ut = svd(A)` positive
+        semi-definite matrix.
+    b: ndarray
+        An array or matrix
 
-    >>> l = cholesky(a, lower=True)
-    >>> np.isclose(cho_log_det(l), np.log(np.linalg.det(a)))
-    True
+    Returns
+    -------
+    X: ndarray
+        The result of :math:`X = A^-1 b`
+    okind: ndarray
+        The indices of :code:`s` that are kept in the factorisation
     """
-    return 2 * np.sum(np.log(c.diagonal()))
+
+    # Test shapes for efficient computations
+    n = U.shape[0]
+    assert(b.shape[0] == n)
+    m = b.shape[1] if np.ndim(b) > 1 else 1
+
+    # Auto truncate SVD based on negative or zero singular values
+    okind = np.where(s > 0)[0]
+
+    # Auto truncate the svd based on condition number and machine precision
+    okind = okind[np.abs(s[okind].max() / s[okind]) < singvalthresh]
+
+    # Inversion factors
+    ss = 1. / np.sqrt(s[okind])
+    U2 = U[:, okind] * ss[np.newaxis, :]
+
+    if m < n:
+        # Few queries
+        X = U2.dot(U2.T.dot(b))  # O(n^2 (2m))
+    else:
+        X = U2.dot(U2.T).dot(b)  # O(n^2 (m + n))
+
+    return X, okind
 
 
 def hadamard(Y, ordering=True):

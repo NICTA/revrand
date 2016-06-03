@@ -105,10 +105,10 @@ def main():
     # Learn regression parameters and predict
     #
 
-    params_elbo = slm.learn(Xtrain, ytrain, base,
-                            var=Parameter(noise**2, Positive()),
-                            regulariser=Parameter(reg, Positive()))
-    Ey_e, Vf_e, Vy_e = slm.predict(Xtest, base, *params_elbo)
+    params_slm = slm.learn(Xtrain, ytrain, base,
+                           var=Parameter(noise**2, Positive()),
+                           regulariser=Parameter(reg, Positive()))
+    Ey_e, Vf_e, Vy_e = slm.predict(Xtest, base, *params_slm)
     Sy_e = np.sqrt(Vy_e)
 
     #
@@ -145,17 +145,17 @@ def main():
     # Evaluate LL and SMSE
     #
 
-    LL_elbo = mll(ftest, Ey_e, Vy_e)
+    LL_s = mll(ftest, Ey_e, Vy_e)
     LL_gp = mll(ftest, Ey_gp, Vy_gp)
     LL_g = mll(ftest, Ey_g, Vy_g)
 
-    smse_elbo = smse(ftest, Ey_e)
+    smse_s = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
     smse_glm = smse(ftest, Ey_g)
 
-    log.info("A la Carte, LL: {}, smse = {}, noise: {}, hypers: {}"
-             .format(LL_elbo, smse_elbo, np.sqrt(params_elbo[3]),
-                     params_elbo[2]))
+    log.info("SLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+             .format(LL_s, smse_s, np.sqrt(params_slm[3]),
+                     params_slm[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
     log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"

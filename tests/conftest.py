@@ -29,3 +29,20 @@ def make_data():
     y = X.dot(w) + np.random.randn(100) / 1000
 
     return X, y, w
+
+
+@pytest.fixture
+def make_cov():
+
+    # Posdef
+    X = np.random.randn(100, 5)
+    S = np.cov(X.T)
+    iS = np.linalg.pinv(S)
+
+    # Slightly not posdef
+    U, s, _ = np.linalg.svd(S)
+    s[-1] = 0.
+    Sn = (U * s).dot(U.T)
+    iSn = np.linalg.pinv(Sn)
+
+    return X, S, iS, Sn, iSn

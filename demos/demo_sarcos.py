@@ -53,8 +53,9 @@ y_train_sub = y_train[train_ind]
 
 
 #
-# Train A la Carte
+# Train revrand regresso
 #
+
 lenARD = lenscale * np.ones(D)
 base = RandomRBF(nbases, D, lenscale_init=Parameter(lenARD, Positive()))
 
@@ -73,7 +74,6 @@ else:
 #
 # Train GP
 #
-
 
 def kdef(h, k):
     return (h(1e-5, 1., 0.5)

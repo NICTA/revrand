@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 
 import revrand.math.special as tfms
+import revrand.math.linalg as la
 
 
 def test_logsumexp():
@@ -47,3 +48,33 @@ def test_sofplus():
     # Extreme value tests
     assert np.allclose(tfms.softplus(np.array([1e3])), 1e3 * np.ones(1))
     assert np.allclose(tfms.softplus(np.array([-1e3])), np.zeros(1))
+
+
+def test_svd_solve(make_cov):
+
+    X, S, iS, Sn, iSn = make_cov
+    D = X.shape[1]
+
+    U, s, _ = np.linalg.svd(S)
+    iSpd, _ = la.svd_solve(U, s, np.eye(D))
+
+    assert np.allclose(iS, iSpd)
+
+    U, s, _ = np.linalg.svd(Sn)
+    iSpd, _ = la.svd_solve(U, s, np.eye(D))
+
+    assert np.allclose(iSn, iSpd)
+
+
+def test_solve_posdef(make_cov):
+
+    X, S, iS, Sn, iSn = make_cov
+    D = X.shape[1]
+
+    iSpd, _ = la.solve_posdef(S, np.eye(D))
+
+    assert np.allclose(iS, iSpd)
+
+    iSpd, _ = la.solve_posdef(Sn, np.eye(D))
+
+    assert np.allclose(iSn, iSpd)

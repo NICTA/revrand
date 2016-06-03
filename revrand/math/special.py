@@ -128,7 +128,7 @@ def softplus(X):
 # Numerically "safe" functions
 #
 
-def safediv(num, den, min_den=eps):
+def safediv(num, den, min_den=small):
 
     if np.isscalar(den):
         return num / max(den, min_den)
