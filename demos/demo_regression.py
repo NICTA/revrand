@@ -49,7 +49,7 @@ def main():
     lenscale_true = 0.7  # For the gpdraw dataset
     noise_true = 0.1
 
-    basis = 'RKS'
+    basis = 'FF'
     # basis = 'FF'
     # basis = 'RBF'
     # basis = 'Linear'
@@ -84,7 +84,7 @@ def main():
     plen2 = Parameter(lenscale2, Positive())
 
     if basis == 'FF':
-        base = bs.FastFood(nbases, Xtrain.shape[1], plen)
+        base = bs.FastFoodRBF(nbases, Xtrain.shape[1], plen)
     elif basis == 'RKS':
         base = bs.RandomRBF(nbases, Xtrain.shape[1], plen)
     elif basis == 'RBF':
@@ -115,15 +115,15 @@ def main():
     # Nonparametric variational inference GLM
     #
 
-    llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
-    params_glm = glm.learn(Xtrain, ytrain, llhood, base,
-                           regulariser=Parameter(reg, Positive()),
-                           use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
-                           batchsize=batchsize, maxit=passes)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
-                                               *params_glm)
-    Vy_g = Vf_g + params_glm[2][0]
-    Sy_g = np.sqrt(Vy_g)
+    # llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
+    # params_glm = glm.learn(Xtrain, ytrain, llhood, base,
+    #                        regulariser=Parameter(reg, Positive()),
+    #                        use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
+    #                        batchsize=batchsize, maxit=passes)
+    # Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
+    #                                            *params_glm)
+    # Vy_g = Vf_g + params_glm[2][0]
+    # Sy_g = np.sqrt(Vy_g)
 
     #
     # Learn GP and predict
@@ -147,20 +147,20 @@ def main():
 
     LL_s = mll(ftest, Ey_e, Vy_e)
     LL_gp = mll(ftest, Ey_gp, Vy_gp)
-    LL_g = mll(ftest, Ey_g, Vy_g)
+    # LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_s = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
-    smse_glm = smse(ftest, Ey_g)
+    # smse_glm = smse(ftest, Ey_g)
 
     log.info("SLM, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_s, smse_s, np.sqrt(params_slm[3]),
                      params_slm[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
-    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
-             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
-                     params_glm[3]))
+    # log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+    #          .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+    #                  params_glm[3]))
 
     #
     # Plot
@@ -185,9 +185,9 @@ def main():
                     label=None)
 
     # GLM Regressor
-    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
-    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
-                    edgecolor='m', linestyle='--', label=None)
+    # pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    # pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+    #                 edgecolor='m', linestyle='--', label=None)
 
     pl.legend()
 

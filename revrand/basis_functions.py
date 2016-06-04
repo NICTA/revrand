@@ -11,9 +11,9 @@ import numpy as np
 from six import wraps
 from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
-from scipy.special import gammaincinv, expit
+from scipy.special import expit, gamma
 from scipy.spatial.distance import cdist
-from scipy.stats import cauchy, laplace, t
+from scipy.stats import cauchy, laplace, t, chi
 
 from .btypes import Positive, Parameter
 from .math.linalg import hadamard
@@ -744,12 +744,16 @@ class RandomMatern32(RandomRBF):
     """ 
 
     def _weightsamples(self):
-        # p = 1, v = 1.5 and the two is a transformation of variables between
-        # Rasmussen 2006 p84 and the CF of a Student t (see wikipedia)
-        return t.rvs(df=2 * 1.5, size=(self.d, self.n))
+        return self._maternweight(p=1)
+
+    def _maternweight(self, p):
+        # p is the matern number (v = p + .5) and the two is a transformation
+        # of variables between Rasmussen 2006 p84 and the CF of a Student t 
+        # (see wikipedia)
+        return t.rvs(df=2 * (p + 0.5), size=(self.d, self.n))
 
 
-class RandomMatern52(RandomRBF):
+class RandomMatern52(RandomMatern32):
     """ 
     Random Matern 5/2 Basis -- Approximates a Matern 5/2 kernel function
 
@@ -771,14 +775,12 @@ class RandomMatern52(RandomRBF):
     """ 
 
     def _weightsamples(self):
-        # p = 2, v = 2.5 and the two is a transformation of variables between
-        # Rasmussen 2006 p84 and the CF of a Student t (see wikipedia)
-        return t.rvs(df=2 * 2.5, size=(self.d, self.n))
+        return self._maternweight(p=2)
 
 
-class FastFood(RandomRBF):
+class FastFoodRBF(RandomRBF):
     """
-    Fast Food basis function, which is an approximation of the random
+    Fast Food radial basis function, which is an approximation of the random
     radial basis function for a large number of bases.
 
     This will make a linear regression model approximate a GP with an RBF
@@ -792,12 +794,17 @@ class FastFood(RandomRBF):
     Xdim: int   
         the dimension (d) of the observations.
     lenscale_init: Parameter, optional
-        A scalar parameter to bound and initialise the length scales for
-        optimization
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
     """
 
     @slice_init
     def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
+
+        if (lenscale_init.shape != (Xdim,)) and (lenscale_init.shape[0] != 1):
+            raise ValueError("Parameter dimension doesn't agree with Xdim!")
 
         self.params = lenscale_init
 
@@ -810,8 +817,12 @@ class FastFood(RandomRBF):
         self.n = self.d2 * self.k
 
         # Draw consistent samples from the covariance matrix
-        results = [self.__sample_matrices() for i in range(self.k)]
-        self.B, self.G, self.PI, self.S = tuple(zip(*results))
+        shape = (self.k, self.d2)
+        self.B = np.random.randint(2, size=shape) * 2 - 1  # uniform [-1,1]
+        self.G = np.random.randn(*shape)  # mean 0 std 1
+        self.PI = np.array([np.random.permutation(self.d2)
+                            for _ in range(self.k)])
+        self.S = self._weightsamples(self.G)
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -833,9 +844,9 @@ class FastFood(RandomRBF):
             use, given in the constructor (to nearest larger two power).
         """
 
-        self._checkD(X.shape[1])
+        lenscale = self._checkD(X.shape[1], lenscale)
 
-        VX = safediv(self.__makeVX(X), lenscale)
+        VX = self.__makeVX(safediv(X, lenscale))
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
         return Phi
 
@@ -860,28 +871,27 @@ class FastFood(RandomRBF):
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
 
-        self._checkD(X.shape[1])
+        d = X.shape[1]
+        lenscale = self._checkD(d, lenscale)
+        ilenscale = safediv(1., lenscale)
 
-        VX = safediv(self.__makeVX(X), lenscale)
-        dVX = - safediv(VX, lenscale)
+        VX = self.__makeVX(X * ilenscale)
+        sinVX = - np.sin(VX)
+        cosVX = np.cos(VX)
 
-        return np.hstack((-dVX * np.sin(VX), dVX * np.cos(VX))) \
-            / np.sqrt(self.n)
+        dPhi = []
+        for i, il in enumerate(ilenscale):
+            indlen = np.zeros(d)
+            indlen[i] = il**2
+            dVX = - self.__makeVX(X * indlen)
+            dPhi.append(np.hstack((dVX * sinVX, dVX * cosVX))
+                        / np.sqrt(self.n))
 
-    def __sample_matrices(self):
-
-        B = np.random.randint(2, size=self.d2) * 2 - 1  # uniform from [-1,1]
-        G = np.random.randn(self.d2)  # mean 0 std 1
-        PI = np.random.permutation(self.d2)
-        S = self._weightsamples(G)
-        return B, G, PI, S
+        return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
     def _weightsamples(self, G):
-        return np.sqrt(gammaincinv(np.ceil(self.d2 / 2), 
-                                       np.random.rand(self.d2)) / norm(G))
-        # return np.sqrt(2 * gammaincinv(np.ceil(self.d2 / 2),
-        #                                np.random.rand(self.d2))) / norm(G)
-
+        s = chi.rvs(self.d2, size=G.shape)
+        return s / norm(G, axis=1)[:, np.newaxis]
 
     def __makeVX(self, X):
         m, d0 = X.shape
@@ -899,10 +909,34 @@ class FastFood(RandomRBF):
 
         return np.hstack(VX)
 
-    def _checkD(self, D):
-        if D != self.d:
-            raise ValueError("Dimensions of data inconsistent!")
 
+class FastFoodMatern32(FastFoodRBF):
+
+    def _weightsamples(self, G):
+
+        return self._maternweight(p=1) # matern p + 1/2 kernel
+        
+    def _maternweight(self, p):
+    
+        dim = int((p + 0.5) * 2)
+        # samp = p
+        return np.array([[self.samplesphere(dim) for _ in range(self.d2)]
+                         for _ in range(self.k)])
+
+    def samplesphere(self, dim, nsamples=10):
+
+        raise NotImplementedError("This is still not correct.")
+
+        xi = np.random.randn(nsamples, dim)
+        xi /= norm(xi, axis=1)[:, np.newaxis]
+        return norm(xi.sum(axis=0)) / np.sqrt(nsamples)
+
+
+class FastFoodMatern52(FastFoodMatern32):
+
+    def _weightsamples(self, G):
+
+        return self._maternweight(p=2) # matern p + 1/2 kernel
 
 #
 # Other basis construction objects and functions
