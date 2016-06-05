@@ -391,8 +391,10 @@ class RadialBasis(Basis):
         array of shape (Dxd) where D is the number of centres for the
         radial bases, and d is the dimensionality of X.
     lenscale_init: Parameter, optional
-        A scalar parameter to bound and initialise the length scales for
-        optimization
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
 
     Note
     ----
@@ -402,8 +404,13 @@ class RadialBasis(Basis):
     @slice_init
     def __init__(self, centres, lenscale_init=Parameter(1., Positive())):
 
-        self.M, self.D = centres.shape
+        self.M, self.d = centres.shape
         self.C = centres
+
+        if (lenscale_init.shape != (self.d,)) \
+                and (lenscale_init.shape[0] != 1):
+            raise ValueError("Parameter dimension doesn't agree with Xdim!")
+
         self.params = lenscale_init
 
     @slice_call
@@ -416,8 +423,9 @@ class RadialBasis(Basis):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
+        lenscale: scalar or ndarray
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X).
 
         Returns
         -------
@@ -425,11 +433,11 @@ class RadialBasis(Basis):
             of shape (N, D) where D is number of RBF centres.
         """
 
-        N, D = X.shape
-        if self.D != D:
-            raise ValueError("X has inconsistent dimensionality!")
+        N, d = X.shape
+        lenscale = self._checkD(d, lenscale)
 
-        return np.exp(- cdist(X, self.C, 'sqeuclidean') / (2 * lenscale**2))
+        den = (2 * lenscale**2)
+        return np.exp(- cdist(X / den, self.C / den, 'sqeuclidean'))
 
     @slice_call
     def grad(self, X, lenscale):
@@ -441,8 +449,9 @@ class RadialBasis(Basis):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
+        lenscale: scalar or ndarray
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X).
 
         Returns
         -------
@@ -451,14 +460,31 @@ class RadialBasis(Basis):
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
 
-        N, D = X.shape
-        if self.D != D:
-            raise ValueError("X has inconsistent dimensionality!")
+        N, d = X.shape
+        lenscale = self._checkD(d, lenscale)
 
-        sdist = cdist(X, self.C, 'sqeuclidean')
-        dPhi = np.exp(- sdist / 2 * lenscale**2) * (sdist / lenscale**3)
+        Phi = self(X, lenscale)
+        dPhi = []
+        for i, l in enumerate(lenscale):
+            ldist = cdist(X[:, [i]] / l**3, self.C[:, [i]] / l**3,
+                          'sqeuclidean')
+            dPhi.append(Phi * ldist)
 
-        return dPhi
+        return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
+
+    def _checkD(self, Xdim, lenscale):
+
+        if Xdim != self.d:
+            raise ValueError("Dimensions of data inconsistent!")
+
+        # Promote dimension of lenscale
+        if np.isscalar(lenscale):
+            lenscale = np.array([lenscale])
+
+        if self.params.shape[0] != len(lenscale):
+            raise ValueError("Dimensions of lenscale inconsistent!")
+
+        return lenscale
 
 
 class SigmoidalBasis(RadialBasis):
@@ -504,12 +530,10 @@ class SigmoidalBasis(RadialBasis):
             of shape (N, D) where D is number of centres.
         """
 
-        N, D = X.shape
-        if self.D != D:
-            raise ValueError("Expected X of dimensionality {0}, got {1}"
-                             .format(self.D, D))
+        N, d = X.shape
+        lenscale = self._checkD(d, lenscale)
 
-        return expit(cdist(X, self.C, 'euclidean') / lenscale)
+        return expit(cdist(X / lenscale, self.C / lenscale, 'euclidean'))
 
     @slice_call
     def grad(self, X, lenscale):
@@ -539,19 +563,19 @@ class SigmoidalBasis(RadialBasis):
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
 
-        N, D = X.shape
-        if self.D != D:
-            raise ValueError("Expected X of dimensionality {0}, got {1}"
-                             .format(self.D, D))
+        N, d = X.shape
+        lenscale = self._checkD(d, lenscale)
 
-        dist = cdist(X, self.C, 'euclidean')
-        sigma = expit(dist / lenscale)
-        dPhi = - dist * sigma * (1 - sigma) / lenscale**2
+        Phi = self(X, lenscale)
+        dPhi = []
+        for i, l in enumerate(lenscale):
+            ldist = cdist(X[:, [i]] / l**2, self.C[:, [i]] / l**2, 'euclidean')
+            dPhi.append(- ldist * Phi * (1 - Phi))
 
-        return dPhi
+        return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
 
-class RandomRBF(Basis):
+class RandomRBF(RadialBasis):
     """ 
     Random RBF Basis -- Approximates an RBF kernel function
 
@@ -606,7 +630,7 @@ class RandomRBF(Basis):
         """
 
         N, D = X.shape
-        lenscale = self._checkD(D, lenscale)
+        lenscale = self._checkD(D, lenscale)[:, np.newaxis]
 
         WX = np.dot(X, self.W / lenscale)
 
@@ -635,7 +659,7 @@ class RandomRBF(Basis):
         """
 
         N, D = X.shape
-        lenscale = self._checkD(D, lenscale)
+        lenscale = self._checkD(D, lenscale)[:, np.newaxis]
 
         WX = np.dot(X, self.W / lenscale)
         sinWX = - np.sin(WX)
@@ -651,21 +675,6 @@ class RandomRBF(Basis):
 
     def _weightsamples(self):
         return np.random.randn(self.d, self.n)
-
-    def _checkD(self, Xdim, lenscale):
-        if Xdim != self.d:
-            raise ValueError("Dimensions of data inconsistent!")
-
-        # Promote dimension of lenscale
-        if np.isscalar(lenscale):
-            lenscale = np.array([lenscale])
-        elif lenscale.ndim == 1:
-            lenscale = lenscale[:, np.newaxis]
-
-        if self.params.shape[0] != len(lenscale):
-            raise ValueError("Dimensions of lenscale inconsistent!")
-
-        return lenscale
 
 
 class RandomLaplace(RandomRBF):
@@ -829,8 +838,9 @@ class FastFoodRBF(RandomRBF):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
+        lenscale: scalar or ndarray
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X).
 
         Returns
         -------
@@ -855,8 +865,9 @@ class FastFoodRBF(RandomRBF):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
+        lenscale: scalar or ndarray
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X).
 
         Returns
         -------
@@ -904,20 +915,6 @@ class FastFoodRBF(RandomRBF):
                       * np.sqrt(self.d2))
 
         return np.hstack(VX)
-
-    def _checkD(self, Xdim, lenscale):
-
-        if Xdim != self.d:
-            raise ValueError("Dimensions of data inconsistent!")
-
-        # Promote dimension of lenscale
-        if np.isscalar(lenscale):
-            lenscale = np.array([lenscale])
-
-        if self.params.shape[0] != len(lenscale):
-            raise ValueError("Dimensions of lenscale inconsistent!")
-
-        return lenscale
 
 
 # class FastFoodMatern32(FastFoodRBF):

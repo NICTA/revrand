@@ -9,8 +9,8 @@ from ..btypes import Bound, Positive, get_values, flatten_bounds
 
 
 # Constants
-small = 1e-100
-logsmall = np.log(small)
+minpos = 1e-100
+logminpos = np.log(minpos)
 
 
 def candidate_start_points_random(bounds, n_candidates=1000,
@@ -549,7 +549,7 @@ def _logtrick_gen(bounds):
                                       for lxi, gi, pos in zip(logx, g, ispos)])
 
     # Redefine bounds as appropriate for new ranges
-    bounds = [Bound(lower=logsmall, upper=np.log(b.upper)
+    bounds = [Bound(lower=logminpos, upper=np.log(b.upper)
                     if b.upper is not None else None)
               if pos else b for b, pos in zip(bounds, ispos)]
 

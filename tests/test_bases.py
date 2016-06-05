@@ -97,24 +97,35 @@ def test_bases(make_data):
 
     X, _, _ = make_data
     N, d = X.shape
+    nC = 10
 
     bases = [bs.LinearBasis(onescol=True),
              bs.PolynomialBasis(order=2),
-             bs.RadialBasis(centres=X[:10, :]),
-             bs.SigmoidalBasis(centres=X[:10, :]),
+             bs.RadialBasis(centres=X[:nC, :]),
+             bs.RadialBasis(centres=X[:nC, :],
+                            lenscale_init=Parameter(np.ones(d), Positive())),
+             bs.SigmoidalBasis(centres=X[:nC, :]),
+             bs.SigmoidalBasis(centres=X[:nC, :],
+                               lenscale_init=Parameter(np.ones(d),
+                                                       Positive())),
              bs.RandomRBF(Xdim=d, nbases=10),
              bs.RandomRBF(Xdim=d, nbases=10,
                           lenscale_init=Parameter(np.ones(d), Positive())),
-             bs.FastFood(Xdim=d, nbases=10),
+             bs.FastFoodRBF(Xdim=d, nbases=10),
+             bs.FastFoodRBF(Xdim=d, nbases=10,
+                            lenscale_init=Parameter(np.ones(d), Positive())),
              ]
 
     hypers = [None,
               None,
               1.,
-              1.,
+              np.ones(d),
               1.,
               np.ones(d),
-              1.
+              1.,
+              np.ones(d),
+              1.,
+              np.ones(d),
               ]
 
     for b, h in zip(bases, hypers):
