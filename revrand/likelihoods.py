@@ -10,7 +10,7 @@ from scipy.stats import bernoulli, poisson, norm
 from scipy.special import gammaln, expit
 
 from .btypes import Parameter, Positive
-from .math.special import safesoftplus, safediv, softplus, logtiny
+from .math.special import safesoftplus, softplus, logtiny
 
 
 #
@@ -294,7 +294,7 @@ class Gaussian(Bernoulli):
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
 
-        return safediv(y - f, var)
+        return (y - f) / var
 
     def d2f(self, y, f, var):
         """
@@ -317,7 +317,7 @@ class Gaussian(Bernoulli):
             :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
 
-        return - safediv(np.ones_like(f), var)
+        return - np.ones_like(f) / var
 
     def d3f(self, y, f, var):
         """
@@ -365,7 +365,7 @@ class Gaussian(Bernoulli):
             where :math:`sigma^2` is the variance.
         """
 
-        ivar = safediv(1., var)
+        ivar = 1. / var
         return 0.5 * (((y - f) * ivar)**2 - ivar)
 
     def dpd2f(self, y, f, var):
@@ -391,7 +391,7 @@ class Gaussian(Bernoulli):
             :math:`\\sigma^2`.
         """
 
-        return safediv(np.ones_like(f), var**2)
+        return np.ones_like(f) / var**2
 
     def cdf(self, y, f, var):
         """

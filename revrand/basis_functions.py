@@ -17,7 +17,6 @@ from scipy.stats import cauchy, laplace, t, chi
 
 from .btypes import Positive, Parameter
 from .math.linalg import hadamard
-from .math.special import safediv
 
 
 #
@@ -430,8 +429,7 @@ class RadialBasis(Basis):
         if self.D != D:
             raise ValueError("X has inconsistent dimensionality!")
 
-        return np.exp(- safediv(cdist(X, self.C, 'sqeuclidean'),
-                                (2 * lenscale**2)))
+        return np.exp(- cdist(X, self.C, 'sqeuclidean') / (2 * lenscale**2))
 
     @slice_call
     def grad(self, X, lenscale):
@@ -458,8 +456,7 @@ class RadialBasis(Basis):
             raise ValueError("X has inconsistent dimensionality!")
 
         sdist = cdist(X, self.C, 'sqeuclidean')
-        dPhi = np.exp(- safediv(sdist, 2 * lenscale**2)) \
-            * safediv(sdist, lenscale**3)
+        dPhi = np.exp(- sdist / 2 * lenscale**2) * (sdist / lenscale**3)
 
         return dPhi
 
@@ -512,7 +509,7 @@ class SigmoidalBasis(RadialBasis):
             raise ValueError("Expected X of dimensionality {0}, got {1}"
                              .format(self.D, D))
 
-        return expit(safediv(cdist(X, self.C, 'euclidean'), lenscale))
+        return expit(cdist(X, self.C, 'euclidean') / lenscale)
 
     @slice_call
     def grad(self, X, lenscale):
@@ -548,10 +545,8 @@ class SigmoidalBasis(RadialBasis):
                              .format(self.D, D))
 
         dist = cdist(X, self.C, 'euclidean')
-
-        sigma = expit(safediv(dist, lenscale))
-
-        dPhi = - dist * sigma * safediv((1 - sigma), lenscale**2)
+        sigma = expit(dist / lenscale)
+        dPhi = - dist * sigma * (1 - sigma) / lenscale**2
 
         return dPhi
 
@@ -613,7 +608,7 @@ class RandomRBF(Basis):
         N, D = X.shape
         lenscale = self._checkD(D, lenscale)
 
-        WX = np.dot(X, safediv(self.W, lenscale))
+        WX = np.dot(X, self.W / lenscale)
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
@@ -642,13 +637,13 @@ class RandomRBF(Basis):
         N, D = X.shape
         lenscale = self._checkD(D, lenscale)
 
-        WX = np.dot(X, safediv(self.W, lenscale))
+        WX = np.dot(X, self.W / lenscale)
         sinWX = - np.sin(WX)
         cosWX = np.cos(WX)
 
         dPhi = []
         for i, l in enumerate(lenscale):
-            dWX = np.outer(X[:, i], - safediv(self.W[i, :], l**2))
+            dWX = np.outer(X[:, i], - self.W[i, :] / l**2)
             dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX))
                         / np.sqrt(self.n))
 
@@ -846,7 +841,7 @@ class FastFoodRBF(RandomRBF):
 
         lenscale = self._checkD(X.shape[1], lenscale)
 
-        VX = self.__makeVX(safediv(X, lenscale))
+        VX = self.__makeVX(X / lenscale)
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
         return Phi
 
@@ -873,17 +868,16 @@ class FastFoodRBF(RandomRBF):
 
         d = X.shape[1]
         lenscale = self._checkD(d, lenscale)
-        ilenscale = safediv(1., lenscale)
 
-        VX = self.__makeVX(X * ilenscale)
+        VX = self.__makeVX(X / lenscale)
         sinVX = - np.sin(VX)
         cosVX = np.cos(VX)
 
         dPhi = []
-        for i, il in enumerate(ilenscale):
+        for i, l in enumerate(lenscale):
             indlen = np.zeros(d)
-            indlen[i] = il**2
-            dVX = - self.__makeVX(X * indlen)
+            indlen[i] = 1. / l**2
+            dVX = - self.__makeVX(X * indlen)  # FIXME make this faster?? 
             dPhi.append(np.hstack((dVX * sinVX, dVX * cosVX))
                         / np.sqrt(self.n))
 
@@ -894,14 +888,16 @@ class FastFoodRBF(RandomRBF):
         return s / norm(G, axis=1)[:, np.newaxis]
 
     def __makeVX(self, X):
-        m, d0 = X.shape
+        N, d0 = X.shape
 
         # Pad the dimensions of X to nearest 2 power
-        X_dash = np.zeros((m, self.d2))
+        X_dash = np.zeros((N, self.d2))
         X_dash[:, 0:d0] = X
 
+        # FIXME do we need this loop even???
         VX = []
         for B, G, PI, S in zip(*(self.B, self.G, self.PI, self.S)):
+            # FIXME adjust this based on if evaluating a gradient? eg RandomRBF
             vX = hadamard(X_dash * B[np.newaxis, :], ordering=False)
             vX = vX[:, PI] * G[np.newaxis, :]
             VX.append(hadamard(vX, ordering=False) * S[np.newaxis, :]
@@ -909,34 +905,48 @@ class FastFoodRBF(RandomRBF):
 
         return np.hstack(VX)
 
+    def _checkD(self, Xdim, lenscale):
 
-class FastFoodMatern32(FastFoodRBF):
+        if Xdim != self.d:
+            raise ValueError("Dimensions of data inconsistent!")
 
-    def _weightsamples(self, G):
+        # Promote dimension of lenscale
+        if np.isscalar(lenscale):
+            lenscale = np.array([lenscale])
 
-        return self._maternweight(p=1) # matern p + 1/2 kernel
+        if self.params.shape[0] != len(lenscale):
+            raise ValueError("Dimensions of lenscale inconsistent!")
+
+        return lenscale
+
+
+# class FastFoodMatern32(FastFoodRBF):
+
+#     def _weightsamples(self, G):
+
+#         return self._maternweight(p=1) # matern p + 1/2 kernel
         
-    def _maternweight(self, p):
+#     def _maternweight(self, p):
     
-        dim = int((p + 0.5) * 2)
-        # samp = p
-        return np.array([[self.samplesphere(dim) for _ in range(self.d2)]
-                         for _ in range(self.k)])
+#         dim = int((p + 0.5) * 2)
+#         # samp = p
+#         return np.array([[self.samplesphere(dim) for _ in range(self.d2)]
+#                          for _ in range(self.k)])
 
-    def samplesphere(self, dim, nsamples=10):
+#     def samplesphere(self, dim, nsamples=10):
 
-        raise NotImplementedError("This is still not correct.")
+#         raise NotImplementedError("This is still not correct.")
 
-        xi = np.random.randn(nsamples, dim)
-        xi /= norm(xi, axis=1)[:, np.newaxis]
-        return norm(xi.sum(axis=0)) / np.sqrt(nsamples)
+#         xi = np.random.randn(nsamples, dim)
+#         xi /= norm(xi, axis=1)[:, np.newaxis]
+#         return norm(xi.sum(axis=0)) / np.sqrt(nsamples)
 
 
-class FastFoodMatern52(FastFoodMatern32):
+# class FastFoodMatern52(FastFoodMatern32):
 
-    def _weightsamples(self, G):
+#     def _weightsamples(self, G):
 
-        return self._maternweight(p=2) # matern p + 1/2 kernel
+#         return self._maternweight(p=2) # matern p + 1/2 kernel
 
 #
 # Other basis construction objects and functions

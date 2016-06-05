@@ -11,8 +11,8 @@ import numpy as np
 
 eps = np.finfo(float).eps
 tiny = np.finfo(float).tiny
-logtiny = np.log(tiny)
 small = 1e-100
+logtiny = np.log(tiny)
 
 
 #
@@ -127,14 +127,6 @@ def softplus(X):
 #
 # Numerically "safe" functions
 #
-
-def safediv(num, den, min_den=small):
-
-    if np.isscalar(den):
-        return num / max(den, min_den)
-    else:
-        return num / np.fmax(den, min_den)
-
 
 def safelog(x, min_x=tiny):
 
