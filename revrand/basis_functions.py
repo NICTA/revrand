@@ -13,7 +13,7 @@ from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
 from scipy.special import expit, gamma
 from scipy.spatial.distance import cdist
-from scipy.stats import cauchy, laplace, t, chi
+from scipy.stats import cauchy, laplace, t, chi, chi2
 
 from .btypes import Positive, Parameter
 from .math.linalg import hadamard
@@ -752,9 +752,14 @@ class RandomMatern32(RandomRBF):
 
     def _maternweight(self, p):
         # p is the matern number (v = p + .5) and the two is a transformation
-        # of variables between Rasmussen 2006 p84 and the CF of a Student t 
-        # (see wikipedia)
-        return t.rvs(df=2 * (p + 0.5), size=(self.d, self.n))
+        # of variables between Rasmussen 2006 p84 and the CF of a Multivariate
+        # Student t (see wikipedia). To sample from a m.v. t we use the formula
+        # from wikipedia, x = y * np.sqrt(df / u) where y ~ norm(0, I), 
+        # u ~ chi2(df), then x ~ mvt(0, I, df)
+        df = 2 * (p + 0.5)
+        y = np.random.randn(self.d, self.n)
+        u = chi2.rvs(df, size=(self.n,))
+        return y * np.sqrt(df / u)
 
 
 class RandomMatern52(RandomMatern32):
