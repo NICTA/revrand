@@ -11,7 +11,7 @@ import numpy as np
 from six import wraps
 from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
-from scipy.special import expit, gamma
+from scipy.special import expit, gamma, gammaincinv
 from scipy.spatial.distance import cdist
 from scipy.stats import cauchy, laplace, t, chi, chi2
 
@@ -723,8 +723,10 @@ class RandomCauchy(RandomRBF):
         learned.
     """ 
     def _weightsamples(self):
-        return laplace.rvs(size=(self.d, self.n)) \
-            * (2 * np.pi)**(self.d / 2) / 2
+        Finv = lambda p: - np.sign(p - 0.5) \
+            * np.log(1 - 2 * np.abs(p - 0.5))
+        return Finv(np.random.rand(self.d, self.n))
+        # return laplace.rvs(size=(self.d, self.n))
 
 
 class RandomMatern32(RandomRBF):
