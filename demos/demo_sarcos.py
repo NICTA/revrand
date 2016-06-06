@@ -65,10 +65,15 @@ if useSGD:
     lparams = [noise**2]
     params = glm.learn(X_train, y_train, llhood, base, use_sgd=True, rho=rho,
                        epsilon=epsilon, batchsize=batchsize, maxit=passes)
+    Ey, Vf, _, _ = glm.predict_moments(X_test, llhood, base, *params)
+    Vy = Vf + params[2][0]
+    Sy = np.sqrt(Vy)
 else:
     log.info("Using full variational regressor")
     params = slm.learn(X_train, y_train, base,
                        var=Parameter(noise**2, Positive()))
+    Ey, Vf, Vy = slm.predict(X_test, base, *params)
+    Sy = np.sqrt(Vy)
 
 
 #
@@ -82,15 +87,6 @@ def kdef(h, k):
 
 hyper_params = gp.learn(X_train_sub, y_train_sub, kdef, verbose=True,
                         ftol=1e-15, maxiter=1000)
-
-
-#
-# Predict Revrand
-#
-
-Ey, Vf, _, _ = glm.predict_moments(X_test, llhood, base, *params)
-Vy = Vf + params[2][0]
-Sy = np.sqrt(Vy)
 
 
 #

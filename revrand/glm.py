@@ -225,7 +225,8 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
     # Optimisation method
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
-        res = nmin(L2, params, tol=tol, options={'maxiter': maxit},
+        res = nmin(L2, params, tol=tol,
+                   options={'maxiter': maxit, 'maxcor': 100},
                    method='L-BFGS-B', jac=True,
                    args=(np.hstack((y[:, np.newaxis], X)),))
     else:

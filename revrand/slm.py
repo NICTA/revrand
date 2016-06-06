@@ -142,7 +142,7 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
     params = append_or_extend([var, regulariser], basis.params)
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(ELBO, params, method='L-BFGS-B', jac=True, tol=tol,
-               options={'maxiter': maxit})
+               options={'maxiter': maxit, 'maxcor': 100})
     (var, regulariser), hypers = res.x[:2], res.x[2:]
 
     if verbose:
