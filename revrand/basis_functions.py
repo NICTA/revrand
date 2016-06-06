@@ -723,7 +723,8 @@ class RandomCauchy(RandomRBF):
         learned.
     """ 
     def _weightsamples(self):
-        return laplace.rvs(size=(self.d, self.n))
+        return laplace.rvs(size=(self.d, self.n)) \
+            * (2 * np.pi)**(self.d / 2) / 2
 
 
 class RandomMatern32(RandomRBF):
