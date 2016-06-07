@@ -348,7 +348,7 @@ class PolynomialBasis(Basis):
             raise ValueError("Polynomial order must be positive")
         self.order = order
 
-        self.include_bias = include_bia
+        self.include_bias = include_bias
 
     @slice_call
     def __call__(self, X):
