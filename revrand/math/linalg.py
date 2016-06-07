@@ -24,7 +24,6 @@ overhead to the original computation.
 from __future__ import division
 
 import numpy as np
-from math import log
 from scipy.linalg import cholesky, cho_solve, svd, LinAlgError
 
 
@@ -208,7 +207,7 @@ def hadamard(Y, ordering=True):
     n_vectors, n_Y = Y.shape
     matching = (n_vectors, 2, int(n_Y / 2))
     H = np.array([[1, 1], [1, -1]]) / 2.  # Julia uses 2 and not sqrt(2)?
-    steps = int(log(n_Y) / log(2))
+    steps = int(np.log(n_Y) / np.log(2))
     assert(2**steps == n_Y)  # required
     for _ in range(steps):
         Y = np.transpose(Y.reshape(matching), (0, 2, 1)).dot(H)

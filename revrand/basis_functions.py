@@ -11,9 +11,9 @@ import numpy as np
 from six import wraps
 from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
-from scipy.special import expit, gamma, gammaincinv
+from scipy.special import expit
 from scipy.spatial.distance import cdist
-from scipy.stats import cauchy, laplace, t, chi, chi2
+from scipy.stats import cauchy, chi, chi2, gamma
 
 from .btypes import Positive, Parameter
 from .math.linalg import hadamard
@@ -154,7 +154,7 @@ def apply_grad(fun, grad):
 #
 
 class Basis(object):
-    """ 
+    """
     The base Basis class. To make other basis classes, make sure they are
     subclasses of this class to enable concatenation and operation with the
     machine learning algorithms.
@@ -187,33 +187,33 @@ class Basis(object):
         All the :code:`params` property does is inform algorithms of the
         intitial value and any bounds this basis object has. This will need to
         correspond to any parameters input into the :code:`__call__` and
-        :code:`grad` methods. All basis class objects MUST have a 
+        :code:`grad` methods. All basis class objects MUST have a
         :code:`params` property, which is either:
 
         - an empty list for basis functions with no learnable parameters
           (just subclass this class)
-        - one Parameter object for an optimisable parameter, see btypes.py 
+        - one Parameter object for an optimisable parameter, see btypes.py
         - a list of Parameter objects, one for each optimisable parameter
         """
         pass
 
     @slice_call
     def __call__(self, X):
-        """ 
+        """
         Return the basis function applied to X, i.e. Phi(X, params), where
         params can also optionally be used and learned.
 
         Parameters
         ----------
         X: ndarray
-            (N, d) array of observations where N is the number of samples, and 
+            (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
         params: optional
             parameter aguments, these can be scalars or arrays.
 
         Returns
         -------
-        ndarray: 
+        ndarray:
             of shape (N, D) where D is the number of basis functions.
         """
         return X
@@ -235,10 +235,10 @@ class Basis(object):
         Returns
         -------
         list or ndarray:
-            this will be a list of ndarrays if there are multiple parameters, 
+            this will be a list of ndarrays if there are multiple parameters,
             or just an ndarray if there is a single parameter. The ndarrays can
             have more than two dimensions (i.e. tensors of rank > 2), depending
-            on the dimensions of the basis function parameters. If there are 
+            on the dimensions of the basis function parameters. If there are
             *no* parameters, :code:`[]` is returned.
         """
         return []
@@ -282,7 +282,7 @@ class Basis(object):
 
 
 class LinearBasis(Basis):
-    """ 
+    """
     Linear basis class, basically this just prepends a columns of ones onto X
 
     Parameters
@@ -298,18 +298,18 @@ class LinearBasis(Basis):
 
     @slice_call
     def __call__(self, X):
-        """ 
+        """
         Return this basis applied to X.
 
         Parameters
         ----------
         X: ndarray
-            of shape (N, d) of observations where N is the number of samples, 
+            of shape (N, d) of observations where N is the number of samples,
             and d is the dimensionality of X.
 
         Returns
         -------
-        ndarray: 
+        ndarray:
             of shape (N, d+1), or (N, d) depending on onescol.
         """
 
@@ -350,13 +350,13 @@ class PolynomialBasis(Basis):
         Parameters
         ----------
         X: ndarray
-            of shape (N, d) of observations where N is the number of samples, 
+            of shape (N, d) of observations where N is the number of samples,
             and d is the dimensionality of X.
 
         Returns
         -------
         ndarray:
-            of shape (N, d*order+1), the extra 1 is from a prepended ones 
+            of shape (N, d*order+1), the extra 1 is from a prepended ones
             column.
         """
 
@@ -387,11 +387,11 @@ class RadialBasis(Basis):
 
     Parameters
     ----------
-    centres: ndarray 
+    centres: ndarray
         array of shape (Dxd) where D is the number of centres for the
         radial bases, and d is the dimensionality of X.
     lenscale_init: Parameter, optional
-        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
@@ -456,7 +456,7 @@ class RadialBasis(Basis):
         Returns
         -------
         ndarray:
-            of shape (N, D) where D is number of RBF centres. This is 
+            of shape (N, D) where D is number of RBF centres. This is
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
 
@@ -494,7 +494,7 @@ class SigmoidalBasis(RadialBasis):
     Parameters
     ----------
     centres: ndarray
-        array of shape (Dxd) where D is the number of centres for 
+        array of shape (Dxd) where D is the number of centres for
         the bases, and d is the dimensionality of X.
     lenscale_init: Parameter, optional
         A scalar parameter to bound and initialise the length scales for
@@ -576,7 +576,7 @@ class SigmoidalBasis(RadialBasis):
 
 
 class RandomRBF(RadialBasis):
-    """ 
+    """
     Random RBF Basis -- Approximates an RBF kernel function
 
     This will make a linear regression model approximate a GP with an
@@ -590,7 +590,7 @@ class RandomRBF(RadialBasis):
     Xdim: int
         the dimension (d) of the observations
     lenscale_init: Parameter, optional
-        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
@@ -668,8 +668,8 @@ class RandomRBF(RadialBasis):
         dPhi = []
         for i, l in enumerate(lenscale):
             dWX = np.outer(X[:, i], - self.W[i, :] / l**2)
-            dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX))
-                        / np.sqrt(self.n))
+            dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX)) /
+                        np.sqrt(self.n))
 
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
@@ -678,7 +678,7 @@ class RandomRBF(RadialBasis):
 
 
 class RandomLaplace(RandomRBF):
-    """ 
+    """
     Random Laplace Basis -- Approximates a Laplace kernel function
 
     This will make a linear regression model approximate a GP with an
@@ -692,18 +692,18 @@ class RandomLaplace(RandomRBF):
     Xdim: int
         the dimension (d) of the observations
     lenscale_init: Parameter, optional
-        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
     """
-    
+
     def _weightsamples(self):
         return cauchy.rvs(size=(self.d, self.n))
 
 
 class RandomCauchy(RandomRBF):
-    """ 
+    """
     Random Cauchy Basis -- Approximates a Cauchy kernel function
 
     This will make a linear regression model approximate a GP with an
@@ -717,20 +717,26 @@ class RandomCauchy(RandomRBF):
     Xdim: int
         the dimension (d) of the observations
     lenscale_init: Parameter, optional
-        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
-    """ 
+    """
     def _weightsamples(self):
-        Finv = lambda p: - np.sign(p - 0.5) \
-            * np.log(1 - 2 * np.abs(p - 0.5))
-        return Finv(np.random.rand(self.d, self.n))
-        # return laplace.rvs(size=(self.d, self.n))
+        # A draw from a (regular) mv laplace is the same as:
+        # X ~ Norm(mu, cov)
+        # Z ~ gamma(1)
+        # Y ~ (2 * Z) * X
+        # See "Multivariate Generalized Laplace Distributions and Related
+        # Random Fields":
+        #   http://www.math.chalmers.se/Math/Research/Preprints/2010/47.pdf
+        X = np.random.randn(self.d, self.n)
+        Z = gamma.rvs(1., size=(1, self.n))
+        return X * np.sqrt(2*Z)
 
 
 class RandomMatern32(RandomRBF):
-    """ 
+    """
     Random Matern 3/2 Basis -- Approximates a Matern 3/2 kernel function
 
     This will make a linear regression model approximate a GP with an
@@ -744,11 +750,11 @@ class RandomMatern32(RandomRBF):
     Xdim: int
         the dimension (d) of the observations
     lenscale_init: Parameter, optional
-        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
-    """ 
+    """
 
     def _weightsamples(self):
         return self._maternweight(p=1)
@@ -756,8 +762,12 @@ class RandomMatern32(RandomRBF):
     def _maternweight(self, p):
         # p is the matern number (v = p + .5) and the two is a transformation
         # of variables between Rasmussen 2006 p84 and the CF of a Multivariate
-        # Student t (see wikipedia). To sample from a m.v. t we use the formula
-        # from wikipedia, x = y * np.sqrt(df / u) where y ~ norm(0, I), 
+        # Student t (see wikipedia). Also see "A Note on the Characteristic
+        # Function of Multivariate t Distribution":
+        #   http://ocean.kisti.re.kr/downfile/volume/kss/GCGHC8/2014/v21n1/
+        #   GCGHC8_2014_v21n1_81.pdf
+        # To sample from a m.v. t we use the formula
+        # from wikipedia, x = y * np.sqrt(df / u) where y ~ norm(0, I),
         # u ~ chi2(df), then x ~ mvt(0, I, df)
         df = 2 * (p + 0.5)
         y = np.random.randn(self.d, self.n)
@@ -766,7 +776,7 @@ class RandomMatern32(RandomRBF):
 
 
 class RandomMatern52(RandomMatern32):
-    """ 
+    """
     Random Matern 5/2 Basis -- Approximates a Matern 5/2 kernel function
 
     This will make a linear regression model approximate a GP with an
@@ -780,11 +790,11 @@ class RandomMatern52(RandomMatern32):
     Xdim: int
         the dimension (d) of the observations
     lenscale_init: Parameter, optional
-        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
-    """ 
+    """
 
     def _weightsamples(self):
         return self._maternweight(p=2)
@@ -803,10 +813,10 @@ class FastFoodRBF(RandomRBF):
     nbases: int
         a scalar for how many random bases to create approximately, this
         actually will be to the neareset larger two power.
-    Xdim: int   
+    Xdim: int
         the dimension (d) of the observations.
     lenscale_init: Parameter, optional
-        A scalar or vector of shape (1,) or (d,) Parameter to bound and 
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
@@ -834,7 +844,7 @@ class FastFoodRBF(RandomRBF):
         self.G = np.random.randn(*shape)  # mean 0 std 1
         self.PI = np.array([np.random.permutation(self.d2)
                             for _ in range(self.k)])
-        self.S = self._weightsamples(self.G)
+        self.S = self._weightsamples()
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -896,15 +906,15 @@ class FastFoodRBF(RandomRBF):
         for i, l in enumerate(lenscale):
             indlen = np.zeros(d)
             indlen[i] = 1. / l**2
-            dVX = - self.__makeVX(X * indlen)  # FIXME make this faster?? 
-            dPhi.append(np.hstack((dVX * sinVX, dVX * cosVX))
-                        / np.sqrt(self.n))
+            dVX = - self.__makeVX(X * indlen)  # FIXME make this faster??
+            dPhi.append(np.hstack((dVX * sinVX, dVX * cosVX)) /
+                        np.sqrt(self.n))
 
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
-    def _weightsamples(self, G):
-        s = chi.rvs(self.d2, size=G.shape)
-        return s / norm(G, axis=1)[:, np.newaxis]
+    def _weightsamples(self):
+        s = chi.rvs(self.d2, size=self.G.shape)
+        return self.d2 * s / norm(self.G, axis=1)[:, np.newaxis]
 
     def __makeVX(self, X):
         N, d0 = X.shape
@@ -913,45 +923,16 @@ class FastFoodRBF(RandomRBF):
         X_dash = np.zeros((N, self.d2))
         X_dash[:, 0:d0] = X
 
-        # FIXME do we need this loop even???
         VX = []
         for B, G, PI, S in zip(*(self.B, self.G, self.PI, self.S)):
-            # FIXME adjust this based on if evaluating a gradient? eg RandomRBF
             vX = hadamard(X_dash * B[np.newaxis, :], ordering=False)
             vX = vX[:, PI] * G[np.newaxis, :]
-            VX.append(hadamard(vX, ordering=False) * S[np.newaxis, :]
-                      * np.sqrt(self.d2))
+            vX = hadamard(vX, ordering=False) * S[np.newaxis, :] * \
+                np.sqrt(self.d2)
+            VX.append(vX)
 
         return np.hstack(VX)
 
-
-# class FastFoodMatern32(FastFoodRBF):
-
-#     def _weightsamples(self, G):
-
-#         return self._maternweight(p=1) # matern p + 1/2 kernel
-        
-#     def _maternweight(self, p):
-    
-#         dim = int((p + 0.5) * 2)
-#         # samp = p
-#         return np.array([[self.samplesphere(dim) for _ in range(self.d2)]
-#                          for _ in range(self.k)])
-
-#     def samplesphere(self, dim, nsamples=10):
-
-#         raise NotImplementedError("This is still not correct.")
-
-#         xi = np.random.randn(nsamples, dim)
-#         xi /= norm(xi, axis=1)[:, np.newaxis]
-#         return norm(xi.sum(axis=0)) / np.sqrt(nsamples)
-
-
-# class FastFoodMatern52(FastFoodMatern32):
-
-#     def _weightsamples(self, G):
-
-#         return self._maternweight(p=2) # matern p + 1/2 kernel
 
 #
 # Other basis construction objects and functions
