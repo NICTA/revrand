@@ -15,7 +15,7 @@ from scipy.special import expit
 from scipy.spatial.distance import cdist
 from scipy.stats import cauchy, chi, chi2, gamma
 
-from .btypes import Positive, Parameter
+from .btypes import Positive, Bound, Parameter
 from .math.linalg import hadamard
 
 
@@ -171,7 +171,15 @@ class Basis(object):
     @slice_init
     def __init__(self):
         """
-        Construct this an instance of this class. This is also a good place
+        Construct this an instance of this     def _init_param(self, param):
+
+        if param.shape == (self.d,):
+            return param
+        elif param.shape[0] == 1:
+            return (Parameter(np.ones(self.d) * param.value, param.bounds))
+        else:
+            raise ValueError("Parameter dimension doesn't agree with X"
+                             " dimensions!")class. This is also a good place
         to set non-learnable properties, and bounded Parameter types. An
         example Basis class with parameters may be,
 
@@ -340,7 +348,7 @@ class PolynomialBasis(Basis):
             raise ValueError("Polynomial order must be positive")
         self.order = order
 
-        self.include_bias = include_bias
+        self.include_bias = include_bia
 
     @slice_call
     def __call__(self, X):
@@ -406,12 +414,7 @@ class RadialBasis(Basis):
 
         self.M, self.d = centres.shape
         self.C = centres
-
-        if (lenscale_init.shape != (self.d,)) \
-                and (lenscale_init.shape[0] != 1):
-            raise ValueError("Parameter dimension doesn't agree with Xdim!")
-
-        self.params = lenscale_init
+        self._init_lenscale(lenscale_init)
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -472,19 +475,30 @@ class RadialBasis(Basis):
 
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
-    def _checkD(self, Xdim, lenscale):
+    def _init_lenscale(self, lenscale_init):
+
+        if (lenscale_init.shape != (self.d,)) \
+                and (lenscale_init.shape[0] != 1):
+            raise ValueError("Parameter dimension doesn't agree with X"
+                             " dimensions!")
+
+        self.params = lenscale_init
+
+    def _checkD(self, Xdim, param, paramind=None):
 
         if Xdim != self.d:
             raise ValueError("Dimensions of data inconsistent!")
 
-        # Promote dimension of lenscale
-        if np.isscalar(lenscale):
-            lenscale = np.array([lenscale])
+        # Promote dimension of parameter
+        if np.isscalar(param):
+            param = np.array([param])
 
-        if self.params.shape[0] != len(lenscale):
-            raise ValueError("Dimensions of lenscale inconsistent!")
+        sparam = self.params if paramind is None else self.params[paramind]
+        
+        if sparam.shape[0] != len(param):
+            raise ValueError("Dimensions of basis parameter is inconsistent!")
 
-        return lenscale
+        return param
 
 
 class SigmoidalBasis(RadialBasis):
@@ -602,11 +616,7 @@ class RandomRBF(RadialBasis):
         self.d = Xdim
         self.n = nbases
         self.W = self._weightsamples()
-
-        if (lenscale_init.shape != (Xdim,)) and (lenscale_init.shape[0] != 1):
-            raise ValueError("Parameter dimension doesn't agree with Xdim!")
-
-        self.params = lenscale_init
+        self._init_lenscale(lenscale_init)
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -825,26 +835,9 @@ class FastFoodRBF(RandomRBF):
     @slice_init
     def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
 
-        if (lenscale_init.shape != (Xdim,)) and (lenscale_init.shape[0] != 1):
-            raise ValueError("Parameter dimension doesn't agree with Xdim!")
-
-        self.params = lenscale_init
-
-        # Make sure our dimensions are powers of 2
-        l = int(np.ceil(np.log2(Xdim)))
-
-        self.d = Xdim
-        self.d2 = pow(2, l)
-        self.k = int(np.ceil(nbases / self.d2))
-        self.n = self.d2 * self.k
-
-        # Draw consistent samples from the covariance matrix
-        shape = (self.k, self.d2)
-        self.B = np.random.randint(2, size=shape) * 2 - 1  # uniform [-1,1]
-        self.G = np.random.randn(*shape)  # mean 0 std 1
-        self.PI = np.array([np.random.permutation(self.d2)
-                            for _ in range(self.k)])
-        self.S = self._weightsamples()
+        self._init_dims(nbases, Xdim)
+        self._init_lenscale(lenscale_init)
+        self._init_matrices()
 
     @slice_call
     def __call__(self, X, lenscale):
@@ -869,7 +862,7 @@ class FastFoodRBF(RandomRBF):
 
         lenscale = self._checkD(X.shape[1], lenscale)
 
-        VX = self.__makeVX(X / lenscale)
+        VX = self._makeVX(X / lenscale)
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
         return Phi
 
@@ -898,7 +891,7 @@ class FastFoodRBF(RandomRBF):
         d = X.shape[1]
         lenscale = self._checkD(d, lenscale)
 
-        VX = self.__makeVX(X / lenscale)
+        VX = self._makeVX(X / lenscale)
         sinVX = - np.sin(VX)
         cosVX = np.cos(VX)
 
@@ -906,17 +899,37 @@ class FastFoodRBF(RandomRBF):
         for i, l in enumerate(lenscale):
             indlen = np.zeros(d)
             indlen[i] = 1. / l**2
-            dVX = - self.__makeVX(X * indlen)  # FIXME make this faster??
+            dVX = - self._makeVX(X * indlen)  # FIXME make this faster??
             dPhi.append(np.hstack((dVX * sinVX, dVX * cosVX)) /
                         np.sqrt(self.n))
 
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
+    def _init_dims(self, nbases, Xdim):
+
+        # Make sure our dimensions are powers of 2
+        l = int(np.ceil(np.log2(Xdim)))
+
+        self.d = Xdim
+        self.d2 = pow(2, l)
+        self.k = int(np.ceil(nbases / self.d2))
+        self.n = self.d2 * self.k
+
+    def _init_matrices(self):
+
+        # Draw consistent samples from the covariance matrix
+        shape = (self.k, self.d2)
+        self.B = np.random.randint(2, size=shape) * 2 - 1  # uniform [-1,1]
+        self.G = np.random.randn(*shape)  # mean 0 std 1
+        self.PI = np.array([np.random.permutation(self.d2)
+                            for _ in range(self.k)])
+        self.S = self._weightsamples()
+
     def _weightsamples(self):
         s = chi.rvs(self.d2, size=self.G.shape)
         return self.d2 * s / norm(self.G, axis=1)[:, np.newaxis]
 
-    def __makeVX(self, X):
+    def _makeVX(self, X):
         N, d0 = X.shape
 
         # Pad the dimensions of X to nearest 2 power
@@ -932,6 +945,82 @@ class FastFoodRBF(RandomRBF):
             VX.append(vX)
 
         return np.hstack(VX)
+
+
+class FastFoodGM(FastFoodRBF):
+    """
+    TODO
+
+    Parameters
+    ----------
+    nbases: int
+        a scalar for how many random bases to create approximately, this
+        actually will be to the neareset larger two power.
+    Xdim: int
+        the dimension (d) of the observations.
+    mean_init: Parameter, optional
+        TODO
+    lenscale_init: Parameter, optional
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
+    """
+
+    @slice_init
+    def __init__(self, nbases, Xdim, mean_init=Parameter(0., Bound()),
+                 lenscale_init=Parameter(1., Positive())):
+
+        self._init_dims(nbases, Xdim)
+        self.params = [self._init_param(mean_init),
+                       self._init_param(lenscale_init)]
+        self._init_matrices()
+
+    @slice_call
+    def __call__(self, X, mean, lenscale):
+        """
+        Apply the Fast Food Gaussian Mixture basis to X.
+
+        Parameters
+        ----------
+        X: ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+        mean: ndarray
+            TODO 
+        lenscale: ndarray
+            array of shape (d,) length scales (one for each dimension of X).
+
+        Returns
+        -------
+        ndarray:
+            of shape (N, 2*nbases) where nbases is number of random bases to
+            use, given in the constructor (to nearest larger two power).
+        """
+
+        self._checkD(X.shape[1], mean, paramind=0)
+        lenscale = self._checkD(X.shape[1], lenscale, paramind=1)
+
+        VX = self._makeVX(X / lenscale)
+        mX = X.dot(mean)[:, np.newaxis]
+        Phi = np.hstack((np.cos(VX + mX), np.sin(VX + mX),
+                         np.cos(VX - mX), np.sin(VX - mX))) / np.sqrt(2*self.n)
+        return Phi
+
+    @slice_call
+    def grad(self, X, mean, lenscale):
+        #TODO
+        pass
+
+    def _init_param(self, param):
+
+        if param.shape == (self.d,):
+            return param
+        elif param.shape[0] == 1:
+            return (Parameter(np.ones(self.d) * param.value, param.bounds))
+        else:
+            raise ValueError("Parameter dimension doesn't agree with X"
+                             " dimensions!")
 
 
 #
