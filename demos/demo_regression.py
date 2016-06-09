@@ -48,21 +48,22 @@ def main():
     lenp = Parameter(lenscale, Positive())
     meanp = Parameter(mean, Bound())
     # base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
-    base = bs.FastFoodGM(Xdim=1, nbases=nbases,
-                         mean_init=meanp,
-                         lenscale_init=lenp) + \
-        bs.FastFoodGM(Xdim=1, nbases=nbases,
-                      mean_init=Parameter(mean + 0.1, Bound()),
-                      lenscale_init=lenp) + \
-        bs.FastFoodGM(Xdim=1, nbases=nbases,
-                      mean_init=Parameter(mean + 0.5, Bound()),
-                      lenscale_init=lenp) + \
-        bs.FastFoodGM(Xdim=1, nbases=nbases,
-                      mean_init=Parameter(mean - 0.1, Bound()),
-                      lenscale_init=lenp) + \
-        bs.FastFoodGM(Xdim=1, nbases=nbases,
-                      mean_init=Parameter(mean - 0.5, Bound()),
-                      lenscale_init=lenp)
+    base = bs.spectralmixture(Xdim=1, ncomponents=5)
+    # base = bs.FastFoodGM(Xdim=1, nbases=nbases,
+    #                      mean_init=meanp,
+    #                      lenscale_init=lenp) + \
+    #     bs.FastFoodGM(Xdim=1, nbases=nbases,
+    #                   mean_init=Parameter(mean + 0.1, Bound()),
+    #                   lenscale_init=lenp) + \
+    #     bs.FastFoodGM(Xdim=1, nbases=nbases,
+    #                   mean_init=Parameter(mean + 0.5, Bound()),
+    #                   lenscale_init=lenp) + \
+    #     bs.FastFoodGM(Xdim=1, nbases=nbases,
+    #                   mean_init=Parameter(mean - 0.1, Bound()),
+    #                   lenscale_init=lenp) + \
+    #     bs.FastFoodGM(Xdim=1, nbases=nbases,
+    #                   mean_init=Parameter(mean - 0.5, Bound()),
+    #                   lenscale_init=lenp)
     # np.random.seed(100)
 
     #

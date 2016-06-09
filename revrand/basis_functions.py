@@ -8,7 +8,9 @@ from __future__ import division
 import sys
 import inspect
 import numpy as np
+from operator import add
 from six import wraps
+from functools import reduce
 from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
 from scipy.special import expit
@@ -1087,6 +1089,28 @@ class FastFoodGM(FastFoodRBF):
         else:
             raise ValueError("Parameter dimension doesn't agree with X"
                              " dimensions!")
+
+
+#
+# Helper Functions
+#
+
+def spectralmixture(Xdim, bases_per_component=50, ncomponents=5,
+                    means_init=None, lenscales_init=None):
+
+    if means_init is None:
+        means_init = [Parameter(np.random.randn(Xdim) + np.random.randn(1),
+                                Bound()) for _ in range(ncomponents)]
+
+    if lenscales_init is None:
+        lenscales_init = [Parameter(gamma.rvs(3, scale=1. / 3, size=(Xdim,)),
+                                    Positive()) for _ in range(ncomponents)]
+
+    mixtures = [FastFoodGM(Xdim=Xdim, nbases=bases_per_component, mean_init=m,
+                           lenscale_init=l)
+                for m, l in zip(means_init, lenscales_init)]
+
+    return reduce(add, mixtures)
 
 
 #
