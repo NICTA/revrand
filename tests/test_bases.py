@@ -5,7 +5,8 @@ from operator import add
 from functools import reduce
 
 import revrand.basis_functions as bs
-from revrand.btypes import Parameter, Positive
+from revrand.btypes import Parameter, Positive, Bound
+from revrand.utils import issequence
 
 
 def test_simple_concat(make_data):
@@ -114,37 +115,53 @@ def test_bases(make_data):
              bs.FastFoodRBF(Xdim=d, nbases=10),
              bs.FastFoodRBF(Xdim=d, nbases=10,
                             lenscale_init=Parameter(np.ones(d), Positive())),
+             bs.FastFoodGM(Xdim=d, nbases=10),
+             bs.FastFoodGM(Xdim=d, nbases=10,
+                           mean_init=Parameter(np.zeros(d), Bound()),
+                           lenscale_init=Parameter(np.ones(d), Positive())),
              ]
 
-    hypers = [None,
-              None,
-              1.,
-              np.ones(d),
-              1.,
-              np.ones(d),
-              1.,
-              np.ones(d),
-              1.,
-              np.ones(d),
+    hypers = [(),
+              (),
+              (1.,),
+              (np.ones(d),),
+              (1.,),
+              (np.ones(d),),
+              (1.,),
+              (np.ones(d),),
+              (1.,),
+              (np.ones(d),),
+              (np.ones(d), np.ones(d)),
+              (np.ones(d), np.ones(d))
               ]
 
     for b, h in zip(bases, hypers):
-        P = b(X, h) if h is not None else b(X)
-        dP = b.grad(X, h) if h is not None else b.grad(X)
+        P = b(X, *h)
+        dP = b.grad(X, *h)
 
         assert P.shape[0] == N
-        assert dP.shape[0] == N if not isinstance(dP, list) else dP == []
+        if not issequence(dP):
+            assert dP.shape[0] == N if not isinstance(dP, list) else dP == []
+        else:
+            for dp in dP:
+                assert dp.shape[0] == N
         assert P.ndim == 2
 
     bcat = reduce(add, bases)
-    hyps = [h for h in hypers if h is not None]
+    hyps = []
+    for h in hypers:
+        hyps.extend(list(h))
     P = bcat(X, *hyps)
     dP = bcat.grad(X, *hyps)
 
     assert P.shape[0] == N
     assert P.ndim == 2
     for dp in dP:
-        assert dp.shape[0] == N if not isinstance(dp, list) else dp == []
+        if not issequence(dP):
+            assert dP.shape[0] == N if not isinstance(dP, list) else dP == []
+        else:
+            for dp in dP:
+                assert dp.shape[0] == N
 
 
 def test_slicing(make_data):

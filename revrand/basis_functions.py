@@ -17,6 +17,7 @@ from scipy.stats import cauchy, chi, chi2, gamma
 
 from .btypes import Positive, Bound, Parameter
 from .math.linalg import hadamard
+from .utils import append_or_extend, issequence
 
 
 #
@@ -136,7 +137,7 @@ def apply_grad(fun, grad):
         the result of applying fun(grad) for a structured grad.
     """
 
-    if inspect.isgenerator(grad):
+    if issequence(grad):
         fgrad = [apply_grad(fun, g) for g in grad]
         return fgrad if len(fgrad) != 1 else fgrad[0]
     elif len(grad) == 0:
@@ -437,7 +438,7 @@ class RadialBasis(Basis):
         """
 
         N, d = X.shape
-        lenscale = self._checkD(d, lenscale)
+        lenscale = self._checkdim(d, lenscale)
 
         den = (2 * lenscale**2)
         return np.exp(- cdist(X / den, self.C / den, 'sqeuclidean'))
@@ -464,7 +465,7 @@ class RadialBasis(Basis):
         """
 
         N, d = X.shape
-        lenscale = self._checkD(d, lenscale)
+        lenscale = self._checkdim(d, lenscale)
 
         Phi = self(X, lenscale)
         dPhi = []
@@ -484,7 +485,7 @@ class RadialBasis(Basis):
 
         self.params = lenscale_init
 
-    def _checkD(self, Xdim, param, paramind=None):
+    def _checkdim(self, Xdim, param, paramind=None):
 
         if Xdim != self.d:
             raise ValueError("Dimensions of data inconsistent!")
@@ -545,7 +546,7 @@ class SigmoidalBasis(RadialBasis):
         """
 
         N, d = X.shape
-        lenscale = self._checkD(d, lenscale)
+        lenscale = self._checkdim(d, lenscale)
 
         return expit(cdist(X / lenscale, self.C / lenscale, 'euclidean'))
 
@@ -578,7 +579,7 @@ class SigmoidalBasis(RadialBasis):
         """
 
         N, d = X.shape
-        lenscale = self._checkD(d, lenscale)
+        lenscale = self._checkdim(d, lenscale)
 
         Phi = self(X, lenscale)
         dPhi = []
@@ -640,7 +641,7 @@ class RandomRBF(RadialBasis):
         """
 
         N, D = X.shape
-        lenscale = self._checkD(D, lenscale)[:, np.newaxis]
+        lenscale = self._checkdim(D, lenscale)[:, np.newaxis]
 
         WX = np.dot(X, self.W / lenscale)
 
@@ -669,7 +670,7 @@ class RandomRBF(RadialBasis):
         """
 
         N, D = X.shape
-        lenscale = self._checkD(D, lenscale)[:, np.newaxis]
+        lenscale = self._checkdim(D, lenscale)[:, np.newaxis]
 
         WX = np.dot(X, self.W / lenscale)
         sinWX = - np.sin(WX)
@@ -821,8 +822,8 @@ class FastFoodRBF(RandomRBF):
     Parameters
     ----------
     nbases: int
-        a scalar for how many random bases to create approximately, this
-        actually will be to the neareset larger two power.
+        a scalar for how many (unique) random bases to create approximately,
+        this actually will be to the nearest larger two power.
     Xdim: int
         the dimension (d) of the observations.
     lenscale_init: Parameter, optional
@@ -860,7 +861,7 @@ class FastFoodRBF(RandomRBF):
             use, given in the constructor (to nearest larger two power).
         """
 
-        lenscale = self._checkD(X.shape[1], lenscale)
+        lenscale = self._checkdim(X.shape[1], lenscale)
 
         VX = self._makeVX(X / lenscale)
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
@@ -871,25 +872,25 @@ class FastFoodRBF(RandomRBF):
         """
         Get the gradients of this basis w.r.t.\ the length scale.
 
-        Parameters
+        parameters
         ----------
-        X: ndarray
-            (N, d) array of observations where N is the number of samples, and
-            d is the dimensionality of X.
+        x: ndarray
+            (n, d) array of observations where n is the number of samples, and
+            d is the dimensionality of x.
         lenscale: scalar or ndarray
             scalar or array of shape (d,) length scales (one for each dimension
-            of X).
+            of x).
 
-        Returns
+        returns
         -------
         ndarray:
-            shape (N, 2*nbases) where nbases is number of random RBF bases,
+            shape (n, 2*nbases) where nbases is number of random rbf bases,
             again to the nearest larger two power. This is
-            :math:`\partial \Phi(\mathbf{X}) / \partial l`
+            :math:`\partial \phi(\mathbf{x}) / \partial l`
         """
 
         d = X.shape[1]
-        lenscale = self._checkD(d, lenscale)
+        lenscale = self._checkdim(d, lenscale)
 
         VX = self._makeVX(X / lenscale)
         sinVX = - np.sin(VX)
@@ -899,7 +900,7 @@ class FastFoodRBF(RandomRBF):
         for i, l in enumerate(lenscale):
             indlen = np.zeros(d)
             indlen[i] = 1. / l**2
-            dVX = - self._makeVX(X * indlen)  # FIXME make this faster??
+            dVX = - self._makeVX(X * indlen)  # FIXME make this more efficient?
             dPhi.append(np.hstack((dVX * sinVX, dVX * cosVX)) /
                         np.sqrt(self.n))
 
@@ -949,22 +950,29 @@ class FastFoodRBF(RandomRBF):
 
 class FastFoodGM(FastFoodRBF):
     """
-    TODO
+    A single mixture component from a Gaussian spectral mixture kernel
+    approximation.
+
+    This (paritally) implements the GM basis from "A la Carte - Learning Fast
+    Kernels". 
 
     Parameters
     ----------
     nbases: int
-        a scalar for how many random bases to create approximately, this
-        actually will be to the neareset larger two power.
+        a scalar for how many (unique) random bases to create approximately,
+        this actually will be to the nearest larger two power.
     Xdim: int
         the dimension (d) of the observations.
     mean_init: Parameter, optional
-        TODO
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
+        initialise the component frequency means for optimization. This will
+        always initialise (d,) means if a scalr bound is given, it is applied
+        to all means.
     lenscale_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
-        initialise the length scales for optimization. If this is shape (d,),
-        ARD length scales will be expected, otherwise an isotropic lenscale is
-        learned.
+        initialise the length scales for optimization. This will always
+        initialise ARD length scales, if a scalr bound is given, it is applied
+        to all length scales.
     """
 
     @slice_init
@@ -979,7 +987,7 @@ class FastFoodGM(FastFoodRBF):
     @slice_call
     def __call__(self, X, mean, lenscale):
         """
-        Apply the Fast Food Gaussian Mixture basis to X.
+        Apply the spectral mixture component basis to X.
 
         Parameters
         ----------
@@ -987,30 +995,88 @@ class FastFoodGM(FastFoodRBF):
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
         mean: ndarray
-            TODO 
+            array of shape (d,) frequency means (one for each dimension of X).
         lenscale: ndarray
             array of shape (d,) length scales (one for each dimension of X).
 
         Returns
         -------
         ndarray:
-            of shape (N, 2*nbases) where nbases is number of random bases to
+            of shape (N, 4*nbases) where nbases is number of random bases to
             use, given in the constructor (to nearest larger two power).
         """
 
-        self._checkD(X.shape[1], mean, paramind=0)
-        lenscale = self._checkD(X.shape[1], lenscale, paramind=1)
+        mean = self._checkdim(X.shape[1], mean, paramind=0)
+        lenscale = self._checkdim(X.shape[1], lenscale, paramind=1)
 
         VX = self._makeVX(X / lenscale)
         mX = X.dot(mean)[:, np.newaxis]
         Phi = np.hstack((np.cos(VX + mX), np.sin(VX + mX),
                          np.cos(VX - mX), np.sin(VX - mX))) / np.sqrt(2*self.n)
+
         return Phi
 
     @slice_call
     def grad(self, X, mean, lenscale):
-        #TODO
-        pass
+        """
+        Get the gradients of this basis w.r.t.\ the frequency mean and length
+        scale.
+
+        parameters
+        ----------
+        x: ndarray
+            (n, d) array of observations where n is the number of samples, and
+            d is the dimensionality of x.
+        mean: ndarray
+            array of shape (d,) frequency means (one for each dimension of X).
+        lenscale: ndarray
+            array of shape (d,) length scales (one for each dimension of X).
+
+        returns
+        -------
+        ndarray:
+            shape (n, 4*nbases) where nbases is number of random rbf bases,
+            again to the nearest larger two power. This is
+            :math:`\partial \phi(\mathbf{x}) / \partial mu`
+        ndarray:
+            shape (n, 4*nbases) where nbases is number of random rbf bases,
+            again to the nearest larger two power. This is
+            :math:`\partial \phi(\mathbf{x}) / \partial l`
+        """
+
+        d = X.shape[1]
+        mean = self._checkdim(d, mean, paramind=0)
+        lenscale = self._checkdim(d, lenscale, paramind=1)
+
+        VX = self._makeVX(X / lenscale)
+        mX = X.dot(mean)[:, np.newaxis]
+
+        sinVXpmX = - np.sin(VX + mX)
+        sinVXmmX = - np.sin(VX - mX)
+        cosVXpmX = np.cos(VX + mX)
+        cosVXmmX = np.cos(VX - mX)
+
+        dPhi_len = []
+        dPhi_mean = []
+        for i, l in enumerate(lenscale):
+
+            # Means
+            dmX = X[:, [i]]
+            dPhi_mean.append(np.hstack((dmX * sinVXpmX, dmX * cosVXpmX,
+                                        -dmX * sinVXmmX, -dmX * cosVXmmX)) /
+                            np.sqrt(2*self.n))
+
+            # Lenscales
+            indlen = np.zeros(d)
+            indlen[i] = 1. / l**2
+            dVX = - self._makeVX(X * indlen) # FIXME make this more efficient?
+            dPhi_len.append(np.hstack((dVX * sinVXpmX, dVX * cosVXpmX,
+                                       dVX * sinVXmmX, dVX * cosVXmmX)) /
+                            np.sqrt(2*self.n))
+
+        dPhi_mean = np.dstack(dPhi_mean) if d != 1 else dPhi_mean[0]
+        dPhi_len = np.dstack(dPhi_len) if d != 1 else dPhi_len[0]
+        return dPhi_mean, dPhi_len
 
     def _init_param(self, param):
 
@@ -1047,27 +1113,39 @@ class BasisCat(object):
 
     def grad(self, X, *params):
 
-        # Get all gradients
+        # Establish a few dimensions
         N = X.shape[0]
+        D = self(X[[0], :], *params).shape[1] 
+
+        # Get all gradients
         args = list(params)
         grads = []
         dims = [0]
 
-        for base in self.bases:
+        for i, base in enumerate(self.bases):
+            
+            # evaluate gradient and deal with multiple parameter gradients by
+            # keeping track of the basis index
             g, args, sargs = base._grad_popargs(X, *args)
-            grads.append(g)
-            dims.append(base(X, *sargs).shape[1] if len(g) == 0 else
-                        g.shape[1])
+            if not issequence(g):
+                grads.append((i, g))
+            else:
+                grads.extend([(i, gg) for gg in g])
 
-        # Now generate structured gradients
-        D = np.sum(dims)
+            # Get the basis dimensionality for padding later
+            baseD = base(X[[0], :], *sargs).shape[1] 
+            dims.append(baseD)
+
+        # Padding indices
         endinds = np.cumsum(dims)
 
-        for i, g in enumerate(grads):
+        # Now generate structured gradients with appropriate zero padding
+        for i, g in grads:
 
             if len(g) == 0:
                 continue
 
+            # Pad the gradient with respect to the total basis dimensionality
             dPhi_dim = (N, D) if g.ndim < 3 else (N, D, g.shape[2])
             dPhi = np.zeros(dPhi_dim)
             dPhi[:, endinds[i]:endinds[i + 1]] = g
@@ -1077,7 +1155,8 @@ class BasisCat(object):
     @property
     def params(self):
 
-        params = [b.params for b in self.bases if b.params != []]
+        paramlist = [b.params for b in self.bases if b.params != []]
+        params = append_or_extend([], *paramlist)
 
         return params[0] if len(params) == 1 else params
 

@@ -1,3 +1,4 @@
+import inspect
 import numpy as np
 
 from six.moves import map, range, zip
@@ -54,6 +55,36 @@ def append_or_extend(mylist, *objs):
     for obj in objs:
         mylist.extend(obj if isinstance(obj, list) else [obj])
     return mylist
+
+
+def issequence(obj):
+    """
+    Tests if an object is an iterable sequence of type generator, list or
+    tuple.
+
+    Parameters
+    ----------
+    obj: object
+        object to test
+
+    Returns
+    -------
+    bool:
+        True if :code:`obj` is a tuple, list or generator
+
+    Examples
+    --------
+    >>> issequence([1, 2])
+    True
+    >>> issequence((1,))
+    True
+    >>> issequence((i for i in range(8)))
+    True
+    >>> issequence(np.array([1, 2, 3]))
+    False
+    """
+
+    return inspect.isgenerator(obj) or isinstance(obj, (list, tuple))
 
 
 def atleast_list(a):

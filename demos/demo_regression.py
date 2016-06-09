@@ -8,7 +8,7 @@ import logging
 from revrand import slm, glm, likelihoods
 from revrand.metrics import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
-from revrand.btypes import Parameter, Positive
+from revrand.btypes import Parameter, Positive, Bound
 from revrand import basis_functions as bs
 import revrand.legacygp as gp
 import revrand.legacygp.kernels as kern
@@ -24,37 +24,46 @@ def main():
     # Settings
     #
 
-    # Algorithmic properties
-    nbases = 100
-    lenscale = 1  # For all basis functions that take lengthscales
-    lenscale2 = 0.5  # For the Combo basis
-    noise = 1
-    order = 7  # For polynomial basis
-    rho = 0.9
-    epsilon = 1e-6
-    passes = 50
-    batchsize = 10
-    reg = 1
-
-    # np.random.seed(100)
-
+    # Dataset properties
     N = 500
     Ns = 250
 
     # Dataset selection
     # dataset = 'sinusoid'
     dataset = 'gp1D'
-
-    # Dataset properties
     lenscale_true = 0.7  # For the gpdraw dataset
     noise_true = 0.1
 
-    basis = 'RKS'
-    # basis = 'FF'
-    # basis = 'RBF'
-    # basis = 'Linear'
-    # basis = 'Poly'
-    # basis = 'Combo'
+    # Algorithmic properties
+    nbases = 20
+    lenscale = 1  # For all basis functions that take lengthscales
+    mean = 0
+    noise = 1
+    rho = 0.9
+    epsilon = 1e-6
+    passes = 50
+    batchsize = 10
+    reg = 1
+
+    lenp = Parameter(lenscale, Positive())
+    meanp = Parameter(mean, Bound())
+    # base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
+    base = bs.FastFoodGM(Xdim=1, nbases=nbases,
+                         mean_init=meanp,
+                         lenscale_init=lenp) + \
+        bs.FastFoodGM(Xdim=1, nbases=nbases,
+                      mean_init=Parameter(mean + 0.1, Bound()),
+                      lenscale_init=lenp) + \
+        bs.FastFoodGM(Xdim=1, nbases=nbases,
+                      mean_init=Parameter(mean + 0.5, Bound()),
+                      lenscale_init=lenp) + \
+        bs.FastFoodGM(Xdim=1, nbases=nbases,
+                      mean_init=Parameter(mean - 0.1, Bound()),
+                      lenscale_init=lenp) + \
+        bs.FastFoodGM(Xdim=1, nbases=nbases,
+                      mean_init=Parameter(mean - 0.5, Bound()),
+                      lenscale_init=lenp)
+    # np.random.seed(100)
 
     #
     # Make Data
@@ -77,31 +86,6 @@ def main():
         raise ValueError('Invalid dataset!')
 
     #
-    # Make Bases
-    #
-
-    plen = Parameter(lenscale, Positive())
-    plen2 = Parameter(lenscale2, Positive())
-
-    if basis == 'FF':
-        base = bs.FastFoodRBF(nbases, Xtrain.shape[1], plen)
-    elif basis == 'RKS':
-        base = bs.RandomRBF(nbases, Xtrain.shape[1], plen)
-    elif basis == 'RBF':
-        base = bs.RadialBasis(Xtrain, plen)
-    elif basis == 'Linear':
-        base = bs.LinearBasis(onescol=True)
-    elif basis == 'Poly':
-        base = bs.PolynomialBasis(order)
-    elif basis == 'Combo':
-        base1 = bs.RandomRBF(nbases, Xtrain.shape[1], plen)
-        base2 = bs.LinearBasis(onescol=True)
-        base3 = bs.FastFood(nbases, Xtrain.shape[1], plen2)
-        base = base1 + base2 + base3
-    else:
-        raise ValueError('Invalid basis!')
-
-    #
     # Learn regression parameters and predict
     #
 
@@ -115,15 +99,15 @@ def main():
     # Nonparametric variational inference GLM
     #
 
-    llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
-    params_glm = glm.learn(Xtrain, ytrain, llhood, base,
-                           regulariser=Parameter(reg, Positive()),
-                           use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
-                           batchsize=batchsize, maxit=passes)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
-                                               *params_glm)
-    Vy_g = Vf_g + params_glm[2][0]
-    Sy_g = np.sqrt(Vy_g)
+    # llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
+    # params_glm = glm.learn(Xtrain, ytrain, llhood, base,
+    #                        regulariser=Parameter(reg, Positive()),
+    #                        use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
+    #                        batchsize=batchsize, maxit=passes)
+    # Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
+    #                                            *params_glm)
+    # Vy_g = Vf_g + params_glm[2][0]
+    # Sy_g = np.sqrt(Vy_g)
 
     #
     # Learn GP and predict
@@ -132,7 +116,7 @@ def main():
     def kdef(h, k):
         return (h(1e-5, 1., 0.5) * k(kern.gaussian, h(1e-5, 1e5, lenscale)) +
                 k(kern.lognoise, h(-4, 1, -3)))
-    hyper_params = gp.learn(Xtrain, ytrain, kdef, verbose=True, ftol=1e-15,
+    hyper_params = gp.learn(Xtrain, ytrain, kdef, verbose=True, ftol=1e-6,
                             maxiter=passes)
 
     regressor = gp.condition(Xtrain, ytrain, kdef, hyper_params)
@@ -147,20 +131,20 @@ def main():
 
     LL_s = mll(ftest, Ey_e, Vy_e)
     LL_gp = mll(ftest, Ey_gp, Vy_gp)
-    LL_g = mll(ftest, Ey_g, Vy_g)
+    # LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_s = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
-    smse_glm = smse(ftest, Ey_g)
+    # smse_glm = smse(ftest, Ey_g)
 
     log.info("SLM, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_s, smse_s, np.sqrt(params_slm[3]),
                      params_slm[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
-    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
-             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
-                     params_glm[3]))
+    # log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+    #          .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+    #                  params_glm[3]))
 
     #
     # Plot
@@ -185,9 +169,9 @@ def main():
                     label=None)
 
     # GLM Regressor
-    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
-    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
-                    edgecolor='m', linestyle='--', label=None)
+    # pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+    # pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+    #                 edgecolor='m', linestyle='--', label=None)
 
     pl.legend()
 
