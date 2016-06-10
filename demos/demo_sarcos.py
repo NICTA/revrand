@@ -27,7 +27,7 @@ gp_Ntrain = 1000
 passes = 5
 rho = 0.9
 epsilon = 1e-6
-batchsize = 10
+batch_size = 10
 useSGD = True
 
 
@@ -64,7 +64,7 @@ if useSGD:
     llhood = Gaussian()
     lparams = [noise**2]
     params = glm.learn(X_train, y_train, llhood, base, use_sgd=True, rho=rho,
-                       epsilon=epsilon, batchsize=batchsize, maxit=passes)
+                       epsilon=epsilon, batch_size=batch_size, maxit=passes)
     Ey, Vf, _, _ = glm.predict_moments(X_test, llhood, base, *params)
     Vy = Vf + params[2][0]
     Sy = np.sqrt(Vy)

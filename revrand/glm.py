@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
-          postcomp=10, use_sgd=True, maxit=1000, tol=1e-7, batchsize=100,
+          postcomp=10, use_sgd=True, maxit=1000, tol=1e-7, batch_size=100,
           rho=0.9, epsilon=1e-5):
     """
     Learn the parameters of a Bayesian generalised linear model (GLM).
@@ -60,7 +60,7 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
             :code:`use_sgd` is :code:`True` then this is the number of complete
             passes through the data before optimization terminates (unless it
             converges first).
-        batchsize: int, optional
+        batch_size: int, optional
             number of observations to use per SGD batch. Ignored if
             :code:`use_sgd=False`.
         rho: float, optional
@@ -242,7 +242,7 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
         updater = AdaDelta(rho=rho, epsilon=epsilon)
         res = nsgd(L2, params, np.hstack((y[:, np.newaxis], X)),
                    gtol=tol, passes=maxit, updater=updater,
-                   batchsize=batchsize, eval_obj=True)
+                   batch_size=batch_size, eval_obj=True)
 
     # Unpack params
     m, C, regulariser = res.x[:3]

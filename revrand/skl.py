@@ -152,7 +152,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             :code:`use_sgd` is :code:`True` then this is the number of complete
             passes through the data before optimization terminates (unless it
             converges first).
-        batchsize: int, optional
+        batch_size: int, optional
             number of observations to use per SGD batch. Ignored if
             :code:`use_sgd=False`.
         rho: float, optional
@@ -166,7 +166,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, likelihood, basis,
                  regulariser=Parameter(1., Positive()), postcomp=10,
-                 use_sgd=True, maxit=1000, tol=1e-7, batchsize=100, rho=0.9,
+                 use_sgd=True, maxit=1000, tol=1e-7, batch_size=100, rho=0.9,
                  epsilon=1e-5, alpha=0.95):
 
         self.likelihood = likelihood
@@ -176,7 +176,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.use_sgd = use_sgd
         self.maxit = maxit
         self.tol = tol
-        self.batchsize = batchsize
+        self.batch_size = batch_size
         self.rho = rho
         self.epsilon = epsilon
         self.alpha = alpha
@@ -201,7 +201,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                       use_sgd=self.use_sgd,
                       maxit=self.maxit,
                       tol=self.tol,
-                      batchsize=self.batchsize,
+                      batch_size=self.batch_size,
                       rho=self.rho,
                       epsilon=self.epsilon)
 

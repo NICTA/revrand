@@ -352,7 +352,8 @@ def structured_sgd(sgd):
     >>> w_0 = Parameter(np.array([1., 1.]), Bound())
     >>> lambda_0 = Parameter(.25, Bound())
 
-    >>> res = new_sgd(cost, [w_0, lambda_0], data, batchsize=10, eval_obj=True)
+    >>> res = new_sgd(cost, [w_0, lambda_0], data, batch_size=10,
+    ...               eval_obj=True)
     >>> res_w, res_lambda = res.x
     """
 
@@ -495,7 +496,7 @@ def logtrick_sgd(sgd):
     >>> lambda_0 = .25
 
     >>> res = new_sgd(cost, w_0, data, args=(lambda_0,), bounds=bounds,
-    ...               batchsize=10, eval_obj=True)
+    ...               batch_size=10, eval_obj=True)
     >>> res.x >= 0
     array([ True,  True], dtype=bool)
 

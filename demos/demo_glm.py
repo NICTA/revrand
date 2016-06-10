@@ -31,7 +31,7 @@ noise = 1
 rho = 0.9
 epsilon = 1e-5
 passes = 400
-batchsize = 100
+batch_size = 100
 use_sgd = True
 
 N = 500
@@ -89,7 +89,7 @@ basis = RandomRBF(nbases, Xtrain.shape[1],
 #
 
 params = glm.learn(Xtrain, ytrain, llhood, basis, use_sgd=use_sgd, rho=rho,
-                   epsilon=epsilon, batchsize=batchsize, maxit=passes)
+                   epsilon=epsilon, batch_size=batch_size, maxit=passes)
 Ey, Vy, Eyn, Eyx = glm.predict_moments(Xtest, llhood, basis, *params)
 plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
 y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)

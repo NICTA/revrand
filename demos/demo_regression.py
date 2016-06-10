@@ -35,13 +35,13 @@ def main():
     noise_true = 0.1
 
     # Algorithmic properties
-    nbases = 300
+    nbases = 100
     lenscale = 1  # For all basis functions that take lengthscales
     noise = 1
     rho = 0.9
     epsilon = 1e-6
     passes = 50
-    batchsize = 10
+    batch_size = 10
     reg = 1
 
     lenp = Parameter(lenscale, Positive())
@@ -93,7 +93,7 @@ def main():
     params_glm = glm.learn(Xtrain, ytrain, llhood, base,
                            regulariser=Parameter(reg, Positive()),
                            use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
-                           batchsize=batchsize, maxit=passes)
+                           batch_size=batch_size, maxit=passes)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]

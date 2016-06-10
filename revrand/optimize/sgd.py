@@ -10,7 +10,10 @@ from scipy.optimize import OptimizeResult
 #
 
 class SGDUpdater:
-    """ Base class for SGD learning rate algorithms. """
+    """
+    Base class for SGD learning rate algorithms.
+    """
+
     name = 'SGD'
 
     def __call__(self, x, grad):
@@ -35,21 +38,21 @@ class SGDUpdater:
 
 
 class AdaDelta(SGDUpdater):
-    """ AdaDelta Algorithm """
+    """
+    AdaDelta Algorithm
+
+    Parameters
+    ----------
+        rho: float, optional
+            smoothing/decay rate parameter, must be [0, 1].
+        epsilon: float, optional
+            "jitter" term to ensure continued learning (should be small).
+    """
+
     name = 'ADADELTA'
 
     def __init__(self, rho=0.95, epsilon=1e-6):
-        """
-        Construct an AdaDelta updater object.
 
-        Parameters
-        ----------
-            rho: float, optional
-                smoothing/decay rate parameter, must be [0, 1].
-            epsilon: float, optional
-                "jitter" term to ensure continued learning (should be small).
-        """
-        
         # TODO: Make these contracts
         if rho < 0 or rho > 1:
             raise ValueError("Decay rate 'rho' must be between 0 and 1!")
@@ -87,21 +90,20 @@ class AdaDelta(SGDUpdater):
 
 
 class AdaGrad(SGDUpdater):
-    """ AdaGrad Algorithm """
+    """
+    AdaGrad Algorithm
+
+    Parameters
+    ----------
+        eta: float, optional
+            smoothing/decay rate parameter, must be [0, 1].
+        epsilon: float, optional
+            small constant term to prevent divide-by-zeros
+    """
 
     name = 'ADAGRAD'
 
     def __init__(self, eta=1, epsilon=1e-6):
-        """
-        Construct an AdaGrad updater object.
-
-        Parameters
-        ----------
-            eta: float, optional
-                smoothing/decay rate parameter, must be [0, 1].
-            epsilon: float, optional
-                small constant term to prevent divide-by-zeros
-        """
 
         if eta <= 0:
             raise ValueError("Learning rate 'eta' must be > 0!")
@@ -136,20 +138,20 @@ class AdaGrad(SGDUpdater):
 
 
 class Momentum(SGDUpdater):
-    """ Momentum Algorithm """
+    """
+    Momentum Algorithm
+
+    Parameters
+    ----------
+        rho: float, optional
+            smoothing/decay rate parameter, must be [0, 1].
+        eta: float, optional
+            weight to give to the momentum term
+    """
+
     name = 'Momentum'
 
     def __init__(self, rho=0.5, eta=0.01):
-        """
-        Construct a Momentum updater object.
-
-        Parameters
-        ----------
-            rho: float, optional
-                smoothing/decay rate parameter, must be [0, 1].
-            eta: float, optional
-                weight to give to the momentum term
-        """
 
         if eta <= 0:
             raise ValueError("Learning rate 'eta' must be > 0!")
@@ -187,8 +189,7 @@ class Momentum(SGDUpdater):
 # SGD minimizer
 #
 
-# TODO: batch_size
-def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, passes=10,
+def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
         updater=None, gtol=1e-3, eval_obj=False):
     """ Stochastic Gradient Descent, using ADADELTA for setting the learning
         rate.
@@ -211,7 +212,7 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, passes=10,
             Bounds for variables, (min, max) pairs for each element in x,
             defining the bounds on that parameter.  Use None for one of min or
             max when there is no bound in that direction.
-        batchsize: int, optional
+        batch_size: int, optional
             The number of observations in an SGD batch.
         passes: int, optional
             Number of complete passes through the data before optimization
@@ -253,12 +254,13 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, passes=10,
     D = x.shape[0]
 
     # Make sure we have a valid batch size
-    batchsize = min(batchsize, N)
+    batch_size = min(batch_size, N)
 
     # Process bounds
     if bounds is not None:
         if len(bounds) != D:
             raise ValueError("The dimension of the bounds does not match x0!")
+
         # TODO: use a zip, pairwise logic
         lower = np.array([-np.inf if b[0] is None else b[0] for b in bounds])
         upper = np.array([np.inf if b[1] is None else b[1] for b in bounds])
@@ -273,7 +275,7 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, passes=10,
     # TODO: ALL to have a go at improving this! (must still pass
     # test_optimize)...
     for _ in range(passes):
-        for ind in _sgd_pass(N, batchsize):
+        for ind in _sgd_pass(N, batch_size):
 
             if not eval_obj:
                 grad = fun(x, Data[ind], *args)
@@ -314,24 +316,23 @@ def sgd(fun, x0, Data, args=(), bounds=None, batchsize=100, passes=10,
 
     return res
 
+
 #
 # Module Helpers
 #
 
-
-def _sgd_pass(N, batchsize):
+def _sgd_pass(N, batch_size):
     """ Batch index generator for SGD that will yeild random batches for a
         single pass through the whole dataset (i.e. a finitie sequence).
 
         Arguments:
             N, (int): length of dataset.
-            batchsize, (int): number of data points in each batch.
+            batch_size, (int): number of data points in each batch.
 
         Yields:
-            array: of size (batchsize,) of random (int).
+            array: of size (batch_size,) of random (int).
     """
 
-    batch_inds = np.array_split(np.random.permutation(N), round(N / batchsize))
-    # TODO: just use iter(...)
-    for b_inds in batch_inds:
-        yield b_inds
+    nbatches = round(N / batch_size)
+    batch_inds = iter(np.array_split(np.random.permutation(N), nbatches))
+    return batch_inds
