@@ -8,9 +8,7 @@ from __future__ import division
 import sys
 import inspect
 import numpy as np
-from operator import add
 from six import wraps
-from functools import reduce
 from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
 from scipy.special import expit
@@ -605,7 +603,8 @@ class RandomRBF(RadialBasis):
         how many unique random bases to create (twice this number will be
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
-        the dimension (d) of the observations
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
     lenscale_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
@@ -703,7 +702,8 @@ class RandomLaplace(RandomRBF):
         how many unique random bases to create (twice this number will be
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
-        the dimension (d) of the observations
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
     lenscale_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
@@ -728,7 +728,8 @@ class RandomCauchy(RandomRBF):
         how many unique random bases to create (twice this number will be
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
-        the dimension (d) of the observations
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
     lenscale_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
@@ -736,6 +737,7 @@ class RandomCauchy(RandomRBF):
         learned.
     """
     def _weightsamples(self):
+
         # A draw from a (regular) mv laplace is the same as:
         # X ~ Norm(mu, cov)
         # Z ~ gamma(1)
@@ -761,7 +763,8 @@ class RandomMatern32(RandomRBF):
         how many unique random bases to create (twice this number will be
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
-        the dimension (d) of the observations
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
     lenscale_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
@@ -773,6 +776,7 @@ class RandomMatern32(RandomRBF):
         return self._maternweight(p=1)
 
     def _maternweight(self, p):
+
         # p is the matern number (v = p + .5) and the two is a transformation
         # of variables between Rasmussen 2006 p84 and the CF of a Multivariate
         # Student t (see wikipedia). Also see "A Note on the Characteristic
@@ -801,7 +805,8 @@ class RandomMatern52(RandomMatern32):
         how many unique random bases to create (twice this number will be
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
-        the dimension (d) of the observations
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
     lenscale_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
@@ -827,7 +832,8 @@ class FastFoodRBF(RandomRBF):
         a scalar for how many (unique) random bases to create approximately,
         this actually will be to the nearest larger two power.
     Xdim: int
-        the dimension (d) of the observations.
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
     lenscale_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the length scales for optimization. If this is shape (d,),
@@ -964,7 +970,8 @@ class FastFoodGM(FastFoodRBF):
         a scalar for how many (unique) random bases to create approximately,
         this actually will be to the nearest larger two power.
     Xdim: int
-        the dimension (d) of the observations.
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
     mean_init: Parameter, optional
         A scalar or vector of shape (1,) or (d,) Parameter to bound and
         initialise the component frequency means for optimization. This will
@@ -1095,22 +1102,72 @@ class FastFoodGM(FastFoodRBF):
 # Helper Functions
 #
 
-def spectralmixture(Xdim, bases_per_component=50, ncomponents=5,
-                    means_init=None, lenscales_init=None):
+def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
+                    ncomponents=5, means_init=None, lenscales_init=None):
+    """
+    Make a Gaussian spectral mixture basis
+
+    This is a helper function for easily creating a Gaussian spectral mixture
+    basis from multiple FasFoodGM mixture components. This implements the full
+    Gaussian spectral mixture from "A la Carte - Learning Fast Kernels".
+
+    Parameters
+    ----------
+    Xdim: int
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
+    apply_ind: slice, optional
+        a slice or index into which columns of X to apply this basis to.  
+    bases_per_component: int, optional
+        a scalar for how many (unique) random bases to create approximately per
+        mixture component. Approximately 4x this number of non-unique bases
+        will be created per component, so 50 with 5 components is approx 1000
+        bases.
+    ncomponents: int, optional
+        Number of FastFoodGM components to use in the mixture.
+    means_init: list of Parameter, optional
+        A list of :code:`Parameter`, :code:`len(means_init) == ncomponents`,
+        to pass to each of the :code:`FastFoodGM`'s :code:`mean_init`
+        constructor values.
+    lenscale_init: list of Parameter, optional
+        A list of :code:`Parameter`, :code:`len(lenscales_init) == 
+        ncomponents`, to pass to each of the :code:`FastFoodGM`'s
+        :code:`lenscale_init` constructor values.
+
+    Returns
+    -------
+    GausSpecMix: BasisCat
+        A concatenation of :code:`FastFoodGM` bases to make the full mixture.
+    """
 
     if means_init is None:
-        means_init = [Parameter(np.random.randn(Xdim) + np.random.randn(1),
-                                Bound()) for _ in range(ncomponents)]
+        # Random values with random offset
+        if Xdim > 1:
+            means_init = [Parameter(np.random.randn(Xdim) + np.random.randn(1),
+                                    Bound()) for _ in range(ncomponents)]
+        else:
+            means_init = [Parameter(np.random.randn(), Bound())
+                          for _ in range(ncomponents)]
+    elif len(means_init) != ncomponents:
+        raise ValueError("Number of mean Parameters has to be equal to "
+                         "ncomponents!")
 
     if lenscales_init is None:
-        lenscales_init = [Parameter(gamma.rvs(3, scale=1. / 3, size=(Xdim,)),
+        # Expected value of 1, with not too much deviation about that value
+        size = None if Xdim == 1 else (Xdim,)
+        lenscales_init = [Parameter(gamma.rvs(3, scale=1. / 3, size=size),
                                     Positive()) for _ in range(ncomponents)]
+    elif len(lenscales_init) != ncomponents:
+        raise ValueError("Number of length scale Parameters has to be equal "
+                         "to ncomponents!")
 
+    # Initialise all of the bases
     mixtures = [FastFoodGM(Xdim=Xdim, nbases=bases_per_component, mean_init=m,
-                           lenscale_init=l)
+                           lenscale_init=l, apply_ind=apply_ind)
                 for m, l in zip(means_init, lenscales_init)]
 
-    return reduce(add, mixtures)
+    # Concatenate and return
+    return BasisCat(mixtures)
 
 
 #

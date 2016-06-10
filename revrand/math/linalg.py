@@ -160,6 +160,8 @@ def svd_solve(U, s, b):
 
     # Auto truncate SVD based on negative or zero singular values
     okind = np.where(s > 0)[0]
+    if len(okind) == 0:
+        raise LinAlgError("No positive singular values!")
 
     # Auto truncate the svd based on condition number and machine precision
     okind = okind[np.abs(s[okind].max() / s[okind]) < singvalthresh]

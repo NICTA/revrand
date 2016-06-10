@@ -14,7 +14,8 @@ Basis Functions
    RandomCauchy
    RandomMatern32
    RandomMatern52
-   FastFood
+   FastFoodRBF
+   FastFoodGM
 
 .. automodule:: revrand.basis_functions
    :members:
