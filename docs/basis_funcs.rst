@@ -8,6 +8,7 @@ Basis Functions
 
    LinearBasis
    PolynomialBasis
+   RadialBasis
    SigmoidalBasis
    RandomRBF
    RandomLaplace

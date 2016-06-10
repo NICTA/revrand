@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as pl
 from scipy.optimize import minimize
 from revrand.optimize import sgd, AdaDelta
-from revrand.basis_functions import RadialBasis
+from revrand import basis_functions as bf
 
 
 # Objective function
@@ -36,12 +36,12 @@ def sgd_demo():
     X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
     Y = np.sin(2 * np.pi * X.flatten()) + np.random.randn(nPoints) * var
     centres = np.linspace(0.0, 1.0, 20)[:, np.newaxis]
-    Phi = RadialBasis(centres)(X, 0.1)
+    Phi = bf.RadialBasis(centres)(X, 0.3)
     train_dat = np.hstack((Y[:, np.newaxis], Phi))
 
     Xs = np.linspace(0.0, 1.0, nQueries)[:, np.newaxis]
     Yt = np.sin(2 * np.pi * Xs.flatten())
-    Phi_s = RadialBasis(centres)(Xs, 0.1)
+    Phi_s = bf.RadialBasis(centres)(Xs, 0.3)
     w = np.linalg.solve(Phi.T.dot(Phi), Phi.T.dot(Y))
     Ys = Phi_s.dot(w)
 
@@ -66,9 +66,9 @@ def sgd_demo():
     # truth
     pl.plot(X, Y, 'r.', Xs, Yt, 'k-')
     # exact weights
-    pl.plot(Xs, Ys, 'c-')
-    pl.plot(Xs, Ys_grad, 'b-')
-    pl.plot(Xs, Ys_sgd, 'g-')
+    pl.plot(Xs, Ys, 'c:')
+    pl.plot(Xs, Ys_grad, 'b--')
+    pl.plot(Xs, Ys_sgd, 'g-.')
     pl.title('Function fitting')
     pl.xlabel('x')
     pl.ylabel('y')
