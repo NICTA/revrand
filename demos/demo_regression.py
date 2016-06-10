@@ -35,7 +35,7 @@ def main():
     noise_true = 0.1
 
     # Algorithmic properties
-    nbases = 200
+    nbases = 300
     lenscale = 1  # For all basis functions that take lengthscales
     noise = 1
     rho = 0.9
