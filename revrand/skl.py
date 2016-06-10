@@ -35,20 +35,16 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             optimiser function tolerance convergence criterion.
         maxit: int, optional
             maximum number of iterations for the optimiser.
-        verbose: bool, optional
-            log learning status.
     """
 
     def __init__(self, basis, var=Parameter(1., Positive()),
-                 regulariser=Parameter(1., Positive()), tol=1e-6, maxit=500,
-                 verbose=True):
+                 regulariser=Parameter(1., Positive()), tol=1e-6, maxit=500):
 
         self.basis = basis
         self.var = var
         self.regulariser = regulariser
         self.tol = tol
         self.maxit = maxit
-        self.verbose = verbose
 
     def fit(self, X, y):
         """
@@ -70,7 +66,6 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                       regulariser=self.regulariser,
                       tol=self.tol,
                       maxit=self.maxit,
-                      verbose=self.verbose
                       )
 
         return self
@@ -167,14 +162,12 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         alpha: float, optional
             The percentile confidence interval (e.g. 95%) to return from
             predict_proba.
-        verbose: bool, optional
-            log the learning status.
     """
 
     def __init__(self, likelihood, basis,
                  regulariser=Parameter(1., Positive()), postcomp=10,
                  use_sgd=True, maxit=1000, tol=1e-7, batchsize=100, rho=0.9,
-                 epsilon=1e-5, alpha=0.95, verbose=True):
+                 epsilon=1e-5, alpha=0.95):
 
         self.likelihood = likelihood
         self.basis = basis
@@ -187,7 +180,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.rho = rho
         self.epsilon = epsilon
         self.alpha = alpha
-        self.verbose = verbose
 
     def fit(self, X, y):
         """
@@ -211,8 +203,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                       tol=self.tol,
                       batchsize=self.batchsize,
                       rho=self.rho,
-                      epsilon=self.epsilon,
-                      verbose=self.verbose)
+                      epsilon=self.epsilon)
 
         return self
 

@@ -30,8 +30,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, basis, var=Parameter(1., Positive()), 
-          regulariser=Parameter(1., Positive()), tol=1e-6, maxit=1000,
-          verbose=True):
+          regulariser=Parameter(1., Positive()), tol=1e-6, maxit=1000):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
@@ -47,8 +46,6 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
             observation variance initial value.
         regulariser: Parameter, optional
             weight regulariser (variance) initial value.
-        verbose: bool, optional
-            log learning status.
         tol: float, optional
             optimiser function tolerance convergence criterion.
         maxit: int, optional
@@ -73,6 +70,17 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
         of a full posterior convariance matrix, this bound is tight and the
         exact solution will be found (modulo local minima for the
         hyperparameters).
+
+        This uses the python logging module for displaying learning status.
+        To view these messages have something like,
+
+        .. code ::
+
+            import logging
+            logging.basicConfig(level=logging.INFO)
+            log = logging.getLogger(__name__)
+
+        in your calling code.
     """
 
     N, d = X.shape
@@ -120,9 +128,8 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
             Ccache[:] = C
             ELBOcache[0] = ELBO
 
-        if verbose:
-            log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
-                     .format(ELBO, _var, _lambda, _theta))
+        log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
+                 .format(ELBO, _var, _lambda, _theta))
 
         # Grad var
         dvar = 0.5 * (-N + (sqErr + TrPhiPhiC) / _var) / _var
@@ -145,10 +152,8 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
                options={'maxiter': maxit, 'maxcor': 100})
     (var, regulariser), hypers = res.x[:2], res.x[2:]
 
-    if verbose:
-        log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, "
-                 "message = {}."
-                 .format(-res['fun'], var, regulariser, hypers, res.message))
+    log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, message = {}."
+             .format(-res['fun'], var, regulariser, hypers, res.message))
 
     return mcache, Ccache, hypers, var
 

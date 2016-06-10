@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 
 def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
           postcomp=10, use_sgd=True, maxit=1000, tol=1e-7, batchsize=100,
-          rho=0.9, epsilon=1e-5, verbose=True):
+          rho=0.9, epsilon=1e-5):
     """
     Learn the parameters of a Bayesian generalised linear model (GLM).
 
@@ -67,8 +67,6 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
             SGD decay rate, must be [0, 1]. Ignored if :code:`use_sgd=False`.
         epsilon: float, optional
             Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
-        verbose: bool, optional
-            log the learning status.
 
     Returns
     -------
@@ -115,6 +113,17 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
         Even though these changes make learning a little slower, and require
         third derivatives of the likelihoods, we obtain better results and we
         can use SGD straight-forwardly.
+
+        This uses the python logging module for displaying learning status.
+        To view these messages have something like,
+
+        .. code ::
+
+            import logging
+            logging.basicConfig(level=logging.INFO)
+            log = logging.getLogger(__name__)
+
+        in your calling code.
     """
 
     # Shapes of things
@@ -208,9 +217,8 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
                        + 0.5 * (_C * H).sum()
                        - logqk.sum() + np.log(K))
 
-        if verbose:
-            log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
-                     .format(L2, _reg, _lpars, _bpars))
+        log.info("L2 = {}, reg = {}, lparams = {}, bparams = {}"
+                 .format(L2, _reg, _lpars, _bpars))
 
         return -L2, append_or_extend([-dm, -dC, -dreg], dlp, dbp)
 
@@ -240,10 +248,9 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
     m, C, regulariser = res.x[:3]
     lparams, bparams = res.x[3:(3 + nlpams)], res.x[(3 + nlpams):]
 
-    if verbose:
-        log.info("Finished! Objective = {}, reg = {}, lparams = {}, "
-                 "bparams = {}, message: {}."
-                 .format(-res.fun, regulariser, lparams, bparams, res.message))
+    log.info("Finished! Objective = {}, reg = {}, lparams = {}, bparams = {},"
+             " message: {}."
+             .format(-res.fun, regulariser, lparams, bparams, res.message))
 
     return m, C, lparams, bparams
 
