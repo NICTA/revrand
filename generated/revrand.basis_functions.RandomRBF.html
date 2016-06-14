@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.RandomRBF &mdash; revrand 0.3.2 documentation</title>
+    <title>revrand.basis_functions.RandomRBF &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
     <link rel="next" title="revrand.basis_functions.RandomLaplace" href="revrand.basis_functions.RandomLaplace.html" />
     <link rel="prev" title="revrand.basis_functions.SigmoidalBasis" href="revrand.basis_functions.SigmoidalBasis.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.basis_functions.SigmoidalBasis.html" title="revrand.basis_functions.SigmoidalBasis"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
       </ul>
     </div>  
@@ -77,7 +77,8 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
 <li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
@@ -164,7 +165,7 @@ learned.</li>
         <li class="right" >
           <a href="revrand.basis_functions.SigmoidalBasis.html" title="revrand.basis_functions.SigmoidalBasis"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 
       </ul>
     </div>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Math Utilities &mdash; revrand 0.3.2 documentation</title>
+    <title>Math Utilities &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="index.html" />
-    <link rel="next" title="Scikit Learn Compatability Interface" href="skl.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
+    <link rel="next" title="Scikit Learn Compatibility Interface" href="skl.html" />
     <link rel="prev" title="revrand.utils.datasets.fetch_gpml_sarcos_data" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -46,12 +46,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="skl.html" title="Scikit Learn Compatability Interface"
+          <a href="skl.html" title="Scikit Learn Compatibility Interface"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -82,22 +82,30 @@ overhead to the original computation.</p>
 </div>
 <dl class="function">
 <dt id="revrand.math.linalg.cho_log_det">
-<code class="descclassname">revrand.math.linalg.</code><code class="descname">cho_log_det</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.cho_log_det" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the log of the determinant of <cite>A</cite>, given its (upper or lower)
-Cholesky factorization <cite>c</cite>.</p>
+<code class="descclassname">revrand.math.linalg.</code><code class="descname">cho_log_det</code><span class="sig-paren">(</span><em>L</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.cho_log_det" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the log of the determinant of <span class="math">\(A\)</span>, given its (upper or lower)
+Cholesky factorization <span class="math">\(LL^T\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>L</strong> (<em>ndarray</em>) &#8211; an upper or lower Cholesky factor</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
 <span class="gp">... </span>              <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
 <span class="gp">... </span>              <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">]])</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">cho_log_det</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Lt</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">cho_log_det</span><span class="p">(</span><span class="n">Lt</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">A</span><span class="p">)))</span>
 <span class="go">True</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">cho_log_det</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">L</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">cho_log_det</span><span class="p">(</span><span class="n">L</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">A</span><span class="p">)))</span>
 <span class="go">True</span>
 </pre></div>
 </div>
@@ -137,66 +145,90 @@ Cholesky factorization <cite>c</cite>.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.math.linalg.jitchol">
-<code class="descclassname">revrand.math.linalg.</code><code class="descname">jitchol</code><span class="sig-paren">(</span><em>a</em>, <em>jit=None</em>, <em>jit_max=0.001</em>, <em>returns_jit=False</em>, <em>lower=False</em>, <em>overwrite_a=False</em>, <em>check_finite=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.jitchol" title="Permalink to this definition">¶</a></dt>
-<dd><p>Do cholesky decomposition with a bit of diagonal jitter if needs be.</p>
+<dt id="revrand.math.linalg.solve_posdef">
+<code class="descclassname">revrand.math.linalg.</code><code class="descname">solve_posdef</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.solve_posdef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the system <span class="math">\(A X = b\)</span> for <span class="math">\(X\)</span> where <span class="math">\(A\)</span> is a
+positive semi-definite matrix.</p>
+<p>This first tries cholesky, and if numerically unstable with solve using a
+truncated SVD (see solve_posdef_svd).</p>
+<p>The log-determinant of <span class="math">\(A\)</span> is also returned since it requires minimal
+overhead.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> &#8211; a [NxN] positive definite symmetric matrix to be decomposed as
-A = L.dot(L.T).</li>
-<li><strong>lower</strong> &#8211; Return lower triangular factor, default False (upper).</li>
+<li><strong>A</strong> (<em>ndarray</em>) &#8211; A positive semi-definite matrix.</li>
+<li><strong>b</strong> (<em>ndarray</em>) &#8211; An array or matrix</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An upper or lower triangular matrix factor, L, also [NxN].
-Also wheter or not a the matrix is lower triangular form,
-(L, lower).</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; The result of <span class="math">\(X = A^-1 b\)</span></li>
+<li><strong>logdet</strong> (<em>float</em>) &#8211; The log-determinant of <span class="math">\(A\)</span></li>
+</ul>
+</p>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.math.linalg.svd_log_det">
+<code class="descclassname">revrand.math.linalg.</code><code class="descname">svd_log_det</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.svd_log_det" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the log of the determinant of <span class="math">\(A\)</span>, given its singular values
+from an SVD factorisation (i.e. <code class="code docutils literal"><span class="pre">s</span></code> from <code class="code docutils literal"><span class="pre">U,</span> <span class="pre">s,</span> <span class="pre">Ut</span> <span class="pre">=</span> <span class="pre">svd(A)</span></code>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>ndarray</em>) &#8211; the singular values from an SVD decomposition</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="n">j</span><span class="p">],</span>
-<span class="gp">... </span>              <span class="p">[</span><span class="mi">2</span><span class="n">j</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">jitchol</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="go">array([[ 1.+0.j,  0.+0.j],</span>
-<span class="go">       [ 0.+2.j,  1.+0.j]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="n">j</span><span class="p">],</span>
-<span class="gp">... </span>                      <span class="p">[</span><span class="mi">2</span><span class="n">j</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]))</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
 <span class="gp">... </span>              <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
 <span class="gp">... </span>              <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">U</span><span class="p">,</span> <span class="n">jit</span> <span class="o">=</span> <span class="n">jitchol</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">returns_jit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">U</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="go">array([[ 1.41, -0.71,  0.  ],</span>
-<span class="go">       [ 0.  ,  1.22, -0.82],</span>
-<span class="go">       [ 0.  ,  0.  ,  1.15]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">jit</span> <span class="ow">is</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">svd_log_det</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">A</span><span class="p">)))</span>
 <span class="go">True</span>
 </pre></div>
 </div>
-<p>Should remain unchanged</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
-<span class="go">array([[ 2, -1,  0],</span>
-<span class="go">       [-1,  2, -1],</span>
-<span class="go">       [ 0, -1,  2]])</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-<span class="gp">... </span>              <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">jitchol</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> 
-<span class="gt">Traceback (most recent call last):</span>
-    <span class="o">...</span>
-<span class="gr">LinAlgError</span>: <span class="n">Exceeded maximum jitter limit, yet a is still not positive</span>
-<span class="go">semidefinite!</span>
-</pre></div>
-</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.math.linalg.svd_solve">
+<code class="descclassname">revrand.math.linalg.</code><code class="descname">svd_solve</code><span class="sig-paren">(</span><em>U</em>, <em>s</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.svd_solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the system <span class="math">\(A X = b\)</span> for <span class="math">\(X\)</span> where <span class="math">\(A\)</span> is a
+positive semi-definite matrix using the singular value decomposition.</p>
+<p>This truncates the SVD so only dimensions corresponding to non-negative and
+sufficiently large singular values are used.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>U</strong> (<em>ndarray</em>) &#8211; The <code class="code docutils literal"><span class="pre">U</span></code> factor of <code class="code docutils literal"><span class="pre">U,</span> <span class="pre">s,</span> <span class="pre">Ut</span> <span class="pre">=</span> <span class="pre">svd(A)</span></code> positive
+semi-definite matrix.</li>
+<li><strong>s</strong> (<em>ndarray</em>) &#8211; The <code class="code docutils literal"><span class="pre">s</span></code> factor of <code class="code docutils literal"><span class="pre">U,</span> <span class="pre">s,</span> <span class="pre">Ut</span> <span class="pre">=</span> <span class="pre">svd(A)</span></code> positive
+semi-definite matrix.</li>
+<li><strong>b</strong> (<em>ndarray</em>) &#8211; An array or matrix</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; The result of <span class="math">\(X = A^-1 b\)</span></li>
+<li><strong>okind</strong> (<em>ndarray</em>) &#8211; The indices of <code class="code docutils literal"><span class="pre">s</span></code> that are kept in the factorisation</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -309,7 +341,7 @@ stable way (using the log-sum-exp trick).</p>
                         title="previous chapter">revrand.utils.datasets.fetch_gpml_sarcos_data</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="skl.html"
-                        title="next chapter">Scikit Learn Compatability Interface</a></p>
+                        title="next chapter">Scikit Learn Compatibility Interface</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -334,12 +366,12 @@ stable way (using the log-sum-exp trick).</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="skl.html" title="Scikit Learn Compatability Interface"
+          <a href="skl.html" title="Scikit Learn Compatibility Interface"
              >next</a> |</li>
         <li class="right" >
           <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalised Linear Models &mdash; revrand 0.3.2 documentation</title>
+    <title>Generalised Linear Model &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
-    <link rel="prev" title="revrand.basis_functions.FastFood" href="generated/revrand.basis_functions.FastFood.html" />
+    <link rel="prev" title="Standard Linear Model" href="slm.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -49,9 +49,9 @@
           <a href="likelihoods.html" title="Likelihood Classes"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="generated/revrand.basis_functions.FastFood.html" title="revrand.basis_functions.FastFood"
+          <a href="slm.html" title="Standard Linear Model"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -61,7 +61,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-revrand.glm">
-<span id="generalised-linear-models"></span><h1>Generalised Linear Models<a class="headerlink" href="#module-revrand.glm" title="Permalink to this headline">¶</a></h1>
+<span id="generalised-linear-model"></span><h1>Generalised Linear Model<a class="headerlink" href="#module-revrand.glm" title="Permalink to this headline">¶</a></h1>
 <p>Implementation of Bayesian GLMs with nonparametric variational inference <a class="footnote-reference" href="#id2" id="id1">[1]</a>,
 with a few modifications and tweaks.</p>
 <table class="docutils footnote" frame="void" id="id2" rules="none">
@@ -73,7 +73,7 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </table>
 <dl class="function">
 <dt id="revrand.glm.learn">
-<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batchsize=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batch_size=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters of a Bayesian generalised linear model (GLM).</p>
 <p>The learning algorithm uses nonparametric variational inference <a class="footnote-reference" href="#id2" id="id3">[1]</a>, and
 optionally stochastic gradients.</p>
@@ -96,11 +96,10 @@ L-BFGS.</li>
 <code class="code docutils literal"><span class="pre">use_sgd</span></code> is <code class="code docutils literal"><span class="pre">True</span></code> then this is the number of complete
 passes through the data before optimization terminates (unless it
 converges first).</li>
-<li><strong>batchsize</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch. Ignored if
+<li><strong>batch_size</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch. Ignored if
 <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
 <li><strong>rho</strong> (<em>float, optional</em>) &#8211; SGD decay rate, must be [0, 1]. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
 <li><strong>epsilon</strong> (<em>float, optional</em>) &#8211; Jitter term for adadelta SGD. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
-<li><strong>verbose</strong> (<em>bool, optional</em>) &#8211; log the learning status.</li>
 </ul>
 </td>
 </tr>
@@ -144,6 +143,14 @@ parameters together.</li>
 <p>Even though these changes make learning a little slower, and require
 third derivatives of the likelihoods, we obtain better results and we
 can use SGD straight-forwardly.</p>
+<p>This uses the python logging module for displaying learning status.
+To view these messages have something like,</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>in your calling code.</p>
 </dd></dl>
 
 <dl class="function">
@@ -291,8 +298,8 @@ the query inputs, Xs of shape (Ns,).</li>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="generated/revrand.basis_functions.FastFood.html"
-                        title="previous chapter">revrand.basis_functions.FastFood</a></p>
+  <p class="topless"><a href="slm.html"
+                        title="previous chapter">Standard Linear Model</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="likelihoods.html"
                         title="next chapter">Likelihood Classes</a></p>
@@ -323,9 +330,9 @@ the query inputs, Xs of shape (Ns,).</li>
           <a href="likelihoods.html" title="Likelihood Classes"
              >next</a> |</li>
         <li class="right" >
-          <a href="generated/revrand.basis_functions.FastFood.html" title="revrand.basis_functions.FastFood"
+          <a href="slm.html" title="Standard Linear Model"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

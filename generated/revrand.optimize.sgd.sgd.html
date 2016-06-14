@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.3.2 documentation</title>
+    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="../index.html" />
     <link rel="up" title="Optimization" href="../optimize.html" />
     <link rel="next" title="revrand.optimize.sgd.AdaDelta" href="revrand.optimize.sgd.AdaDelta.html" />
     <link rel="prev" title="revrand.optimize.base.candidate_start_points_random" href="revrand.optimize.base.candidate_start_points_random.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
       </ul>
     </div>  
@@ -66,7 +66,7 @@
 <h1>revrand.optimize.sgd.sgd<a class="headerlink" href="#revrand-optimize-sgd-sgd" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="revrand.optimize.sgd.sgd">
-<code class="descclassname">revrand.optimize.sgd.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>Data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batchsize=100</em>, <em>passes=10</em>, <em>updater=None</em>, <em>gtol=0.001</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.sgd" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.optimize.sgd.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>Data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batch_size=100</em>, <em>passes=10</em>, <em>updater=None</em>, <em>gtol=0.001</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stochastic Gradient Descent, using ADADELTA for setting the learning
 rate.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -88,7 +88,7 @@ split along the first axis (axis=0), and then input into <cite>fun</cite>.</li>
 <li><strong>bounds</strong> (<em>sequence, optional</em>) &#8211; Bounds for variables, (min, max) pairs for each element in x,
 defining the bounds on that parameter.  Use None for one of min or
 max when there is no bound in that direction.</li>
-<li><strong>batchsize</strong> (<em>int, optional</em>) &#8211; The number of observations in an SGD batch.</li>
+<li><strong>batch_size</strong> (<em>int, optional</em>) &#8211; The number of observations in an SGD batch.</li>
 <li><strong>passes</strong> (<em>int, optional</em>) &#8211; Number of complete passes through the data before optimization
 terminates (unless it converges first).</li>
 <li><strong>updater</strong> (<em>SGDUpdater, optional</em>) &#8211; The type of gradient update to use, by default this is AdaDelta</li>
@@ -174,7 +174,7 @@ True.</p>
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
       </ul>
     </div>

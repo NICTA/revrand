@@ -28,7 +28,7 @@ nbases = 200
 lenscale = 10
 doSGD = True
 passes = 30
-batchsize = 10
+batch_size = 10
 
 #
 # Load data
@@ -63,7 +63,7 @@ Phi = RandomRBF(nbases, X.shape[1],
                 lenscale_init=Parameter(lenscale, Positive()))
 llhood = Bernoulli()
 params = glm.learn(X, Y, llhood, Phi, use_sgd=doSGD,
-                   maxit=passes, batchsize=batchsize)
+                   maxit=passes, batch_size=batch_size)
 
 # Predict
 pys_l, Vpy, Epn, Epx = glm.predict_moments(Xs, llhood, Phi, *params)

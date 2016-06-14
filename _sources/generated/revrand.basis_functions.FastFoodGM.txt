@@ -1,0 +1,29 @@
+revrand.basis_functions.FastFoodGM
+==================================
+
+.. currentmodule:: revrand.basis_functions
+
+.. autoclass:: FastFoodGM
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FastFoodGM.__init__
+      ~FastFoodGM.grad
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FastFoodGM.params
+   
+   

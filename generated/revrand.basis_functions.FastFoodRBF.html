@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.FastFood &mdash; revrand 0.3.2 documentation</title>
+    <title>revrand.basis_functions.FastFoodRBF &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="Generalised Linear Models" href="../glm.html" />
+    <link rel="next" title="revrand.basis_functions.FastFoodGM" href="revrand.basis_functions.FastFoodGM.html" />
     <link rel="prev" title="revrand.basis_functions.RandomMatern52" href="revrand.basis_functions.RandomMatern52.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../glm.html" title="Generalised Linear Models"
+          <a href="revrand.basis_functions.FastFoodGM.html" title="revrand.basis_functions.FastFoodGM"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="revrand.basis_functions.RandomMatern52.html" title="revrand.basis_functions.RandomMatern52"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
       </ul>
     </div>  
@@ -62,12 +62,12 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="revrand-basis-functions-fastfood">
-<h1>revrand.basis_functions.FastFood<a class="headerlink" href="#revrand-basis-functions-fastfood" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="revrand-basis-functions-fastfoodrbf">
+<h1>revrand.basis_functions.FastFoodRBF<a class="headerlink" href="#revrand-basis-functions-fastfoodrbf" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="revrand.basis_functions.FastFood">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFood</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fast Food basis function, which is an approximation of the random
+<dt id="revrand.basis_functions.FastFoodRBF">
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast Food radial basis function, which is an approximation of the random
 radial basis function for a large number of bases.</p>
 <p>This will make a linear regression model approximate a GP with an RBF
 covariance function.</p>
@@ -76,19 +76,22 @@ covariance function.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>nbases</strong> (<em>int</em>) &#8211; a scalar for how many random bases to create approximately, this
-actually will be to the neareset larger two power.</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations.</li>
-<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
-optimization</li>
+<li><strong>nbases</strong> (<em>int</em>) &#8211; a scalar for how many (unique) random bases to create approximately,
+this actually will be to the nearest larger two power.</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+initialise the length scales for optimization. If this is shape (d,),
+ARD length scales will be expected, otherwise an isotropic lenscale is
+learned.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.FastFood.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFood.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.basis_functions.FastFoodRBF.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -98,10 +101,10 @@ optimization</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.FastFood.__init__" title="revrand.basis_functions.FastFood.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.FastFoodRBF.__init__" title="revrand.basis_functions.FastFoodRBF.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="../basis_funcs.html#revrand.basis_functions.FastFood.grad" title="revrand.basis_functions.FastFood.grad"><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code></a>(X,&nbsp;lenscale)</td>
+<tr class="row-even"><td><a class="reference internal" href="../basis_funcs.html#revrand.basis_functions.FastFoodRBF.grad" title="revrand.basis_functions.FastFoodRBF.grad"><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code></a>(X,&nbsp;lenscale)</td>
 <td>Get the gradients of this basis w.r.t.the length scale.</td>
 </tr>
 </tbody>
@@ -132,8 +135,8 @@ optimization</li>
   <p class="topless"><a href="revrand.basis_functions.RandomMatern52.html"
                         title="previous chapter">revrand.basis_functions.RandomMatern52</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../glm.html"
-                        title="next chapter">Generalised Linear Models</a></p>
+  <p class="topless"><a href="revrand.basis_functions.FastFoodGM.html"
+                        title="next chapter">revrand.basis_functions.FastFoodGM</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -158,12 +161,12 @@ optimization</li>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../glm.html" title="Generalised Linear Models"
+          <a href="revrand.basis_functions.FastFoodGM.html" title="revrand.basis_functions.FastFoodGM"
              >next</a> |</li>
         <li class="right" >
           <a href="revrand.basis_functions.RandomMatern52.html" title="revrand.basis_functions.RandomMatern52"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.3.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 
       </ul>
     </div>

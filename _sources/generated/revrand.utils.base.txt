@@ -16,6 +16,7 @@ revrand.utils.base
       decouple
       flatten
       isgenerator
+      issequence
       map_indices
       nwise
       tee

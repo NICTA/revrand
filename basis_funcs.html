@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Basis Functions &mdash; revrand 0.3.2 documentation</title>
+    <title>Basis Functions &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
     <link rel="next" title="revrand.basis_functions.LinearBasis" href="generated/revrand.basis_functions.LinearBasis.html" />
     <link rel="prev" title="Installation" href="installation.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -74,26 +74,35 @@
 <tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.PolynomialBasis.html#revrand.basis_functions.PolynomialBasis" title="revrand.basis_functions.PolynomialBasis"><code class="xref py py-obj docutils literal"><span class="pre">PolynomialBasis</span></code></a>(order[,&nbsp;include_bias])</td>
 <td>Polynomial basis class, this essentially creates the concatenation, <span class="math">\(\boldsymbol\Phi = [\mathbf{X}^0, \mathbf{X}^1, ..., \mathbf{X}^p]\)</span> where <span class="math">\(p\)</span> is the <code class="code docutils literal"><span class="pre">order</span></code> of the polynomial.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.SigmoidalBasis.html#revrand.basis_functions.SigmoidalBasis" title="revrand.basis_functions.SigmoidalBasis"><code class="xref py py-obj docutils literal"><span class="pre">SigmoidalBasis</span></code></a>(centres[,&nbsp;lenscale_init])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.RadialBasis.html#revrand.basis_functions.RadialBasis" title="revrand.basis_functions.RadialBasis"><code class="xref py py-obj docutils literal"><span class="pre">RadialBasis</span></code></a>(centres[,&nbsp;lenscale_init])</td>
+<td>Radial basis class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.SigmoidalBasis.html#revrand.basis_functions.SigmoidalBasis" title="revrand.basis_functions.SigmoidalBasis"><code class="xref py py-obj docutils literal"><span class="pre">SigmoidalBasis</span></code></a>(centres[,&nbsp;lenscale_init])</td>
 <td>Sigmoidal Basis</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomRBF.html#revrand.basis_functions.RandomRBF" title="revrand.basis_functions.RandomRBF"><code class="xref py py-obj docutils literal"><span class="pre">RandomRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomRBF.html#revrand.basis_functions.RandomRBF" title="revrand.basis_functions.RandomRBF"><code class="xref py py-obj docutils literal"><span class="pre">RandomRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
 <td>Random RBF Basis &#8211; Approximates an RBF kernel function</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomLaplace.html#revrand.basis_functions.RandomLaplace" title="revrand.basis_functions.RandomLaplace"><code class="xref py py-obj docutils literal"><span class="pre">RandomLaplace</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomLaplace.html#revrand.basis_functions.RandomLaplace" title="revrand.basis_functions.RandomLaplace"><code class="xref py py-obj docutils literal"><span class="pre">RandomLaplace</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
 <td>Random Laplace Basis &#8211; Approximates a Laplace kernel function</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomCauchy.html#revrand.basis_functions.RandomCauchy" title="revrand.basis_functions.RandomCauchy"><code class="xref py py-obj docutils literal"><span class="pre">RandomCauchy</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomCauchy.html#revrand.basis_functions.RandomCauchy" title="revrand.basis_functions.RandomCauchy"><code class="xref py py-obj docutils literal"><span class="pre">RandomCauchy</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
 <td>Random Cauchy Basis &#8211; Approximates a Cauchy kernel function</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomMatern32.html#revrand.basis_functions.RandomMatern32" title="revrand.basis_functions.RandomMatern32"><code class="xref py py-obj docutils literal"><span class="pre">RandomMatern32</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomMatern32.html#revrand.basis_functions.RandomMatern32" title="revrand.basis_functions.RandomMatern32"><code class="xref py py-obj docutils literal"><span class="pre">RandomMatern32</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
 <td>Random Matern 3/2 Basis &#8211; Approximates a Matern 3/2 kernel function</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomMatern52.html#revrand.basis_functions.RandomMatern52" title="revrand.basis_functions.RandomMatern52"><code class="xref py py-obj docutils literal"><span class="pre">RandomMatern52</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomMatern52.html#revrand.basis_functions.RandomMatern52" title="revrand.basis_functions.RandomMatern52"><code class="xref py py-obj docutils literal"><span class="pre">RandomMatern52</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
 <td>Random Matern 5/2 Basis &#8211; Approximates a Matern 5/2 kernel function</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.FastFood.html#revrand.basis_functions.FastFood" title="revrand.basis_functions.FastFood"><code class="xref py py-obj docutils literal"><span class="pre">FastFood</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
-<td>Fast Food basis function, which is an approximation of the random radial basis function for a large number of bases.</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.FastFoodRBF.html#revrand.basis_functions.FastFoodRBF" title="revrand.basis_functions.FastFoodRBF"><code class="xref py py-obj docutils literal"><span class="pre">FastFoodRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<td>Fast Food radial basis function, which is an approximation of the random radial basis function for a large number of bases.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.FastFoodGM.html#revrand.basis_functions.FastFoodGM" title="revrand.basis_functions.FastFoodGM"><code class="xref py py-obj docutils literal"><span class="pre">FastFoodGM</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;mean_init,&nbsp;...])</td>
+<td>A single mixture component from a Gaussian spectral mixture kernel approximation.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.spectralmixture.html#revrand.basis_functions.spectralmixture" title="revrand.basis_functions.spectralmixture"><code class="xref py py-obj docutils literal"><span class="pre">spectralmixture</span></code></a>(Xdim[,&nbsp;apply_ind,&nbsp;...])</td>
+<td>Make a Gaussian spectral mixture basis</td>
 </tr>
 </tbody>
 </table>
@@ -181,9 +190,99 @@ on the dimensions of the basis function parameters. If there are
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.FastFood">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFood</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fast Food basis function, which is an approximation of the random
+<dt id="revrand.basis_functions.FastFoodGM">
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodGM</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single mixture component from a Gaussian spectral mixture kernel
+approximation.</p>
+<p>This (paritally) implements the GM basis from &#8220;A la Carte - Learning Fast
+Kernels&#8221;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nbases</strong> (<em>int</em>) &#8211; a scalar for how many (unique) random bases to create approximately,
+this actually will be to the nearest larger two power.</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>mean_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+initialise the component frequency means for optimization. This will
+always initialise (d,) means if a scalr bound is given, it is applied
+to all means.</li>
+<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+initialise the length scales for optimization. This will always
+initialise ARD length scales, if a scalr bound is given, it is applied
+to all length scales.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="revrand.basis_functions.FastFoodGM.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>mean</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the spectral mixture component basis to X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
+d is the dimensionality of X.</li>
+<li><strong>mean</strong> (<em>ndarray</em>) &#8211; array of shape (d,) frequency means (one for each dimension of X).</li>
+<li><strong>lenscale</strong> (<em>ndarray</em>) &#8211; array of shape (d,) length scales (one for each dimension of X).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">of shape (N, 4*nbases) where nbases is number of random bases to
+use, given in the constructor (to nearest larger two power).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="revrand.basis_functions.FastFoodGM.grad">
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>mean</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.grad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the gradients of this basis w.r.t.the frequency mean and length
+scale.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>ndarray</em>) &#8211; (n, d) array of observations where n is the number of samples, and
+d is the dimensionality of x.</li>
+<li><strong>mean</strong> (<em>ndarray</em>) &#8211; array of shape (d,) frequency means (one for each dimension of X).</li>
+<li><strong>lenscale</strong> (<em>ndarray</em>) &#8211; array of shape (d,) length scales (one for each dimension of X).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><em>ndarray</em> &#8211; shape (n, 4*nbases) where nbases is number of random rbf bases,
+again to the nearest larger two power. This is
+<span class="math">\(\partial \phi(\mathbf{x}) / \partial mu\)</span></li>
+<li><em>ndarray</em> &#8211; shape (n, 4*nbases) where nbases is number of random rbf bases,
+again to the nearest larger two power. This is
+<span class="math">\(\partial \phi(\mathbf{x}) / \partial l\)</span></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="revrand.basis_functions.FastFoodRBF">
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast Food radial basis function, which is an approximation of the random
 radial basis function for a large number of bases.</p>
 <p>This will make a linear regression model approximate a GP with an RBF
 covariance function.</p>
@@ -192,19 +291,22 @@ covariance function.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>nbases</strong> (<em>int</em>) &#8211; a scalar for how many random bases to create approximately, this
-actually will be to the neareset larger two power.</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations.</li>
-<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
-optimization</li>
+<li><strong>nbases</strong> (<em>int</em>) &#8211; a scalar for how many (unique) random bases to create approximately,
+this actually will be to the nearest larger two power.</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+initialise the length scales for optimization. If this is shape (d,),
+ARD length scales will be expected, otherwise an isotropic lenscale is
+learned.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.FastFood.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFood.__call__" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.basis_functions.FastFoodRBF.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the Fast Food RBF basis to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -213,7 +315,8 @@ optimization</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -229,23 +332,24 @@ use, given in the constructor (to nearest larger two power).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.basis_functions.FastFood.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFood.grad" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.basis_functions.FastFoodRBF.grad">
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF.grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the gradients of this basis w.r.t.the length scale.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
-d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>x</strong> (<em>ndarray</em>) &#8211; (n, d) array of observations where n is the number of samples, and
+d is the dimensionality of x.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of x).</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">shape (N, 2*nbases) where nbases is number of random RBF bases,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">shape (n, 2*nbases) where nbases is number of random rbf bases,
 again to the nearest larger two power. This is
-<span class="math">\(\partial \Phi(\mathbf{X}) / \partial l\)</span></p>
+<span class="math">\(\partial \phi(\mathbf{x}) / \partial l\)</span></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -343,8 +447,10 @@ column.</td>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for the
 radial bases, and d is the dimensionality of X.</li>
-<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
-optimization</li>
+<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+initialise the length scales for optimization. If this is shape (d,),
+ARD length scales will be expected, otherwise an isotropic lenscale is
+learned.</li>
 </ul>
 </td>
 </tr>
@@ -365,7 +471,8 @@ optimization</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -390,7 +497,8 @@ d is the dimensionality of X.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -420,7 +528,8 @@ d is the dimensionality of X.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
 <li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
@@ -445,7 +554,8 @@ learned.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
 <li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
@@ -470,7 +580,8 @@ learned.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
 <li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
@@ -495,7 +606,8 @@ learned.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
 <li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
@@ -520,7 +632,8 @@ learned.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
 <li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
@@ -751,6 +864,45 @@ apply_ind. E.g.,</p>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="revrand.basis_functions.spectralmixture">
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">spectralmixture</code><span class="sig-paren">(</span><em>Xdim</em>, <em>apply_ind=None</em>, <em>bases_per_component=50</em>, <em>ncomponents=5</em>, <em>means_init=None</em>, <em>lenscales_init=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.spectralmixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a Gaussian spectral mixture basis</p>
+<p>This is a helper function for easily creating a Gaussian spectral mixture
+basis from multiple FasFoodGM mixture components. This implements the full
+Gaussian spectral mixture from &#8220;A la Carte - Learning Fast Kernels&#8221;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>apply_ind</strong> (<em>slice, optional</em>) &#8211; a slice or index into which columns of X to apply this basis to.</li>
+<li><strong>bases_per_component</strong> (<em>int, optional</em>) &#8211; a scalar for how many (unique) random bases to create approximately per
+mixture component. Approximately 4x this number of non-unique bases
+will be created per component, so 50 with 5 components is approx 1000
+bases.</li>
+<li><strong>ncomponents</strong> (<em>int, optional</em>) &#8211; Number of FastFoodGM components to use in the mixture.</li>
+<li><strong>means_init</strong> (<em>list of Parameter, optional</em>) &#8211; A list of <code class="code docutils literal"><span class="pre">Parameter</span></code>, <code class="code docutils literal"><span class="pre">len(means_init)</span> <span class="pre">==</span> <span class="pre">ncomponents</span></code>,
+to pass to each of the <code class="code docutils literal"><span class="pre">FastFoodGM</span></code>&#8216;s <code class="code docutils literal"><span class="pre">mean_init</span></code>
+constructor values.</li>
+<li><strong>lenscale_init</strong> (<em>list of Parameter, optional</em>) &#8211; A list of <code class="code docutils literal"><span class="pre">Parameter</span></code>, <code class="code docutils literal"><span class="pre">len(lenscales_init)</span> <span class="pre">==</span>
+<span class="pre">ncomponents</span></code>, to pass to each of the <code class="code docutils literal"><span class="pre">FastFoodGM</span></code>&#8216;s
+<code class="code docutils literal"><span class="pre">lenscale_init</span></code> constructor values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>GausSpecMix</strong> &#8211; A concatenation of <code class="code docutils literal"><span class="pre">FastFoodGM</span></code> bases to make the full mixture.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#revrand.basis_functions.BasisCat" title="revrand.basis_functions.BasisCat">BasisCat</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
@@ -794,7 +946,7 @@ apply_ind. E.g.,</p>
         <li class="right" >
           <a href="installation.html" title="Installation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

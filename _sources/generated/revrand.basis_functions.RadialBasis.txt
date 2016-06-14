@@ -1,9 +1,9 @@
-revrand.basis_functions.FastFood
-================================
+revrand.basis_functions.RadialBasis
+===================================
 
 .. currentmodule:: revrand.basis_functions
 
-.. autoclass:: FastFood
+.. autoclass:: RadialBasis
 
    
    .. automethod:: __init__
@@ -13,8 +13,8 @@ revrand.basis_functions.FastFood
 
    .. autosummary::
    
-      ~FastFood.__init__
-      ~FastFood.grad
+      ~RadialBasis.__init__
+      ~RadialBasis.grad
    
    
 
@@ -24,6 +24,6 @@ revrand.basis_functions.FastFood
 
    .. autosummary::
    
-      ~FastFood.params
+      ~RadialBasis.params
    
    

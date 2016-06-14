@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Scikit Learn Compatibility Interface &mdash; revrand 0.3.2 documentation</title>
+    <title>Scikit Learn Compatibility Interface &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
     <link rel="next" title="Demos" href="demo.html" />
     <link rel="prev" title="Math Utilities" href="math.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="math.html" title="Math Utilities"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,8 +71,34 @@ objects. You can still use the original basis function objects with the
 regression wrappers here though.</p>
 </div>
 <dl class="class">
+<dt id="revrand.skl.FastFoodRBF">
+<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">FastFoodRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.FastFoodRBF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="generated/revrand.basis_functions.FastFoodRBF.html#revrand.basis_functions.FastFoodRBF" title="revrand.basis_functions.FastFoodRBF"><code class="xref py py-class docutils literal"><span class="pre">revrand.basis_functions.FastFoodRBF</span></code></a>, <a class="reference internal" href="#revrand.skl.RandomRBF" title="revrand.skl.RandomRBF"><code class="xref py py-class docutils literal"><span class="pre">revrand.skl.RandomRBF</span></code></a></p>
+<p>Fast Food radial basis function, which is an approximation of the random
+radial basis function for a large number of bases.</p>
+<p>This will make a linear regression model approximate a GP with an RBF
+covariance function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nbases</strong> (<em>int</em>) &#8211; a scalar for how many (unique) random bases to create approximately,
+this actually will be to the nearest larger two power.</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
 <dt id="revrand.skl.GeneralisedLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batchsize=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em>, <em>alpha=0.95</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batch_size=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em>, <em>alpha=0.95</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.BaseEstimator</span></code>, <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.RegressorMixin</span></code></p>
 <p>Generalised linear model interface class.</p>
 <p>This provides a scikit learn compatible interface for the glm module.</p>
@@ -93,13 +119,12 @@ L-BFGS.</li>
 <code class="code docutils literal"><span class="pre">use_sgd</span></code> is <code class="code docutils literal"><span class="pre">True</span></code> then this is the number of complete
 passes through the data before optimization terminates (unless it
 converges first).</li>
-<li><strong>batchsize</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch. Ignored if
+<li><strong>batch_size</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch. Ignored if
 <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
 <li><strong>rho</strong> (<em>float, optional</em>) &#8211; SGD decay rate, must be [0, 1]. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
 <li><strong>epsilon</strong> (<em>float, optional</em>) &#8211; Jitter term for adadelta SGD. Ignored if <code class="code docutils literal"><span class="pre">use_sgd=False</span></code>.</li>
 <li><strong>alpha</strong> (<em>float, optional</em>) &#8211; The percentile confidence interval (e.g. 95%) to return from
 predict_proba.</li>
-<li><strong>verbose</strong> (<em>bool, optional</em>) &#8211; log the learning status.</li>
 </ul>
 </td>
 </tr>
@@ -214,7 +239,7 @@ acts as the intercept term in a linear model)</li>
 <dl class="class">
 <dt id="revrand.skl.RadialBasis">
 <em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">RadialBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.RadialBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="basis_funcs.html#revrand.basis_functions.RadialBasis" title="revrand.basis_functions.RadialBasis"><code class="xref py py-class docutils literal"><span class="pre">revrand.basis_functions.RadialBasis</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">revrand.skl._BaseBasis</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="generated/revrand.basis_functions.RadialBasis.html#revrand.basis_functions.RadialBasis" title="revrand.basis_functions.RadialBasis"><code class="xref py py-class docutils literal"><span class="pre">revrand.basis_functions.RadialBasis</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">revrand.skl._BaseBasis</span></code></p>
 <p>Radial basis class.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -223,7 +248,8 @@ acts as the intercept term in a linear model)</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for the
 radial bases, and d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -250,7 +276,8 @@ radial bases, and d is the dimensionality of X.</li>
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -273,7 +300,8 @@ actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -296,7 +324,8 @@ actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -319,7 +348,8 @@ actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -342,7 +372,8 @@ actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -362,7 +393,8 @@ actually created, i.e. real and imaginary components for each base)</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for the bases,
 and d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>float</em>) &#8211; the length scale (scalar) of the RBFs to apply to X.</li>
+<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+of X).</li>
 </ul>
 </td>
 </tr>
@@ -372,7 +404,7 @@ and d is the dimensionality of X.</li>
 
 <dl class="class">
 <dt id="revrand.skl.StandardLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-06</em>, <em>maxit=500</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-06</em>, <em>maxit=500</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.BaseEstimator</span></code>, <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.RegressorMixin</span></code></p>
 <p>Standard linear model interface class.</p>
 <p>This provides a scikit learn compatible interface for the slm module.</p>
@@ -386,7 +418,6 @@ and d is the dimensionality of X.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
 <li><strong>maxit</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
-<li><strong>verbose</strong> (<em>bool, optional</em>) &#8211; log learning status.</li>
 </ul>
 </td>
 </tr>
@@ -499,7 +530,7 @@ X_star of shape (N_star,).</li>
         <li class="right" >
           <a href="math.html" title="Math Utilities"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

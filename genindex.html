@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; revrand 0.3.2 documentation</title>
+    <title>Index &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.2',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.3.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,7 +66,6 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
- | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -86,7 +85,11 @@
 
       <dd><dl>
         
-  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFood.__call__">(revrand.basis_functions.FastFood method)</a>
+  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFoodGM.__call__">(revrand.basis_functions.FastFoodGM method)</a>
+  </dt>
+
+        
+  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFoodRBF.__call__">(revrand.basis_functions.FastFoodRBF method)</a>
   </dt>
 
         
@@ -113,16 +116,24 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="generated/revrand.basis_functions.FastFood.html#revrand.basis_functions.FastFood.__init__">__init__() (revrand.basis_functions.FastFood method)</a>
+  <dt><a href="generated/revrand.basis_functions.FastFoodGM.html#revrand.basis_functions.FastFoodGM.__init__">__init__() (revrand.basis_functions.FastFoodGM method)</a>
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="generated/revrand.basis_functions.FastFoodRBF.html#revrand.basis_functions.FastFoodRBF.__init__">(revrand.basis_functions.FastFoodRBF method)</a>
+  </dt>
+
         
   <dt><a href="generated/revrand.basis_functions.LinearBasis.html#revrand.basis_functions.LinearBasis.__init__">(revrand.basis_functions.LinearBasis method)</a>
   </dt>
 
         
   <dt><a href="generated/revrand.basis_functions.PolynomialBasis.html#revrand.basis_functions.PolynomialBasis.__init__">(revrand.basis_functions.PolynomialBasis method)</a>
+  </dt>
+
+        
+  <dt><a href="generated/revrand.basis_functions.RadialBasis.html#revrand.basis_functions.RadialBasis.__init__">(revrand.basis_functions.RadialBasis method)</a>
   </dt>
 
         
@@ -373,9 +384,19 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFood">FastFood (class in revrand.basis_functions)</a>, <a href="generated/revrand.basis_functions.FastFood.html#revrand.basis_functions.FastFood">[1]</a>
+  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFoodGM">FastFoodGM (class in revrand.basis_functions)</a>, <a href="generated/revrand.basis_functions.FastFoodGM.html#revrand.basis_functions.FastFoodGM">[1]</a>
   </dt>
 
+      
+  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFoodRBF">FastFoodRBF (class in revrand.basis_functions)</a>, <a href="generated/revrand.basis_functions.FastFoodRBF.html#revrand.basis_functions.FastFoodRBF">[1]</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="skl.html#revrand.skl.FastFoodRBF">(class in revrand.skl)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html#revrand.utils.datasets.fetch_gpml_sarcos_data">fetch_gpml_sarcos_data() (in module revrand.utils.datasets)</a>
   </dt>
@@ -434,7 +455,11 @@
 
       <dd><dl>
         
-  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFood.grad">(revrand.basis_functions.FastFood method)</a>
+  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFoodGM.grad">(revrand.basis_functions.FastFoodGM method)</a>
+  </dt>
+
+        
+  <dt><a href="basis_funcs.html#revrand.basis_functions.FastFoodRBF.grad">(revrand.basis_functions.FastFoodRBF method)</a>
   </dt>
 
         
@@ -463,16 +488,6 @@
   </dl></td>
 </tr></table>
 
-<h2 id="J">J</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="math.html#revrand.math.linalg.jitchol">jitchol() (in module revrand.math.linalg)</a>
-  </dt>
-
-  </dl></td>
-</tr></table>
-
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
@@ -480,6 +495,12 @@
   <dt><a href="glm.html#revrand.glm.learn">learn() (in module revrand.glm)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="slm.html#revrand.slm.learn">(in module revrand.slm)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="basis_funcs.html#revrand.basis_functions.LinearBasis">LinearBasis (class in revrand.basis_functions)</a>, <a href="generated/revrand.basis_functions.LinearBasis.html#revrand.basis_functions.LinearBasis">[1]</a>
   </dt>
@@ -609,10 +630,14 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="skl.html#revrand.skl.GeneralisedLinearModel.predict">predict() (revrand.skl.GeneralisedLinearModel method)</a>
+  <dt><a href="slm.html#revrand.slm.predict">predict() (in module revrand.slm)</a>
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skl.html#revrand.skl.GeneralisedLinearModel.predict">(revrand.skl.GeneralisedLinearModel method)</a>
+  </dt>
+
         
   <dt><a href="skl.html#revrand.skl.StandardLinearModel.predict">(revrand.skl.StandardLinearModel method)</a>
   </dt>
@@ -647,7 +672,7 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="basis_funcs.html#revrand.basis_functions.RadialBasis">RadialBasis (class in revrand.basis_functions)</a>
+  <dt><a href="basis_funcs.html#revrand.basis_functions.RadialBasis">RadialBasis (class in revrand.basis_functions)</a>, <a href="generated/revrand.basis_functions.RadialBasis.html#revrand.basis_functions.RadialBasis">[1]</a>
   </dt>
 
       <dd><dl>
@@ -714,12 +739,12 @@
   <dt><a href="btypes.html#module-revrand.btypes">revrand.btypes (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="glm.html#module-revrand.glm">revrand.glm (module)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="likelihoods.html#module-revrand.likelihoods">revrand.likelihoods (module)</a>
   </dt>
@@ -742,6 +767,10 @@
 
       
   <dt><a href="skl.html#module-revrand.skl">revrand.skl (module)</a>
+  </dt>
+
+      
+  <dt><a href="slm.html#module-revrand.slm">revrand.slm (module)</a>
   </dt>
 
       
@@ -784,14 +813,22 @@
   <dt><a href="metrics.html#revrand.metrics.smse">smse() (in module revrand.metrics)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="math.html#revrand.math.special.softmax">softmax() (in module revrand.math.special)</a>
   </dt>
 
       
   <dt><a href="math.html#revrand.math.special.softplus">softplus() (in module revrand.math.special)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="math.html#revrand.math.linalg.solve_posdef">solve_posdef() (in module revrand.math.linalg)</a>
+  </dt>
+
+      
+  <dt><a href="basis_funcs.html#revrand.basis_functions.spectralmixture">spectralmixture() (in module revrand.basis_functions)</a>, <a href="generated/revrand.basis_functions.spectralmixture.html#revrand.basis_functions.spectralmixture">[1]</a>
   </dt>
 
       
@@ -804,6 +841,14 @@
 
       
   <dt><a href="generated/revrand.optimize.base.structured_sgd.html#revrand.optimize.base.structured_sgd">structured_sgd() (in module revrand.optimize.base)</a>
+  </dt>
+
+      
+  <dt><a href="math.html#revrand.math.linalg.svd_log_det">svd_log_det() (in module revrand.math.linalg)</a>
+  </dt>
+
+      
+  <dt><a href="math.html#revrand.math.linalg.svd_solve">svd_solve() (in module revrand.math.linalg)</a>
   </dt>
 
   </dl></td>
@@ -868,7 +913,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.3.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.LinearBasis &mdash; revrand 0.4.0 documentation</title>
+    <title>revrand.basis_functions.spectralmixture &mdash; revrand 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.4.0 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="revrand.basis_functions.PolynomialBasis" href="revrand.basis_functions.PolynomialBasis.html" />
-    <link rel="prev" title="Basis Functions" href="../basis_funcs.html" />
+    <link rel="next" title="Standard Linear Model" href="../slm.html" />
+    <link rel="prev" title="revrand.basis_functions.FastFoodGM" href="revrand.basis_functions.FastFoodGM.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -47,10 +47,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.PolynomialBasis.html" title="revrand.basis_functions.PolynomialBasis"
+          <a href="../slm.html" title="Standard Linear Model"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../basis_funcs.html" title="Basis Functions"
+          <a href="revrand.basis_functions.FastFoodGM.html" title="revrand.basis_functions.FastFoodGM"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
@@ -62,49 +62,42 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="revrand-basis-functions-linearbasis">
-<h1>revrand.basis_functions.LinearBasis<a class="headerlink" href="#revrand-basis-functions-linearbasis" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="revrand.basis_functions.LinearBasis">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">LinearBasis</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.LinearBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Linear basis class, basically this just prepends a columns of ones onto X</p>
+  <div class="section" id="revrand-basis-functions-spectralmixture">
+<h1>revrand.basis_functions.spectralmixture<a class="headerlink" href="#revrand-basis-functions-spectralmixture" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="revrand.basis_functions.spectralmixture">
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">spectralmixture</code><span class="sig-paren">(</span><em>Xdim</em>, <em>apply_ind=None</em>, <em>bases_per_component=50</em>, <em>ncomponents=5</em>, <em>means_init=None</em>, <em>lenscales_init=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.spectralmixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a Gaussian spectral mixture basis</p>
+<p>This is a helper function for easily creating a Gaussian spectral mixture
+basis from multiple FasFoodGM mixture components. This implements the full
+Gaussian spectral mixture from &#8220;A la Carte - Learning Fast Kernels&#8221;.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>onescol</strong> (<em>bool, optional</em>) &#8211; If true, prepend a column of ones onto X.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>apply_ind</strong> (<em>slice, optional</em>) &#8211; a slice or index into which columns of X to apply this basis to.</li>
+<li><strong>bases_per_component</strong> (<em>int, optional</em>) &#8211; a scalar for how many (unique) random bases to create approximately per
+mixture component. Approximately 4x this number of non-unique bases
+will be created per component, so 50 with 5 components is approx 1000
+bases.</li>
+<li><strong>ncomponents</strong> (<em>int, optional</em>) &#8211; Number of FastFoodGM components to use in the mixture.</li>
+<li><strong>means_init</strong> (<em>list of Parameter, optional</em>) &#8211; A list of <code class="code docutils literal"><span class="pre">Parameter</span></code>, <code class="code docutils literal"><span class="pre">len(means_init)</span> <span class="pre">==</span> <span class="pre">ncomponents</span></code>,
+to pass to each of the <code class="code docutils literal"><span class="pre">FastFoodGM</span></code>&#8216;s <code class="code docutils literal"><span class="pre">mean_init</span></code>
+constructor values.</li>
+<li><strong>lenscale_init</strong> (<em>list of Parameter, optional</em>) &#8211; A list of <code class="code docutils literal"><span class="pre">Parameter</span></code>, <code class="code docutils literal"><span class="pre">len(lenscales_init)</span> <span class="pre">==</span>
+<span class="pre">ncomponents</span></code>, to pass to each of the <code class="code docutils literal"><span class="pre">FastFoodGM</span></code>&#8216;s
+<code class="code docutils literal"><span class="pre">lenscale_init</span></code> constructor values.</li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<dl class="method">
-<dt id="revrand.basis_functions.LinearBasis.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.LinearBasis.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.LinearBasis.__init__" title="revrand.basis_functions.LinearBasis.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([onescol])</td>
-<td></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>GausSpecMix</strong> &#8211; A concatenation of <code class="code docutils literal"><span class="pre">FastFoodGM</span></code> bases to make the full mixture.</p>
+</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X)</td>
-<td>Return the gradient of the basis function w.r.t.each of the parameters.</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params</span></code></td>
-<td>Get this object&#8217;s Parameter types.</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="../basis_funcs.html#revrand.basis_functions.BasisCat" title="revrand.basis_functions.BasisCat">BasisCat</a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -119,11 +112,11 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../basis_funcs.html"
-                        title="previous chapter">Basis Functions</a></p>
+  <p class="topless"><a href="revrand.basis_functions.FastFoodGM.html"
+                        title="previous chapter">revrand.basis_functions.FastFoodGM</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.PolynomialBasis.html"
-                        title="next chapter">revrand.basis_functions.PolynomialBasis</a></p>
+  <p class="topless"><a href="../slm.html"
+                        title="next chapter">Standard Linear Model</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -148,10 +141,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.PolynomialBasis.html" title="revrand.basis_functions.PolynomialBasis"
+          <a href="../slm.html" title="Standard Linear Model"
              >next</a> |</li>
         <li class="right" >
-          <a href="../basis_funcs.html" title="Basis Functions"
+          <a href="revrand.basis_functions.FastFoodGM.html" title="revrand.basis_functions.FastFoodGM"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 

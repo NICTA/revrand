@@ -8,13 +8,16 @@ Basis Functions
 
    LinearBasis
    PolynomialBasis
+   RadialBasis
    SigmoidalBasis
    RandomRBF
    RandomLaplace
    RandomCauchy
    RandomMatern32
    RandomMatern52
-   FastFood
+   FastFoodRBF
+   FastFoodGM
+   spectralmixture
 
 .. automodule:: revrand.basis_functions
    :members:
