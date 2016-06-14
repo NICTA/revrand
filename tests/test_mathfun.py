@@ -2,8 +2,8 @@ from __future__ import division
 
 import numpy as np
 
-import revrand.math.special as tfms
-import revrand.math.linalg as la
+import revrand.mathfun.special as tfms
+import revrand.mathfun.linalg as la
 
 
 def test_logsumexp():

@@ -12,15 +12,13 @@ the "A la Carte" GP [1]_.
 
 from __future__ import division
 
-import numpy as np
 import logging
 
+import numpy as np
 from scipy.optimize import minimize
-from scipy.linalg import cho_solve
 
-from .utils import append_or_extend 
-# from .math.linalg import jitchol, cho_log_det
-from .math.linalg import solve_posdef
+from .utils import append_or_extend
+from .mathfun.linalg import solve_posdef
 from .optimize import structured_minimizer, logtrick_minimizer
 from .btypes import Parameter, Positive, get_values
 from .basis_functions import apply_grad
@@ -29,7 +27,7 @@ from .basis_functions import apply_grad
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, basis, var=Parameter(1., Positive()), 
+def learn(X, y, basis, var=Parameter(1., Positive()),
           regulariser=Parameter(1., Positive()), tol=1e-6, maxit=1000):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.

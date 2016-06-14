@@ -11,7 +11,7 @@ from revrand import glm, likelihoods
 from revrand.basis_functions import RandomRBF
 from revrand.btypes import Parameter, Positive
 from revrand.utils.datasets import gen_gausprocess_se
-from revrand.math.special import softplus
+from revrand.mathfun.special import softplus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
