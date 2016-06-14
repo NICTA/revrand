@@ -12,9 +12,16 @@ from scipy.optimize import OptimizeResult
 class SGDUpdater:
     """
     Base class for SGD learning rate algorithms.
+
+    Parameters
+    ----------
+    eta: float, optional
+        The learning rate applied to every gradient step.
     """
 
-    name = 'SGD'
+    def __init__(self, eta=1.):
+
+        self.eta = eta
 
     def __call__(self, x, grad):
         """
@@ -33,7 +40,7 @@ class SGDUpdater:
             the new value for x
         """
 
-        delta = x - grad
+        delta = x - self.eta * grad
         return delta
 
 
@@ -49,11 +56,8 @@ class AdaDelta(SGDUpdater):
             "jitter" term to ensure continued learning (should be small).
     """
 
-    name = 'ADADELTA'
-
     def __init__(self, rho=0.95, epsilon=1e-6):
 
-        # TODO: Make these contracts
         if rho < 0 or rho > 1:
             raise ValueError("Decay rate 'rho' must be between 0 and 1!")
 
@@ -86,7 +90,9 @@ class AdaDelta(SGDUpdater):
         dx = - grad * np.sqrt(self.Edx2 + self.epsilon) \
             / np.sqrt(self.Eg2 + self.epsilon)
         self.Edx2 = self.rho * self.Edx2 + (1 - self.rho) * dx**2
-        return x + dx
+
+        delta = x + dx
+        return delta
 
 
 class AdaGrad(SGDUpdater):
@@ -100,8 +106,6 @@ class AdaGrad(SGDUpdater):
         epsilon: float, optional
             small constant term to prevent divide-by-zeros
     """
-
-    name = 'ADAGRAD'
 
     def __init__(self, eta=1, epsilon=1e-6):
 
@@ -149,8 +153,6 @@ class Momentum(SGDUpdater):
             weight to give to the momentum term
     """
 
-    name = 'Momentum'
-
     def __init__(self, rho=0.5, eta=0.01):
 
         if eta <= 0:
@@ -181,6 +183,7 @@ class Momentum(SGDUpdater):
         """
 
         self.dx = self.rho * self.dx - self.eta * grad
+
         delta = x + self.dx
         return delta
 
@@ -245,7 +248,6 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
                 True.
     """
 
-    # TODO: dictionary lookup?
     if updater is None:
         updater = AdaDelta()
 
@@ -261,7 +263,6 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
         if len(bounds) != D:
             raise ValueError("The dimension of the bounds does not match x0!")
 
-        # TODO: use a zip, pairwise logic
         lower = np.array([-np.inf if b[0] is None else b[0] for b in bounds])
         upper = np.array([np.inf if b[1] is None else b[1] for b in bounds])
 
@@ -271,9 +272,6 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
     norms = []
     allpasses = True
 
-    # TODO: Difficult to test. Should we put inner content into function?
-    # TODO: ALL to have a go at improving this! (must still pass
-    # test_optimize)...
     for _ in range(passes):
         for ind in _sgd_pass(N, batch_size):
 
