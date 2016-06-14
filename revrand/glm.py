@@ -16,7 +16,7 @@ from scipy.stats.distributions import gamma
 from scipy.optimize import brentq, minimize
 
 from .utils import couple, append_or_extend, atleast_list
-from .math.special import logsumexp
+from .mathfun.special import logsumexp
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
     logtrick_minimizer, AdaDelta
@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
           postcomp=10, use_sgd=True, maxit=1000, tol=1e-7, batch_size=100,
           rho=0.9, epsilon=1e-5):
-    """
+    r"""
     Learn the parameters of a Bayesian generalised linear model (GLM).
 
     The learning algorithm uses nonparametric variational inference [1]_, and
@@ -87,14 +87,14 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
 
         .. math ::
 
-            \mathbf{w} \sim \\frac{1}{K} \sum^K_{k=1}
-                \mathcal{N}(\mathbf{m_k}, \\boldsymbol{\Psi}_k)
+            \mathbf{w} \sim \frac{1}{K} \sum^K_{k=1}
+                \mathcal{N}(\mathbf{m_k}, \boldsymbol{\Psi}_k)
 
         where,
 
         .. math ::
 
-            \\boldsymbol{\Psi}_k = \\text{diag}([\Psi_{k,1}, \ldots,
+            \boldsymbol{\Psi}_k = \text{diag}([\Psi_{k,1}, \ldots,
                 \Psi_{k,D}]).
 
         This is so arbitrary likelihoods can be used with this algorithm, while
@@ -257,7 +257,7 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
 
 def predict_moments(Xs, likelihood, basis, m, C, lparams, bparams,
                     nsamples=100):
-    """
+    r"""
     Predictive moments, in particular mean and variance, of a Bayesian GLM.
 
     This function uses Monte-Carlo sampling to evaluate the predictive mean and
@@ -265,15 +265,15 @@ def predict_moments(Xs, likelihood, basis, m, C, lparams, bparams,
 
     .. math ::
 
-        \mathbb{E}[y^*] = \int g(\mathbf{w}^T \\boldsymbol\phi^{*})
-            p(\mathbf{w} | \mathbf{y}, \\boldsymbol\Phi) d\mathbf{w},
+        \mathbb{E}[y^*] = \int g(\mathbf{w}^T \boldsymbol\phi^{*})
+            p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
         
-        \mathbb{V}[y^*] = \int \left(g(\mathbf{w}^T \\boldsymbol\phi^{*})
-            - \mathbb{E}[y^*]\\right)^2 
-            p(\mathbf{w} | \mathbf{y}, \\boldsymbol\Phi) d\mathbf{w},
+        \mathbb{V}[y^*] = \int \left(g(\mathbf{w}^T \boldsymbol\phi^{*})
+            - \mathbb{E}[y^*]\right)^2 
+            p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
 
     where :math:`g(\cdot)` is the activation (inverse link) link function used
-    by the GLM, and :math:`p(\mathbf{w} | \mathbf{y}, \\boldsymbol\Phi)` is the
+    by the GLM, and :math:`p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi)` is the
     posterior distribution over weights (from :code:`learn`). Here are few
     concrete examples of how we can use these values,
 
@@ -331,13 +331,13 @@ def predict_moments(Xs, likelihood, basis, m, C, lparams, bparams,
 
 def predict_cdf(quantile, Xs, likelihood, basis, m, C, lparams, bparams,
                 nsamples=100):
-    """
+    r"""
     Predictive cumulative density function of a Bayesian GLM.
 
     Parameters
     ----------
         quantile: float
-            The predictive probability, :math:`p(y^* \leq \\text{quantile} |
+            The predictive probability, :math:`p(y^* \leq \text{quantile} |
             \mathbf{X}, y)`.
         Xs: ndarray
             (Ns,d) array query input dataset (Ns samples, D dimensions).
