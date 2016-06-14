@@ -390,8 +390,9 @@ class RadialBasis(bf.RadialBasis, _BaseBasis):
     centres: ndarray
         array of shape (Dxd) where D is the number of centres for the
         radial bases, and d is the dimensionality of X.
-    lenscale: float
-        the length scale (scalar) of the RBFs to apply to X.
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
 
     Note
     ----
@@ -416,8 +417,9 @@ class SigmoidalBasis(bf.SigmoidalBasis, RadialBasis):
     centres: ndarray
         array of shape (Dxd) where D is the number of centres for the bases,
         and d is the dimensionality of X.
-    lenscale: float
-        the length scale (scalar) of the RBFs to apply to X.
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
     """
 
     pass
@@ -437,8 +439,9 @@ class RandomRBF(bf.RandomRBF, _BaseBasis):
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
         the dimension (d) of the observations
-    lenscale: float
-        the length scale (scalar) of the RBFs to apply to X.
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
     """
 
     def __init__(self, nbases, Xdim, lenscale):
@@ -464,8 +467,9 @@ class RandomLaplace(bf.RandomLaplace, RandomRBF):
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
         the dimension (d) of the observations
-    lenscale: float
-        the length scale (scalar) of the RBFs to apply to X.
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
     """
     pass
 
@@ -484,8 +488,9 @@ class RandomCauchy(bf.RandomCauchy, RandomRBF):
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
         the dimension (d) of the observations
-    lenscale: float
-        the length scale (scalar) of the RBFs to apply to X.
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
     """
 
     pass
@@ -505,8 +510,9 @@ class RandomMatern32(bf.RandomMatern32, RandomRBF):
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
         the dimension (d) of the observations
-    lenscale: float
-        the length scale (scalar) of the RBFs to apply to X.
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
     """
     pass
 
@@ -525,8 +531,40 @@ class RandomMatern52(bf.RandomMatern52, RandomRBF):
         actually created, i.e. real and imaginary components for each base)
     Xdim: int
         the dimension (d) of the observations
-    lenscale: float
-        the length scale (scalar) of the RBFs to apply to X.
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
     """
 
     pass
+
+
+class FastFoodRBF(bf.FastFoodRBF, RandomRBF):
+    """
+    Fast Food radial basis function, which is an approximation of the random
+    radial basis function for a large number of bases.
+
+    This will make a linear regression model approximate a GP with an RBF
+    covariance function.
+
+    Parameters
+    ----------
+    nbases: int
+        a scalar for how many (unique) random bases to create approximately,
+        this actually will be to the nearest larger two power.
+    Xdim: int
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
+    lenscale: scalar or ndarray
+        scalar or array of shape (d,) length scales (one for each dimension
+        of X).
+    """
+
+    def __init__(self, nbases, Xdim, lenscale):
+        self.nbases = nbases
+        self.Xdim = Xdim
+        self.lenscale = lenscale
+        self.kwparams = {'lenscale': lenscale}
+        super(FastFoodRBF, self).__init__(Xdim=Xdim, nbases=nbases)
+
+

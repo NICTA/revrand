@@ -650,7 +650,7 @@ class RandomRBF(RadialBasis):
 
     @slice_call
     def grad(self, X, lenscale):
-        """
+        r"""
         Get the gradients of this basis w.r.t.\ the length scales.
 
         Parameters

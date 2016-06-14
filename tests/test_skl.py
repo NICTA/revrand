@@ -77,6 +77,11 @@ def test_pipeline_bases(make_data):
                     {'nbases': 20, 'Xdim': X.shape[1]},
                     {'lenscale': 1.}
                     ),
+                   (bf.FastFoodRBF,
+                    skl.FastFoodRBF,
+                    {'nbases': 20, 'Xdim': X.shape[1]},
+                    {'lenscale': 1.}
+                    ),
                    (bf.RandomCauchy,
                     skl.RandomCauchy,
                     {'nbases': 20, 'Xdim': X.shape[1]},
