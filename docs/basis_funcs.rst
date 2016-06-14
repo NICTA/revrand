@@ -17,6 +17,7 @@ Basis Functions
    RandomMatern52
    FastFoodRBF
    FastFoodGM
+   spectralmixture
 
 .. automodule:: revrand.basis_functions
    :members:
