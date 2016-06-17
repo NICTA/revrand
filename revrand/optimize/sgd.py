@@ -3,6 +3,49 @@
 import numpy as np
 
 from scipy.optimize import OptimizeResult
+from ..externals.sklearn import check_random_state
+
+def normalize_bound(bound):
+    """
+    Examples
+    --------
+    >>> normalize_bound((2.6, 7.2))
+    (2.6, 7.2)
+
+    >>> normalize_bound((None, 7.2))
+    (-inf, 7.2)
+
+    >>> normalize_bound((2.6, None))
+    (2.6, inf)
+
+    >>> normalize_bound((None, None))
+    (-inf, inf)
+
+    This operation is idempotent:
+
+    >>> normalize_bound((-float("inf"), float("inf")))
+    (-inf, inf)
+    """
+    min_, max_ = bound
+
+    if min_ is None:
+        min_ = -float('inf')
+
+    if max_ is None:
+        max_ = float('inf')
+
+    return min_, max_
+
+
+def normalize_bounds(bounds=[]):
+    """
+    Examples
+    --------
+    >>> bounds = [(2.6, 7.2), (None, 2), (3.14, None), (None, None)]
+    >>> list(normalize_bounds(bounds))
+    [(2.6, 7.2), (-inf, 2), (3.14, inf), (-inf, inf)]
+    """
+    return map(normalize_bound, bounds)
 
 
 #
@@ -263,8 +306,7 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
         if len(bounds) != D:
             raise ValueError("The dimension of the bounds does not match x0!")
 
-        lower = np.array([-np.inf if b[0] is None else b[0] for b in bounds])
-        upper = np.array([np.inf if b[1] is None else b[1] for b in bounds])
+        lower, upper = np.vstack(normalize_bounds(bounds)).T
 
     # Learning Records
     obj = None
@@ -292,7 +334,7 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
 
             # Trucate steps if bounded
             if bounds is not None:
-                x = np.minimum(np.maximum(x, lower), upper)
+                x = np.clip(x, lower, upper)
 
             gnorm = np.linalg.norm(grad)
             norms.append(gnorm)
@@ -319,7 +361,7 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
 # Module Helpers
 #
 
-def _sgd_pass(N, batch_size):
+def _sgd_pass(n, batch_size, random_state=None):
     """ Batch index generator for SGD that will yeild random batches for a
         single pass through the whole dataset (i.e. a finitie sequence).
 
@@ -330,7 +372,7 @@ def _sgd_pass(N, batch_size):
         Yields:
             array: of size (batch_size,) of random (int).
     """
-
-    nbatches = round(N / batch_size)
-    batch_inds = iter(np.array_split(np.random.permutation(N), nbatches))
+    generator = check_random_state(random_state)
+    n_batches = -(-n // batch_size)  # ceiling
+    batch_inds = iter(np.array_split(generator.permutation(n), n_batches))
     return batch_inds
