@@ -3,8 +3,7 @@ import numpy as np
 from itertools import repeat
 from six import wraps
 
-from ..utils import flatten, unflatten
-from ..externals import check_random_state
+from ..utils import flatten, unflatten, check_random_state
 from ..btypes import Bound, Positive, get_values, flatten_bounds
 
 

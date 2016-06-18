@@ -2,9 +2,6 @@
 revrand 
 =======
 
-.. image:: https://badge.fury.io/gh/NICTA%2Frevrand.svg
-    :target: https://badge.fury.io/gh/NICTA%2Frevrand
-
 .. image:: https://travis-ci.org/NICTA/revrand.svg?branch=master
    :target: https://travis-ci.org/NICTA/revrand
 

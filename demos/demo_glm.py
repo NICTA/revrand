@@ -4,7 +4,7 @@
 import matplotlib.pyplot as pl
 import numpy as np
 import logging
-from scipy.stats import poisson, bernoulli
+from scipy.stats import poisson, bernoulli, binom
 from scipy.special import expit
 
 from revrand import glm, likelihoods
@@ -45,12 +45,15 @@ noise_true = 0.1
 # like = 'Gaussian'
 # like = 'Bernoulli'
 like = 'Poisson'
+# like = 'Binomial'
 
 #
 # Make Data
 #
 
 lnoise = noise_true if like == 'Gaussian' else 0
+largs = ()
+slargs = ()
 
 Xtrain, ytrain, Xtest, ftest = \
     gen_gausprocess_se(N, Ns, lenscale=lenscale_true, noise=lnoise)
@@ -59,6 +62,14 @@ if like == 'Bernoulli':
 
     ytrain = bernoulli.rvs(expit(20 * ytrain))
     ftest = expit(20 * ftest)
+
+elif like == 'Binomial':
+
+    n = 5
+    largs = (n * np.ones(N),)
+    slargs = (n * np.ones(Ns),)
+    ytrain = binom.rvs(n=n, p=expit(ytrain))
+    ftest = n * expit(ftest)
 
 elif like == 'Poisson':
 
@@ -73,10 +84,10 @@ if like == 'Gaussian':
     llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
 elif like == 'Bernoulli':
     llhood = likelihoods.Bernoulli()
-    lparams = []
+elif like == 'Binomial':
+    llhood = likelihoods.Binomial()
 elif like == 'Poisson':
     llhood = likelihoods.Poisson(tranfcn='softplus')
-    lparams = []
 else:
     raise ValueError("Invalid likelihood, {}!".format(like))
 
@@ -88,11 +99,16 @@ basis = RandomRBF(nbases, Xtrain.shape[1],
 # Inference
 #
 
-params = glm.learn(Xtrain, ytrain, llhood, basis, use_sgd=use_sgd, rho=rho,
-                   epsilon=epsilon, batch_size=batch_size, maxit=passes)
-Ey, Vy, Eyn, Eyx = glm.predict_moments(Xtest, llhood, basis, *params)
-plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params)
-y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params)
+params = glm.learn(Xtrain, ytrain, llhood, basis, likelihood_args=largs,
+                   use_sgd=use_sgd, rho=rho, epsilon=epsilon,
+                   batch_size=batch_size, maxit=passes)
+
+Ey, Vy, Eyn, Eyx = glm.predict_moments(Xtest, llhood, basis, *params,
+                                       likelihood_args=slargs)
+plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params,
+                                     likelihood_args=slargs)
+y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params,
+                                  likelihood_args=slargs)
 
 if like == 'Gaussian':
     Sy2 = 2 * np.sqrt(Vy + params[2][0])

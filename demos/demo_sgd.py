@@ -28,7 +28,6 @@ def sgd_demo():
     nPoints = 1000
     nQueries = 500
     passes = 200
-    min_grad_norm = 0.01
     rho = 0.9
     epsilon = 1e-5
 
@@ -55,7 +54,7 @@ def sgd_demo():
     w0 = np.random.randn(Phi.shape[1])
     updater = AdaDelta(rho=rho, epsilon=epsilon)
     results = sgd(f, w0, train_dat, passes=passes, batch_size=batch_size,
-                  eval_obj=True, gtol=min_grad_norm, updater=updater)
+                  eval_obj=True, updater=updater)
     w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
 
     Ys_sgd = Phi_s.dot(w_sgd)

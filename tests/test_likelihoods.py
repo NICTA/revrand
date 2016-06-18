@@ -3,8 +3,8 @@ from __future__ import division
 import numpy as np
 import revrand.likelihoods as lk
 
-likelihoods = [lk.Gaussian, lk.Poisson, lk.Bernoulli]
-likelihood_args = [[1.], [], []]
+likelihoods = [lk.Gaussian, lk.Poisson, lk.Bernoulli, lk.Binomial]
+likelihood_args = [[1.], [], [], [5]]
 
 
 def test_shapes():

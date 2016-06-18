@@ -181,7 +181,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.epsilon = epsilon
         self.alpha = alpha
 
-    def fit(self, X, y):
+    def fit(self, X, y, likelihood_args=()):
         """
 
         Parameters
@@ -192,11 +192,12 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                 (N,) array targets (N samples)
         """
 
-        self.m, self.C, self.lparams, self.bparams = \
+        self.m, self.C, self.likelihood_hypers, self.basis_hypers = \
             glm.learn(X, y,
                       likelihood=self.likelihood,
                       basis=self.basis,
                       regulariser=self.regulariser,
+                      likelihood_args=likelihood_args,
                       postcomp=self.postcomp,
                       use_sgd=self.use_sgd,
                       maxit=self.maxit,
@@ -207,69 +208,80 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return self
 
-    def predict(self, X):
+    def predict(self, X, likelihood_args=()):
         """
         Predict the target expected value from the generalised linear model.
 
         Parameters
         ----------
-            X: ndarray
-                (Ns,d) array query input dataset (Ns samples, d dimensions).
+        X: ndarray
+            (Ns,d) array query input dataset (Ns samples, d dimensions).
+        likelihood_args: sequence, optional
+            sequence of arguments to pass to the likelihood function. These
+            are non-learnable parameters. They can be scalars or arrays of
+            length Ns.
 
         Returns
         -------
-            Ey: ndarray
-                The expected value of y_star for the query inputs, X_star
-                of shape (N_star,).
+        Ey: ndarray
+            The expected value of y_star for the query inputs, X_star of shape
+            (N_star,).
         """
 
-        Ey, _, _, _ = glm.predict_moments(X,
-                                          likelihood=self.likelihood,
-                                          basis=self.basis,
-                                          m=self.m,
-                                          C=self.C,
-                                          lparams=self.lparams,
-                                          bparams=self.bparams
-                                          )
+        Ey, _, _, _ = \
+            glm.predict_moments(X,
+                                likelihood=self.likelihood,
+                                basis=self.basis,
+                                m=self.m,
+                                C=self.C,
+                                likelihood_hypers=self.likelihood_hypers,
+                                basis_hypers=self.basis_hypers,
+                                likelihood_args=likelihood_args
+                                )
         return Ey
 
-    def predict_proba(self, X, alpha=None):
+    def predict_proba(self, X, alpha=None, likelihood_args=()):
         """
         Predicted target value and uncertainty quantiles from the generalised
         linear model.
 
         Parameters
         ----------
-            X: ndarray
-                (Ns,d) array query input dataset (Ns samples, d dimensions).
-            alpha: float, optional
-                The percentile confidence interval (e.g. 95%) to return from
-                predict_proba. If this is None, the value in the constructor is
-                used.
+        X: ndarray
+            (Ns,d) array query input dataset (Ns samples, d dimensions).
+        alpha: float, optional
+            The percentile confidence interval (e.g. 95%) to return from
+            predict_proba. If this is None, the value in the constructor is
+            used.
+        likelihood_args: sequence, optional
+            sequence of arguments to pass to the likelihood function. These
+            are non-learnable parameters. They can be scalars or arrays of
+            length Ns.
 
         Returns
         -------
-            Ey: ndarray
-                The expected value of y_star for the query inputs, X_star
-                of shape (N_star,).
-            ql: ndarray
-                The lower end point of the interval with shape (N_star,)
-            qu: ndarray
-                The upper end point of the interval with shape (N_star,)
+        Ey: ndarray
+            The expected value of y_star for the query inputs, X_star of shape
+            (Ns,).
+        ql: ndarray
+            The lower end point of the interval with shape (Ns,)
+        qu: ndarray
+            The upper end point of the interval with shape (Ns,)
         """
 
         if alpha is not None:
             self.alpha = alpha
 
-        Ey = self.predict(X)
+        Ey = self.predict(X, likelihood_args)
         ql, qu = glm.predict_interval(alpha=self.alpha,
                                       Xs=X,
                                       likelihood=self.likelihood,
                                       basis=self.basis,
                                       m=self.m,
                                       C=self.C,
-                                      lparams=self.lparams,
-                                      bparams=self.bparams
+                                      likelihood_hypers=self.likelihood_hypers,
+                                      basis_hypers=self.basis_hypers,
+                                      likelihood_args=likelihood_args
                                       )
 
         return Ey, ql, qu
@@ -566,5 +578,3 @@ class FastFoodRBF(bf.FastFoodRBF, RandomRBF):
         self.lenscale = lenscale
         self.kwparams = {'lenscale': lenscale}
         super(FastFoodRBF, self).__init__(Xdim=Xdim, nbases=nbases)
-
-
