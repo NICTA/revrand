@@ -10,9 +10,9 @@ from revrand.likelihoods import Gaussian
 from revrand.metrics import smse
 
 
-def test_pipeline_slm(make_data):
+def test_pipeline_slm(make_gaus_data):
 
-    X, y, w = make_data
+    X, y, w = make_gaus_data
 
     slm = skl.StandardLinearModel(bf.LinearBasis(onescol=True))
     estimators = [('PCA', PCA()),
@@ -27,9 +27,9 @@ def test_pipeline_slm(make_data):
     assert smse(y, Ey) < 0.1
 
 
-def test_pipeline_glm(make_data):
+def test_pipeline_glm(make_gaus_data):
 
-    X, y, w = make_data
+    X, y, w = make_gaus_data
 
     glm = skl.GeneralisedLinearModel(Gaussian(), bf.LinearBasis(onescol=True))
     estimators = [('PCA', PCA()),
@@ -46,9 +46,9 @@ def test_pipeline_glm(make_data):
     assert all(ql < qu)
 
 
-def test_pipeline_bases(make_data):
+def test_pipeline_bases(make_gaus_data):
 
-    X, y, w = make_data
+    X, y, w = make_gaus_data
 
     exactbases = [(bf.LinearBasis,
                    skl.LinearBasis,
