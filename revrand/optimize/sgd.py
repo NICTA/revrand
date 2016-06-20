@@ -195,7 +195,7 @@ class Momentum(SGDUpdater):
 # SGD minimizer
 #
 
-def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
+def sgd(fun, x0, data, args=(), bounds=None, batch_size=100, passes=10,
         updater=None, eval_obj=False):
     """
     Stochastic Gradient Descent, using ADADELTA for setting the learning rate.
@@ -204,12 +204,12 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
     ----------
     fun: callable
         the function to evaluate, this must have the signature :code:`[obj,]
-        grad = fun(x, Data, ...)`, where the :code:`eval_obj` argument tells
+        grad = fun(x, data, ...)`, where the :code:`eval_obj` argument tells
         :code:`sgd` if an objective function value is going to be returned by
         :code:`fun`.
     x0: ndarray
         a sequence/1D array of initial values for the parameters to learn.
-    Data: ndarray
+    data: ndarray
         a numpy array or sequence of data to input into :code:`fun`. This will
         be split along the first axis (axis=0), and then input into
         :code:`fun`.
@@ -252,7 +252,7 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
     if updater is None:
         updater = AdaDelta()
 
-    N = _len_data(Data)
+    N = _len_data(data)
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
 
@@ -276,9 +276,9 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
         for ind in _sgd_pass(N, batch_size):
 
             if not eval_obj:
-                grad = fun(x, *chain(_split_data(Data, ind), args))
+                grad = fun(x, *chain(_split_data(data, ind), args))
             else:
-                obj, grad = fun(x, *chain(_split_data(Data, ind), args))
+                obj, grad = fun(x, *chain(_split_data(data, ind), args))
                 objs.append(obj)
 
             norms.append(np.linalg.norm(grad))
@@ -313,25 +313,25 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
 # Module Helpers
 #
 
-def _len_data(Data):
+def _len_data(data):
 
-    if not issequence(Data):
-        return Data.shape[0]
+    if not issequence(data):
+        return data.shape[0]
 
-    N = len(Data[0])
-    for d in Data[1:]:
+    N = len(data[0])
+    for d in data[1:]:
         if d.shape[0] != N:
             raise ValueError("Not all data is the same length!")
 
     return N
 
 
-def _split_data(Data, ind):
+def _split_data(data, ind):
 
-    if not issequence(Data):
-        return (Data[ind],)
+    if not issequence(data):
+        return (data[ind],)
 
-    return [d[ind] for d in Data]
+    return [d[ind] for d in data]
 
 
 def _sgd_pass(N, batch_size, random_state=None):

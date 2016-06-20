@@ -32,6 +32,20 @@ def test_unbounded(make_quadratic):
     assert_opt(*res['x'])
 
 
+def test_sgd_seqdata(make_quadratic):
+
+    a, b, c, data, _ = make_quadratic
+    y, x = data[:, 0], data[:, 1]
+    w0 = np.random.randn(3)
+
+    assert_opt = lambda Ea, Eb, Ec: \
+        np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
+
+    res = sgd(q_seq, w0, data=(x, y), eval_obj=True, passes=1000,
+              updater=AdaDelta())
+    assert_opt(*res['x'])
+
+
 def test_bounded(make_quadratic):
 
     a, b, c, data, bounds = make_quadratic
@@ -160,3 +174,7 @@ def _getxu(w, data):
 def q_struc(w12, w3, data, func):
 
     return func(flatten([w12, w3], returns_shapes=False), data)
+
+
+def q_seq(w, x, y):
+    return qobj(w, np.vstack((x, y)).T)
