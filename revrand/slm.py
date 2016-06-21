@@ -81,6 +81,11 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
         in your calling code.
     """
 
+    if y.ndim != 1:
+        raise ValueError("y has to be a 1-d array (single task)")
+    if X.ndim != 2:
+        raise ValueError("X has to be a 2-d array")
+
     N, d = X.shape
     D = basis(np.atleast_2d(X[0, :]), *get_values(basis.params)).shape[1]
 

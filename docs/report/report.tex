@@ -42,9 +42,9 @@
     regression), approximate Gaussian processes and generalised linear models.
     These algorithms have been implemented such that they can be used for
     large-scale inference by using stochastic gradients. All of the algorithms
-    in \emph{revrand} use a unified feature composition framework, that allows
-    for easy composition of positive-definite covariance functions and easy
-    manipulation and combination of regression basis functions.
+    in \emph{revrand} use a unified feature composition framework that allows
+    for easy concatenation and selective application of regression basis
+    functions.
 \end{abstract}
 
 \tableofcontents
@@ -59,19 +59,19 @@ amongst many computational nodes.
 
 When an objective function factorises over data,
 \begin{equation}
-    \func{\ins, \param}{} = \sum_{\inss \in \ins} \func{\inss, \param}{},
+    \ffunc{\ins, \param}{} = \sum_{\inss \in \ins} \ffunc{\inss, \param}{},
 \end{equation}
 a regular gradient descent would perform the following iterations to minimise
 the function w.r.t.\ $\param$,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \ins}
-    \nabla_{\param} \func{\inss_n, \param}{}\!|_{\param = \param_{k-1}},
+    \nabla_{\param} \ffunc{\inss_n, \param}{}\!|_{\param = \param_{k-1}},
 \end{equation}
 where $\lrate_k$ is the learning rate (step size) at iteration $k$. Stochastic
 gradients proposes the following update,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \minibatch}
-    \nabla_{\param} \func{\inss, \param}{}\!|_{\param = \param_{k-1}},
+    \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}},
     \label{eq:sg}
 \end{equation}
 where $\minibatch \subset \ins$ is a mini-batch of the original dataset, where
@@ -80,17 +80,17 @@ $|\minibatch| \ll |\ins|$.
 Unfortunately some objective functions to not entirely decompose over the data,
 i.e. 
 \begin{equation}
-    \func{\ins, \param}{} = \sum_{\inss \in \ins} \func{\inss, \param}{}
-    + \ofunc{g}{\param}{}.
+    \ffunc{\ins, \param}{} = \sum_{\inss \in \ins} \ffunc{\inss, \param}{}
+    + \func{g}{\param}{}.
     \label{eq:objwconst}
 \end{equation}
 Let $M = |\minibatch|$ and $N = |\ins|$, then we divide the contribution of the
 constant term amongst the mini-batches in stochastic gradients,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \minibatch}
-    \nabla_{\param} \func{\inss, \param}{}\!|_{\param = \param_{k-1}}
+    \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}}
     - \lrate_k \frac{M}{N} \nabla_{\param} 
-    \ofunc{g}{\param}{}\!|_{\param = \param_{k-1}}.
+    \func{g}{\param}{}\!|_{\param = \param_{k-1}}.
     \label{eq:wsg}
 \end{equation} 
 This is particularly relevant for variational inference where the evidence
@@ -109,10 +109,10 @@ don't care about the value(s) of $\param$,
     \label{eq:lml}
 \end{equation}
 There are two problems with this objective however, (1) it may not factor over
-data and (2) the integral may be intractable, like if the prior and likelihood
-are not conjugate. In variational inference we use Jensen's inequality to
-lower-bound log-marginal likelihood with a tractable objective function called
-the evidence lower bound (ELBO),
+data and (2) the integral may be intractable, for instance, if the prior and
+likelihood are not conjugate. In variational inference we use Jensen's
+inequality to lower-bound log-marginal likelihood with a tractable objective
+function called the evidence lower bound (ELBO),
 \begin{align}
     \log \probC{\targ}{\hyper} =& \log \int 
         \prod^N_{n=1} \probC{\targs_n}{\param} 
@@ -133,7 +133,7 @@ makes inference easier. This can be re-written as,
     \label{eq:elbo}
 \end{equation}
 which takes the form of Equation~\eqref{eq:objwconst}, and so we can weight the
-Kullback-Leibler term like the constant term, $\ofunc{g}{\cdot}{}$, from
+Kullback-Leibler term like the constant term, $\func{g}{\cdot}{}$, from
 Equation~\eqref{eq:wsg} if we use stochastic gradients optimisation.
 Furthermore, if $\qrob{\param} = \probC{\param}{\hyper}$ then the lower bound
 is tight, and this will be equivalent to optimising log-marginal likelihood.
@@ -148,30 +148,40 @@ regressor of the following form,
     \gausC{\targs_n}{\feats_n\T\weights, \var}, \\
     \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \reg\ident{D}},
 \end{align}
-where $\feats_n := \ofunc{\featfunc}{\inss_n, \param}{}$ is a feature function
-that $\featfunc: \real{d} \to \real{D}$. This is, for all intents and purposes
-the same algorithm described in~\cite[Chapter 2]{Rasmussen2006}.
+where $\feats_n := \func{\featfunc}{\inss_n, \param}{}$ is a feature, or
+basis, function that $\featfunc: \real{d} \to \real{D}$. This is, for all
+intents and purposes the same algorithm described in~\cite[Chapter
+2]{Rasmussen2006}.
 
 We then:
 \begin{itemize}
     \item Solve analytically for the posterior over weights, $\weights | \targ
-        \sim \gaus{\pomean, \pocov}$,
+        \sim \gaus{\pomean, \pocov}$, where,
+        \begin{align*}
+            \pomean &= \text{TODO} \\
+            \pocov &= \text{TODO}
+        \end{align*}
     \item Optimise $\var, \reg$ and $\param$ w.r.t.\ log-marginal likelihood,
         which is tractable,
     \item Use the (analytically solvable) predictive distribution
-        \begin{equation}
-            \probC{\targs\test}{\targ, \ins, \inss\test} = \int
+        \begin{align}
+            \probC{\targs\test}{\targ, \ins, \inss\test} &= \int
             \gausC{\targs\test}{\feats\testT\weights, \var}
-            \gausC{\weights}{\pomean, \pocov} d\weights
-        \end{equation}
+            \gausC{\weights}{\pomean, \pocov} d\weights \nonumber \\
+            &= \gausC{\targs\test}{\text{TODO}, \text{TODO}}
+        \end{align}
         for query inputs, $\inss\test$.
 \end{itemize}
 
 It is actually easier to use the ELBO form with stochastic gradients for
 learning the parameters of this algorithm, rather than log-marginal likelihood.
-This is simply because it is plainly in the same form as Equation
+This is because it is plainly in the same form as Equation
 \eqref{eq:objwconst}, though it would give the same result as log-marginal
-likelihood, since no approximation is made about the posterior.
+likelihood, since no approximation is made about the posterior. The ELBO for
+this model is,
+\begin{equation}
+    \text{TODO}
+\end{equation}
 
 We have not implemented a stochastic gradient version of this algorithm since
 it still requires a matrix solve involving a $D \times D$ matrix, and so is
@@ -182,6 +192,19 @@ and $D$ problems.
 
 
 \subsection{Bayesian Generalised Linear Models}
+
+The algorithm of primary interest in \emph{revrand} is the Bayesian generalised
+linear model. The general form of the model implemented by this algorithm is,
+\begin{align}
+    \text{Likelihood:} \quad &\prod^N_{n=1} 
+    \probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}, \\
+    \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \reg\ident{D}},
+\end{align}
+for an arbitrary univariate likelihood, $\prob{\cdot}$, with an appropriate
+transformation (inverse link) function, $\activ{\cdot}$, and parameter(s),
+$\lparam$. Naturally, calculating the exact posterior over the weights,
+$\probC{\weights}{\targ}$ is intractable since we may have a non-conjugate
+relationship.
 
 A modification of the GLM in~\cite{gershman2012} to make it work with
 stochastic gradients.

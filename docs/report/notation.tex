@@ -35,6 +35,7 @@
 \newcommand{\hess}[1]   {\ensuremath{\mathbf{H}_{#1}}}
 \newcommand{\reg}       {\ensuremath{\lambda}}
 \newcommand{\param}     {\ensuremath{\theta}}
+\newcommand{\lparam}    {\ensuremath{\gamma}}
 \newcommand{\hyper}     {\ensuremath{\alpha}}
 \newcommand{\lrate}     {\ensuremath{\eta}}
 
@@ -59,8 +60,9 @@
 
 
 %% Functions, PDFs etc
-\newcommand{\func}  [2] {\ensuremath{f_{#2}\!\brac{{#1}}}}
-\newcommand{\ofunc} [3] {\ensuremath{{#1}_{#3}\!\brac{{#2}}}}
+\newcommand{\func} [3] {\ensuremath{{#1}_{#3}\!\brac{{#2}}}}
+\newcommand{\ffunc} [2] {\func{f}{#1}{#2}}
+\newcommand{\activ} [1] {\func{g}{#1}{}}
 \newcommand{\Prob}  [1] {\ensuremath{P\!\brac{#1}}}
 \newcommand{\ProbC} [2] {\ensuremath{P\!\left({#1}\middle\vert{#2}\right)}}
 \newcommand{\iProb}  [1] {\ensuremath{P\inv\!\brac{#1}}}
