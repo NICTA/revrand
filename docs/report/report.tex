@@ -4,6 +4,7 @@
 \usepackage{sectsty}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage[super]{nth}
 \usepackage{mathtools, amsfonts}
 
 % Package config
@@ -15,7 +16,10 @@
     urlcolor={blue!80!black}
 }
 
-\usepackage[backend=bibtex, style=numeric, firstinits=true]{biblatex}
+\usepackage[backend=bibtex,
+            style=numeric,
+            firstinits=true,
+            natbib=true]{biblatex}
 \bibliography{report}
 
 % Notation and macros
@@ -52,6 +56,7 @@
 \section{Core Algorithms}
 
 \subsection{Stochastic Gradients and Variational Objective Functions}
+\label{sub:stochvar}
 
 Stochastic Gradients is now a ubiquitous method for optimisation when a whole
 dataset does not fit in memory, or when optimisation has to be distributed
@@ -197,19 +202,75 @@ The algorithm of primary interest in \emph{revrand} is the Bayesian generalised
 linear model. The general form of the model implemented by this algorithm is,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
-    \probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}, \\
+        \probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}, 
+        \label{eq:glmlike} \\
     \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \reg\ident{D}},
 \end{align}
 for an arbitrary univariate likelihood, $\prob{\cdot}$, with an appropriate
 transformation (inverse link) function, $\activ{\cdot}$, and parameter(s),
-$\lparam$. Naturally, calculating the exact posterior over the weights,
-$\probC{\weights}{\targ}$ is intractable since we may have a non-conjugate
-relationship.
+$\lparam$. 
 
-A modification of the GLM in~\cite{gershman2012} to make it work with
-stochastic gradients.
+Naturally, both calculating the exact posterior over the weights,
+$\probC{\weights}{\targ, \ins}$, and the log-marginal likelihood,
+$\prob{\targ}$, for hyperparameter learning are intractable since we may have a
+non-conjugate relationship between the likelihood and prior. Therefore we must
+resort to approximating the true posterior and the log-marginal likelihood.
+We use a modification of the nonparametric variational algorithm
+presented in~\cite{gershman2012} for approximating the posterior and log
+marginal likelihood. The posterior takes the form
+\begin{align}
+    \probC{\weights}{\targ, \ins} &\approx \qrob{\weights}, \nonumber \\
+    &= \frac{1}{K} \prod^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k},
+\end{align}
+i.e.\ a mixture of $K$ diagonal Gaussians, $\dpocov_k = \diag{[\dpocovs_{k,1},
+    \ldots, \dpocovs_{k, D}]\T}$. This is a very flexible form for the
+approximate posterior, and still admits a closed-form lower bound to the
+log-marginal likelihood. Furthermore this has the nice property that our
+algorithm no longer has a \bigo{D^3} cost associated with the number of
+features. \citet{gershman2012} make one more approximation based on local
+second order Taylor expansions of the joint,
+\begin{multline}
+    \expec{q}{\log \prob{\targ, \weights}} \approx
+    \frac{1}{K} \sum^K_{k=1} \sum^N_{n=1} 
+    \log \probC{\targs_n}{\activ{\feats_n\T \pomean_k}, \lparam} \\
+    + \log \probC{\weights}{\pomean_k, \dpocov_k}
+    + \frac{1}{2} \trace{\dpocov_k\hess{k}},
+\end{multline}
+to deal with non-conjugacy within their variational framework. Here $\hess{k} =
+\nabla^2_{\weights} \prob{\targs, \weights}\!|_{\weights =
+    \pomean_k}$\footnote{We only need the diagonals of this Hessian matrix.}.
+Unfortunately this approximation to the ELBO actually breaks the lower bound,
+but works well in practice. For more details on this inference scheme we direct
+the reader to~\cite{gershman2012}. The final objective function we optimise is,
+\begin{multline}
+    \elbo \approx
+    \frac{1}{K} \sum^K_{k=1} \sum^N_{n=1} 
+    \log \probC{\targs_n}{\activ{\feats_n\T \pomean_k}, \lparam}
+    + \log \probC{\weights}{\pomean_k, \dpocov_k} \\
+    + \frac{1}{2} \trace{\dpocov_k\hess{k}}
+    - \log \brac{\sum^K_{j=1} \gausC{\pomean_k}{\pomean_j, \dpocov_k +
+            \dpocov_j}} - \log K. \label{eq:glmobj}
+\end{multline}
+While this is an approximation to Equation~\eqref{eq:elbo}, it retains the
+property that it easily factorises over the data ($n$), and so can be optimised
+using stochastic gradients as described in \S \ref{sub:stochvar}.
+
+In \emph{revrand} we actually optimise Equation~\eqref{eq:glmobj} with respect
+to the hyperparameters, $\param, \lparam$ \emph{and} the parameters $\pomean_k,
+\dpocov_k~\forall k$ simultaneously. This is unlike the optimising scheme 
+in~\cite{gershman2012}, since it requires \nth{3} derivatives of the
+likelihood in Equation~\eqref{eq:glmlike} w.r.t.\ $\weights$. However, we find
+that providing these derivatives is simple (for our model) compared to the more
+complex optimisation scheme presented in~\cite{gershman2012}, which is not as
+amenable to large datasets as stochastic gradients when hyperparameter 
+optimisation is involved.
+
+TODO: Prediction
 
 \subsection{Large Scale Gaussian Process Approximation}
+
+TODO: Show kernel approximations (from notebook)
+
 
 \subsubsection{With Bayesian Linear Regression}
 
@@ -218,6 +279,7 @@ i.e.\ A la Carte~\cite{yang2014}
 we still need to invert a $D \times D$ matrix with stochastic gradients, so
 \bigo{D^3}, but that is where the GLM comes in.
 
+
 \subsubsection{With Bayesian GLMs}
 
 We only have to invert $K$ diagonal matrices of dimension $D \times D$, so
@@ -225,7 +287,8 @@ We only have to invert $K$ diagonal matrices of dimension $D \times D$, so
 
 \section{Feature Composition Framework}
 
-\section{Future Functionality}
+\section{Experiments}
+
 
 \printbibliography%
 
