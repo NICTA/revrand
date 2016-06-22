@@ -160,20 +160,29 @@ intents and purposes the same algorithm described in~\cite[Chapter
 
 We then:
 \begin{itemize}
-    \item Solve analytically for the posterior over weights, $\weights | \targ
-        \sim \gaus{\pomean, \pocov}$, where,
-        \begin{align*}
-            \pomean &= \text{TODO} \\
-            \pocov &= \text{TODO}
-        \end{align*}
     \item Optimise $\var, \reg$ and $\param$ w.r.t.\ log-marginal likelihood,
-        which is tractable,
-    \item Use the (analytically solvable) predictive distribution
+        \begin{equation}
+            \log \probC{\targ}{\var, \reg, \param} =
+            \log \gausC{\targ}{\mathbf{0}, \var\ident{N} + \reg \feat\T\feat},
+        \end{equation}
+        where $\feat \in \real{N \times D}$ is the concatenation of all the
+        features, $\feats_n$. Note this results in the covariance of the
+        log-marginal likelihood being $N \times N$, though we can use the
+        Woodbury identity to simplify the corresponding matrix inversion.
+    \item Solve analytically for the posterior over weights, $\weights | \targ
+        \sim \gaus{\pomean, \pocov}$ given the above hyperparameters, where,
+        \begin{align*}
+            \pocov &= \sbrac{\reg \ident{D} + \frac{1}{\var}
+                \feat\T \feat}\inv \\
+            \pomean &= \frac{1}{\var} \pocov \feat\T \targ
+        \end{align*}
+    \item Use the predictive distribution
         \begin{align}
             \probC{\targs\test}{\targ, \ins, \inss\test} &= \int
             \gausC{\targs\test}{\feats\testT\weights, \var}
             \gausC{\weights}{\pomean, \pocov} d\weights \nonumber \\
-            &= \gausC{\targs\test}{\text{TODO}, \text{TODO}}
+            &= \gausC{\targs\test}{\feats\testT \pomean,
+                \var + \feats\testT \pocov \feats\test}
         \end{align}
         for query inputs, $\inss\test$.
 \end{itemize}
@@ -257,7 +266,7 @@ using stochastic gradients as described in \S \ref{sub:stochvar}.
 
 In \emph{revrand} we actually optimise Equation~\eqref{eq:glmobj} with respect
 to the hyperparameters, $\param, \lparam$ \emph{and} the parameters $\pomean_k,
-\dpocov_k~\forall k$ simultaneously. This is unlike the optimising scheme 
+\dpocov_k~\forall k$ simultaneously. This is unlike the optimisation scheme 
 in~\cite{gershman2012}, since it requires \nth{3} derivatives of the
 likelihood in Equation~\eqref{eq:glmlike} w.r.t.\ $\weights$. However, we find
 that providing these derivatives is simple (for our model) compared to the more
