@@ -153,12 +153,9 @@ regressor of the following form,
     \gausC{\targs_n}{\feats_n\T\weights, \var}, \\
     \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \reg\ident{D}},
 \end{align}
-where $\feats_n := \func{\featfunc}{\inss_n, \param}{}$ is a feature, or
-basis, function that $\featfunc: \real{d} \to \real{D}$. This is, for all
-intents and purposes the same algorithm described in~\cite[Chapter
-2]{Rasmussen2006}.
-
-We then:
+where $\feats_n := \func{\featfunc}{\inss_n, \param}{}$ is a feature, or basis,
+function that $\featfunc: \real{d} \to \real{D}$. This is the same algorithm
+described in~\cite[Chapter 2]{Rasmussen2006}. We then:
 \begin{itemize}
     \item Optimise $\var, \reg$ and $\param$ w.r.t.\ log-marginal likelihood,
         \begin{equation}
@@ -173,14 +170,14 @@ We then:
         \sim \gaus{\pomean, \pocov}$ given the above hyperparameters, where,
         \begin{align*}
             \pocov &= \sbrac{\reg \ident{D} + \frac{1}{\var}
-                \feat\T \feat}\inv \\
-            \pomean &= \frac{1}{\var} \pocov \feat\T \targ
+                \feat\T \feat}\inv, \\
+            \pomean &= \frac{1}{\var} \pocov \feat\T \targ.
         \end{align*}
     \item Use the predictive distribution
         \begin{align}
             \probC{\targs\test}{\targ, \ins, \inss\test} &= \int
             \gausC{\targs\test}{\feats\testT\weights, \var}
-            \gausC{\weights}{\pomean, \pocov} d\weights \nonumber \\
+            \gausC{\weights}{\pomean, \pocov} d\weights, \nonumber \\
             &= \gausC{\targs\test}{\feats\testT \pomean,
                 \var + \feats\testT \pocov \feats\test}
         \end{align}
@@ -188,17 +185,32 @@ We then:
 \end{itemize}
 
 It is actually easier to use the ELBO form with stochastic gradients for
-learning the parameters of this algorithm, rather than log-marginal likelihood.
-This is because it is plainly in the same form as Equation
-\eqref{eq:objwconst}, though it would give the same result as log-marginal
-likelihood, since no approximation is made about the posterior. The ELBO for
-this model is,
+learning the parameters of this algorithm, rather than log-marginal likelihood
+recast using the Woodbury identity.  This is because it is plainly in the same
+form as Equation \eqref{eq:objwconst}, though it would give the same result as
+log-marginal likelihood, the ``approximate'' posterior is the same form as the
+true posterior, i.e.\ $\qrob{\weights} = \gausC{\weights}{\pomean, \pocov}$.
+The ELBO for this model is,
 \begin{equation}
-    \text{TODO}
+    \elbo = \sum^N_{n=1} 
+    \expec{q}{\log\gausC{\targs_n}{\feats_n\T\weights, \var}}
+    - \KL{\gausC{\weights}{\pomean, \pocov}}
+        {\gausC{\weights}{\mathbf{0}, \reg\ident{D}}}.
+    \label{eq:slmobj}
 \end{equation}
-
+More specifically,
+\begin{align*}
+    \expec{q}{\log\gausC{\targs_n}{\feats_n\T\weights, \var}} =&
+    \log \gausC{\targs_n}{\feats_n\T\pomean, \var}
+    - \frac{1}{2 \var} \trace{\feats_n\T\feats_n\pocov}, \\
+    \KL{\gausC{\weights}{\pomean, \pocov}}
+        {\gausC{\weights}{\mathbf{0}, \reg\ident{D}}} =&
+        \frac{1}{2 \reg} \sbrac{\trace{\pocov} + \pomean\T\pomean} 
+        - \frac{1}{2} \log\deter{\pocov} \\
+        &+ \frac{D}{2} \brac{\log \reg - 1}.
+\end{align*}
 We have not implemented a stochastic gradient version of this algorithm since
-it still requires a matrix solve involving a $D \times D$ matrix, and so is
+it still requires a determinant involving a $D \times D$ matrix, and so is
 \bigo{D^3} in complexity, per iteration. This is true even if we optimise the
 posterior covariance directly (or some triangular form). The GLM presented in
 the next section circumvents this issue, and is more suited to really large $N$
@@ -279,20 +291,8 @@ TODO: Prediction
 \subsection{Large Scale Gaussian Process Approximation}
 
 TODO: Show kernel approximations (from notebook)
+TODO: Some mention of these work with the SLM and GLM.
 
-
-\subsubsection{With Bayesian Linear Regression}
-
-i.e.\ A la Carte~\cite{yang2014}
-
-we still need to invert a $D \times D$ matrix with stochastic gradients, so
-\bigo{D^3}, but that is where the GLM comes in.
-
-
-\subsubsection{With Bayesian GLMs}
-
-We only have to invert $K$ diagonal matrices of dimension $D \times D$, so
-\bigo{KD}.
 
 \section{Feature Composition Framework}
 
