@@ -1,51 +1,11 @@
 """Stochastic Gradient Descent."""
 
+from itertools import chain
+
 import numpy as np
-
 from scipy.optimize import OptimizeResult
-from ..externals.sklearn import check_random_state
 
-def normalize_bound(bound):
-    """
-    Examples
-    --------
-    >>> normalize_bound((2.6, 7.2))
-    (2.6, 7.2)
-
-    >>> normalize_bound((None, 7.2))
-    (-inf, 7.2)
-
-    >>> normalize_bound((2.6, None))
-    (2.6, inf)
-
-    >>> normalize_bound((None, None))
-    (-inf, inf)
-
-    This operation is idempotent:
-
-    >>> normalize_bound((-float("inf"), float("inf")))
-    (-inf, inf)
-    """
-    min_, max_ = bound
-
-    if min_ is None:
-        min_ = -float('inf')
-
-    if max_ is None:
-        max_ = float('inf')
-
-    return min_, max_
-
-
-def normalize_bounds(bounds=[]):
-    """
-    Examples
-    --------
-    >>> bounds = [(2.6, 7.2), (None, 2), (3.14, None), (None, None)]
-    >>> list(normalize_bounds(bounds))
-    [(2.6, 7.2), (-inf, 2), (3.14, inf), (-inf, inf)]
-    """
-    return map(normalize_bound, bounds)
+from ..utils import issequence, check_random_state
 
 
 #
@@ -235,66 +195,64 @@ class Momentum(SGDUpdater):
 # SGD minimizer
 #
 
-def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
-        updater=None, gtol=1e-3, eval_obj=False):
-    """ Stochastic Gradient Descent, using ADADELTA for setting the learning
-        rate.
+def sgd(fun, x0, data, args=(), bounds=None, batch_size=100, passes=10,
+        updater=None, eval_obj=False):
+    """
+    Stochastic Gradient Descent, using ADADELTA for setting the learning rate.
 
-        Parameters
-        ----------
-        fun: callable
-            the function to evaluate, this must have the signature
-                `[obj,] grad = fun(x, Data, ...)`, where the `eval_obj`
-                argument tells `sgd` if an objective function value is going to
-                be returned by `fun`.
-        x0: ndarray
-            a sequence/1D array of initial values for the parameters to learn.
-        Data: ndarray
-            a numpy array or sequence of data to input into `fun`. This will be
-            split along the first axis (axis=0), and then input into `fun`.
-        args: sequence, optional
-            an optional sequence of arguments to give to fun.
-        bounds: sequence, optional
-            Bounds for variables, (min, max) pairs for each element in x,
-            defining the bounds on that parameter.  Use None for one of min or
-            max when there is no bound in that direction.
-        batch_size: int, optional
-            The number of observations in an SGD batch.
-        passes: int, optional
-            Number of complete passes through the data before optimization
-            terminates (unless it converges first).
-        updater: SGDUpdater, optional
-            The type of gradient update to use, by default this is AdaDelta
-        gtol: float, optional
-            The norm of the gradient of x that will trigger a convergence
-            condition.
-        eval_obj: bool, optional
-            This indicates whether or not `fun` also evaluates and returns the
-            objective function value. If this is true, `fun` must return
-            `(obj, grad)` and then a list of objective function values is also
-            returned.
+    Parameters
+    ----------
+    fun: callable
+        the function to evaluate, this must have the signature :code:`[obj,]
+        grad = fun(x, data, ...)`, where the :code:`eval_obj` argument tells
+        :code:`sgd` if an objective function value is going to be returned by
+        :code:`fun`.
+    x0: ndarray
+        a sequence/1D array of initial values for the parameters to learn.
+    data: ndarray
+        a numpy array or sequence of data to input into :code:`fun`. This will
+        be split along the first axis (axis=0), and then input into
+        :code:`fun`.
+    args: sequence, optional
+        an optional sequence of arguments to give to fun.
+    bounds: sequence, optional
+        Bounds for variables, (min, max) pairs for each element in x, defining
+        the bounds on that parameter.  Use None for one of min or max when
+        there is no bound in that direction.
+    batch_size: int, optional
+        The number of observations in an SGD batch.
+    passes: int, optional
+        Number of complete passes through the data before optimization
+        terminates (unless it converges first).
+    updater: SGDUpdater, optional
+        The type of gradient update to use, by default this is AdaDelta
+    eval_obj: bool, optional
+        This indicates whether or not :code:`fun` also evaluates and returns
+        the objective function value. If this is true, :code:`fun` must return
+        :code:`(obj, grad)` and then a list of objective function values is
+        also returned.
 
-        Returns
-        -------
-        res: OptimizeResult
-            x: narray
-                the final result
-            norms: list
-                the list of gradient norms
-            message: str
-                the convergence condition ('converge' or 'maxiter')
-            objs: list
-                the list of objective function evaluations if :code:`eval_obj`
-                is True.
-            fun: float
-                the final objective function evaluation if :code:`eval_obj` is
-                True.
+    Returns
+    -------
+    res: OptimizeResult
+        x: narray
+            the final result
+        norms: list
+            the list of gradient norms
+        message: str
+            the convergence condition ('converge' or 'maxiter')
+        objs: list
+            the list of objective function evaluations if :code:`eval_obj`
+            is True.
+        fun: float
+            the final objective function evaluation if :code:`eval_obj` is
+            True.
     """
 
     if updater is None:
         updater = AdaDelta()
 
-    N = Data.shape[0]
+    N = _len_data(data)
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
 
@@ -306,21 +264,24 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
         if len(bounds) != D:
             raise ValueError("The dimension of the bounds does not match x0!")
 
-        lower, upper = np.vstack(normalize_bounds(bounds)).T
+        lower, upper = zip(*map(_normalize_bound, bounds))
+        lower = np.array(lower)
+        upper = np.array(upper)
 
     # Learning Records
-    obj = None
     objs = []
     norms = []
-    allpasses = True
 
     for _ in range(passes):
         for ind in _sgd_pass(N, batch_size):
 
             if not eval_obj:
-                grad = fun(x, Data[ind], *args)
+                grad = fun(x, *chain(_split_data(data, ind), args))
             else:
-                obj, grad = fun(x, Data[ind], *args)
+                obj, grad = fun(x, *chain(_split_data(data, ind), args))
+                objs.append(obj)
+
+            norms.append(np.linalg.norm(grad))
 
             # Truncate gradients if bounded
             if bounds is not None:
@@ -336,20 +297,11 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
             if bounds is not None:
                 x = np.clip(x, lower, upper)
 
-            gnorm = np.linalg.norm(grad)
-            norms.append(gnorm)
-            if eval_obj:
-                objs.append(obj)
-
-            if gnorm <= gtol:
-                allpasses = False
-                break
-
     # Format results
     res = OptimizeResult(
         x=x,
         norms=norms,
-        message='converge' if not allpasses else 'all passes',
+        message='all passes',
         fun=obj,
         objs=objs
     )
@@ -361,7 +313,28 @@ def sgd(fun, x0, Data, args=(), bounds=None, batch_size=100, passes=10,
 # Module Helpers
 #
 
-def _sgd_pass(n, batch_size, random_state=None):
+def _len_data(data):
+
+    if not issequence(data):
+        return data.shape[0]
+
+    N = len(data[0])
+    for d in data[1:]:
+        if d.shape[0] != N:
+            raise ValueError("Not all data is the same length!")
+
+    return N
+
+
+def _split_data(data, ind):
+
+    if not issequence(data):
+        return (data[ind],)
+
+    return [d[ind] for d in data]
+
+
+def _sgd_pass(N, batch_size, random_state=None):
     """ Batch index generator for SGD that will yeild random batches for a
         single pass through the whole dataset (i.e. a finitie sequence).
 
@@ -373,6 +346,38 @@ def _sgd_pass(n, batch_size, random_state=None):
             array: of size (batch_size,) of random (int).
     """
     generator = check_random_state(random_state)
-    n_batches = -(-n // batch_size)  # ceiling
-    batch_inds = iter(np.array_split(generator.permutation(n), n_batches))
+    n_batches = -(-N // batch_size)  # ceiling
+    batch_inds = iter(np.array_split(generator.permutation(N), n_batches))
     return batch_inds
+
+
+def _normalize_bound(bound):
+    """
+    Examples
+    --------
+    >>> normalize_bound((2.6, 7.2)) # doctest: +SKIP
+    (2.6, 7.2)
+
+    >>> normalize_bound((None, 7.2)) # doctest: +SKIP
+    (-inf, 7.2)
+
+    >>> normalize_bound((2.6, None)) # doctest: +SKIP
+    (2.6, inf)
+
+    >>> normalize_bound((None, None)) # doctest: +SKIP
+    (-inf, inf)
+
+    This operation is idempotent:
+
+    >>> normalize_bound((-float("inf"), float("inf"))) # doctest: +SKIP
+    (-inf, inf)
+    """
+    min_, max_ = bound
+
+    if min_ is None:
+        min_ = -float('inf')
+
+    if max_ is None:
+        max_ = float('inf')
+
+    return min_, max_

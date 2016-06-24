@@ -20,7 +20,7 @@ Contents:
    metrics
    optimize
    utils
-   math
+   mathfun
    skl
    demo
 

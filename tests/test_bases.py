@@ -9,9 +9,9 @@ from revrand.btypes import Parameter, Positive, Bound
 from revrand.utils import issequence
 
 
-def test_simple_concat(make_data):
+def test_simple_concat(make_gaus_data):
 
-    X, _, _ = make_data
+    X, _, _ = make_gaus_data
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False) + bs.LinearBasis(onescol=False)
@@ -32,9 +32,9 @@ def test_simple_concat(make_data):
     assert P.shape == (N, (D + d) * 2 + N)
 
 
-def test_grad_concat(make_data):
+def test_grad_concat(make_gaus_data):
 
-    X, _, _ = make_data
+    X, _, _ = make_gaus_data
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False) + bs.LinearBasis(onescol=False)
@@ -57,9 +57,9 @@ def test_grad_concat(make_data):
         assert g.shape == d
 
 
-def test_apply_grad(make_data):
+def test_apply_grad(make_gaus_data):
 
-    X, _, _ = make_data
+    X, _, _ = make_gaus_data
     N, d = X.shape
 
     y = np.random.randn(N)
@@ -94,9 +94,9 @@ def test_apply_grad(make_data):
     assert gs[1].shape == (d,)
 
 
-def test_bases(make_data):
+def test_bases(make_gaus_data):
 
-    X, _, _ = make_data
+    X, _, _ = make_gaus_data
     N, d = X.shape
     nC = 10
 
@@ -164,9 +164,9 @@ def test_bases(make_data):
                 assert dp.shape[0] == N
 
 
-def test_slicing(make_data):
+def test_slicing(make_gaus_data):
 
-    X, _, _ = make_data
+    X, _, _ = make_gaus_data
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False, apply_ind=[0]) \

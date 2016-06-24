@@ -7,8 +7,10 @@ Likelihood Classes
    :toctree: generated/
 
    Bernoulli
+   Binomial
    Gaussian
    Poisson
 
 .. automodule:: revrand.likelihoods
    :members:
+   :noindex:

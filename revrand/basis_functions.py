@@ -16,7 +16,7 @@ from scipy.spatial.distance import cdist
 from scipy.stats import cauchy, chi, chi2, gamma
 
 from .btypes import Positive, Bound, Parameter
-from .math.linalg import hadamard
+from .mathfun.linalg import hadamard
 from .utils import append_or_extend, issequence
 
 
@@ -495,7 +495,7 @@ class RadialBasis(Basis):
             param = np.array([param])
 
         sparam = self.params if paramind is None else self.params[paramind]
-        
+
         if sparam.shape[0] != len(param):
             raise ValueError("Dimensions of basis parameter is inconsistent!")
 
@@ -747,7 +747,7 @@ class RandomCauchy(RandomRBF):
         #   http://www.math.chalmers.se/Math/Research/Preprints/2010/47.pdf
         X = np.random.randn(self.d, self.n)
         Z = gamma.rvs(1., size=(1, self.n))
-        return X * np.sqrt(2*Z)
+        return X * np.sqrt(2 * Z)
 
 
 class RandomMatern32(RandomRBF):
@@ -962,7 +962,7 @@ class FastFoodGM(FastFoodRBF):
     approximation.
 
     This (paritally) implements the GM basis from "A la Carte - Learning Fast
-    Kernels". 
+    Kernels".
 
     Parameters
     ----------
@@ -1021,7 +1021,8 @@ class FastFoodGM(FastFoodRBF):
         VX = self._makeVX(X / lenscale)
         mX = X.dot(mean)[:, np.newaxis]
         Phi = np.hstack((np.cos(VX + mX), np.sin(VX + mX),
-                         np.cos(VX - mX), np.sin(VX - mX))) / np.sqrt(2*self.n)
+                         np.cos(VX - mX), np.sin(VX - mX))) / \
+            np.sqrt(2 * self.n)
 
         return Phi
 
@@ -1073,15 +1074,15 @@ class FastFoodGM(FastFoodRBF):
             dmX = X[:, [i]]
             dPhi_mean.append(np.hstack((dmX * sinVXpmX, dmX * cosVXpmX,
                                         -dmX * sinVXmmX, -dmX * cosVXmmX)) /
-                            np.sqrt(2*self.n))
+                             np.sqrt(2 * self.n))
 
             # Lenscales
             indlen = np.zeros(d)
             indlen[i] = 1. / l**2
-            dVX = - self._makeVX(X * indlen) # FIXME make this more efficient?
+            dVX = - self._makeVX(X * indlen)  # FIXME make this more efficient?
             dPhi_len.append(np.hstack((dVX * sinVXpmX, dVX * cosVXpmX,
                                        dVX * sinVXmmX, dVX * cosVXmmX)) /
-                            np.sqrt(2*self.n))
+                            np.sqrt(2 * self.n))
 
         dPhi_mean = np.dstack(dPhi_mean) if d != 1 else dPhi_mean[0]
         dPhi_len = np.dstack(dPhi_len) if d != 1 else dPhi_len[0]
@@ -1117,7 +1118,7 @@ def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
         the dimension (d) of the observations (or the dimension of the slices
         if using apply_ind).
     apply_ind: slice, optional
-        a slice or index into which columns of X to apply this basis to.  
+        a slice or index into which columns of X to apply this basis to.
     bases_per_component: int, optional
         a scalar for how many (unique) random bases to create approximately per
         mixture component. Approximately 4x this number of non-unique bases
@@ -1130,7 +1131,7 @@ def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
         to pass to each of the :code:`FastFoodGM`'s :code:`mean_init`
         constructor values.
     lenscale_init: list of Parameter, optional
-        A list of :code:`Parameter`, :code:`len(lenscales_init) == 
+        A list of :code:`Parameter`, :code:`len(lenscales_init) ==
         ncomponents`, to pass to each of the :code:`FastFoodGM`'s
         :code:`lenscale_init` constructor values.
 
@@ -1196,7 +1197,7 @@ class BasisCat(object):
 
         # Establish a few dimensions
         N = X.shape[0]
-        D = self(X[[0], :], *params).shape[1] 
+        D = self(X[[0], :], *params).shape[1]
 
         # Get all gradients
         args = list(params)
@@ -1204,7 +1205,7 @@ class BasisCat(object):
         dims = [0]
 
         for i, base in enumerate(self.bases):
-            
+
             # evaluate gradient and deal with multiple parameter gradients by
             # keeping track of the basis index
             g, args, sargs = base._grad_popargs(X, *args)
@@ -1214,7 +1215,7 @@ class BasisCat(object):
                 grads.extend([(i, gg) for gg in g])
 
             # Get the basis dimensionality for padding later
-            baseD = base(X[[0], :], *sargs).shape[1] 
+            baseD = base(X[[0], :], *sargs).shape[1]
             dims.append(baseD)
 
         # Padding indices

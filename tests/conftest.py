@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from scipy.stats import binom
 
 
 @pytest.fixture
@@ -21,7 +22,7 @@ def make_quadratic():
 
 
 @pytest.fixture
-def make_data():
+def make_gaus_data():
 
     w = np.array([1., 2.])
     x = np.atleast_2d(np.arange(-50, 50)).T
@@ -29,6 +30,18 @@ def make_data():
     y = X.dot(w) + np.random.randn(100) / 1000
 
     return X, y, w
+
+
+@pytest.fixture
+def make_binom_data():
+
+    X = np.atleast_2d(np.arange(-50, 50)).T
+
+    p = 0.5 * (np.sin(X.flatten() / 5.) + 1)
+    n = 1000
+    y = binom.rvs(p=p, n=n)
+
+    return X, y, p, n
 
 
 @pytest.fixture

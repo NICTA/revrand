@@ -21,4 +21,5 @@ Basis Functions
 
 .. automodule:: revrand.basis_functions
    :members:
+   :noindex:
    :special-members: __call__

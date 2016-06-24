@@ -3,8 +3,7 @@ import numpy as np
 from itertools import repeat
 from six import wraps
 
-from ..utils import flatten, unflatten
-from ..externals import check_random_state
+from ..utils import flatten, unflatten, check_random_state
 from ..btypes import Bound, Positive, get_values, flatten_bounds
 
 
@@ -358,7 +357,7 @@ def structured_sgd(sgd):
     """
 
     @wraps(sgd)
-    def new_sgd(fun, parameters, Data, eval_obj=False, **sgd_kwargs):
+    def new_sgd(fun, parameters, data, eval_obj=False, **sgd_kwargs):
 
         array1d, shapes = flatten(get_values(parameters))
         fbounds = flatten_bounds(parameters)
@@ -371,7 +370,7 @@ def structured_sgd(sgd):
         else:
             new_fun = flatten(new_fun, returns_shapes=False)
 
-        result = sgd(new_fun, array1d, Data=Data, bounds=fbounds,
+        result = sgd(new_fun, array1d, data=data, bounds=fbounds,
                      eval_obj=eval_obj, **sgd_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
         return result
@@ -507,10 +506,10 @@ def logtrick_sgd(sgd):
     """
 
     @wraps(sgd)
-    def new_sgd(fun, x0, Data, bounds=None, eval_obj=False, **sgd_kwargs):
+    def new_sgd(fun, x0, data, bounds=None, eval_obj=False, **sgd_kwargs):
 
         if bounds is None:
-            return sgd(fun, x0, Data, bounds=bounds, eval_obj=eval_obj,
+            return sgd(fun, x0, data, bounds=bounds, eval_obj=eval_obj,
                        **sgd_kwargs)
 
         logx, expx, gradx, bounds = _logtrick_gen(bounds)
@@ -524,7 +523,7 @@ def logtrick_sgd(sgd):
                 return gradx(fun(expx(x), *fargs, **fkwargs), x)
 
         # Transform the final result
-        result = sgd(new_fun, logx(x0), Data, bounds=bounds, eval_obj=eval_obj,
+        result = sgd(new_fun, logx(x0), data, bounds=bounds, eval_obj=eval_obj,
                      **sgd_kwargs)
         result['x'] = expx(result['x'])
         return result
