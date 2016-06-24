@@ -14,7 +14,6 @@ revrand.optimize.sgd.AdaDelta
    .. autosummary::
    
       ~AdaDelta.__init__
-      ~AdaDelta.name
    
    
 

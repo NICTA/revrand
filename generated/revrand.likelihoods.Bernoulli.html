@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.likelihoods.Bernoulli &mdash; revrand 0.4.0 documentation</title>
+    <title>revrand.likelihoods.Bernoulli &mdash; revrand 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.0 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.4.1 documentation" href="../index.html" />
     <link rel="up" title="Likelihood Classes" href="../likelihoods.html" />
-    <link rel="next" title="revrand.likelihoods.Gaussian" href="revrand.likelihoods.Gaussian.html" />
+    <link rel="next" title="revrand.likelihoods.Binomial" href="revrand.likelihoods.Binomial.html" />
     <link rel="prev" title="Likelihood Classes" href="../likelihoods.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.likelihoods.Gaussian.html" title="revrand.likelihoods.Gaussian"
+          <a href="revrand.likelihoods.Binomial.html" title="revrand.likelihoods.Binomial"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../likelihoods.html" title="Likelihood Classes"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../likelihoods.html" accesskey="U">Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>  
@@ -82,31 +82,31 @@ the GLM prior into a probability.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.Ey" title="revrand.likelihoods.Bernoulli.Ey"><code class="xref py py-obj docutils literal"><span class="pre">Ey</span></code></a>(f)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">Ey</span></code>(f)</td>
 <td>Expected value of the Bernoulli likelihood.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Bernoulli.__init__" title="revrand.likelihoods.Bernoulli.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.cdf" title="revrand.likelihoods.Bernoulli.cdf"><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code></a>(y,&nbsp;f)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code>(y,&nbsp;f)</td>
 <td>Cumulative density function of the likelihood.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.d2f" title="revrand.likelihoods.Bernoulli.d2f"><code class="xref py py-obj docutils literal"><span class="pre">d2f</span></code></a>(y,&nbsp;f)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">d2f</span></code>(y,&nbsp;f)</td>
 <td>Second derivative of Bernoulli log likelihood w.r.t. f.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.d3f" title="revrand.likelihoods.Bernoulli.d3f"><code class="xref py py-obj docutils literal"><span class="pre">d3f</span></code></a>(y,&nbsp;f)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">d3f</span></code>(y,&nbsp;f)</td>
 <td>Third derivative of Bernoulli log likelihood w.r.t. f.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.df" title="revrand.likelihoods.Bernoulli.df"><code class="xref py py-obj docutils literal"><span class="pre">df</span></code></a>(y,&nbsp;f)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">df</span></code>(y,&nbsp;f)</td>
 <td>Derivative of Bernoulli log likelihood w.r.t. f.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.dp" title="revrand.likelihoods.Bernoulli.dp"><code class="xref py py-obj docutils literal"><span class="pre">dp</span></code></a>(y,&nbsp;f)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">dp</span></code>(y,&nbsp;f,&nbsp;*args)</td>
 <td>Derivative of Bernoulli log likelihood w.r.t. the parameters, <span class="math">\(\theta\)</span>.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.dpd2f" title="revrand.likelihoods.Bernoulli.dpd2f"><code class="xref py py-obj docutils literal"><span class="pre">dpd2f</span></code></a>(y,&nbsp;f)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">dpd2f</span></code>(y,&nbsp;f,&nbsp;*args)</td>
 <td>Partial derivative of Bernoulli log likelihood, <span class="math">\(\partial h(f, \theta) / \partial \theta\)</span> where <span class="math">\(h(f, \theta) = \partial^2 \log p(y|f, \theta)/ \partial f^2\)</span>.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.loglike" title="revrand.likelihoods.Bernoulli.loglike"><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code></a>(y,&nbsp;f)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code>(y,&nbsp;f)</td>
 <td>Bernoulli log likelihood.</td>
 </tr>
 </tbody>
@@ -118,7 +118,7 @@ the GLM prior into a probability.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="../likelihoods.html#revrand.likelihoods.Bernoulli.params" title="revrand.likelihoods.Bernoulli.params"><code class="xref py py-obj docutils literal"><span class="pre">params</span></code></a></td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params</span></code></td>
 <td>Get this object&#8217;s Parameter types.</td>
 </tr>
 </tbody>
@@ -137,8 +137,8 @@ the GLM prior into a probability.</p>
   <p class="topless"><a href="../likelihoods.html"
                         title="previous chapter">Likelihood Classes</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.likelihoods.Gaussian.html"
-                        title="next chapter">revrand.likelihoods.Gaussian</a></p>
+  <p class="topless"><a href="revrand.likelihoods.Binomial.html"
+                        title="next chapter">revrand.likelihoods.Binomial</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -163,12 +163,12 @@ the GLM prior into a probability.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.likelihoods.Gaussian.html" title="revrand.likelihoods.Gaussian"
+          <a href="revrand.likelihoods.Binomial.html" title="revrand.likelihoods.Binomial"
              >next</a> |</li>
         <li class="right" >
           <a href="../likelihoods.html" title="Likelihood Classes"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../likelihoods.html" >Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>

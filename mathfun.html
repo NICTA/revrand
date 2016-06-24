@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Math Utilities &mdash; revrand 0.4.0 documentation</title>
+    <title>Math Utilities &mdash; revrand 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.1 documentation" href="index.html" />
     <link rel="next" title="Scikit Learn Compatibility Interface" href="skl.html" />
     <link rel="prev" title="revrand.utils.datasets.fetch_gpml_sarcos_data" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -62,8 +62,8 @@
             
   <div class="section" id="math-utilities">
 <h1>Math Utilities<a class="headerlink" href="#math-utilities" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-revrand.math.linalg">
-<span id="linear-algebra"></span><h2>Linear Algebra<a class="headerlink" href="#module-revrand.math.linalg" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-revrand.mathfun.linalg">
+<span id="linear-algebra"></span><h2>Linear Algebra<a class="headerlink" href="#module-revrand.mathfun.linalg" title="Permalink to this headline">¶</a></h2>
 <p>Various linear algebra utilities.</p>
 <p>Notes on the fast Hadamard transform (Alistair Reid, NICTA 2015):</p>
 <p>The Hadamard transform is a recursive application of sums and differences
@@ -81,8 +81,8 @@ overhead to the original computation.</p>
 </pre></div>
 </div>
 <dl class="function">
-<dt id="revrand.math.linalg.cho_log_det">
-<code class="descclassname">revrand.math.linalg.</code><code class="descname">cho_log_det</code><span class="sig-paren">(</span><em>L</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.cho_log_det" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.linalg.cho_log_det">
+<code class="descclassname">revrand.mathfun.linalg.</code><code class="descname">cho_log_det</code><span class="sig-paren">(</span><em>L</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.linalg.cho_log_det" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the log of the determinant of <span class="math">\(A\)</span>, given its (upper or lower)
 Cholesky factorization <span class="math">\(LL^T\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -112,8 +112,8 @@ Cholesky factorization <span class="math">\(LL^T\)</span>.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.math.linalg.hadamard">
-<code class="descclassname">revrand.math.linalg.</code><code class="descname">hadamard</code><span class="sig-paren">(</span><em>Y</em>, <em>ordering=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.hadamard" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.linalg.hadamard">
+<code class="descclassname">revrand.mathfun.linalg.</code><code class="descname">hadamard</code><span class="sig-paren">(</span><em>Y</em>, <em>ordering=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.linalg.hadamard" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>Very fast</em> Hadamard transform for single vector at a time</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -145,8 +145,8 @@ Cholesky factorization <span class="math">\(LL^T\)</span>.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.math.linalg.solve_posdef">
-<code class="descclassname">revrand.math.linalg.</code><code class="descname">solve_posdef</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.solve_posdef" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.linalg.solve_posdef">
+<code class="descclassname">revrand.mathfun.linalg.</code><code class="descname">solve_posdef</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.linalg.solve_posdef" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve the system <span class="math">\(A X = b\)</span> for <span class="math">\(X\)</span> where <span class="math">\(A\)</span> is a
 positive semi-definite matrix.</p>
 <p>This first tries cholesky, and if numerically unstable with solve using a
@@ -175,8 +175,8 @@ overhead.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.math.linalg.svd_log_det">
-<code class="descclassname">revrand.math.linalg.</code><code class="descname">svd_log_det</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.svd_log_det" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.linalg.svd_log_det">
+<code class="descclassname">revrand.mathfun.linalg.</code><code class="descname">svd_log_det</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.linalg.svd_log_det" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the log of the determinant of <span class="math">\(A\)</span>, given its singular values
 from an SVD factorisation (i.e. <code class="code docutils literal"><span class="pre">s</span></code> from <code class="code docutils literal"><span class="pre">U,</span> <span class="pre">s,</span> <span class="pre">Ut</span> <span class="pre">=</span> <span class="pre">svd(A)</span></code>).</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -201,8 +201,8 @@ from an SVD factorisation (i.e. <code class="code docutils literal"><span class=
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.math.linalg.svd_solve">
-<code class="descclassname">revrand.math.linalg.</code><code class="descname">svd_solve</code><span class="sig-paren">(</span><em>U</em>, <em>s</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.linalg.svd_solve" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.linalg.svd_solve">
+<code class="descclassname">revrand.mathfun.linalg.</code><code class="descname">svd_solve</code><span class="sig-paren">(</span><em>U</em>, <em>s</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.linalg.svd_solve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve the system <span class="math">\(A X = b\)</span> for <span class="math">\(X\)</span> where <span class="math">\(A\)</span> is a
 positive semi-definite matrix using the singular value decomposition.</p>
 <p>This truncates the SVD so only dimensions corresponding to non-negative and
@@ -232,12 +232,12 @@ semi-definite matrix.</li>
 </dd></dl>
 
 </div>
-<div class="section" id="module-revrand.math.special">
-<span id="special-functions"></span><h2>Special Functions<a class="headerlink" href="#module-revrand.math.special" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-revrand.mathfun.special">
+<span id="special-functions"></span><h2>Special Functions<a class="headerlink" href="#module-revrand.mathfun.special" title="Permalink to this headline">¶</a></h2>
 <p>Special Numerical Operations.</p>
 <dl class="function">
-<dt id="revrand.math.special.logsumexp">
-<code class="descclassname">revrand.math.special.</code><code class="descname">logsumexp</code><span class="sig-paren">(</span><em>X</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.special.logsumexp" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.special.logsumexp">
+<code class="descclassname">revrand.mathfun.special.</code><code class="descname">logsumexp</code><span class="sig-paren">(</span><em>X</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.special.logsumexp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log-sum-exp trick for matrix X for summation along a specified axis.</p>
 <p>This performs the following operation in a stable fashion,</p>
 <div class="math">
@@ -265,8 +265,8 @@ if <code class="code docutils literal"><span class="pre">axis=0</span></code> or
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.math.special.softmax">
-<code class="descclassname">revrand.math.special.</code><code class="descname">softmax</code><span class="sig-paren">(</span><em>X</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.special.softmax" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.special.softmax">
+<code class="descclassname">revrand.mathfun.special.</code><code class="descname">softmax</code><span class="sig-paren">(</span><em>X</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.special.softmax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pass X through a softmax function in a numerically stable way using the
 log-sum-exp trick.</p>
 <p>This transformation is:</p>
@@ -297,8 +297,8 @@ will sum to 1 if <code class="code docutils literal"><span class="pre">axis=0</s
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.math.special.softplus">
-<code class="descclassname">revrand.math.special.</code><code class="descname">softplus</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.math.special.softplus" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.mathfun.special.softplus">
+<code class="descclassname">revrand.mathfun.special.</code><code class="descname">softplus</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.mathfun.special.softplus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pass X through a soft-plus function, , in a numerically
 stable way (using the log-sum-exp trick).</p>
 <p>The softplus transformation is:</p>
@@ -330,8 +330,8 @@ stable way (using the log-sum-exp trick).</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Math Utilities</a><ul>
-<li><a class="reference internal" href="#module-revrand.math.linalg">Linear Algebra</a></li>
-<li><a class="reference internal" href="#module-revrand.math.special">Special Functions</a></li>
+<li><a class="reference internal" href="#module-revrand.mathfun.linalg">Linear Algebra</a></li>
+<li><a class="reference internal" href="#module-revrand.mathfun.special">Special Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -371,7 +371,7 @@ stable way (using the log-sum-exp trick).</p>
         <li class="right" >
           <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

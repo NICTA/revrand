@@ -1,0 +1,36 @@
+revrand.likelihoods.Binomial
+============================
+
+.. currentmodule:: revrand.likelihoods
+
+.. autoclass:: Binomial
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Binomial.Ey
+      ~Binomial.__init__
+      ~Binomial.cdf
+      ~Binomial.d2f
+      ~Binomial.d3f
+      ~Binomial.df
+      ~Binomial.dp
+      ~Binomial.dpd2f
+      ~Binomial.loglike
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Binomial.params
+   
+   

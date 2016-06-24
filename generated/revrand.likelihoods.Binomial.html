@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.RandomLaplace &mdash; revrand 0.4.1 documentation</title>
+    <title>revrand.likelihoods.Binomial &mdash; revrand 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.4.1 documentation" href="../index.html" />
-    <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="revrand.basis_functions.RandomCauchy" href="revrand.basis_functions.RandomCauchy.html" />
-    <link rel="prev" title="revrand.basis_functions.RandomRBF" href="revrand.basis_functions.RandomRBF.html" />
+    <link rel="up" title="Likelihood Classes" href="../likelihoods.html" />
+    <link rel="next" title="revrand.likelihoods.Gaussian" href="revrand.likelihoods.Gaussian.html" />
+    <link rel="prev" title="revrand.likelihoods.Bernoulli" href="revrand.likelihoods.Bernoulli.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -47,13 +47,13 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.RandomCauchy.html" title="revrand.basis_functions.RandomCauchy"
+          <a href="revrand.likelihoods.Gaussian.html" title="revrand.likelihoods.Gaussian"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.RandomRBF.html" title="revrand.basis_functions.RandomRBF"
+          <a href="revrand.likelihoods.Bernoulli.html" title="revrand.likelihoods.Bernoulli"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../likelihoods.html" accesskey="U">Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -62,35 +62,17 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="revrand-basis-functions-randomlaplace">
-<h1>revrand.basis_functions.RandomLaplace<a class="headerlink" href="#revrand-basis-functions-randomlaplace" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="revrand-likelihoods-binomial">
+<h1>revrand.likelihoods.Binomial<a class="headerlink" href="#revrand-likelihoods-binomial" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="revrand.basis_functions.RandomLaplace">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomLaplace</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomLaplace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Random Laplace Basis &#8211; Approximates a Laplace kernel function</p>
-<p>This will make a linear regression model approximate a GP with an
-(optionally ARD) Laplace covariance function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
-actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
-if using apply_ind).</li>
-<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
-initialise the length scales for optimization. If this is shape (d,),
-ARD length scales will be expected, otherwise an isotropic lenscale is
-learned.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dt id="revrand.likelihoods.Binomial">
+<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Binomial</code><a class="headerlink" href="#revrand.likelihoods.Binomial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binomial likelihood class.</p>
+<p>A logistic transformation function is used to map the latent function from
+the GLM prior into a probability.</p>
 <dl class="method">
-<dt id="revrand.basis_functions.RandomLaplace.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomLaplace.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.likelihoods.Binomial.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Binomial.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -100,11 +82,32 @@ learned.</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.RandomLaplace.__init__" title="revrand.basis_functions.RandomLaplace.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale_init])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">Ey</span></code>(f,&nbsp;n)</td>
+<td>Expected value of the Binomial likelihood.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Binomial.__init__" title="revrand.likelihoods.Binomial.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X,&nbsp;lenscale)</td>
-<td>Get the gradients of this basis w.r.t.the length scales.</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code>(y,&nbsp;f,&nbsp;n)</td>
+<td>Cumulative density function of the likelihood.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">d2f</span></code>(y,&nbsp;f,&nbsp;n)</td>
+<td>Second derivative of Binomial log likelihood w.r.t. f.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">d3f</span></code>(y,&nbsp;f,&nbsp;n)</td>
+<td>Third derivative of Binomial log likelihood w.r.t. f.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">df</span></code>(y,&nbsp;f,&nbsp;n)</td>
+<td>Derivative of Binomial log likelihood w.r.t. f.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">dp</span></code>(y,&nbsp;f,&nbsp;*args)</td>
+<td>Derivative of Bernoulli log likelihood w.r.t. the parameters, <span class="math">\(\theta\)</span>.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">dpd2f</span></code>(y,&nbsp;f,&nbsp;*args)</td>
+<td>Partial derivative of Bernoulli log likelihood, <span class="math">\(\partial h(f, \theta) / \partial \theta\)</span> where <span class="math">\(h(f, \theta) = \partial^2 \log p(y|f, \theta)/ \partial f^2\)</span>.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code>(y,&nbsp;f,&nbsp;n)</td>
+<td>Binomial log likelihood.</td>
 </tr>
 </tbody>
 </table>
@@ -131,11 +134,11 @@ learned.</li>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.RandomRBF.html"
-                        title="previous chapter">revrand.basis_functions.RandomRBF</a></p>
+  <p class="topless"><a href="revrand.likelihoods.Bernoulli.html"
+                        title="previous chapter">revrand.likelihoods.Bernoulli</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.basis_functions.RandomCauchy.html"
-                        title="next chapter">revrand.basis_functions.RandomCauchy</a></p>
+  <p class="topless"><a href="revrand.likelihoods.Gaussian.html"
+                        title="next chapter">revrand.likelihoods.Gaussian</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -160,13 +163,13 @@ learned.</li>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.RandomCauchy.html" title="revrand.basis_functions.RandomCauchy"
+          <a href="revrand.likelihoods.Gaussian.html" title="revrand.likelihoods.Gaussian"
              >next</a> |</li>
         <li class="right" >
-          <a href="revrand.basis_functions.RandomRBF.html" title="revrand.basis_functions.RandomRBF"
+          <a href="revrand.likelihoods.Bernoulli.html" title="revrand.likelihoods.Bernoulli"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../likelihoods.html" >Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

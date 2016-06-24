@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Scikit Learn Compatibility Interface &mdash; revrand 0.4.0 documentation</title>
+    <title>Scikit Learn Compatibility Interface &mdash; revrand 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.1 documentation" href="index.html" />
     <link rel="next" title="Demos" href="demo.html" />
-    <link rel="prev" title="Math Utilities" href="math.html" />
+    <link rel="prev" title="Math Utilities" href="mathfun.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -49,9 +49,9 @@
           <a href="demo.html" title="Demos"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="math.html" title="Math Utilities"
+          <a href="mathfun.html" title="Math Utilities"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -108,7 +108,7 @@ of X).</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
-<li><strong>basis</strong> (<a class="reference internal" href="basis_funcs.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>postcomp</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
 posterior distribution.</li>
@@ -132,7 +132,7 @@ predict_proba.</li>
 </table>
 <dl class="method">
 <dt id="revrand.skl.GeneralisedLinearModel.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel.fit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel.fit" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -149,18 +149,26 @@ predict_proba.</li>
 
 <dl class="method">
 <dt id="revrand.skl.GeneralisedLinearModel.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel.predict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict the target expected value from the generalised linear model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</li>
+<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These
+are non-learnable parameters. They can be scalars or arrays of
+length Ns.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; The expected value of y_star for the query inputs, X_star
-of shape (N_star,).</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; The expected value of y_star for the query inputs, X_star of shape
+(N_star,).</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -168,7 +176,7 @@ of shape (N_star,).</td>
 
 <dl class="method">
 <dt id="revrand.skl.GeneralisedLinearModel.predict_proba">
-<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em>, <em>alpha=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel.predict_proba" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em>, <em>alpha=None</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel.predict_proba" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predicted target value and uncertainty quantiles from the generalised
 linear model.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -180,14 +188,17 @@ linear model.</p>
 <li><strong>alpha</strong> (<em>float, optional</em>) &#8211; The percentile confidence interval (e.g. 95%) to return from
 predict_proba. If this is None, the value in the constructor is
 used.</li>
+<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These
+are non-learnable parameters. They can be scalars or arrays of
+length Ns.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y_star for the query inputs, X_star
-of shape (N_star,).</li>
-<li><strong>ql</strong> (<em>ndarray</em>) &#8211; The lower end point of the interval with shape (N_star,)</li>
-<li><strong>qu</strong> (<em>ndarray</em>) &#8211; The upper end point of the interval with shape (N_star,)</li>
+<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y_star for the query inputs, X_star of shape
+(Ns,).</li>
+<li><strong>ql</strong> (<em>ndarray</em>) &#8211; The lower end point of the interval with shape (Ns,)</li>
+<li><strong>qu</strong> (<em>ndarray</em>) &#8211; The upper end point of the interval with shape (Ns,)</li>
 </ul>
 </p>
 </td>
@@ -413,7 +424,7 @@ of X).</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>basis</strong> (<a class="reference internal" href="basis_funcs.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>var</strong> (<em>Parameter, optional</em>) &#8211; observation variance initial value.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
@@ -496,7 +507,7 @@ X_star of shape (N_star,).</li>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="math.html"
+  <p class="topless"><a href="mathfun.html"
                         title="previous chapter">Math Utilities</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="demo.html"
@@ -528,9 +539,9 @@ X_star of shape (N_star,).</li>
           <a href="demo.html" title="Demos"
              >next</a> |</li>
         <li class="right" >
-          <a href="math.html" title="Math Utilities"
+          <a href="mathfun.html" title="Math Utilities"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

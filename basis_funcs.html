@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Basis Functions &mdash; revrand 0.4.0 documentation</title>
+    <title>Basis Functions &mdash; revrand 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.1 documentation" href="index.html" />
     <link rel="next" title="revrand.basis_functions.LinearBasis" href="generated/revrand.basis_functions.LinearBasis.html" />
     <link rel="prev" title="Installation" href="installation.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -106,11 +106,11 @@
 </tr>
 </tbody>
 </table>
-<span class="target" id="module-revrand.basis_functions"></span><p>Various basis function objects specialised for parameter learning.</p>
+<p>Various basis function objects specialised for parameter learning.</p>
 <p>To make a new basis object, see the documentation of the Basis class.</p>
 <dl class="class">
-<dt id="revrand.basis_functions.Basis">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">Basis</code><a class="headerlink" href="#revrand.basis_functions.Basis" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">Basis</code></dt>
 <dd><p>The base Basis class. To make other basis classes, make sure they are
 subclasses of this class to enable concatenation and operation with the
 machine learning algorithms.</p>
@@ -120,8 +120,8 @@ machine learning algorithms.</p>
 </pre></div>
 </div>
 <dl class="method">
-<dt id="revrand.basis_functions.Basis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.Basis.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span></dt>
 <dd><p>Return the basis function applied to X, i.e. Phi(X, params), where
 params can also optionally be used and learned.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -146,8 +146,8 @@ d is the dimensionality of X.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.basis_functions.Basis.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.Basis.grad" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span></dt>
 <dd><p>Return the gradient of the basis function w.r.t.each of the
 parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -176,22 +176,22 @@ on the dimensions of the basis function parameters. If there are
 </dd></dl>
 
 <dl class="attribute">
-<dt id="revrand.basis_functions.Basis.params">
-<code class="descname">params</code><a class="headerlink" href="#revrand.basis_functions.Basis.params" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">params</code></dt>
 <dd><p>Get this object&#8217;s Parameter types.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.BasisCat">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">BasisCat</code><span class="sig-paren">(</span><em>basis_list</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.BasisCat" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">BasisCat</code><span class="sig-paren">(</span><em>basis_list</em><span class="sig-paren">)</span></dt>
 <dd><p>A class that implements concatenation of bases.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.FastFoodGM">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodGM</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodGM</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>A single mixture component from a Gaussian spectral mixture kernel
 approximation.</p>
 <p>This (paritally) implements the GM basis from &#8220;A la Carte - Learning Fast
@@ -219,8 +219,8 @@ to all length scales.</li>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.FastFoodGM.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>mean</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>mean</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Apply the spectral mixture component basis to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -246,8 +246,8 @@ use, given in the constructor (to nearest larger two power).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.basis_functions.FastFoodGM.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>mean</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.grad" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>mean</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Get the gradients of this basis w.r.t.the frequency mean and length
 scale.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -280,8 +280,8 @@ again to the nearest larger two power. This is
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.FastFoodRBF">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Fast Food radial basis function, which is an approximation of the random
 radial basis function for a large number of bases.</p>
 <p>This will make a linear regression model approximate a GP with an RBF
@@ -305,8 +305,8 @@ learned.</li>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.FastFoodRBF.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Apply the Fast Food RBF basis to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -332,8 +332,8 @@ use, given in the constructor (to nearest larger two power).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.basis_functions.FastFoodRBF.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodRBF.grad" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Get the gradients of this basis w.r.t.the length scale.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -362,8 +362,8 @@ again to the nearest larger two power. This is
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.LinearBasis">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">LinearBasis</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.LinearBasis" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">LinearBasis</code><span class="sig-paren">(</span><em>onescol=False</em><span class="sig-paren">)</span></dt>
 <dd><p>Linear basis class, basically this just prepends a columns of ones onto X</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -374,8 +374,8 @@ again to the nearest larger two power. This is
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.LinearBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.LinearBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span></dt>
 <dd><p>Return this basis applied to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -395,8 +395,8 @@ and d is the dimensionality of X.</td>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.PolynomialBasis">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">PolynomialBasis</code><span class="sig-paren">(</span><em>order</em>, <em>include_bias=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.PolynomialBasis" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">PolynomialBasis</code><span class="sig-paren">(</span><em>order</em>, <em>include_bias=True</em><span class="sig-paren">)</span></dt>
 <dd><p>Polynomial basis class, this essentially creates the concatenation,
 <span class="math">\(\boldsymbol\Phi = [\mathbf{X}^0, \mathbf{X}^1, ..., \mathbf{X}^p]\)</span>
 where <span class="math">\(p\)</span> is the <code class="code docutils literal"><span class="pre">order</span></code> of the polynomial.</p>
@@ -415,8 +415,8 @@ acts as the intercept term in a linear model)</li>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.PolynomialBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.PolynomialBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span></dt>
 <dd><p>Return this basis applied to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -437,8 +437,8 @@ column.</td>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.RadialBasis">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RadialBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RadialBasis" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RadialBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Radial basis class.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -461,8 +461,8 @@ learned.</li>
 <p class="last">This will have relevance vector machine-like behaviour with uncertainty.</p>
 </div>
 <dl class="method">
-<dt id="revrand.basis_functions.RadialBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RadialBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Apply the RBF to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -487,8 +487,8 @@ of X).</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.basis_functions.RadialBasis.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RadialBasis.grad" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Get the gradients of this basis w.r.t.the length scale.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -516,8 +516,8 @@ of X).</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.RandomCauchy">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomCauchy</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomCauchy" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomCauchy</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Random Cauchy Basis &#8211; Approximates a Cauchy kernel function</p>
 <p>This will make a linear regression model approximate a GP with an
 (optionally ARD) Cauchy covariance function.</p>
@@ -542,8 +542,8 @@ learned.</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.RandomLaplace">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomLaplace</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomLaplace" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomLaplace</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Random Laplace Basis &#8211; Approximates a Laplace kernel function</p>
 <p>This will make a linear regression model approximate a GP with an
 (optionally ARD) Laplace covariance function.</p>
@@ -568,8 +568,8 @@ learned.</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.RandomMatern32">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomMatern32</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomMatern32" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomMatern32</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Random Matern 3/2 Basis &#8211; Approximates a Matern 3/2 kernel function</p>
 <p>This will make a linear regression model approximate a GP with an
 (optionally ARD) Matern covariance function.</p>
@@ -594,8 +594,8 @@ learned.</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.RandomMatern52">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomMatern52</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomMatern52" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomMatern52</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Random Matern 5/2 Basis &#8211; Approximates a Matern 5/2 kernel function</p>
 <p>This will make a linear regression model approximate a GP with an
 (optionally ARD) Matern covariance function.</p>
@@ -620,8 +620,8 @@ learned.</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.RandomRBF">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomRBF" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Random RBF Basis &#8211; Approximates an RBF kernel function</p>
 <p>This will make a linear regression model approximate a GP with an
 (optionally ARD) RBF covariance function.</p>
@@ -644,8 +644,8 @@ learned.</li>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.RandomRBF.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomRBF.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Apply the random RBF to X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -671,8 +671,8 @@ use, given in the constructor.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.basis_functions.RandomRBF.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomRBF.grad" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Get the gradients of this basis w.r.t.the length scales.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -701,8 +701,8 @@ ARD, i.e. scalar lenscale, this is just a 2D array). This is
 </dd></dl>
 
 <dl class="class">
-<dt id="revrand.basis_functions.SigmoidalBasis">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">SigmoidalBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">SigmoidalBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
 <dd><p>Sigmoidal Basis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -719,8 +719,8 @@ optimization</li>
 </tbody>
 </table>
 <dl class="method">
-<dt id="revrand.basis_functions.SigmoidalBasis.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis.__call__" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Apply the sigmoid basis function to X.</p>
 <div class="math">
 \[\phi_j (x) = \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )\]</div>
@@ -749,8 +749,8 @@ d is the dimensionality of X.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.basis_functions.SigmoidalBasis.grad">
-<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis.grad" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">grad</code><span class="sig-paren">(</span><em>X</em>, <em>lenscale</em><span class="sig-paren">)</span></dt>
 <dd><p>Get the gradients of this basis w.r.t.the length scale.</p>
 <div class="math">
 \[\frac{\partial}{\partial s} \phi_j(x) =
@@ -783,8 +783,8 @@ d is the dimensionality of X.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.basis_functions.apply_grad">
-<code class="descclassname">revrand.basis_functions.</code><code class="descname">apply_grad</code><span class="sig-paren">(</span><em>fun</em>, <em>grad</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.apply_grad" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">apply_grad</code><span class="sig-paren">(</span><em>fun</em>, <em>grad</em><span class="sig-paren">)</span></dt>
 <dd><p>Apply a function that takes a gradient matrix to a sequence of 2 or 3
 dimensional gradients.</p>
 <p>This is partucularly useful when the gradient of a basis concatenation
@@ -824,8 +824,8 @@ object is quite complex, eg.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.basis_functions.count_args">
-<code class="descclassname">revrand.basis_functions.</code><code class="descname">count_args</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.count_args" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">count_args</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span></dt>
 <dd><p>Count the number of arguments in a function/method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -842,16 +842,16 @@ object is quite complex, eg.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.basis_functions.slice_call">
-<code class="descclassname">revrand.basis_functions.</code><code class="descname">slice_call</code><span class="sig-paren">(</span><em>func</em>, <em>self</em>, <em>X</em>, <em>*vargs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.slice_call" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">slice_call</code><span class="sig-paren">(</span><em>func</em>, <em>self</em>, <em>X</em>, <em>*vargs</em>, <em>**kwargs</em><span class="sig-paren">)</span></dt>
 <dd><p>Decorator for implementing partial application.</p>
 <p>This must decorate the <code class="code docutils literal"><span class="pre">__call__</span></code> and <code class="code docutils literal"><span class="pre">grad</span></code> methods of basis
 objects if the <code class="code docutils literal"><span class="pre">slice_init</span></code> decorator was used.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.basis_functions.slice_init">
-<code class="descclassname">revrand.basis_functions.</code><code class="descname">slice_init</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.slice_init" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">slice_init</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span></dt>
 <dd><p>Decorator for adding partial application functionality to a basis object.</p>
 <p>This will add an &#8220;apply_ind&#8221; argument to a basis object initialiser that
 can be used to apply the basis function to only the dimensions specified in
@@ -865,8 +865,8 @@ apply_ind. E.g.,</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.basis_functions.spectralmixture">
-<code class="descclassname">revrand.basis_functions.</code><code class="descname">spectralmixture</code><span class="sig-paren">(</span><em>Xdim</em>, <em>apply_ind=None</em>, <em>bases_per_component=50</em>, <em>ncomponents=5</em>, <em>means_init=None</em>, <em>lenscales_init=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.spectralmixture" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">spectralmixture</code><span class="sig-paren">(</span><em>Xdim</em>, <em>apply_ind=None</em>, <em>bases_per_component=50</em>, <em>ncomponents=5</em>, <em>means_init=None</em>, <em>lenscales_init=None</em><span class="sig-paren">)</span></dt>
 <dd><p>Make a Gaussian spectral mixture basis</p>
 <p>This is a helper function for easily creating a Gaussian spectral mixture
 basis from multiple FasFoodGM mixture components. This implements the full
@@ -896,7 +896,7 @@ constructor values.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>GausSpecMix</strong> &#8211; A concatenation of <code class="code docutils literal"><span class="pre">FastFoodGM</span></code> bases to make the full mixture.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#revrand.basis_functions.BasisCat" title="revrand.basis_functions.BasisCat">BasisCat</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">BasisCat</p>
 </td>
 </tr>
 </tbody>
@@ -946,7 +946,7 @@ constructor values.</li>
         <li class="right" >
           <a href="installation.html" title="Installation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

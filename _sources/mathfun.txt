@@ -1,14 +1,14 @@
 Math Utilities
 ==============
 
-.. currentmodule:: revrand.utils
+.. currentmodule:: revrand.mathfun
 
 Linear Algebra
 --------------
-.. automodule:: revrand.math.linalg
+.. automodule:: revrand.mathfun.linalg
    :members:
 
 Special Functions
 -----------------
-.. automodule:: revrand.math.special
+.. automodule:: revrand.mathfun.special
    :members:
