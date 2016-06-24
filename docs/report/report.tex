@@ -181,7 +181,11 @@ described in~\cite[Chapter 2]{Rasmussen2006}. We then:
             &= \gausC{\targs\test}{\feats\testT \pomean,
                 \var + \feats\testT \pocov \feats\test}
         \end{align}
-        for query inputs, $\inss\test$.
+        for query inputs, $\inss\test$. This gives us the useful expectations,
+        \begin{align}
+            \expece{}{\targs\test} &= \feats\testT\pomean, \\
+            \evar{}{\targs\test} &= \var + \feats\testT\pocov\feats\testT.
+        \end{align}
 \end{itemize}
 
 It is actually easier to use the ELBO form with stochastic gradients for
@@ -286,7 +290,57 @@ complex optimisation scheme presented in~\cite{gershman2012}, which is not as
 amenable to large datasets as stochastic gradients when hyperparameter 
 optimisation is involved.
 
-TODO: Prediction
+The most simple and accurate method for approximating the predictive
+distribution, $\probC{\targs\test}{\targ, \ins, \inss\test}$ is to Monte-Carlo
+sample the integral,
+\begin{equation}
+    \probC{\targs\test}{\targ, \ins, \inss\test} \approx
+    \int \probC{\targ}{\activ{\feats\testT\weights}, \lparam}
+    \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k} d \weights.
+    \label{eq:glppred}
+\end{equation}
+However, this integral is not particularly useful unless we wish to evaluate
+known $\targ\test$ under the model. For prediction, it is more useful to
+compute (using Monte-Carlo integration) the predictive expectation, 
+\begin{align}
+    \expece{}{\targs\test} \approx&
+    \int \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k}
+    \int \targs\test \probC{\targs\test}{\activ{\feats\testT\weights}, \lparam}
+    d \targs\test d \weights
+    \nonumber\\
+    =& \int \activ{\feats\testT\weights}
+    \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k}
+    d \weights.
+    \label{eq:glmexpec}
+\end{align}
+
+Where the second line is a consequence of the choice of transformation
+function\footnote{This may not always be the case depending on how the
+    transformation function is used. In such cases, we can use the quantile
+    method to obtain useful statics},
+$\expece{}{\probC{\targs\test}{\activ{\feats\testT\weights}, \lparam}} =
+\activ{\feats\testT\weights}$. Furthermore, it is useful to compute quantiles
+of the predictive density in order to ascertain the predictive uncertainty. We
+start by sampling the predictive cumulative density function, $\Prob{\cdot}$,
+\begin{align}
+    &\ProbC{\targs\test \leq \cdfAlph}{\targ, \ins, \inss\test} \nonumber\\ 
+    &\qquad\approx \int 
+    \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k}
+    \int^{\cdfAlph}_{-\infty} 
+    \probC{\targs\test}{\activ{\feats\testT\weights}, \lparam}
+    d \targs\test d \weights \nonumber\\
+    &\qquad= \int
+    \ProbC{\targs\test \leq \cdfAlph}{\activ{\feats\testT\weights}, \lparam}
+    \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k}
+    d \weights.
+    \label{eq:lapexpec}
+\end{align}
+Once we have obtained sufficient samples we can obtain quantiles, $\cdfAlph$, 
+for some chosen level of probability, $p$, using root finding techniques.
+Specifically, we solve the following for $\cdfAlph$,
+\begin{equation}
+    \ProbC{\targs\test \leq \cdfAlph}{\targ, \ins, \inss\test} - p = 0.
+\end{equation}
 
 \subsection{Large Scale Gaussian Process Approximation}
 

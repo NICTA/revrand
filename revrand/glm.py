@@ -211,8 +211,8 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
             # Likelihood parameter gradients
             ziplgrads = zip(*lgrads(y, f[:, k], *lpars_largs))
             for l, (dp, dp2df) in enumerate(ziplgrads):
-                dlpars[l] -= B * (dp.sum()
-                               + 0.5 * (C[:, k] * dp2df.dot(Phi2)).sum()) / K
+                dlpars[l] -= B * \
+                    (dp.sum() + 0.5 * (C[:, k] * dp2df.dot(Phi2)).sum()) / K
 
         # Regulariser gradient
         dreg = 0.5 * (((m**2).sum() + C.sum()) / (reg**2 * K) - D / reg)
@@ -565,12 +565,8 @@ def _sample_func(Xs, basis, m, C, basis_hypers, nsamples, genaxis=1):
     D, K = m.shape
 
     # Generate weight samples from all mixture components
-    w = np.zeros((D, nsamples))
-    for k in range(K):
-        w += m[:, k:k + 1] + np.random.randn(D, nsamples) \
-            * np.sqrt(C[:, k:k + 1])
-
-    w /= K
+    k = np.random.randint(0, K, size=(nsamples,))
+    w = m[:, k] + np.random.randn(D, nsamples) * np.sqrt(C[:, k])
 
     # Now generate latent functions samples either colwise or rowwise
     if genaxis == 1:
