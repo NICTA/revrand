@@ -4,7 +4,7 @@
 import matplotlib.pyplot as pl
 import numpy as np
 import logging
-from scipy.stats import poisson, bernoulli, binom
+from scipy.stats import poisson, bernoulli, binom, beta
 from scipy.special import expit
 
 from revrand import glm, likelihoods
@@ -27,12 +27,15 @@ log = logging.getLogger(__name__)
 # Algorithmic properties
 nbases = 100
 lenscale = 1  # For all basis functions that take lengthscales
-noise = 1
 rho = 0.9
 epsilon = 1e-5
 passes = 400
 batch_size = 100
 use_sgd = True
+
+noise = 1
+a = 1
+b = 1
 
 N = 500
 Ns = 250
@@ -40,12 +43,15 @@ Ns = 250
 # Dataset properties
 lenscale_true = 0.7  # For the gpdraw dataset
 noise_true = 0.1
+a_true = 5  # For the Beta3 likelihood 
+b_true = 1
 
 # Likelihood
 # like = 'Gaussian'
 # like = 'Bernoulli'
-like = 'Poisson'
+# like = 'Poisson'
 # like = 'Binomial'
+like = 'Beta3'
 
 #
 # Make Data
@@ -71,6 +77,13 @@ elif like == 'Binomial':
     ytrain = binom.rvs(n=n, p=expit(ytrain))
     ftest = n * expit(ftest)
 
+elif like == 'Beta3':
+
+    offset = 0.001
+    minf = min(ytrain.min(), ftest.min())
+    ytrain = beta.rvs(a_true, b_true, size=(N,)) * (ytrain - minf + offset)
+    ftest = ftest - minf + offset
+
 elif like == 'Poisson':
 
     ytrain = poisson.rvs(softplus(5 * ytrain))
@@ -88,6 +101,10 @@ elif like == 'Binomial':
     llhood = likelihoods.Binomial()
 elif like == 'Poisson':
     llhood = likelihoods.Poisson(tranfcn='softplus')
+elif like == 'Beta3':
+    a_init = Parameter(a, Positive())
+    b_init = Parameter(b, Positive())
+    llhood = likelihoods.Beta3(a_init=a_init, b_init=b_init)
 else:
     raise ValueError("Invalid likelihood, {}!".format(like))
 

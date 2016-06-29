@@ -7,8 +7,8 @@ from __future__ import division
 
 import numpy as np
 
-from scipy.stats import bernoulli, binom, poisson, norm
-from scipy.special import gammaln, expit
+from scipy.stats import bernoulli, binom, poisson, norm, beta
+from scipy.special import gammaln, expit, digamma, betaln
 
 from .btypes import Parameter, Positive
 from .mathfun.special import safesoftplus, softplus, logtiny
@@ -490,8 +490,8 @@ class Gaussian(Bernoulli):
 
     def dp(self, y, f, var):
         r"""
-        Derivative of Gaussian log likelihood w.r.t.\  the parameters,
-        :math:`\theta`.
+        Derivative of Gaussian log likelihood w.r.t.\ the variance
+        :math:`\sigma^2`.
 
         Parameters
         ----------
@@ -728,3 +728,278 @@ class Poisson(Bernoulli):
 
         mu = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
         return poisson.cdf(y, mu=mu)
+
+
+class Beta3(Bernoulli):
+    """
+    A three-parameter Beta distribution,
+
+    .. math::
+
+        \mathcal{B}(y | f, \alpha, \beta) = \frac{1}{f^{\alpha + \beta - 1}
+            B(\alpha, \beta)} y^{\alpha - 1} (f - y)^{\beta - 1},
+
+    where :math:`B(\cdot)` is a Beta function. This is a distribution between
+    :math:`(0, f)`, with the special case of :math:`\alpha = \beta = 1` being a
+    uniform distribution.
+
+    Parameters
+    ----------
+    a_init: Parameter, optional
+        A scalar Parameter describing the initial point and bounds for
+        an optimiser to learn the a-shape parameter of this object.
+    b_init: Parameter, optional
+        A scalar Parameter describing the initial point and bounds for
+        an optimiser to learn the b-shape parameter of this object.
+    """
+
+    def __init__(self,
+                 a_init=Parameter(1., Positive()),
+                 b_init=Parameter(1., Positive())
+                 ):
+
+        self.params = [a_init, b_init]
+
+    def loglike(self, y, f, a, b):
+        r"""
+        Three-parameter Beta log likelihood.
+
+        Parameters
+        ----------
+        y: ndarray
+            array of (0, f) valued targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        logp: ndarray
+            the log likelihood of each y given each f under this
+            likelihood.
+        """
+
+        self.__check_ab(a, b)
+        self.__check_yf(y, f)
+
+        norm_const = -(a + b - 1) * np.log(f) - betaln(a, b)
+        log_like = (a - 1) * np.log(y) + (b - 1) * np.log(f - y)
+
+        return norm_const + log_like
+
+    def Ey(self, f, a, b):
+        r""" Expected value of the three-parameter Beta.
+
+        Parameters
+        ----------
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        Ey: ndarray
+            expected value of y, :math:`\mathbb{E}[y|f]`.
+        """
+
+        self.__check_ab(a, b)
+
+        return (a * f) / (a + b)
+
+    def df(self, y, f, a, b):
+        r"""
+        Derivative of three-parameter Beta log likelihood w.r.t.\  f.
+
+        Parameters
+        ----------
+        y: ndarray
+            array of (0, f) valued targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        df: ndarray
+            the derivative :math:`\partial \log p(y|f) / \partial f`
+        """
+
+        self.__check_ab(a, b)
+        self.__check_yf(y, f)
+
+        return (b - 1) / (f - y) - (a + b + 1) / f
+
+    def d2f(self, y, f, a, b):
+        r"""
+        Second derivative of three-parameter Beta log likelihood w.r.t.\  f.
+
+        Parameters
+        ----------
+        y: ndarray
+            array of (0, f) valued targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        df: ndarray
+            the second derivative
+            :math:`\partial^2 \log p(y|f)/ \partial f^2`
+        """
+
+        self.__check_ab(a, b)
+        self.__check_yf(y, f)
+
+        return (a + b + 1) / f**2 - (b - 1) / (f - y)**2
+
+    def d3f(self, y, f, a, b):
+        r"""
+        Third derivative of three-parameter Beta log likelihood w.r.t.\  f.
+
+        Parameters
+        ----------
+        y: ndarray
+            array of (0, f) valued targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        df: ndarray
+            the third derivative
+            :math:`\partial^3 \log p(y|f)/ \partial f^3`
+        """
+
+        self.__check_ab(a, b)
+        self.__check_yf(y, f)
+
+        return 2 * (b - 1) / (f - y)**3 - 2 * (a + b + 1) / f**3
+
+    def dp(self, y, f, a, b):
+        r"""
+        Derivatives of three-parameter Beta log likelihood w.r.t.\ the
+        parameters, :math:`a` and math:`b`.
+
+        Parameters
+        ----------
+        y: ndarray
+            array of (0, f) valued targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        dp: list
+            the derivatives
+            :math:`\partial \log p(y|f, a, b)/ \partial a` and
+            :math:`\partial \log p(y|f, a, b)/ \partial b` and
+        """
+
+        self.__check_ab(a, b)
+        self.__check_yf(y, f)
+
+        digamma_ab = digamma(a + b)
+
+        da = digamma_ab - digamma(a) - np.log(f) + np.log(y)
+        db = digamma_ab - digamma(b) + np.log(1 - y / f)
+        return [da, db]
+
+    def dpd2f(self, y, f, a, b):
+        r"""
+        Partial derivative of three-parameter Beta log likelihood,
+        :math:`\partial h(f, a, b) / \partial a` and
+        :math:`\partial h(f, a, b) / \partial b` and where
+        :math:`h(f, a, b) = \partial^2 \log p(y|f, a, b)/ \partial f^2`.
+
+        Parameters
+        ----------
+        y: ndarray
+            array of (0, f) valued targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        dpd2f: list
+            the derivative of the likelihood Hessian w.r.t.\ the parameters
+            :math:`a` and :math:`b`.
+        """
+
+        self.__check_ab(a, b)
+        self.__check_yf(y, f)
+
+        da = 1. / f**2
+        db = da - 1. / (f - y)**2
+        return [da, db]
+
+    def cdf(self, y, f, a, b):
+        r"""
+        Cumulative density function of the likelihood.
+
+        Parameters
+        ----------
+        y: ndarray
+            array of (0, f) valued targets
+        f: ndarray
+            latent function from the GLM prior (:math:`\mathbf{f} =
+            \boldsymbol\Phi \mathbf{w}`)
+        a: float
+            shape parameter, a > 0
+        b: float
+            shape parameter, b > 0
+
+        Returns
+        -------
+        cdf: ndarray
+            Cumulative density function evaluated at y.
+        """
+
+        self.__check_ab(a, b)
+        self.__check_yf(y, f)
+
+        return beta.cdf(y / f, a, b) / f
+
+    def __check_ab(self, a, b):
+
+        if a <= 0:
+            raise ValueError("a must be greater than 0")
+
+        if b <= 0:
+            raise ValueError("b must be greater than 0")
+
+    def __check_yf(self, y, f):
+
+        if any(f < y):
+            raise ValueError("f must be greater than y")
