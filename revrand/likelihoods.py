@@ -7,8 +7,8 @@ from __future__ import division
 
 import numpy as np
 
-from scipy.stats import bernoulli, binom, poisson, norm
-from scipy.special import gammaln, expit
+from scipy.stats import bernoulli, binom, poisson, norm, beta
+from scipy.special import gammaln, expit, digamma, betaln
 
 from .btypes import Parameter, Positive
 from .mathfun.special import safesoftplus, softplus, logtiny
@@ -490,8 +490,8 @@ class Gaussian(Bernoulli):
 
     def dp(self, y, f, var):
         r"""
-        Derivative of Gaussian log likelihood w.r.t.\  the parameters,
-        :math:`\theta`.
+        Derivative of Gaussian log likelihood w.r.t.\ the variance
+        :math:`\sigma^2`.
 
         Parameters
         ----------
