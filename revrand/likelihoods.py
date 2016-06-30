@@ -7,8 +7,8 @@ from __future__ import division
 
 import numpy as np
 
-from scipy.stats import bernoulli, binom, poisson, norm, beta
-from scipy.special import gammaln, expit, digamma, betaln
+from scipy.stats import bernoulli, binom, poisson, norm
+from scipy.special import gammaln, expit
 
 from .btypes import Parameter, Positive
 from .mathfun.special import safesoftplus, softplus, logtiny
