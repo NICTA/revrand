@@ -40,97 +40,94 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
 
     Parameters
     ----------
-        X: ndarray
-            (N, d) array input dataset (N samples, d dimensions).
-        y: ndarray
-            (N,) array targets (N samples)
-        likelihood: Object
-            A likelihood object, see the likelihoods module.
-        basis: Basis
-            A basis object, see the basis_functions module.
-        regulariser: Parameter, optional
-            weight regulariser (variance) initial value.
-        likelihood_args: sequence, optional
-            sequence of arguments to pass to the likelihood function. These
-            are non-learnable parameters. They can be scalars or arrays of
-            length N.
-        postcomp: int, optional
-            Number of diagonal Gaussian components to use to approximate the
-            posterior distribution.
-        use_sgd: bool, optional
-            If :code:`True` then use SGD (Adadelta) optimisation instead of
-            L-BFGS.
-        maxit: int, optional
-            Maximum number of iterations of the optimiser to run. If
-            :code:`use_sgd` is :code:`True` then this is the number of complete
-            passes through the data before optimization terminates.
-        tol: float, optional
-            Optimiser relative tolerance convergence criterion (only if L-BFGS
-            is used as the optimiser).
-        batch_size: int, optional
-            number of observations to use per SGD batch. Ignored if
-            :code:`use_sgd=False`.
-        rho: float, optional
-            SGD decay rate, must be [0, 1]. Ignored if :code:`use_sgd=False`.
-        epsilon: float, optional
-            Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
+    X: ndarray
+        (N, d) array input dataset (N samples, d dimensions).
+    y: ndarray
+        (N,) array targets (N samples)
+    likelihood: Object
+        A likelihood object, see the likelihoods module.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    regulariser: Parameter, optional
+        weight regulariser (variance) initial value.
+    likelihood_args: sequence, optional
+        sequence of arguments to pass to the likelihood function. These are
+        non-learnable parameters. They can be scalars or arrays of length N.
+    postcomp: int, optional
+        Number of diagonal Gaussian components to use to approximate the
+        posterior distribution.
+    use_sgd: bool, optional
+        If :code:`True` then use SGD (Adadelta) optimisation instead of L-BFGS.
+    maxit: int, optional
+        Maximum number of iterations of the optimiser to run. If
+        :code:`use_sgd` is :code:`True` then this is the number of complete
+        passes through the data before optimization terminates.
+    tol: float, optional
+        Optimiser relative tolerance convergence criterion (only if L-BFGS
+        is used as the optimiser).
+    batch_size: int, optional
+        number of observations to use per SGD batch. Ignored if
+        :code:`use_sgd=False`.
+    rho: float, optional
+        SGD decay rate, must be [0, 1]. Ignored if :code:`use_sgd=False`.
+    epsilon: float, optional
+        Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
 
     Returns
     -------
-        m: ndarray
-            (D, postcomp) array of posterior weight means (D is the dimension
-            of the features).
-        C: ndarray
-            (D, postcomp) array of posterior weight variances.
-        likelihood_hypers: sequence
-            learned sequence of likelihood object hyperparameters.
-        basis_hypers: sequence
-            learned sequence of basis object hyperparameters.
+    m: ndarray
+        (D, postcomp) array of posterior weight means (D is the dimension of
+        the features).
+    C: ndarray
+        (D, postcomp) array of posterior weight variances.
+    likelihood_hypers: sequence
+        learned sequence of likelihood object hyperparameters.
+    basis_hypers: sequence
+        learned sequence of basis object hyperparameters.
 
     Notes
     -----
-        This approximates the posterior distribution over the weights with
-        a mixture of Gaussians:
+    This approximates the posterior distribution over the weights with
+    a mixture of Gaussians:
 
-        .. math ::
+    .. math ::
 
-            \mathbf{w} \sim \frac{1}{K} \sum^K_{k=1}
-                \mathcal{N}(\mathbf{m_k}, \boldsymbol{\Psi}_k)
+        \mathbf{w} \sim \frac{1}{K} \sum^K_{k=1}
+            \mathcal{N}(\mathbf{m_k}, \boldsymbol{\Psi}_k)
 
-        where,
+    where,
 
-        .. math ::
+    .. math ::
 
-            \boldsymbol{\Psi}_k = \text{diag}([\Psi_{k,1}, \ldots,
-                \Psi_{k,D}]).
+        \boldsymbol{\Psi}_k = \text{diag}([\Psi_{k,1}, \ldots,
+            \Psi_{k,D}]).
 
-        This is so arbitrary likelihoods can be used with this algorithm, while
-        still mainting flexible and tractable non-Gaussian posteriors.
-        Additionaly this has the benefit that we have a reduced number of
-        parameters to optimise (compared with full covariance Gaussians).
+    This is so arbitrary likelihoods can be used with this algorithm, while
+    still mainting flexible and tractable non-Gaussian posteriors. Additionaly
+    this has the benefit that we have a reduced number of parameters to
+    optimise (compared with full covariance Gaussians).
 
-        The main differences between this implementation and the GLM in [1]_
-        are:
-            - We use diagonal mixtures, as opposed to isotropic.
-            - We do not cycle between optimising eq. 10 and 11 (objectives L1
-              and L2) in the paper. We use the full objective L2 for
-              everything, including the posterior means, and we optimise all
-              parameters together.
+    The main differences between this implementation and the GLM in [1]_ are:
+        - We use diagonal mixtures, as opposed to isotropic.
+        - We do not cycle between optimising eq. 10 and 11 (objectives L1 and
+          L2) in the paper. We use the full objective L2 for everything,
+          including the posterior means, and we optimise all parameters
+          together.
 
-        Even though these changes make learning a little slower, and require
-        third derivatives of the likelihoods, we obtain better results and we
-        can use SGD straight-forwardly.
+    Even though these changes make learning a little slower, and require third
+    derivatives of the likelihoods, we obtain better results and we can use SGD
+    straight-forwardly.
 
-        This uses the python logging module for displaying learning status.
-        To view these messages have something like,
+    This uses the python logging module for displaying learning status. To view
+    these messages have something like,
 
-        .. code ::
+    .. code ::
 
-            import logging
-            logging.basicConfig(level=logging.INFO)
-            log = logging.getLogger(__name__)
+        import logging
+        logging.basicConfig(level=logging.INFO)
+        log = logging.getLogger(__name__)
 
-        in your calling code.
+    in your calling code.
     """
 
     if y.ndim != 1:
@@ -311,47 +308,46 @@ def predict_moments(Xs, likelihood, basis, m, C, likelihood_hypers,
 
     Parameters
     ----------
-        Xs: ndarray
-            (Ns,d) array query input dataset (Ns samples, D dimensions).
-        likelihood: Object
-            A likelihood object, see the likelihoods module.
-        basis: Basis
-            A basis object, see the basis_functions module.
-        m: ndarray
-            (D,) array of regression weights (posterior).
-        C: ndarray
-            (D,) or (D, D) array of regression weight covariances (posterior).
-        likelihood_hypers: sequence
-            a sequence of parameters for the likelihood object, e.g. the
-            likelihoods.Gaussian object takes a variance parameter, so this
-            should be :code:`[var]`.
-        basis_hypers: sequence
-            A sequence of hyperparameters of the basis object.
-        likelihood_args: sequence, optional
-            sequence of arguments to pass to the likelihood function. These
-            are non-learnable parameters. They can be scalars or arrays of
-            length Ns.
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
+    Xs: ndarray
+        (Ns,d) array query input dataset (Ns samples, D dimensions).
+    likelihood: Object
+        A likelihood object, see the likelihoods module.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    m: ndarray
+        (D,) array of regression weights (posterior).
+    C: ndarray
+        (D,) or (D, D) array of regression weight covariances (posterior).
+    likelihood_hypers: sequence
+        a sequence of parameters for the likelihood object, e.g. the
+        likelihoods.Gaussian object takes a variance parameter, so this should
+        be :code:`[var]`.
+    basis_hypers: sequence
+        A sequence of hyperparameters of the basis object.
+    likelihood_args: sequence, optional
+        sequence of arguments to pass to the likelihood function. These are
+        non-learnable parameters. They can be scalars or arrays of length Ns.
+    nsamples: int, optional
+        The number of samples to draw from the posterior in order to
+        approximate the predictive mean and variance.
 
     Returns
     -------
-        Ey: ndarray
-            The expected value of ys for the query inputs, Xs of shape (Ns,).
-        Vy: ndarray
-            The expected variance of ys (excluding likelihood noise terms) for
-            the query inputs, Xs of shape (Ns,).
-        Ey_min: ndarray
-            The minimum sampled values of the predicted mean (same shape as Ey)
-        Ey_max: ndarray
-            The maximum sampled values of the predicted mean (same shape as Ey)
+    Ey: ndarray
+        The expected value of ys for the query inputs, Xs of shape (Ns,).
+    Vy: ndarray
+        The expected variance of ys (excluding likelihood noise terms) for the
+        query inputs, Xs of shape (Ns,).
+    Ey_min: ndarray
+        The minimum sampled values of the predicted mean (same shape as Ey)
+    Ey_max: ndarray
+        The maximum sampled values of the predicted mean (same shape as Ey)
     """
 
     # Get latent function samples
     N = Xs.shape[0]
     ys = np.empty((N, nsamples))
-    fsamples = _sample_func(Xs, basis, m, C, basis_hypers, nsamples)
+    fsamples = sample_func(Xs, basis, m, C, basis_hypers, nsamples)
 
     # Push samples though likelihood expected value
     for i, f in enumerate(fsamples):
@@ -366,6 +362,69 @@ def predict_moments(Xs, likelihood, basis, m, C, likelihood_hypers,
     return Ey, Vy, Ey_min, Ey_max
 
 
+def predict_logpdf(ys, Xs, likelihood, basis, m, C, likelihood_hypers,
+                   basis_hypers, likelihood_args=(), nsamples=100):
+    r"""
+    Predictive log-probability density function of a Bayesian GLM.
+
+    Parameters
+    ----------
+    ys: ndarray
+        The test observations of shape (Ns,) to evaluate under,
+        :math:`\log p(y^* |\mathbf{x}^*, \mathbf{X}, y)`.
+    Xs: ndarray
+        (Ns,d) array query input dataset (Ns samples, D dimensions).
+    likelihood: Object
+        A likelihood object, see the likelihoods module.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    m: ndarray
+        (D,) array of regression weights (posterior).
+    C: ndarray
+        (D,) or (D, D) array of regression weight covariances (posterior).
+    likelihood_hypers: sequence
+        a sequence of parameters for the likelihood object, e.g. the
+        likelihoods.Gaussian object takes a variance parameter, so this should
+        be :code:`[var]`.
+    basis_hypers: sequence
+        A sequence of hyperparameters of the basis object.
+    likelihood_args: sequence, optional
+        sequence of arguments to pass to the likelihood function. These are
+        non-learnable parameters. They can be scalars or arrays of length Ns.
+    nsamples: int, optional
+        The number of samples to draw from the posterior in order to
+        approximate the predictive mean and variance.
+
+    Returns
+    -------
+    logp: ndarray
+       The log probability of ys given Xs of shape (Ns,).
+    logp_min: ndarray
+        The minimum sampled values of the predicted log probability (same shape
+        as p)
+    logp_max: ndarray
+        The maximum sampled values of the predicted log probability (same shape
+        as p)
+    """
+
+    # Get latent function samples
+    N = Xs.shape[0]
+    ps = np.empty((N, nsamples))
+    fsamples = sample_func(Xs, basis, m, C, basis_hypers, nsamples)
+
+    # Push samples though likelihood pdf
+    for i, f in enumerate(fsamples):
+        ps[:, i] = likelihood.loglike(ys, f, *chain(likelihood_hypers,
+                                                    likelihood_args))
+
+    # Average transformed samples (MC integration)
+    logp = ps.mean(axis=1)
+    logp_min = ps.min(axis=1)
+    logp_max = ps.max(axis=1)
+
+    return logp, logp_min, logp_max
+
+
 def predict_cdf(quantile, Xs, likelihood, basis, m, C, likelihood_hypers,
                 basis_hypers, likelihood_args=(), nsamples=100):
     r"""
@@ -373,50 +432,49 @@ def predict_cdf(quantile, Xs, likelihood, basis, m, C, likelihood_hypers,
 
     Parameters
     ----------
-        quantile: float
-            The predictive probability, :math:`p(y^* \leq \text{quantile} |
-            \mathbf{X}, y)`.
-        Xs: ndarray
-            (Ns,d) array query input dataset (Ns samples, D dimensions).
-        likelihood: Object
-            A likelihood object, see the likelihoods module.
-        basis: Basis
-            A basis object, see the basis_functions module.
-        m: ndarray
-            (D,) array of regression weights (posterior).
-        C: ndarray
-            (D,) or (D, D) array of regression weight covariances (posterior).
-        likelihood_hypers: sequence
-            a sequence of parameters for the likelihood object, e.g. the
-            likelihoods.Gaussian object takes a variance parameter, so this
-            should be :code:`[var]`.
-        basis_hypers: sequence
-            A sequence of hyperparameters of the basis object.
-        likelihood_args: sequence, optional
-            sequence of arguments to pass to the likelihood function. These
-            are non-learnable parameters. They can be scalars or arrays of
-            length Ns.
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
+    quantile: float
+        The predictive probability, :math:`p(y^* \leq \text{quantile} |
+        \mathbf{x}^*, \mathbf{X}, y)`.
+    Xs: ndarray
+        (Ns,d) array query input dataset (Ns samples, D dimensions).
+    likelihood: Object
+        A likelihood object, see the likelihoods module.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    m: ndarray
+        (D,) array of regression weights (posterior).
+    C: ndarray
+        (D,) or (D, D) array of regression weight covariances (posterior).
+    likelihood_hypers: sequence
+        a sequence of parameters for the likelihood object, e.g. the
+        likelihoods.Gaussian object takes a variance parameter, so this
+        should be :code:`[var]`.
+    basis_hypers: sequence
+        A sequence of hyperparameters of the basis object.
+    likelihood_args: sequence, optional
+        sequence of arguments to pass to the likelihood function. These are
+        non-learnable parameters. They can be scalars or arrays of length Ns.
+    nsamples: int, optional
+        The number of samples to draw from the posterior in order to
+        approximate the predictive mean and variance.
 
     Returns
     -------
-        p: ndarray
-           The probability of ys <= quantile for the query inputs, Xs of shape
-           (Ns,).
-        p_min: ndarray
-            The minimum sampled values of the predicted probability (same shape
-            as p)
-        p_max: ndarray
-            The maximum sampled values of the predicted probability (same shape
-            as p)
+    p: ndarray
+       The probability of ys <= quantile for the query inputs, Xs of shape
+       (Ns,).
+    p_min: ndarray
+        The minimum sampled values of the predicted probability (same shape
+        as p)
+    p_max: ndarray
+        The maximum sampled values of the predicted probability (same shape
+        as p)
     """
 
     # Get latent function samples
     N = Xs.shape[0]
     ps = np.empty((N, nsamples))
-    fsamples = _sample_func(Xs, basis, m, C, basis_hypers, nsamples)
+    fsamples = sample_func(Xs, basis, m, C, basis_hypers, nsamples)
 
     # Push samples though likelihood cdf
     for i, f in enumerate(fsamples):
@@ -440,46 +498,45 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, likelihood_hypers,
 
     Parameters
     ----------
-        alpha: float
-            The percentile confidence interval (e.g. 95%) to return.
-        Xs: ndarray
-            (Ns,d) array query input dataset (Ns samples, D dimensions).
-        likelihood: Object
-            A likelihood object, see the likelihoods module.
-        basis: Basis
-            A basis object, see the basis_functions module.
-        m: ndarray
-            (D,) array of regression weights (posterior).
-        C: ndarray
-            (D,) or (D, D) array of regression weight covariances (posterior).
-        likelihood_hypers: sequence
-            a sequence of parameters for the likelihood object, e.g. the
-            likelihoods.Gaussian object takes a variance parameter, so this
-            should be :code:`[var]`.
-        basis_hypers: sequence
-            A sequence of hyperparameters of the basis object.
-        likelihood_args: sequence, optional
-            sequence of arguments to pass to the likelihood function. These
-            are non-learnable parameters. They can be scalars or arrays of
-            length Ns.
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
-        multiproc: bool, optional
-            Use multiprocessing to paralellise this prediction computation.
+    alpha: float
+        The percentile confidence interval (e.g. 95%) to return.
+    Xs: ndarray
+        (Ns,d) array query input dataset (Ns samples, D dimensions).
+    likelihood: Object
+        A likelihood object, see the likelihoods module.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    m: ndarray
+        (D,) array of regression weights (posterior).
+    C: ndarray
+        (D,) or (D, D) array of regression weight covariances (posterior).
+    likelihood_hypers: sequence
+        a sequence of parameters for the likelihood object, e.g. the
+        likelihoods.Gaussian object takes a variance parameter, so this should
+        be :code:`[var]`.
+    basis_hypers: sequence
+        A sequence of hyperparameters of the basis object.
+    likelihood_args: sequence, optional
+        sequence of arguments to pass to the likelihood function. These are
+        non-learnable parameters. They can be scalars or arrays of length Ns.
+    nsamples: int, optional
+        The number of samples to draw from the posterior in order to
+        approximate the predictive mean and variance.
+    multiproc: bool, optional
+        Use multiprocessing to paralellise this prediction computation.
 
     Returns
     -------
-        ql: ndarray
-            The lower end point of the interval with shape (Ns,)
-        qu: ndarray
-            The upper end point of the interval with shape (Ns,)
+    ql: ndarray
+        The lower end point of the interval with shape (Ns,)
+    qu: ndarray
+        The upper end point of the interval with shape (Ns,)
     """
 
     N = Xs.shape[0]
 
     # Generate latent function samples per observation (n in N)
-    fsamples = _sample_func(Xs, basis, m, C, basis_hypers, nsamples, genaxis=0)
+    fsamples = sample_func(Xs, basis, m, C, basis_hypers, nsamples, genaxis=0)
 
     # Make sure likelihood_args is consistent with work
     if len(likelihood_args) > 0:
@@ -501,6 +558,61 @@ def predict_interval(alpha, Xs, likelihood, basis, m, C, likelihood_hypers,
     # Get results of work
     ql, qu = zip(*res)
     return np.array(ql), np.array(qu)
+
+
+def sample_func(Xs, basis, m, C, basis_hypers, nsamples=100, genaxis=1):
+    """
+    Generate samples from the posterior latent function mixtures of the GLM for
+    query inputs, Xs.
+
+    Parameters
+    ----------
+    Xs: ndarray
+        (Ns,d) array query input dataset (Ns samples, D dimensions).
+    likelihood: Object
+        A likelihood object, see the likelihoods module.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    m: ndarray
+        (D,) array of regression weights (posterior).
+    C: ndarray
+        (D,) or (D, D) array of regression weight covariances (posterior).
+    basis_hypers: sequence
+        A sequence of hyperparameters of the basis object.
+    nsamples: int, optional
+        The number of samples to draw from the posterior in order to
+        approximate the predictive mean and variance.
+    genaxis: int
+        Axis to return samples from, i.e.
+        - :code:`genaxis=1` will give you one sample at a time of f for ALL
+            observations (so it will iterate over nsamples).
+        - :code:`genaxis=0` will give you all samples of f for ONE
+            observation at a time (so it will iterate through Xs, row by row)
+
+    Yields
+    ------
+    fsamples: ndarray
+        of shape (Ns,) if :code:`genaxis=1` with each call being a sample
+        from the mixture of latent functions over all Ns. Or of shape
+        (nsamples,) if :code:`genaxis=0`, with each call being a all samples
+        for an observation, n in Ns.
+    """
+    D, K = m.shape
+
+    # Generate weight samples from all mixture components
+    k = np.random.randint(0, K, size=(nsamples,))
+    w = m[:, k] + np.random.randn(D, nsamples) * np.sqrt(C[:, k])
+    Phi = basis(Xs, *basis_hypers)  # Keep this here for speed
+
+    # Now generate latent functions samples either colwise or rowwise
+    if genaxis == 1:
+        fs = (Phi.dot(ws) for ws in w.T)
+    elif genaxis == 0:
+        fs = (phi_n.dot(w) for phi_n in Phi)
+    else:
+        raise ValueError("Invalid axis to generate samples from")
+
+    return fs
 
 
 #
@@ -554,30 +666,6 @@ def _rootfinding(fn, likelihood, likelihood_hypers, likelihood_args, alpha):
         qun = np.nan
 
     return qln, qun
-
-
-def _sample_func(Xs, basis, m, C, basis_hypers, nsamples, genaxis=1):
-    # genaxis == 1 will give you one sample at a time of f for ALL observations
-    #   (so it will iterate over nsamples).
-    # genaxis == 0 will give you all samples of f for ONE observation at a
-    #   time (so it will iterate through Xs, row by row)
-
-    D, K = m.shape
-
-    # Generate weight samples from all mixture components
-    k = np.random.randint(0, K, size=(nsamples,))
-    w = m[:, k] + np.random.randn(D, nsamples) * np.sqrt(C[:, k])
-
-    # Now generate latent functions samples either colwise or rowwise
-    if genaxis == 1:
-        Phi = basis(Xs, *basis_hypers)
-        fs = (Phi.dot(ws) for ws in w.T)
-    elif genaxis == 0:
-        fs = (basis(np.atleast_2d(Xn), *basis_hypers).dot(w) for Xn in Xs)
-    else:
-        raise ValueError("Invalid axis to generate samples from")
-
-    return fs
 
 
 def _dgausll(x, mean, dcov):
