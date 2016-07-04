@@ -240,7 +240,7 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
         return -L2, append_or_extend([-dm, -dC, -dreg], dlpars, dbpars)
 
     # Intialise m and C
-    m = np.random.randn(D, K) + np.random.randn(K)  # V. important for perform.
+    m = (np.random.randn(D, K) + np.random.randn(K)) * regulariser.value
     C = gamma.rvs(2, scale=0.5, size=(D, K))
 
     # Pack params
