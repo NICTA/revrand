@@ -57,6 +57,10 @@ def test_glm_gaussian(make_gaus_data):
     py, _, _ = glm.predict_cdf(1e5, X, lhood, basis, *params)
     assert np.allclose(py, 1.)
 
+    # Test log probability
+    lpy, _, _ = glm.predict_logpdf(Ey, X, lhood, basis, *params)
+    assert np.all(lpy > -100)
+
     EyQn, EyQx = glm.predict_interval(0.9, X, lhood, basis, *params)
     assert all(Ey <= EyQx)
     assert all(Ey >= EyQn)
@@ -83,7 +87,7 @@ def test_glm_binomial(make_binom_data):
 
     # LBFGS
     params = glm.learn(X, y, lhood, basis, use_sgd=False,
-                       likelihood_args=largs)
+                       likelihood_args=largs, tol=1e-7)
     Ey, _, _, _ = glm.predict_moments(X, lhood, basis, *params,
                                       likelihood_args=largs)
 

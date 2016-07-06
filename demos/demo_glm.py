@@ -111,6 +111,13 @@ plt1, plt1n, plt1x = glm.predict_cdf(0, Xtest, llhood, basis, *params,
 y95n, y95x = glm.predict_interval(0.95, Xtest, llhood, basis, *params,
                                   likelihood_args=slargs)
 
+# Get the NLP
+logp, _, _ = glm.predict_logpdf(ftest, Xtest, llhood, basis, *params,
+                                likelihood_args=slargs)
+
+log.info("Average NLP = {}".format(- logp.mean()))
+
+
 if like == 'Gaussian':
     Sy2 = 2 * np.sqrt(Vy + params[2][0])
 else:

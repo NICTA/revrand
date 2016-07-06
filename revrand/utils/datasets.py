@@ -230,7 +230,8 @@ def gen_gausprocess_se(ntrain, ntest, noise=1., lenscale=1., scale=1.,
     Generate a random (noisy) draw from a Gaussian Process with a RBF kernel.
     """
 
-    Xtrain = np.linspace(xmin, xmax, ntrain)[:, np.newaxis]
+    # Xtrain = np.linspace(xmin, xmax, ntrain)[:, np.newaxis]
+    Xtrain = np.random.rand(ntrain)[:, np.newaxis] * (xmin - xmax) - xmin
     Xtest = np.linspace(xmin, xmax, ntest)[:, np.newaxis]
     Xcat = np.vstack((Xtrain, Xtest))
 

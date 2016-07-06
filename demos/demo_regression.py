@@ -8,7 +8,7 @@ import logging
 from revrand import slm, glm, likelihoods
 from revrand.metrics import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
-from revrand.btypes import Parameter, Positive
+from revrand.btypes import Parameter, Positive, Bound
 from revrand import basis_functions as bs
 import revrand.legacygp as gp
 import revrand.legacygp.kernels as kern
@@ -25,26 +25,28 @@ def main():
     #
 
     # Dataset properties
-    N = 500
+    N = 30
     Ns = 250
 
     # Dataset selection
     # dataset = 'sinusoid'
     dataset = 'gp1D'
-    lenscale_true = 0.7  # For the gpdraw dataset
+    lenscale_true = 1.2  # For the gpdraw dataset
     noise_true = 0.1
 
     # Algorithmic properties
-    nbases = 200
+    nbases = 100
     lenscale = 1  # For all basis functions that take lengthscales
-    noise = 1
+    noise = 0.5
+    reg = 1.
+
+    # GLM learning settings
     rho = 0.9
     epsilon = 1e-6
-    passes = 50
+    passes = 600
     batch_size = 10
-    reg = 1
 
-    lenp = Parameter(lenscale, Positive())
+    lenp = Parameter(lenscale, Bound(1e-3, 10))
     base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
     # base = bs.RandomMatern32(Xdim=1, nbases=nbases, lenscale_init=lenp)
 
@@ -61,8 +63,8 @@ def main():
 
     # Sinusoid
     if dataset == 'sinusoid':
-        Xtrain = np.linspace(-2 * np.pi, 2 * np.pi, N)[:, np.newaxis]
-        ytrain = np.sin(Xtrain).flatten() + np.random.randn(N) * noise
+        Xtrain = np.random.rand(N)[:, np.newaxis] * 4 * np.pi - 2 * np.pi
+        ytrain = np.sin(Xtrain).flatten() + np.random.randn(N) * noise_true
         Xtest = np.linspace(-2 * np.pi, 2 * np.pi, Ns)[:, np.newaxis]
         ftest = np.sin(Xtest).flatten()
 

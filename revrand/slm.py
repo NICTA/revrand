@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, basis, var=Parameter(1., Positive()),
-          regulariser=Parameter(1., Positive()), tol=1e-6, maxit=1000):
+          regulariser=Parameter(1., Positive()), tol=1e-8, maxit=1000):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
