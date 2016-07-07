@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Scikit Learn Compatibility Interface &mdash; revrand 0.4.1 documentation</title>
+    <title>Scikit Learn Compatibility Interface &mdash; revrand 0.4.2 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
     <link rel="next" title="Demos" href="demo.html" />
     <link rel="prev" title="Math Utilities" href="mathfun.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="mathfun.html" title="Math Utilities"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -98,7 +98,7 @@ of X).</li>
 
 <dl class="class">
 <dt id="revrand.skl.GeneralisedLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batch_size=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em>, <em>alpha=0.95</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxiter=1000</em>, <em>tol=1e-07</em>, <em>batch_size=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em>, <em>alpha=0.95</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.BaseEstimator</span></code>, <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.RegressorMixin</span></code></p>
 <p>Generalised linear model interface class.</p>
 <p>This provides a scikit learn compatible interface for the glm module.</p>
@@ -115,7 +115,7 @@ posterior distribution.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; Optimiser relative tolerance convergence criterion.</li>
 <li><strong>use_sgd</strong> (<em>bool, optional</em>) &#8211; If <code class="code docutils literal"><span class="pre">True</span></code> then use SGD (Adadelta) optimisation instead of
 L-BFGS.</li>
-<li><strong>maxit</strong> (<em>int, optional</em>) &#8211; Maximum number of iterations of the optimiser to run. If
+<li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; Maximum number of iterations of the optimiser to run. If
 <code class="code docutils literal"><span class="pre">use_sgd</span></code> is <code class="code docutils literal"><span class="pre">True</span></code> then this is the number of complete
 passes through the data before optimization terminates (unless it
 converges first).</li>
@@ -415,7 +415,7 @@ of X).</li>
 
 <dl class="class">
 <dt id="revrand.skl.StandardLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-06</em>, <em>maxit=500</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.skl.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-06</em>, <em>maxiter=500</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.skl.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.BaseEstimator</span></code>, <code class="xref py py-class docutils literal"><span class="pre">sklearn.base.RegressorMixin</span></code></p>
 <p>Standard linear model interface class.</p>
 <p>This provides a scikit learn compatible interface for the slm module.</p>
@@ -428,7 +428,7 @@ of X).</li>
 <li><strong>var</strong> (<em>Parameter, optional</em>) &#8211; observation variance initial value.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
-<li><strong>maxit</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
+<li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
 </ul>
 </td>
 </tr>
@@ -541,7 +541,7 @@ X_star of shape (N_star,).</li>
         <li class="right" >
           <a href="mathfun.html" title="Math Utilities"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

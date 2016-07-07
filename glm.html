@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalised Linear Model &mdash; revrand 0.4.1 documentation</title>
+    <title>Generalised Linear Model &mdash; revrand 0.4.2 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
     <link rel="prev" title="Standard Linear Model" href="slm.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="slm.html" title="Standard Linear Model"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -73,7 +73,7 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </table>
 <dl class="function">
 <dt id="revrand.glm.learn">
-<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>likelihood_args=()</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxit=1000</em>, <em>tol=1e-07</em>, <em>batch_size=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.glm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>likelihood_args=()</em>, <em>postcomp=10</em>, <em>use_sgd=True</em>, <em>maxiter=1000</em>, <em>tol=1e-07</em>, <em>batch_size=100</em>, <em>rho=0.9</em>, <em>epsilon=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters of a Bayesian generalised linear model (GLM).</p>
 <p>The learning algorithm uses nonparametric variational inference <a class="footnote-reference" href="#id2" id="id3">[1]</a>, and
 optionally stochastic gradients.</p>
@@ -87,16 +87,14 @@ optionally stochastic gradients.</p>
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
 <li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
-<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These
-are non-learnable parameters. They can be scalars or arrays of
-length N.</li>
+<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
+non-learnable parameters. They can be scalars or arrays of length N.</li>
 <li><strong>postcomp</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
 posterior distribution.</li>
-<li><strong>use_sgd</strong> (<em>bool, optional</em>) &#8211; If <code class="code docutils literal"><span class="pre">True</span></code> then use SGD (Adadelta) optimisation instead of
-L-BFGS.</li>
-<li><strong>maxit</strong> (<em>int, optional</em>) &#8211; Maximum number of iterations of the optimiser to run. If
-<code class="code docutils literal"><span class="pre">use_sgd</span></code> is <code class="code docutils literal"><span class="pre">True</span></code> then this is the number of complete
-passes through the data before optimization terminates.</li>
+<li><strong>use_sgd</strong> (<em>bool, optional</em>) &#8211; If <code class="code docutils literal"><span class="pre">True</span></code> then use SGD (Adadelta) optimisation instead of L-BFGS.</li>
+<li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; Maximum number of iterations of the optimiser to run. If
+<code class="code docutils literal"><span class="pre">use_sgd</span></code> is <code class="code docutils literal"><span class="pre">True</span></code> then this is the number of mini batches
+to evaluate before termination.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; Optimiser relative tolerance convergence criterion (only if L-BFGS
 is used as the optimiser).</li>
 <li><strong>batch_size</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch. Ignored if
@@ -107,8 +105,8 @@ is used as the optimiser).</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D, postcomp) array of posterior weight means (D is the dimension
-of the features).</li>
+<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D, postcomp) array of posterior weight means (D is the dimension of
+the features).</li>
 <li><strong>C</strong> (<em>ndarray</em>) &#8211; (D, postcomp) array of posterior weight variances.</li>
 <li><strong>likelihood_hypers</strong> (<em>sequence</em>) &#8211; learned sequence of likelihood object hyperparameters.</li>
 <li><strong>basis_hypers</strong> (<em>sequence</em>) &#8211; learned sequence of basis object hyperparameters.</li>
@@ -129,25 +127,25 @@ a mixture of Gaussians:</p>
 \[\boldsymbol{\Psi}_k = \text{diag}([\Psi_{k,1}, \ldots,
     \Psi_{k,D}]).\]</div>
 <p>This is so arbitrary likelihoods can be used with this algorithm, while
-still mainting flexible and tractable non-Gaussian posteriors.
-Additionaly this has the benefit that we have a reduced number of
-parameters to optimise (compared with full covariance Gaussians).</p>
-<p>The main differences between this implementation and the GLM in <a class="footnote-reference" href="#id2" id="id4">[1]</a>
-are:</p>
-<blockquote>
-<div><ul class="simple">
+still mainting flexible and tractable non-Gaussian posteriors. Additionaly
+this has the benefit that we have a reduced number of parameters to
+optimise (compared with full covariance Gaussians).</p>
+<dl class="docutils">
+<dt>The main differences between this implementation and the GLM in <a class="footnote-reference" href="#id2" id="id4">[1]</a> are:</dt>
+<dd><ul class="first last simple">
 <li>We use diagonal mixtures, as opposed to isotropic.</li>
-<li>We do not cycle between optimising eq. 10 and 11 (objectives L1
-and L2) in the paper. We use the full objective L2 for
-everything, including the posterior means, and we optimise all
-parameters together.</li>
+<li>We do not cycle between optimising eq. 10 and 11 (objectives L1 and
+L2) in the paper. We use the full objective L2 for everything,
+including the posterior means, and we optimise all parameters
+together.</li>
 </ul>
-</div></blockquote>
-<p>Even though these changes make learning a little slower, and require
-third derivatives of the likelihoods, we obtain better results and we
-can use SGD straight-forwardly.</p>
-<p>This uses the python logging module for displaying learning status.
-To view these messages have something like,</p>
+</dd>
+</dl>
+<p>Even though these changes make learning a little slower, and require third
+derivatives of the likelihoods, we obtain better results and we can use SGD
+straight-forwardly.</p>
+<p>This uses the python logging module for displaying learning status. To view
+these messages have something like,</p>
 <div class="code highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
@@ -166,7 +164,7 @@ To view these messages have something like,</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>quantile</strong> (<em>float</em>) &#8211; The predictive probability, <span class="math">\(p(y^* \leq \text{quantile} |
-\mathbf{X}, y)\)</span>.</li>
+\mathbf{x}^*, \mathbf{X}, y)\)</span>.</li>
 <li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
 <li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
@@ -176,9 +174,8 @@ To view these messages have something like,</p>
 likelihoods.Gaussian object takes a variance parameter, so this
 should be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
 <li><strong>basis_hypers</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
-<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These
-are non-learnable parameters. They can be scalars or arrays of
-length Ns.</li>
+<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
+non-learnable parameters. They can be scalars or arrays of length Ns.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
 approximate the predictive mean and variance.</li>
 </ul>
@@ -216,12 +213,11 @@ GLM.</p>
 <li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
 <li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
 <li><strong>likelihood_hypers</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
-likelihoods.Gaussian object takes a variance parameter, so this
-should be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
+likelihoods.Gaussian object takes a variance parameter, so this should
+be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
 <li><strong>basis_hypers</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
-<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These
-are non-learnable parameters. They can be scalars or arrays of
-length Ns.</li>
+<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
+non-learnable parameters. They can be scalars or arrays of length Ns.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
 approximate the predictive mean and variance.</li>
 <li><strong>multiproc</strong> (<em>bool, optional</em>) &#8211; Use multiprocessing to paralellise this prediction computation.</li>
@@ -231,6 +227,47 @@ approximate the predictive mean and variance.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
 <li><strong>ql</strong> (<em>ndarray</em>) &#8211; The lower end point of the interval with shape (Ns,)</li>
 <li><strong>qu</strong> (<em>ndarray</em>) &#8211; The upper end point of the interval with shape (Ns,)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.glm.predict_logpdf">
+<code class="descclassname">revrand.glm.</code><code class="descname">predict_logpdf</code><span class="sig-paren">(</span><em>ys</em>, <em>Xs</em>, <em>likelihood</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>likelihood_hypers</em>, <em>basis_hypers</em>, <em>likelihood_args=()</em>, <em>nsamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.predict_logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predictive log-probability density function of a Bayesian GLM.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ys</strong> (<em>ndarray</em>) &#8211; The test observations of shape (Ns,) to evaluate under,
+<span class="math">\(\log p(y^* |\mathbf{x}^*, \mathbf{X}, y)\)</span>.</li>
+<li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
+<li><strong>likelihood_hypers</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
+likelihoods.Gaussian object takes a variance parameter, so this should
+be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
+<li><strong>basis_hypers</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
+<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
+non-learnable parameters. They can be scalars or arrays of length Ns.</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
+approximate the predictive mean and variance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>logp</strong> (<em>ndarray</em>) &#8211; The log probability of ys given Xs of shape (Ns,).</li>
+<li><strong>logp_min</strong> (<em>ndarray</em>) &#8211; The minimum sampled values of the predicted log probability (same shape
+as p)</li>
+<li><strong>logp_max</strong> (<em>ndarray</em>) &#8211; The maximum sampled values of the predicted log probability (same shape
+as p)</li>
 </ul>
 </p>
 </td>
@@ -276,12 +313,11 @@ variance in this instance may not be so useful.</li>
 <li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
 <li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
 <li><strong>likelihood_hypers</strong> (<em>sequence</em>) &#8211; a sequence of parameters for the likelihood object, e.g. the
-likelihoods.Gaussian object takes a variance parameter, so this
-should be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
+likelihoods.Gaussian object takes a variance parameter, so this should
+be <code class="code docutils literal"><span class="pre">[var]</span></code>.</li>
 <li><strong>basis_hypers</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
-<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These
-are non-learnable parameters. They can be scalars or arrays of
-length Ns.</li>
+<li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
+non-learnable parameters. They can be scalars or arrays of length Ns.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
 approximate the predictive mean and variance.</li>
 </ul>
@@ -289,12 +325,55 @@ approximate the predictive mean and variance.</li>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
 <li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of ys for the query inputs, Xs of shape (Ns,).</li>
-<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of ys (excluding likelihood noise terms) for
-the query inputs, Xs of shape (Ns,).</li>
+<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of ys (excluding likelihood noise terms) for the
+query inputs, Xs of shape (Ns,).</li>
 <li><strong>Ey_min</strong> (<em>ndarray</em>) &#8211; The minimum sampled values of the predicted mean (same shape as Ey)</li>
 <li><strong>Ey_max</strong> (<em>ndarray</em>) &#8211; The maximum sampled values of the predicted mean (same shape as Ey)</li>
 </ul>
 </p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.glm.sample_func">
+<code class="descclassname">revrand.glm.</code><code class="descname">sample_func</code><span class="sig-paren">(</span><em>Xs</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>basis_hypers</em>, <em>nsamples=100</em>, <em>genaxis=1</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.sample_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples from the posterior latent function mixtures of the GLM for
+query inputs, Xs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
+<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
+<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D,) or (D, D) array of regression weight covariances (posterior).</li>
+<li><strong>basis_hypers</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
+approximate the predictive mean and variance.</li>
+<li><strong>genaxis</strong> (<em>int</em>) &#8211; <p>Axis to return samples from, i.e.
+- <code class="code docutils literal"><span class="pre">genaxis=1</span></code> will give you one sample at a time of f for ALL</p>
+<blockquote>
+<div>observations (so it will iterate over nsamples).</div></blockquote>
+<ul>
+<li><dl class="first docutils">
+<dt><code class="code docutils literal"><span class="pre">genaxis=0</span></code> will give you all samples of f for ONE</dt>
+<dd>observation at a time (so it will iterate through Xs, row by row)</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first last"><strong>fsamples</strong> (<em>ndarray</em>) &#8211; of shape (Ns,) if <code class="code docutils literal"><span class="pre">genaxis=1</span></code> with each call being a sample
+from the mixture of latent functions over all Ns. Or of shape
+(nsamples,) if <code class="code docutils literal"><span class="pre">genaxis=0</span></code>, with each call being a all samples
+for an observation, n in Ns.</p>
 </td>
 </tr>
 </tbody>
@@ -344,7 +423,7 @@ the query inputs, Xs of shape (Ns,).</li>
         <li class="right" >
           <a href="slm.html" title="Standard Linear Model"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

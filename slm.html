@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Standard Linear Model &mdash; revrand 0.4.1 documentation</title>
+    <title>Standard Linear Model &mdash; revrand 0.4.2 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
     <link rel="next" title="Generalised Linear Model" href="glm.html" />
     <link rel="prev" title="revrand.basis_functions.spectralmixture" href="generated/revrand.basis_functions.spectralmixture.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="generated/revrand.basis_functions.spectralmixture.html" title="revrand.basis_functions.spectralmixture"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -76,7 +76,7 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </table>
 <dl class="function">
 <dt id="revrand.slm.learn">
-<code class="descclassname">revrand.slm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-06</em>, <em>maxit=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.learn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.slm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-08</em>, <em>maxiter=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -89,7 +89,7 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 <li><strong>var</strong> (<em>Parameter, optional</em>) &#8211; observation variance initial value.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
-<li><strong>maxit</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
+<li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
 </ul>
 </td>
 </tr>
@@ -197,7 +197,7 @@ X_star of shape (N_star,).</li>
         <li class="right" >
           <a href="generated/revrand.basis_functions.spectralmixture.html" title="revrand.basis_functions.spectralmixture"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
