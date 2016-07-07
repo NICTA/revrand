@@ -38,7 +38,7 @@ setup(
     },
     tests_require=['pytest', 'scikit-learn'],
     install_requires=[
-        'scipy >= 0.17.0',
+        'scipy >= 0.15.1',
         'numpy >= 1.8.2',
         'six >= 1.9.0',
         'decorator >= 4.0.6'

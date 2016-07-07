@@ -1,16 +1,14 @@
 language: python
 
-python:
-  - "2.7"
-  - "3.4"
-
 addons:
   apt:
     packages:
-    - libblas-dev
-    - liblapack-dev
-    - libatlas-base-dev
-    - gfortran
+    - libopenblas-base
+    - libopenblas-dev
+
+python:
+  - "2.7"
+  - "3.4"
 
 install:
   - cd $TRAVIS_BUILD_DIR
