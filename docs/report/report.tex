@@ -216,9 +216,9 @@ More specifically,
 We have not implemented a stochastic gradient version of this algorithm since
 it still requires a determinant involving a $D \times D$ matrix, and so is
 \bigo{D^3} in complexity, per iteration. This is true even if we optimise the
-posterior covariance directly (or some triangular form). The GLM presented in
-the next section circumvents this issue, and is more suited to really large $N$
-and $D$ problems.
+posterior covariance directly (or a triangular parameterisation). The GLM
+presented in the next section circumvents this issue, and is more suited to
+really large $N$ and $D$ problems.
 
 
 \subsection{Bayesian Generalised Linear Models}
@@ -308,20 +308,18 @@ compute (using Monte-Carlo integration) the predictive expectation,
     \int \targs\test \probC{\targs\test}{\activ{\feats\testT\weights}, \lparam}
     d \targs\test d \weights
     \nonumber\\
-    =& \int \activ{\feats\testT\weights}
+    =& \int \expece{}{\probC{\targs\test}
+        {\activ{\feats\testT\weights}, \lparam}}
     \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k}
     d \weights.
     \label{eq:glmexpec}
 \end{align}
-
-Where the second line is a consequence of the choice of transformation
-function\footnote{This may not always be the case depending on how the
-    transformation function is used. In such cases, we can use the quantile
-    method to obtain useful statics},
-$\expece{}{\probC{\targs\test}{\activ{\feats\testT\weights}, \lparam}} =
-\activ{\feats\testT\weights}$. Furthermore, it is useful to compute quantiles
-of the predictive density in order to ascertain the predictive uncertainty. We
-start by sampling the predictive cumulative density function, $\Prob{\cdot}$,
+Often we find $\expece{}{\probC{\targs\test}{\activ{\feats\testT\weights},
+        \lparam}} = \activ{\feats\testT\weights}$, however this is only with
+true with right choice and usage of the activation function. Furthermore, it
+is useful to compute quantiles of the predictive density in order to ascertain
+the predictive uncertainty. We start by sampling the predictive cumulative
+density function, $\Prob{\cdot}$,
 \begin{align}
     &\ProbC{\targs\test \leq \cdfAlph}{\targ, \ins, \inss\test} \nonumber\\ 
     &\qquad\approx \int 
@@ -348,8 +346,8 @@ TODO: Show kernel approximations (from notebook)
 TODO: Some mention of these work with the SLM and GLM.
 
 Highlight how we can use proper optimisation to learn kernel parameters
-\emph{without} weight re-sampling (unlike what they say in "The Mondrian
-Kernel" paper). I.e. extend what Edwin wrote in the E/UKS paper in section 3 to
+\emph{without} weight re-sampling (unlike what they say in ``The Mondrian
+Kernel'' paper). I.e. extend what Edwin wrote in the E/UKS paper in section 3 to
 show how we learn length-scales (this should be obvious from the A la Carte
 paper though).
 
