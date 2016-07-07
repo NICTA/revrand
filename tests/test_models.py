@@ -79,15 +79,15 @@ def test_glm_binomial(make_binom_data):
     largs = (n,)
 
     # SGD
-    params = glm.learn(X, y, lhood, basis, likelihood_args=largs)
+    params = glm.learn(X, y, lhood, basis, likelihood_args=largs, maxiter=2000)
     Ey, _, _, _ = glm.predict_moments(X, lhood, basis, *params,
                                       likelihood_args=largs)
 
     assert smse(f, Ey) < 1
 
     # LBFGS
-    params = glm.learn(X, y, lhood, basis, use_sgd=False,
-                       likelihood_args=largs, tol=1e-7)
+    params = glm.learn(X, y, lhood, basis, use_sgd=False, tol=1e-7,
+                       maxiter=2000, likelihood_args=largs)
     Ey, _, _, _ = glm.predict_moments(X, lhood, basis, *params,
                                       likelihood_args=largs)
 

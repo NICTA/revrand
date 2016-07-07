@@ -114,7 +114,7 @@ def solve_posdef(A, b):
         if any(L.diagonal() < cholthresh):
             raise LinAlgError("Unstable cholesky factor detected")
         X = cho_solve((L, lower), b)
-        logdet = cho_log_det(L)
+        logdet = -cho_log_det(L)
 
     # Failed cholesky, use svd to do the inverse
     except LinAlgError:
@@ -142,7 +142,7 @@ def svd_solve(U, s, V, b, s_tol=1e-15):
     s: ndarray
         The :code:`s` factor of :code:`U, s, V = svd(A)` positive
         semi-definite matrix.
-    U: ndarray
+    V: ndarray
         The :code:`V` factor of :code:`U, s, V = svd(A)` positive
         semi-definite matrix.
     b: ndarray
