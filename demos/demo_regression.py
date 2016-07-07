@@ -25,24 +25,26 @@ def main():
     #
 
     # Dataset properties
-    N = 500
+    N = 300
     Ns = 250
 
     # Dataset selection
     # dataset = 'sinusoid'
     dataset = 'gp1D'
-    lenscale_true = 0.7  # For the gpdraw dataset
+    lenscale_true = 1.2  # For the gpdraw dataset
     noise_true = 0.1
 
     # Algorithmic properties
-    nbases = 200
+    nbases = 100
     lenscale = 1  # For all basis functions that take lengthscales
-    noise = 1
+    noise = 0.5
+    reg = 1
+
+    # GLM learning settings
     rho = 0.9
     epsilon = 1e-6
-    passes = 50
+    maxiter = 5000
     batch_size = 10
-    reg = 1
 
     lenp = Parameter(lenscale, Positive())
     base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
@@ -61,8 +63,8 @@ def main():
 
     # Sinusoid
     if dataset == 'sinusoid':
-        Xtrain = np.linspace(-2 * np.pi, 2 * np.pi, N)[:, np.newaxis]
-        ytrain = np.sin(Xtrain).flatten() + np.random.randn(N) * noise
+        Xtrain = np.random.rand(N)[:, np.newaxis] * 4 * np.pi - 2 * np.pi
+        ytrain = np.sin(Xtrain).flatten() + np.random.randn(N) * noise_true
         Xtest = np.linspace(-2 * np.pi, 2 * np.pi, Ns)[:, np.newaxis]
         ftest = np.sin(Xtest).flatten()
 
@@ -93,7 +95,7 @@ def main():
     params_glm = glm.learn(Xtrain, ytrain, llhood, base,
                            regulariser=Parameter(reg, Positive()),
                            use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
-                           batch_size=batch_size, maxit=passes)
+                           batch_size=batch_size, maxiter=maxiter)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]
@@ -107,7 +109,7 @@ def main():
         return (h(1e-5, 1., 0.5) * k(kern.gaussian, h(1e-5, 1e5, lenscale)) +
                 k(kern.lognoise, h(-4, 1, -3)))
     hyper_params = gp.learn(Xtrain, ytrain, kdef, verbose=True, ftol=1e-6,
-                            maxiter=passes)
+                            maxiter=maxiter)
 
     regressor = gp.condition(Xtrain, ytrain, kdef, hyper_params)
     query = gp.query(regressor, Xtest)

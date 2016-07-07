@@ -490,8 +490,8 @@ class Gaussian(Bernoulli):
 
     def dp(self, y, f, var):
         r"""
-        Derivative of Gaussian log likelihood w.r.t.\  the parameters,
-        :math:`\theta`.
+        Derivative of Gaussian log likelihood w.r.t.\ the variance
+        :math:`\sigma^2`.
 
         Parameters
         ----------
@@ -609,7 +609,10 @@ class Poisson(Bernoulli):
 
         g = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
         logg = np.log(g)
-        logg[np.isinf(logg)] = logtiny
+        if not np.isscalar(logg):
+            logg[np.isinf(logg)] = logtiny
+        else:
+            logg = logtiny if np.isinf(logg) else logg
         return y * logg - g - gammaln(y + 1)
 
     def Ey(self, f):

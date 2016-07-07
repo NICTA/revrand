@@ -24,10 +24,10 @@ dig1 = 3
 dig2 = 5
 
 # A la Carte classifier setting
-nbases = 200
+nbases = 100
 lenscale = 10
 doSGD = True
-passes = 30
+maxiter = 2000
 batch_size = 10
 
 #
@@ -63,7 +63,7 @@ Phi = RandomRBF(nbases, X.shape[1],
                 lenscale_init=Parameter(lenscale, Positive()))
 llhood = Bernoulli()
 params = glm.learn(X, Y, llhood, Phi, use_sgd=doSGD,
-                   maxit=passes, batch_size=batch_size)
+                   maxiter=maxiter, batch_size=batch_size)
 
 # Predict
 pys_l, Vpy, Epn, Epx = glm.predict_moments(Xs, llhood, Phi, *params)

@@ -195,10 +195,10 @@ class Momentum(SGDUpdater):
 # SGD minimizer
 #
 
-def sgd(fun, x0, data, args=(), bounds=None, batch_size=100, passes=10,
+def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=1000,
         updater=None, eval_obj=False):
     """
-    Stochastic Gradient Descent, using ADADELTA for setting the learning rate.
+    Stochastic Gradient Descent.
 
     Parameters
     ----------
@@ -221,9 +221,8 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=100, passes=10,
         there is no bound in that direction.
     batch_size: int, optional
         The number of observations in an SGD batch.
-    passes: int, optional
-        Number of complete passes through the data before optimization
-        terminates (unless it converges first).
+    maxiter: int, optional
+        Number of mini-batch iterations before optimization terminates.
     updater: SGDUpdater, optional
         The type of gradient update to use, by default this is AdaDelta
     eval_obj: bool, optional
@@ -240,7 +239,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=100, passes=10,
         norms: list
             the list of gradient norms
         message: str
-            the convergence condition ('converge' or 'maxiter')
+            the convergence condition ('maxiter reached' or error)
         objs: list
             the list of objective function evaluations if :code:`eval_obj`
             is True.
@@ -272,36 +271,35 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=100, passes=10,
     objs = []
     norms = []
 
-    for _ in range(passes):
-        for ind in _sgd_pass(N, batch_size):
+    for ind in _sgd_iter(maxiter, N, batch_size):
 
-            if not eval_obj:
-                grad = fun(x, *chain(_split_data(data, ind), args))
-            else:
-                obj, grad = fun(x, *chain(_split_data(data, ind), args))
-                objs.append(obj)
+        if not eval_obj:
+            grad = fun(x, *chain(_split_data(data, ind), args))
+        else:
+            obj, grad = fun(x, *chain(_split_data(data, ind), args))
+            objs.append(obj)
 
-            norms.append(np.linalg.norm(grad))
+        norms.append(np.linalg.norm(grad))
 
-            # Truncate gradients if bounded
-            if bounds is not None:
-                xlower = x <= lower
-                grad[xlower] = np.minimum(grad[xlower], 0)
-                xupper = x >= upper
-                grad[xupper] = np.maximum(grad[xupper], 0)
+        # Truncate gradients if bounded
+        if bounds is not None:
+            xlower = x <= lower
+            grad[xlower] = np.minimum(grad[xlower], 0)
+            xupper = x >= upper
+            grad[xupper] = np.maximum(grad[xupper], 0)
 
-            # perform update
-            x = updater(x, grad)
+        # perform update
+        x = updater(x, grad)
 
-            # Trucate steps if bounded
-            if bounds is not None:
-                x = np.clip(x, lower, upper)
+        # Trucate steps if bounded
+        if bounds is not None:
+            x = np.clip(x, lower, upper)
 
     # Format results
     res = OptimizeResult(
         x=x,
         norms=norms,
-        message='all passes',
+        message='maxiter reached',
         fun=obj,
         objs=objs
     )
@@ -349,6 +347,29 @@ def _sgd_pass(N, batch_size, random_state=None):
     n_batches = -(-N // batch_size)  # ceiling
     batch_inds = iter(np.array_split(generator.permutation(N), n_batches))
     return batch_inds
+
+
+def _sgd_iter(maxiter, N, batch_size, random_state=None):
+    """ Batch index generator for SGD that will yeild random batches for a
+        a defined number of iterations. This calls _sgd_pass until the required
+        number of iterations have been reached.
+
+        Arguments:
+            maxiter, (int): The number of iterations
+            N, (int): length of dataset.
+            batch_size, (int): number of data points in each batch.
+
+        Yields:
+            array: of size (batch_size,) of random (int).
+    """
+
+    i = 0
+    while i < maxiter:
+        for ind in _sgd_pass(N, batch_size, random_state):
+            yield ind
+            i += 1
+            if i >= maxiter:
+                break
 
 
 def _normalize_bound(bound):
