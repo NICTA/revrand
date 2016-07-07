@@ -55,13 +55,13 @@ def test_svd_solve(make_cov):
     X, S, iS, Sn, iSn = make_cov
     D = X.shape[1]
 
-    U, s, _ = np.linalg.svd(S)
-    iSpd, _ = la.svd_solve(U, s, np.eye(D))
+    U, s, V = np.linalg.svd(S)
+    iSpd = la.svd_solve(U, s, V, np.eye(D))
 
     assert np.allclose(iS, iSpd)
 
-    U, s, _ = np.linalg.svd(Sn)
-    iSpd, _ = la.svd_solve(U, s, np.eye(D))
+    U, s, V = np.linalg.svd(Sn)
+    iSpd = la.svd_solve(U, s, V, np.eye(D))
 
     assert np.allclose(iSn, iSpd)
 

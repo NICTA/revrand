@@ -33,18 +33,18 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             weight regulariser (variance) initial value.
         tol: float, optional
             optimiser function tolerance convergence criterion.
-        maxit: int, optional
+        maxiter: int, optional
             maximum number of iterations for the optimiser.
     """
 
     def __init__(self, basis, var=Parameter(1., Positive()),
-                 regulariser=Parameter(1., Positive()), tol=1e-6, maxit=500):
+                 regulariser=Parameter(1., Positive()), tol=1e-6, maxiter=500):
 
         self.basis = basis
         self.var = var
         self.regulariser = regulariser
         self.tol = tol
-        self.maxit = maxit
+        self.maxiter = maxiter
 
     def fit(self, X, y):
         """
@@ -65,7 +65,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                       var=self.var,
                       regulariser=self.regulariser,
                       tol=self.tol,
-                      maxit=self.maxit,
+                      maxiter=self.maxiter,
                       )
 
         return self
@@ -147,7 +147,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         use_sgd: bool, optional
             If :code:`True` then use SGD (Adadelta) optimisation instead of
             L-BFGS.
-        maxit: int, optional
+        maxiter: int, optional
             Maximum number of iterations of the optimiser to run. If
             :code:`use_sgd` is :code:`True` then this is the number of complete
             passes through the data before optimization terminates (unless it
@@ -166,7 +166,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, likelihood, basis,
                  regulariser=Parameter(1., Positive()), postcomp=10,
-                 use_sgd=True, maxit=1000, tol=1e-7, batch_size=100, rho=0.9,
+                 use_sgd=True, maxiter=1000, tol=1e-7, batch_size=100, rho=0.9,
                  epsilon=1e-5, alpha=0.95):
 
         self.likelihood = likelihood
@@ -174,7 +174,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.regulariser = regulariser
         self.postcomp = postcomp
         self.use_sgd = use_sgd
-        self.maxit = maxit
+        self.maxiter = maxiter
         self.tol = tol
         self.batch_size = batch_size
         self.rho = rho
@@ -200,7 +200,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                       likelihood_args=likelihood_args,
                       postcomp=self.postcomp,
                       use_sgd=self.use_sgd,
-                      maxit=self.maxit,
+                      maxiter=self.maxiter,
                       tol=self.tol,
                       batch_size=self.batch_size,
                       rho=self.rho,

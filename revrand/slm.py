@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, basis, var=Parameter(1., Positive()),
-          regulariser=Parameter(1., Positive()), tol=1e-8, maxit=1000):
+          regulariser=Parameter(1., Positive()), tol=1e-8, maxiter=1000):
     """
     Learn the parameters and hyperparameters of a Bayesian linear regressor.
 
@@ -46,7 +46,7 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
             weight regulariser (variance) initial value.
         tol: float, optional
             optimiser function tolerance convergence criterion.
-        maxit: int, optional
+        maxiter: int, optional
             maximum number of iterations for the optimiser.
 
     Returns
@@ -142,7 +142,7 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
 
         # Get structured basis function gradients
         def dtheta(dPhi):
-            return - (m.T.dot(Err.dot(dPhi)) 
+            return - (m.T.dot(Err.dot(dPhi))
                       - (dPhi.T.dot(Phi) * C).sum()) / _var
 
         dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
@@ -152,7 +152,7 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
     params = append_or_extend([var, regulariser], basis.params)
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(ELBO, params, method='L-BFGS-B', jac=True, tol=tol,
-               options={'maxiter': maxit, 'maxcor': 100})
+               options={'maxiter': maxiter, 'maxcor': 100})
     (var, regulariser), hypers = res.x[:2], res.x[2:]
 
     log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, message = {}."

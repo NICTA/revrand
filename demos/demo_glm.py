@@ -29,8 +29,8 @@ nbases = 100
 lenscale = 1  # For all basis functions that take lengthscales
 rho = 0.9
 epsilon = 1e-5
-passes = 400
-batch_size = 100
+maxiter = 1000
+batch_size = 10
 use_sgd = True
 
 noise = 1
@@ -102,7 +102,8 @@ basis = RandomRBF(nbases, Xtrain.shape[1],
 
 params = glm.learn(Xtrain, ytrain, llhood, basis, likelihood_args=largs,
                    use_sgd=use_sgd, rho=rho, epsilon=epsilon,
-                   batch_size=batch_size, maxit=passes)
+
+                   batch_size=batch_size, maxiter=maxiter)
 
 Ey, Vy, Eyn, Eyx = glm.predict_moments(Xtest, llhood, basis, *params,
                                        likelihood_args=slargs)
@@ -116,7 +117,6 @@ logp, _, _ = glm.predict_logpdf(ftest, Xtest, llhood, basis, *params,
                                 likelihood_args=slargs)
 
 log.info("Average NLP = {}".format(- logp.mean()))
-
 
 if like == 'Gaussian':
     Sy2 = 2 * np.sqrt(Vy + params[2][0])

@@ -8,7 +8,7 @@ import logging
 from revrand import slm, glm, likelihoods
 from revrand.metrics import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
-from revrand.btypes import Parameter, Positive, Bound
+from revrand.btypes import Parameter, Positive
 from revrand import basis_functions as bs
 import revrand.legacygp as gp
 import revrand.legacygp.kernels as kern
@@ -25,7 +25,7 @@ def main():
     #
 
     # Dataset properties
-    N = 30
+    N = 300
     Ns = 250
 
     # Dataset selection
@@ -38,15 +38,15 @@ def main():
     nbases = 100
     lenscale = 1  # For all basis functions that take lengthscales
     noise = 0.5
-    reg = 1.
+    reg = 1
 
     # GLM learning settings
     rho = 0.9
     epsilon = 1e-6
-    passes = 600
+    maxiter = 5000
     batch_size = 10
 
-    lenp = Parameter(lenscale, Bound(1e-3, 10))
+    lenp = Parameter(lenscale, Positive())
     base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
     # base = bs.RandomMatern32(Xdim=1, nbases=nbases, lenscale_init=lenp)
 
@@ -95,7 +95,7 @@ def main():
     params_glm = glm.learn(Xtrain, ytrain, llhood, base,
                            regulariser=Parameter(reg, Positive()),
                            use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
-                           batch_size=batch_size, maxit=passes)
+                           batch_size=batch_size, maxiter=maxiter)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]
@@ -109,7 +109,7 @@ def main():
         return (h(1e-5, 1., 0.5) * k(kern.gaussian, h(1e-5, 1e5, lenscale)) +
                 k(kern.lognoise, h(-4, 1, -3)))
     hyper_params = gp.learn(Xtrain, ytrain, kdef, verbose=True, ftol=1e-6,
-                            maxiter=passes)
+                            maxiter=maxiter)
 
     regressor = gp.condition(Xtrain, ytrain, kdef, hyper_params)
     query = gp.query(regressor, Xtest)

@@ -30,8 +30,8 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
-          likelihood_args=(), postcomp=10, use_sgd=True, maxit=1000, tol=1e-7,
-          batch_size=100, rho=0.9, epsilon=1e-5):
+          likelihood_args=(), postcomp=10, use_sgd=True, maxiter=1000,
+          tol=1e-7, batch_size=100, rho=0.9, epsilon=1e-5):
     r"""
     Learn the parameters of a Bayesian generalised linear model (GLM).
 
@@ -58,10 +58,10 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
         posterior distribution.
     use_sgd: bool, optional
         If :code:`True` then use SGD (Adadelta) optimisation instead of L-BFGS.
-    maxit: int, optional
+    maxiter: int, optional
         Maximum number of iterations of the optimiser to run. If
-        :code:`use_sgd` is :code:`True` then this is the number of complete
-        passes through the data before optimization terminates.
+        :code:`use_sgd` is :code:`True` then this is the number of mini batches
+        to evaluate before termination.
     tol: float, optional
         Optimiser relative tolerance convergence criterion (only if L-BFGS
         is used as the optimiser).
@@ -254,11 +254,11 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
     if use_sgd is False:
         nmin = structured_minimizer(logtrick_minimizer(minimize))
         res = nmin(L2, params, tol=tol, method='L-BFGS-B', jac=True,
-                   args=data, options={'maxiter': maxit, 'maxcor': 100})
+                   args=data, options={'maxiter': maxiter, 'maxcor': 100})
     else:
         nsgd = structured_sgd(logtrick_sgd(sgd))
         updater = AdaDelta(rho=rho, epsilon=epsilon)
-        res = nsgd(L2, params, data, passes=maxit, updater=updater,
+        res = nsgd(L2, params, data, maxiter=maxiter, updater=updater,
                    batch_size=batch_size, eval_obj=True)
 
     # Unpack params
