@@ -53,9 +53,9 @@ def make_cov():
     iS = np.linalg.pinv(S)
 
     # Slightly not posdef
-    U, s, _ = np.linalg.svd(S)
-    s[-1] = 0.
-    Sn = (U * s).dot(U.T)
+    l, U = np.linalg.eig(S)
+    l[0] = -1e-13
+    Sn = (U * l).dot(U.T)
     iSn = np.linalg.pinv(Sn)
 
     return X, S, iS, Sn, iSn

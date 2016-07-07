@@ -102,7 +102,10 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
 
         # Posterior Parameters
         iC = np.diag(np.ones(D) / _lambda) + PhiPhi / _var
-        C, logdetC = solve_posdef(iC, np.eye(D))
+        # C, logdetC = solve_posdef(iC, np.eye(D))
+        C = np.linalg.pinv(iC)
+        logdetC = np.log(np.linalg.det(C))
+
         m = C.dot(Phi.T.dot(y)) / _var
 
         # Common calcs
