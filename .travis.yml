@@ -3,6 +3,9 @@ language: python
 addons:
   apt:
     packages:
+    - gfortran
+    - libblas-dev
+    - liblapack-dev
     - libopenblas-base
     - libopenblas-dev
 
