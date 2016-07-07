@@ -1,33 +1,20 @@
+sudo: required
+
 language: python
 
-addons:
-  apt:
-    packages:
-    - gfortran
-    - libblas-dev
-    - liblapack-dev
-    - libopenblas-base
-    - libopenblas-dev
+services:
+  - docker
 
 python:
   - "2.7"
   - "3.4"
 
-install:
-  - cd $TRAVIS_BUILD_DIR
-  - pip install --upgrade pip
-  - pip install --upgrade pytest pytest-cov
-  - pip install codecov unipath requests scikit-learn
-  - python setup.py install
+before_install:
+  - docker build -t nicta/revrand .
+  - docker ps -a
 
 script:
-  - py.test --cov=./
-
-cache:
-  - apt
-  - pip
-  - directories:
-    - $HOME/.cache/pip
+  - docker run -w /usr/src/python/revrand nicta/revrand py.test --cov=./
 
 after_success:
-  - codecov
+  - docker run -w /usr/src/python/revrand nicta/revrand codecov
