@@ -3,11 +3,10 @@ language: python
 addons:
   apt:
     packages:
-    - gfortran
-    - libblas-dev
-    - liblapack-dev
-    - libopenblas-base
-    - libopenblas-dev
+    - python3-numpy
+    - python3-scipy
+    - python-numpy
+    - python-scipy
 
 python:
   - "2.7"
@@ -15,8 +14,7 @@ python:
 
 install:
   - cd $TRAVIS_BUILD_DIR
-  - pip install --upgrade pip
-  - pip install --upgrade pytest pytest-cov
+  - pip install pytest pytest-cov
   - pip install codecov unipath requests scikit-learn
   - python setup.py install
 
