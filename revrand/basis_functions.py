@@ -290,6 +290,34 @@ class Basis(object):
         return self if other == 0 else self.__add__(other)
 
 
+class BiasBasis(Basis):
+    """
+    Bias Basis for adding a bias term to a regressor.
+
+    This just returns a column of ones so a bias term can be learned by a
+    regressor.
+    """
+
+    def __call__(self, X):
+        """
+        Return this basis applied to X.
+
+        Parameters
+        ----------
+        X: ndarray
+            of shape (N, d) of observations where N is the number of samples,
+            and d is the dimensionality of X.
+
+        Returns
+        -------
+        ndarray:
+            of shape (N, 1) of ones.
+        """
+
+        N = len(X)
+        return np.ones((N, 1))
+
+
 class LinearBasis(Basis):
     """
     Linear basis class, basically this just prepends a columns of ones onto X

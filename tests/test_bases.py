@@ -100,7 +100,8 @@ def test_bases(make_gaus_data):
     N, d = X.shape
     nC = 10
 
-    bases = [bs.LinearBasis(onescol=True),
+    bases = [bs.BiasBasis(),
+             bs.LinearBasis(onescol=True),
              bs.PolynomialBasis(order=2),
              bs.RadialBasis(centres=X[:nC, :]),
              bs.RadialBasis(centres=X[:nC, :],
@@ -122,6 +123,7 @@ def test_bases(make_gaus_data):
              ]
 
     hypers = [(),
+              (),
               (),
               (1.,),
               (np.ones(d),),
