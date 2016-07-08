@@ -303,10 +303,12 @@ class BiasBasis(Basis):
         A scalar value to give the bias column. By default this is one.
     """
 
+    @slice_init
     def __init__(self, offset=1.):
 
         self.offset = offset
 
+    @slice_call
     def __call__(self, X):
         """
         Return this basis applied to X.
