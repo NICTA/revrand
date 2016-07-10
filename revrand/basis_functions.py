@@ -290,6 +290,45 @@ class Basis(object):
         return self if other == 0 else self.__add__(other)
 
 
+class BiasBasis(Basis):
+    """
+    Bias Basis for adding a bias term to a regressor.
+
+    This just returns a column of a constant value so a bias term can be
+    learned by a regressor.
+
+    Parameters
+    ----------
+    offset: float, optional
+        A scalar value to give the bias column. By default this is one.
+    """
+
+    @slice_init
+    def __init__(self, offset=1.):
+
+        self.offset = offset
+
+    @slice_call
+    def __call__(self, X):
+        """
+        Return this basis applied to X.
+
+        Parameters
+        ----------
+        X: ndarray
+            of shape (N, d) of observations where N is the number of samples,
+            and d is the dimensionality of X.
+
+        Returns
+        -------
+        ndarray:
+            of shape (N, 1) of ones * self.offset.
+        """
+
+        N = len(X)
+        return np.ones((N, 1)) * self.offset
+
+
 class LinearBasis(Basis):
     """
     Linear basis class, basically this just prepends a columns of ones onto X
@@ -327,9 +366,9 @@ class LinearBasis(Basis):
 
 
 class PolynomialBasis(Basis):
-    """
+    r"""
     Polynomial basis class, this essentially creates the concatenation,
-    :math:`\\boldsymbol\Phi = [\mathbf{X}^0, \mathbf{X}^1, ..., \mathbf{X}^p]`
+    :math:`\boldsymbol\Phi = [\mathbf{X}^0, \mathbf{X}^1, ..., \mathbf{X}^p]`
     where :math:`p` is the :code:`order` of the polynomial.
 
     Parameters
