@@ -11,7 +11,7 @@ from scipy.stats import bernoulli, binom, poisson, norm
 from scipy.special import gammaln, expit
 
 from .btypes import Parameter, Positive
-from .mathfun.special import safesoftplus, softplus, logtiny
+from .mathfun.special import safesoftplus, softplus, LOGTINY
 
 
 #
@@ -62,7 +62,7 @@ class Bernoulli():
         """
 
         ll = bernoulli.logpmf(y, expit(f))
-        ll[np.isinf(ll)] = logtiny
+        ll[np.isinf(ll)] = LOGTINY
         return ll
 
     def Ey(self, f):
@@ -245,7 +245,7 @@ class Binomial(Bernoulli):
         """
 
         ll = binom.logpmf(y, n=n, p=expit(f))
-        ll[np.isinf(ll)] = logtiny
+        ll[np.isinf(ll)] = LOGTINY
         return ll
 
     def Ey(self, f, n):
@@ -610,9 +610,9 @@ class Poisson(Bernoulli):
         g = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
         logg = np.log(g)
         if not np.isscalar(logg):
-            logg[np.isinf(logg)] = logtiny
+            logg[np.isinf(logg)] = LOGTINY
         else:
-            logg = logtiny if np.isinf(logg) else logg
+            logg = LOGTINY if np.isinf(logg) else logg
         return y * logg - g - gammaln(y + 1)
 
     def Ey(self, f):
