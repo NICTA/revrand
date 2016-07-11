@@ -30,8 +30,8 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
-          likelihood_args=(), postcomp=10, use_sgd=True, maxiter=1000,
-          tol=1e-7, batch_size=100, rho=0.9, epsilon=1e-5):
+          likelihood_args=(), postcomp=10, use_sgd=True, maxiter=5000,
+          tol=1e-7, batch_size=10, rho=0.9, epsilon=1e-5):
     r"""
     Learn the parameters of a Bayesian generalised linear model (GLM).
 

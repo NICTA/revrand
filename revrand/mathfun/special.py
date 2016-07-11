@@ -9,10 +9,10 @@ import numpy as np
 # Module constants
 #
 
-eps = np.finfo(float).eps
-tiny = np.finfo(float).tiny
-small = 1e-100
-logtiny = np.log(tiny)
+EPS = np.finfo(float).eps
+TINY = np.finfo(float).tiny
+SMALL = 1e-100
+LOGTINY = np.log(TINY)
 
 
 #
@@ -128,14 +128,14 @@ def softplus(X):
 # Numerically "safe" functions
 #
 
-def safelog(x, min_x=tiny):
+def safelog(x, min_x=TINY):
 
     cx = x.copy()
     cx[cx < min_x] = min_x
     return np.log(cx)
 
 
-def safesoftplus(x, min_x=small):
+def safesoftplus(x, min_x=SMALL):
 
     g = softplus(x)
     g[g < min_x] = min_x

@@ -195,7 +195,7 @@ class Momentum(SGDUpdater):
 # SGD minimizer
 #
 
-def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=1000,
+def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
         updater=None, eval_obj=False):
     """
     Stochastic Gradient Descent.
