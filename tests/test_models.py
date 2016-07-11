@@ -79,8 +79,8 @@ def test_glm_binomial(make_binom_data):
     largs = (n,)
 
     # SGD
-    params = glm.learn(X, y, lhood, basis, likelihood_args=largs, maxiter=3000,
-                       batch_size=10)
+    params = glm.learn(X, y, lhood, basis, likelihood_args=largs, maxiter=3000)
+
     Ey, _, _, _ = glm.predict_moments(X, lhood, basis, *params,
                                       likelihood_args=largs)
 
