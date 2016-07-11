@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import minimize
 
 from revrand.optimize import sgd, structured_minimizer, logtrick_minimizer, \
-    structured_sgd, logtrick_sgd, AdaDelta, Momentum, AdaGrad, SGDUpdater
+    structured_sgd, logtrick_sgd, AdaDelta, Momentum, AdaGrad, Adam, SGDUpdater
 from revrand.btypes import Bound, Positive, Parameter
 from revrand.utils import flatten
 
@@ -17,7 +17,7 @@ def test_unbounded(make_quadratic):
     assert_opt = lambda Ea, Eb, Ec: \
         np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
-    for updater in [SGDUpdater, AdaDelta, AdaGrad, Momentum]:
+    for updater in [SGDUpdater, AdaDelta, AdaGrad, Momentum, Adam]:
         res = sgd(qobj, w0, data, eval_obj=True, updater=updater())
         assert_opt(*res['x'])
 

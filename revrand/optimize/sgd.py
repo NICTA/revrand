@@ -43,8 +43,8 @@ class SGDUpdater:
             the new value for x
         """
 
-        delta = x - self.eta * grad
-        return delta
+        newx = x - self.eta * grad
+        return newx
 
 
 class AdaDelta(SGDUpdater):
@@ -94,8 +94,8 @@ class AdaDelta(SGDUpdater):
             / np.sqrt(self.Eg2 + self.epsilon)
         self.Edx2 = self.rho * self.Edx2 + (1 - self.rho) * dx**2
 
-        delta = x + dx
-        return delta
+        newx = x + dx
+        return newx
 
 
 class AdaGrad(SGDUpdater):
@@ -140,8 +140,8 @@ class AdaGrad(SGDUpdater):
         """
 
         self.g2_hist += grad**2
-        delta = x - self.eta * grad / (self.epsilon + np.sqrt(self.g2_hist))
-        return delta
+        newx = x - self.eta * grad / (self.epsilon + np.sqrt(self.g2_hist))
+        return newx
 
 
 class Momentum(SGDUpdater):
@@ -187,8 +187,37 @@ class Momentum(SGDUpdater):
 
         self.dx = self.rho * self.dx - self.eta * grad
 
-        delta = x + self.dx
-        return delta
+        newx = x + self.dx
+        return newx
+
+
+class Adam(SGDUpdater):
+
+    def __init__(self, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
+
+        self.alpha = alpha
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.epsilon = epsilon
+        self.t = 0
+        self.m = None
+        self.v = None
+
+    def __call__(self, x, grad):
+
+        self.t += 1
+
+        if self.m is None:
+            self.m = np.zeros_like(x)
+            self.v = np.zeros_like(x)
+
+        self.m = self.beta1 * self.m + (1 - self.beta1) * grad
+        self.v = self.beta2 * self.v + (1 - self.beta2) * grad**2
+        mbar = self.m / (1 - self.beta1**self.t)
+        vbar = self.v / (1 - self.beta2**self.t)
+
+        newx = x - self.alpha * mbar / (np.sqrt(vbar) + self.epsilon)
+        return newx
 
 
 #
