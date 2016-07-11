@@ -41,9 +41,7 @@ def main():
     reg = 1
 
     # GLM learning settings
-    rho = 0.9
-    epsilon = 1e-6
-    maxiter = 5000
+    maxiter = 3000
     batch_size = 10
 
     lenp = Parameter(lenscale, Positive())
@@ -94,8 +92,8 @@ def main():
     llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
     params_glm = glm.learn(Xtrain, ytrain, llhood, base,
                            regulariser=Parameter(reg, Positive()),
-                           use_sgd=True, rho=rho, postcomp=10, epsilon=epsilon,
-                           batch_size=batch_size, maxiter=maxiter)
+                           use_sgd=True, batch_size=batch_size,
+                           maxiter=maxiter)
     Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
                                                *params_glm)
     Vy_g = Vf_g + params_glm[2][0]

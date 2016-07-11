@@ -27,7 +27,7 @@ dig2 = 5
 nbases = 100
 lenscale = 10
 doSGD = True
-maxiter = 2000
+maxiter = 3000
 batch_size = 10
 
 #

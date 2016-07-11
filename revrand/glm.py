@@ -21,7 +21,7 @@ from .utils import couple, append_or_extend, atleast_list
 from .mathfun.special import logsumexp
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
-    logtrick_minimizer, AdaDelta
+    logtrick_minimizer
 from .btypes import Bound, Positive, Parameter, get_values
 
 
@@ -30,8 +30,8 @@ log = logging.getLogger(__name__)
 
 
 def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
-          likelihood_args=(), postcomp=10, use_sgd=True, maxiter=5000,
-          tol=1e-7, batch_size=10, rho=0.9, epsilon=1e-5):
+          likelihood_args=(), postcomp=10, use_sgd=True, maxiter=3000,
+          tol=1e-7, batch_size=10, updater=None):
     r"""
     Learn the parameters of a Bayesian generalised linear model (GLM).
 
@@ -68,10 +68,9 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
     batch_size: int, optional
         number of observations to use per SGD batch. Ignored if
         :code:`use_sgd=False`.
-    rho: float, optional
-        SGD decay rate, must be [0, 1]. Ignored if :code:`use_sgd=False`.
-    epsilon: float, optional
-        Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
+    updater: SGDUpdater, optional
+        The SGD learning rate updating algorithm to use, by default this is
+        Adadelta. See revrand.optimize.sgd for different options.
 
     Returns
     -------
@@ -257,7 +256,6 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
                    args=data, options={'maxiter': maxiter, 'maxcor': 100})
     else:
         nsgd = structured_sgd(logtrick_sgd(sgd))
-        updater = AdaDelta(rho=rho, epsilon=epsilon)
         res = nsgd(L2, params, data, maxiter=maxiter, updater=updater,
                    batch_size=batch_size, eval_obj=True)
 

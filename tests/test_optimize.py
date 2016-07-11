@@ -58,7 +58,7 @@ def test_bounded(make_quadratic):
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs),
                        (Ea_sgd, Eb_sgd, Ec_sgd),
-                       atol=1e-2, rtol=0)
+                       atol=2e-2, rtol=0)
 
 
 def test_structured_params(make_quadratic):

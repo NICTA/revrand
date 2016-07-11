@@ -5,7 +5,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 from scipy.optimize import minimize
-from revrand.optimize import sgd, AdaDelta, Adam
+from revrand.optimize import sgd, AdaDelta
 from revrand import basis_functions as bf
 
 
@@ -53,7 +53,6 @@ def sgd_demo():
     # SGD for learning w
     w0 = np.random.randn(Phi.shape[1])
     updater = AdaDelta(rho=rho, epsilon=epsilon)
-    # updater = Adam(alpha=0.01, epsilon=epsilon)
     results = sgd(f, w0, train_dat, maxiter=maxiter, batch_size=batch_size,
                   eval_obj=True, updater=updater)
     w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']

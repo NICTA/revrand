@@ -43,8 +43,8 @@ class SGDUpdater:
             the new value for x
         """
 
-        newx = x - self.eta * grad
-        return newx
+        x_new = x - self.eta * grad
+        return x_new
 
 
 class AdaDelta(SGDUpdater):
@@ -53,10 +53,10 @@ class AdaDelta(SGDUpdater):
 
     Parameters
     ----------
-        rho: float, optional
-            smoothing/decay rate parameter, must be [0, 1].
-        epsilon: float, optional
-            "jitter" term to ensure continued learning (should be small).
+    rho: float, optional
+        smoothing/decay rate parameter, must be [0, 1].
+    epsilon: float, optional
+        "jitter" term to ensure continued learning (should be small).
     """
 
     def __init__(self, rho=0.95, epsilon=1e-6):
@@ -94,8 +94,8 @@ class AdaDelta(SGDUpdater):
             / np.sqrt(self.Eg2 + self.epsilon)
         self.Edx2 = self.rho * self.Edx2 + (1 - self.rho) * dx**2
 
-        newx = x + dx
-        return newx
+        x_new = x + dx
+        return x_new
 
 
 class AdaGrad(SGDUpdater):
@@ -104,10 +104,10 @@ class AdaGrad(SGDUpdater):
 
     Parameters
     ----------
-        eta: float, optional
-            smoothing/decay rate parameter, must be [0, 1].
-        epsilon: float, optional
-            small constant term to prevent divide-by-zeros
+    eta: float, optional
+        smoothing/decay rate parameter, must be [0, 1].
+    epsilon: float, optional
+        small constant term to prevent divide-by-zeros
     """
 
     def __init__(self, eta=1, epsilon=1e-6):
@@ -140,8 +140,8 @@ class AdaGrad(SGDUpdater):
         """
 
         self.g2_hist += grad**2
-        newx = x - self.eta * grad / (self.epsilon + np.sqrt(self.g2_hist))
-        return newx
+        x_new = x - self.eta * grad / (self.epsilon + np.sqrt(self.g2_hist))
+        return x_new
 
 
 class Momentum(SGDUpdater):
@@ -150,10 +150,10 @@ class Momentum(SGDUpdater):
 
     Parameters
     ----------
-        rho: float, optional
-            smoothing/decay rate parameter, must be [0, 1].
-        eta: float, optional
-            weight to give to the momentum term
+    rho: float, optional
+        smoothing/decay rate parameter, must be [0, 1].
+    eta: float, optional
+        weight to give to the momentum term
     """
 
     def __init__(self, rho=0.5, eta=0.01):
@@ -187,13 +187,28 @@ class Momentum(SGDUpdater):
 
         self.dx = self.rho * self.dx - self.eta * grad
 
-        newx = x + self.dx
-        return newx
+        x_new = x + self.dx
+        return x_new
 
 
 class Adam(SGDUpdater):
+    """
+    Adam Algorithm
 
-    def __init__(self, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
+    Parameters
+    ----------
+    alpha: float, optional
+        stepsize to give the update.
+    beta1: float, optional
+        smoothing/decay rate parameter for the gradient, must be [0, 1].
+    beta2: float, optional
+        smoothing/decay rate parameter for the squared gradient, must be
+        [0, 1].
+    epsilon: float, optional
+        "jitter" term to ensure continued learning (should be small).
+    """
+
+    def __init__(self, alpha=0.01, beta1=0.9, beta2=0.999, epsilon=1e-5):
 
         self.alpha = alpha
         self.beta1 = beta1
@@ -204,6 +219,21 @@ class Adam(SGDUpdater):
         self.v = None
 
     def __call__(self, x, grad):
+        """
+        Get a new parameter value from the Adam algorithm
+
+        Parameters
+        ----------
+        x: ndarray
+            input parameters to optimise
+        grad: ndarray
+            gradient of x
+
+        Returns
+        -------
+        x_new: ndarray
+            the new value for x
+        """
 
         self.t += 1
 
@@ -216,8 +246,8 @@ class Adam(SGDUpdater):
         mbar = self.m / (1 - self.beta1**self.t)
         vbar = self.v / (1 - self.beta2**self.t)
 
-        newx = x - self.alpha * mbar / (np.sqrt(vbar) + self.epsilon)
-        return newx
+        x_new = x - self.alpha * mbar / (np.sqrt(vbar) + self.epsilon)
+        return x_new
 
 
 #

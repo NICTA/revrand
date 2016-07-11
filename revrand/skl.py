@@ -15,6 +15,7 @@ from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from . import slm, glm
 from . import basis_functions as bf
 from .btypes import Parameter, Positive
+from .optimize import AdaDelta
 
 
 class StandardLinearModel(BaseEstimator, RegressorMixin):
@@ -25,16 +26,16 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
     Parameters
     ----------
-        basis: Basis
-            A basis object, see the basis_functions module.
-        var: Parameter, optional
-            observation variance initial value.
-        regulariser: Parameter, optional
-            weight regulariser (variance) initial value.
-        tol: float, optional
-            optimiser function tolerance convergence criterion.
-        maxiter: int, optional
-            maximum number of iterations for the optimiser.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    var: Parameter, optional
+        observation variance initial value.
+    regulariser: Parameter, optional
+        weight regulariser (variance) initial value.
+    tol: float, optional
+        optimiser function tolerance convergence criterion.
+    maxiter: int, optional
+        maximum number of iterations for the optimiser.
     """
 
     def __init__(self, basis, var=Parameter(1., Positive()),
@@ -53,10 +54,10 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-            X: ndarray
-                (N, d) array input dataset (N samples, d dimensions).
-            y: ndarray
-                (N,) array targets (N samples)
+        X: ndarray
+            (N, d) array input dataset (N samples, d dimensions).
+        y: ndarray
+            (N,) array targets (N samples)
         """
 
         self.m, self.C, self.hypers, self.optvar = \
@@ -76,14 +77,14 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-            X: ndarray
-                (Ns,d) array query input dataset (Ns samples, d dimensions).
+        X: ndarray
+            (Ns,d) array query input dataset (Ns samples, d dimensions).
 
         Returns
         -------
-            Ey: ndarray
-                The expected value of y_star for the query inputs, X_star
-                of shape (N_star,).
+        Ey: ndarray
+            The expected value of y_star for the query inputs, X_star of shape
+            (N_star,).
         """
 
         return self._predict(X)
@@ -94,20 +95,20 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-            X: ndarray
-                (Ns,d) array query input dataset (Ns samples, d dimensions).
+        X: ndarray
+            (Ns,d) array query input dataset (Ns samples, d dimensions).
 
         Returns
         -------
-            Ey: ndarray
-                The expected value of y_star for the query inputs, X_star
-                of shape (N_star,).
-            Vf: ndarray
-                The expected variance of f_star for the query inputs,
-                X_star of shape (N_star,).
-            Vy: ndarray
-                The expected variance of y_star for the query inputs,
-                X_star of shape (N_star,).
+        Ey: ndarray
+            The expected value of y_star for the query inputs, X_star of shape
+            (N_star,).
+        Vf: ndarray
+            The expected variance of f_star for the query inputs, X_star of
+            shape (N_star,).
+        Vy: ndarray
+            The expected variance of y_star for the query inputs, X_star of
+            shape (N_star,).
         """
 
         return self._predict(X, uncertainty=True)
@@ -133,41 +134,40 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     Parameters
     ----------
-        likelihood: Object
-            A likelihood object, see the likelihoods module.
-        basis: Basis
-            A basis object, see the basis_functions module.
-        regulariser: Parameter, optional
-            weight regulariser (variance) initial value.
-        postcomp: int, optional
-            Number of diagonal Gaussian components to use to approximate the
-            posterior distribution.
-        tol: float, optional
-           Optimiser relative tolerance convergence criterion.
-        use_sgd: bool, optional
-            If :code:`True` then use SGD (Adadelta) optimisation instead of
-            L-BFGS.
-        maxiter: int, optional
-            Maximum number of iterations of the optimiser to run. If
-            :code:`use_sgd` is :code:`True` then this is the number of complete
-            passes through the data before optimization terminates (unless it
-            converges first).
-        batch_size: int, optional
-            number of observations to use per SGD batch. Ignored if
-            :code:`use_sgd=False`.
-        rho: float, optional
-            SGD decay rate, must be [0, 1]. Ignored if :code:`use_sgd=False`.
-        epsilon: float, optional
-            Jitter term for adadelta SGD. Ignored if :code:`use_sgd=False`.
-        alpha: float, optional
-            The percentile confidence interval (e.g. 95%) to return from
-            predict_proba.
+    likelihood: Object
+        A likelihood object, see the likelihoods module.
+    basis: Basis
+        A basis object, see the basis_functions module.
+    regulariser: Parameter, optional
+        weight regulariser (variance) initial value.
+    postcomp: int, optional
+        Number of diagonal Gaussian components to use to approximate the
+        posterior distribution.
+    tol: float, optional
+       Optimiser relative tolerance convergence criterion.
+    use_sgd: bool, optional
+        If :code:`True` then use SGD (Adadelta) optimisation instead of
+        L-BFGS.
+    maxiter: int, optional
+        Maximum number of iterations of the optimiser to run. If
+        :code:`use_sgd` is :code:`True` then this is the number of complete
+        passes through the data before optimization terminates (unless it
+        converges first).
+    batch_size: int, optional
+        number of observations to use per SGD batch. Ignored if
+        :code:`use_sgd=False`.
+    updater: SGDUpdater, optional
+        The SGD learning rate updating algorithm to use, by default this is
+        Adadelta. See revrand.optimize.sgd for different options.
+    alpha: float, optional
+        The percentile confidence interval (e.g. 95%) to return from
+        predict_proba.
     """
 
     def __init__(self, likelihood, basis,
                  regulariser=Parameter(1., Positive()), postcomp=10,
-                 use_sgd=True, maxiter=1000, tol=1e-7, batch_size=100, rho=0.9,
-                 epsilon=1e-5, alpha=0.95):
+                 use_sgd=True, maxiter=1000, tol=1e-7, batch_size=100,
+                 updater=AdaDelta(), alpha=0.95):
 
         self.likelihood = likelihood
         self.basis = basis
@@ -177,8 +177,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.maxiter = maxiter
         self.tol = tol
         self.batch_size = batch_size
-        self.rho = rho
-        self.epsilon = epsilon
+        self.updater = updater
         self.alpha = alpha
 
     def fit(self, X, y, likelihood_args=()):
@@ -186,10 +185,10 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-            X: ndarray
-                (N, d) array input dataset (N samples, d dimensions).
-            y: ndarray
-                (N,) array targets (N samples)
+        X: ndarray
+            (N, d) array input dataset (N samples, d dimensions).
+        y: ndarray
+            (N,) array targets (N samples)
         """
 
         self.m, self.C, self.likelihood_hypers, self.basis_hypers = \
@@ -203,8 +202,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                       maxiter=self.maxiter,
                       tol=self.tol,
                       batch_size=self.batch_size,
-                      rho=self.rho,
-                      epsilon=self.epsilon)
+                      updater=self.updater)
 
         return self
 
