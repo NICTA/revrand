@@ -35,17 +35,20 @@ def main():
     noise_true = 0.1
 
     # Algorithmic properties
-    nbases = 100
+    nbases = 20
     lenscale = 1  # For all basis functions that take lengthscales
     noise = 0.5
     reg = 1
 
     # GLM learning settings
-    maxiter = 3000
+    run_glm = True
+    use_sgd = True
+    maxiter = 5000
     batch_size = 10
 
-    lenp = Parameter(lenscale, Positive())
-    base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
+    lenp = Parameter(lenscale, Positive(10.))
+    base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp) \
+        + bs.BiasBasis()
     # base = bs.RandomMatern32(Xdim=1, nbases=nbases, lenscale_init=lenp)
 
     # Gaussian spectral mixture basis
@@ -89,15 +92,16 @@ def main():
     # Nonparametric variational inference GLM
     #
 
-    llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
-    params_glm = glm.learn(Xtrain, ytrain, llhood, base,
-                           regulariser=Parameter(reg, Positive()),
-                           use_sgd=True, batch_size=batch_size,
-                           maxiter=maxiter)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
-                                               *params_glm)
-    Vy_g = Vf_g + params_glm[2][0]
-    Sy_g = np.sqrt(Vy_g)
+    if run_glm:
+        llhood = likelihoods.Gaussian(var_init=Parameter(noise**2, Positive()))
+        params_glm = glm.learn(Xtrain, ytrain, llhood, base,
+                               regulariser=Parameter(reg, Positive()),
+                               use_sgd=use_sgd, batch_size=batch_size,
+                               maxiter=maxiter)
+        Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
+                                                   *params_glm)
+        Vy_g = Vf_g + params_glm[2][0]
+        Sy_g = np.sqrt(Vy_g)
 
     #
     # Learn GP and predict
@@ -121,20 +125,23 @@ def main():
 
     LL_s = mll(ftest, Ey_e, Vy_e)
     LL_gp = mll(ftest, Ey_gp, Vy_gp)
-    LL_g = mll(ftest, Ey_g, Vy_g)
+    if run_glm:
+        LL_g = mll(ftest, Ey_g, Vy_g)
 
     smse_s = smse(ftest, Ey_e)
     smse_gp = smse(ftest, Ey_gp)
-    smse_glm = smse(ftest, Ey_g)
+    if run_glm:
+        smse_glm = smse(ftest, Ey_g)
 
     log.info("SLM, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_s, smse_s, np.sqrt(params_slm[3]),
                      params_slm[2]))
     log.info("GP, LL: {}, smse = {}, noise: {}, hypers: {}"
              .format(LL_gp, smse_gp, hyper_params[1], hyper_params[0]))
-    log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
-             .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
-                     params_glm[3]))
+    if run_glm:
+        log.info("GLM, LL: {}, smse = {}, noise: {}, hypers: {}"
+                 .format(LL_g, smse_glm, np.sqrt(params_glm[2][0]),
+                         params_glm[3]))
 
     #
     # Plot
@@ -159,9 +166,10 @@ def main():
                     label=None)
 
     # GLM Regressor
-    pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
-    pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
-                    edgecolor='m', linestyle='--', label=None)
+    if run_glm:
+        pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
+        pl.fill_between(Xpl_s, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
+                        edgecolor='m', linestyle='--', label=None)
 
     pl.legend()
 

@@ -15,7 +15,6 @@ from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from . import slm, glm
 from . import basis_functions as bf
 from .btypes import Parameter, Positive
-from .optimize import AdaDelta
 
 
 class StandardLinearModel(BaseEstimator, RegressorMixin):
@@ -39,7 +38,8 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
     """
 
     def __init__(self, basis, var=Parameter(1., Positive()),
-                 regulariser=Parameter(1., Positive()), tol=1e-6, maxiter=500):
+                 regulariser=Parameter(1., Positive()), tol=1e-6,
+                 maxiter=1000):
 
         self.basis = basis
         self.var = var
@@ -166,8 +166,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, likelihood, basis,
                  regulariser=Parameter(1., Positive()), postcomp=10,
-                 use_sgd=True, maxiter=1000, tol=1e-7, batch_size=100,
-                 updater=AdaDelta(), alpha=0.95):
+                 use_sgd=True, maxiter=3000, tol=1e-7, batch_size=100,
+                 updater=None, alpha=0.95):
 
         self.likelihood = likelihood
         self.basis = basis

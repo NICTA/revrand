@@ -28,8 +28,8 @@ def sgd_demo():
     nPoints = 1000
     nQueries = 500
     maxiter = 2000
-    rho = 0.9
-    epsilon = 1e-5
+    rho = 0.5
+    epsilon = 1e-6
 
     # Create dataset
     X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
