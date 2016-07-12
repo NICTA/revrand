@@ -5,13 +5,14 @@ import matplotlib.pyplot as pl
 import numpy as np
 import logging
 
+import revrand.legacygp as gp
+import revrand.legacygp.kernels as kern
 from revrand import slm, glm, likelihoods
 from revrand.metrics import mll, smse
 from revrand.utils.datasets import gen_gausprocess_se
 from revrand.btypes import Parameter, Positive
 from revrand import basis_functions as bs
-import revrand.legacygp as gp
-import revrand.legacygp.kernels as kern
+from revrand.optimize import AdaDelta, Adam
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -43,12 +44,13 @@ def main():
     # GLM learning settings
     run_glm = True
     use_sgd = True
-    maxiter = 5000
+    maxiter = 3000
     batch_size = 10
+    updater = AdaDelta(0.1, 1e-5)
+    # updater = Adam(alpha=0.01, epsilon=1e-5, beta1=0.1, beta2=0.1)
 
     lenp = Parameter(lenscale, Positive(10.))
-    base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp) \
-        + bs.BiasBasis()
+    base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
     # base = bs.RandomMatern32(Xdim=1, nbases=nbases, lenscale_init=lenp)
 
     # Gaussian spectral mixture basis
@@ -97,7 +99,7 @@ def main():
         params_glm = glm.learn(Xtrain, ytrain, llhood, base,
                                regulariser=Parameter(reg, Positive()),
                                use_sgd=use_sgd, batch_size=batch_size,
-                               maxiter=maxiter)
+                               maxiter=maxiter, updater=updater)
         Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base,
                                                    *params_glm)
         Vy_g = Vf_g + params_glm[2][0]

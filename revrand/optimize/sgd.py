@@ -59,7 +59,7 @@ class AdaDelta(SGDUpdater):
         "jitter" term to ensure continued learning (should be small).
     """
 
-    def __init__(self, rho=0.95, epsilon=1e-6):
+    def __init__(self, rho=0.1, epsilon=1e-5):
 
         if rho < 0 or rho > 1:
             raise ValueError("Decay rate 'rho' must be between 0 and 1!")
@@ -208,7 +208,7 @@ class Adam(SGDUpdater):
         "jitter" term to ensure continued learning (should be small).
     """
 
-    def __init__(self, alpha=0.01, beta1=0.9, beta2=0.999, epsilon=1e-5):
+    def __init__(self, alpha=0.1, beta1=0.1, beta2=0.1, epsilon=1e-5):
 
         self.alpha = alpha
         self.beta1 = beta1
