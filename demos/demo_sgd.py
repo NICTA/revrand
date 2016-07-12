@@ -29,7 +29,7 @@ def sgd_demo():
     nQueries = 500
     maxiter = 2000
 
-    updater = Adam(alpha=0.01, epsilon=1e-5, beta1=0.1, beta2=0.1)
+    updater = Adam(alpha=0.01, epsilon=1e-5, beta1=0.1, beta2=0.3)
     # updater = AdaDelta(rho=0.1, epsilon=1e-5)
 
     # Create dataset

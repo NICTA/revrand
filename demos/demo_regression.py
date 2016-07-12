@@ -32,7 +32,7 @@ def main():
     # Dataset selection
     # dataset = 'sinusoid'
     dataset = 'gp1D'
-    lenscale_true = 1.2  # For the gpdraw dataset
+    lenscale_true = 0.7  # For the gpdraw dataset
     noise_true = 0.1
 
     # Algorithmic properties
@@ -46,8 +46,8 @@ def main():
     use_sgd = True
     maxiter = 3000
     batch_size = 10
-    updater = AdaDelta(0.1, 1e-5)
-    # updater = Adam(alpha=0.01, epsilon=1e-5, beta1=0.1, beta2=0.1)
+    # updater = AdaDelta(0.1, 1e-5)
+    updater = Adam(alpha=0.01, epsilon=1e-5, beta1=0.1, beta2=0.3)
 
     lenp = Parameter(lenscale, Positive(10.))
     base = bs.RandomRBF(Xdim=1, nbases=nbases, lenscale_init=lenp)
