@@ -258,7 +258,7 @@ second order Taylor expansions of the joint,
     \expec{q}{\log \prob{\targ, \weights}} \approx
     \frac{1}{K} \sum^K_{k=1} \sum^N_{n=1} 
     \log \probC{\targs_n}{\activ{\feats_n\T \pomean_k}, \lparam} \\
-    + \log \probC{\weights}{\pomean_k, \dpocov_k}
+    + \log \gausC{\pomean_k}{\mathbf{0}, \reg\ident{D}}
     + \frac{1}{2} \trace{\dpocov_k\hess{k}},
 \end{multline}
 to deal with non-conjugacy within their variational framework. Here $\hess{k} =
@@ -271,7 +271,7 @@ the reader to~\cite{gershman2012}. The final objective function we optimise is,
     \elbo \approx
     \frac{1}{K} \sum^K_{k=1} \sum^N_{n=1} 
     \log \probC{\targs_n}{\activ{\feats_n\T \pomean_k}, \lparam}
-    + \log \probC{\weights}{\pomean_k, \dpocov_k} \\
+    + \log \gausC{\pomean_k}{\mathbf{0}, \reg\ident{D}} \\
     + \frac{1}{2} \trace{\dpocov_k\hess{k}}
     - \log \brac{\sum^K_{j=1} \gausC{\pomean_k}{\pomean_j, \dpocov_k +
             \dpocov_j}} - \log K. \label{eq:glmobj}
