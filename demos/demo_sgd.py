@@ -23,13 +23,13 @@ def f(w, Data, sigma=1.0):
 def sgd_demo():
     # Settings
 
-    batch_size = 100
+    batch_size = 10
     var = 0.05
     nPoints = 1000
     nQueries = 500
-    passes = 200
-    rho = 0.9
-    epsilon = 1e-5
+    maxiter = 2000
+    rho = 0.5
+    epsilon = 1e-6
 
     # Create dataset
     X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
@@ -53,7 +53,7 @@ def sgd_demo():
     # SGD for learning w
     w0 = np.random.randn(Phi.shape[1])
     updater = AdaDelta(rho=rho, epsilon=epsilon)
-    results = sgd(f, w0, train_dat, passes=passes, batch_size=batch_size,
+    results = sgd(f, w0, train_dat, maxiter=maxiter, batch_size=batch_size,
                   eval_obj=True, updater=updater)
     w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
 
