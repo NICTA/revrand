@@ -59,7 +59,7 @@ class AdaDelta(SGDUpdater):
         "jitter" term to ensure continued learning (should be small).
     """
 
-    def __init__(self, rho=0.95, epsilon=1e-6):
+    def __init__(self, rho=0.1, epsilon=1e-5):
 
         if rho < 0 or rho > 1:
             raise ValueError("Decay rate 'rho' must be between 0 and 1!")
@@ -208,7 +208,7 @@ class Adam(SGDUpdater):
         "jitter" term to ensure continued learning (should be small).
     """
 
-    def __init__(self, alpha=0.01, beta1=0.9, beta2=0.999, epsilon=1e-5):
+    def __init__(self, alpha=0.01, beta1=0.1, beta2=0.3, epsilon=1e-5):
 
         self.alpha = alpha
         self.beta1 = beta1
@@ -283,7 +283,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     maxiter: int, optional
         Number of mini-batch iterations before optimization terminates.
     updater: SGDUpdater, optional
-        The type of gradient update to use, by default this is AdaDelta
+        The type of gradient update to use, by default this is AdaDelta.
     eval_obj: bool, optional
         This indicates whether or not :code:`fun` also evaluates and returns
         the objective function value. If this is true, :code:`fun` must return

@@ -24,7 +24,8 @@ regression) and generalised linear models. A few features of this library are:
 - Non-Gaussian likelihoods with Bayesian generalised linear models using a
   modified version of the nonparametric variational inference algorithm
   presented in [4]_.
-- Large scale learning using stochastic gradient descent (ADADELTA and more).
+- Large scale learning using stochastic gradient descent (Adam, AdaDelta and 
+  more).
 
 
 Quickstart
@@ -247,7 +248,7 @@ We can also use *partial application* of basis functions, e.g.
     >>> Phi.shape
     (100, 203)
 
-Now the basis functions are applied to seperate dimensions of the input, ``X``.
+Now the basis functions are applied to separate dimensions of the input, ``X``.
 That is, ``LinearBasis`` takes dimensions 0 and 1, and ``RandomRBF`` takes the
 rest, and again the results are concatenated.
 

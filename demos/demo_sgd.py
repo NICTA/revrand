@@ -5,7 +5,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 from scipy.optimize import minimize
-from revrand.optimize import sgd, AdaDelta
+from revrand.optimize import sgd, AdaDelta, Adam
 from revrand import basis_functions as bf
 
 
@@ -28,8 +28,9 @@ def sgd_demo():
     nPoints = 1000
     nQueries = 500
     maxiter = 2000
-    rho = 0.5
-    epsilon = 1e-6
+
+    updater = Adam(alpha=0.01, epsilon=1e-5, beta1=0.1, beta2=0.3)
+    # updater = AdaDelta(rho=0.1, epsilon=1e-5)
 
     # Create dataset
     X = np.linspace(0.0, 1.0, nPoints)[:, np.newaxis]
@@ -52,7 +53,6 @@ def sgd_demo():
 
     # SGD for learning w
     w0 = np.random.randn(Phi.shape[1])
-    updater = AdaDelta(rho=rho, epsilon=epsilon)
     results = sgd(f, w0, train_dat, maxiter=maxiter, batch_size=batch_size,
                   eval_obj=True, updater=updater)
     w_sgd, gnorms, costs = results['x'], results['norms'], results['objs']
