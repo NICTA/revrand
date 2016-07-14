@@ -70,7 +70,8 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
         :code:`use_sgd=False`.
     updater: SGDUpdater, optional
         The SGD learning rate updating algorithm to use, by default this is
-        Adadelta. See revrand.optimize.sgd for different options.
+        AdaDelta. See revrand.optimize.sgd for different options (another good
+        alternative is Adam).
 
     Returns
     -------

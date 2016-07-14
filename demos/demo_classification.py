@@ -8,7 +8,7 @@ from sklearn.metrics import log_loss, accuracy_score
 from revrand.utils.datasets import fetch_gpml_usps_resampled_data
 from revrand import glm
 from revrand.btypes import Parameter, Positive
-from revrand.basis_functions import RandomRBF
+from revrand.basis_functions import RandomMatern32, BiasBasis
 from revrand.likelihoods import Bernoulli
 
 import logging
@@ -59,11 +59,12 @@ usps_resampled.test.targets[ind2] = 0
 Ys = usps_resampled.test.targets[np.logical_or(ind1, ind2)]
 
 # Classify - Revrand
-Phi = RandomRBF(nbases, X.shape[1],
-                lenscale_init=Parameter(lenscale, Positive()))
+Phi = RandomMatern32(nbases, X.shape[1],
+                     lenscale_init=Parameter(lenscale, Positive())) \
+    + BiasBasis()
 llhood = Bernoulli()
-params = glm.learn(X, Y, llhood, Phi, use_sgd=doSGD,
-                   maxiter=maxiter, batch_size=batch_size)
+params = glm.learn(X, Y, llhood, Phi, use_sgd=doSGD, maxiter=maxiter,
+                   batch_size=batch_size)
 
 # Predict
 pys_l, Vpy, Epn, Epx = glm.predict_moments(Xs, llhood, Phi, *params)
