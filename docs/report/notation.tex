@@ -22,13 +22,17 @@
 \newcommand{\targdT}    {\ensuremath{\mathbf{y}\testT}}
 \newcommand{\ins}       {\ensuremath{\mathbf{X}}}
 \newcommand{\inss}      {\ensuremath{\mathbf{x}}}
+\newcommand{\inssprime} {\ensuremath{\inss'}}
 \newcommand{\locs}      {\ensuremath{\mathbf{z}}}
 \newcommand{\minibatch} {\ensuremath{\mathbf{B}}}
 \newcommand{\feat}      {\ensuremath{\boldsymbol\Phi}}
 \newcommand{\feats}     {\ensuremath{\boldsymbol\phi}}
-\newcommand{\featfunc}  {\ensuremath{\phi}}
+\newcommand{\featsym}   {\ensuremath{\phi}}
+\newcommand{\featfunc}[1]  {\ensuremath{\featsym\!\brac{#1}}}
+\newcommand{\singlefeatfunc}[2]  {\ensuremath{\phi_{#2}\!\brac{{#1}}}}
 \newcommand{\weights}   {\ensuremath{\mathbf{w}}}
 \newcommand{\var}       {\ensuremath{\sigma^2}}
+\newcommand{\varfeat}   {\sigma_{\featsym}^2}
 \newcommand{\pomean}    {\ensuremath{\mathbf{m}}}
 \newcommand{\pocov}     {\ensuremath{\mathbf{C}}}
 \newcommand{\dpocov}    {\ensuremath{\boldsymbol{\Psi}}}
@@ -47,6 +51,10 @@
 \newcommand{\Kernl}     {\ensuremath{\mathbf{k}}}
 \newcommand{\KERNL}     {\ensuremath{\mathbf{K}}}
 
+% Fourier things
+\newcommand{\tfourier}{\boldsymbol{\tau}}   % time space
+\newcommand{\ffourier}{\mathbf{s}} % freq space
+\newcommand{\specfourier}{S}
 
 %% Operations
 \newcommand{\T}          {\ensuremath{^{\!\top}}}
