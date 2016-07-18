@@ -355,6 +355,8 @@ the following for $\cdfAlph$,
 % show how we learn length-scales (this should be obvious from the A la Carte
 % paper though).
 
+TODO: re-write the following:
+
 In \emph{revrand} we approximate Gaussian Processes with our standard and
 generalised linear models by using random feature functions such as those of
 \citeauthor{rahimi2007} \citeyearpar{rahimi2007,rahimi2008}. They use Bochner's
@@ -393,13 +395,17 @@ feature space.  \citet{rahimi2007} used the above feature map to approximate
 the commonly used (isotropic) squared exponential kernel, and showed that such
 an approximation converges in expectation to the true kernel.  
 
-TODO: table of kernels and distributions
+TODO: table of kernels and sampling distributions currently in revrand
+(Laplace, Cauchy, RBF, Matern5/2, Matern3/2 etc)
 
 TODO: FastFood
 
-TODO: Alacarte spectral mixtures
+TODO: A la Carte spectral mixtures
 
 \section{Feature Composition Framework}
+
+TODO: We have implemented kernel addition (basis concatenation), but we haven't
+done kernel products.
 
 TODO: mention advantages of using kernel and constant bases (offsets)
 
