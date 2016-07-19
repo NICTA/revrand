@@ -37,7 +37,7 @@ def smse(y_true, y_pred):
 
 def mll(y_true, y_pred, y_var):
     """
-    Mean (negative) log likelihood under a Gaussian distribution.
+    Mean log loss under a Gaussian distribution.
 
     Parameters
     ----------
@@ -51,7 +51,7 @@ def mll(y_true, y_pred, y_var):
     Returns
     -------
     float:
-        The mean negative log likelihood
+        The mean negative log loss (negative log likelihood)
 
     Example
     -------
@@ -68,7 +68,7 @@ def mll(y_true, y_pred, y_var):
 
 def msll(y_true, y_pred, y_var, y_train):
     """
-    Mean standardised (negative) log likelihood under a Gaussian distribution.
+    Mean standardised log loss under a Gaussian distribution.
 
     Parameters
     ----------
@@ -84,7 +84,7 @@ def msll(y_true, y_pred, y_var, y_train):
     Returns
     -------
     float:
-        The negative mean standardised log likelihood
+        The negative mean standardised log loss (negative log likelihood)
 
     Example
     -------
@@ -106,7 +106,7 @@ def msll(y_true, y_pred, y_var, y_train):
 
 def lins_ccc(y_true, y_pred):
     """
-    Lin's Concordance Correlation Coefficient. 
+    Lin's Concordance Correlation Coefficient.
 
     See https://en.wikipedia.org/wiki/Concordance_correlation_coefficient
 
