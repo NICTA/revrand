@@ -1,6 +1,9 @@
 import numpy as np
 
-from revrand import slm, glm
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+
+from revrand import StandardLinearModel, glm
 from revrand.likelihoods import Gaussian, Binomial
 from revrand.basis_functions import LinearBasis, RandomRBF
 from revrand.metrics import smse
@@ -12,14 +15,35 @@ def test_slm(make_gaus_data):
 
     basis = LinearBasis(onescol=False)
 
-    params = slm.learn(X, y, basis)
-    Ey, Vf, Vy = slm.predict(X, basis, *params)
+    slm = StandardLinearModel(basis)
+    slm.fit(X, y)
+    Ey, Vf, Vy = slm.predict_proba(X)
+
     assert smse(y, Ey) < 0.1
 
     basis = LinearBasis(onescol=False) + RandomRBF(nbases=10, Xdim=X.shape[1])
 
-    params = slm.learn(X, y, basis)
-    Ey, Vf, Vy = slm.predict(X, basis, *params)
+    slm = StandardLinearModel(basis)
+    slm.fit(X, y)
+    Ey, Vf, Vy = slm.predict_proba(X)
+
+    assert smse(y, Ey) < 0.1
+
+
+def test_pipeline_slm(make_gaus_data):
+
+    X, y, w = make_gaus_data
+
+    slm = StandardLinearModel(LinearBasis(onescol=True))
+    estimators = [('PCA', PCA()),
+                  ('SLM', slm)]
+    pipe = Pipeline(estimators)
+
+    pipe.fit(X, y)
+    Ey = pipe.predict(X)
+    assert smse(y, Ey) < 0.1
+
+    Ey, _, Vy = pipe.predict_proba(X)
     assert smse(y, Ey) < 0.1
 
 

@@ -1,5 +1,5 @@
 """
-Various Bayesian linear regression learning and prediction functions.
+The standard Bayesian linear regression model.
 
 By using the appropriate bases, this will also yield a simple implementation of
 the "A la Carte" GP [1]_.
@@ -13,64 +13,81 @@ the "A la Carte" GP [1]_.
 from __future__ import division
 
 import logging
+from functools import partial
 
 import numpy as np
 from scipy.optimize import minimize
+from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.utils.validation import check_is_fitted
 
 from .utils import append_or_extend
 from .mathfun.linalg import solve_posdef
 from .optimize import structured_minimizer, logtrick_minimizer
-from .btypes import Parameter, Positive, get_values
+from .btypes import Parameter, Positive
 from .basis_functions import apply_grad
 
 # Set up logging
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, basis, var=Parameter(1., Positive()),
-          regulariser=Parameter(1., Positive()), tol=1e-8, maxiter=1000):
+class StandardLinearModel(BaseEstimator, RegressorMixin):
     """
-    Learn the parameters and hyperparameters of a Bayesian linear regressor.
+    Standard linear model interface class.
 
     Parameters
     ----------
+    basis: Basis
+        A basis object, see the basis_functions module.
+    var: Parameter, optional
+        observation variance initial value.
+    regulariser: Parameter, optional
+        weight regulariser (variance) initial value.
+    tol: float, optional
+        optimiser function tolerance convergence criterion.
+    maxiter: int, optional
+        maximum number of iterations for the optimiser.
+    """
+
+    def __init__(self,
+                 basis,
+                 var=Parameter(1., Positive()),
+                 regulariser=Parameter(1., Positive()),
+                 tol=1e-8,
+                 maxiter=1000
+                 ):
+
+        self.basis = basis
+        self.var = var
+        self.regulariser = regulariser
+        self.tol = tol
+        self.maxiter = maxiter
+
+    def fit(self, X, y):
+        """
+        Learn the parameters and hyperparameters of a Bayesian linear
+        regressor.
+
+        Parameters
+        ----------
         X: ndarray
             (N, d) array input dataset (N samples, d dimensions).
         y: ndarray
             (N,) array targets (N samples)
-        basis: Basis
-            A basis object, see the basis_functions module.
-        var: Parameter, optional
-            observation variance initial value.
-        regulariser: Parameter, optional
-            weight regulariser (variance) initial value.
-        tol: float, optional
-            optimiser function tolerance convergence criterion.
-        maxiter: int, optional
-            maximum number of iterations for the optimiser.
 
-    Returns
-    -------
-        m: ndarray
-            (D,) array of posterior weight means (D is the dimension of the
-            features).
-        C: ndarray
-            (D, D) array of posterior weight variances.
-        bparams: sequence
-            learned sequence of basis object hyperparameters.
-        float:
-            learned observation variance
+        Returns
+        -------
+        self
 
-    Notes
-    -----
+        Notes
+        -----
         This actually optimises the evidence lower bound on log marginal
         likelihood, rather than log marginal likelihood directly. In the case
         of a full posterior convariance matrix, this bound is tight and the
         exact solution will be found (modulo local minima for the
         hyperparameters).
 
-        This uses the python logging module for displaying learning status.
-        To view these messages have something like,
+        This uses the python logging module for displaying learning status. To
+        view these messages have something like,
 
         .. code ::
 
@@ -79,32 +96,55 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
             log = logging.getLogger(__name__)
 
         in your calling code.
-    """
+        """
 
-    if y.ndim != 1:
-        raise ValueError("y has to be a 1-d array (single task)")
-    if X.ndim != 2:
-        raise ValueError("X has to be a 2-d array")
+        if y.ndim != 1:
+            raise ValueError("y has to be a 1-d array (single task)")
+        if X.ndim != 2:
+            raise ValueError("X has to be a 2-d array")
 
-    N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *get_values(basis.params)).shape[1]
+        self.obj = -np.inf
 
-    # Caches for returning optimal params
-    ELBOcache = [-np.inf]
-    mcache = np.zeros(D)
-    Ccache = np.zeros((D, D))
+        # Make list of parameters and decorate optimiser to undestand this
+        params = append_or_extend([self.var, self.regulariser],
+                                  self.basis.params)
+        nmin = structured_minimizer(logtrick_minimizer(minimize))
 
-    def ELBO(_var, _lambda, *_theta):
+        # Close over objective and learn parameters
+        elbo = partial(StandardLinearModel._elbo, self, X, y)
+        res = nmin(elbo,
+                   params,
+                   method='L-BFGS-B',
+                   jac=True, tol=self.tol,
+                   options={'maxiter': self.maxiter, 'maxcor': 100}
+                   )
+
+        # Upack learned parameters and report
+        (self.var, self.regulariser), self.hypers = res.x[:2], res.x[2:]
+
+        log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, "
+                 "message = {}."
+                 .format(-res['fun'],
+                         self.var,
+                         self.regulariser,
+                         self.hypers,
+                         res.message)
+                 )
+
+        return self
+
+    def _elbo(self, X, y, var, reg, *hypers):
 
         # Get Basis
-        Phi = basis(X, *_theta)                      # N x D
+        Phi = self.basis(X, *hypers)                      # N x D
         PhiPhi = Phi.T.dot(Phi)
+        N, D = Phi.shape
 
         # Posterior Parameters
-        iC = np.diag(np.ones(D) / _lambda) + PhiPhi / _var
+        iC = np.diag(np.ones(D) / reg) + PhiPhi / var
         C, logdetiC = solve_posdef(iC, np.eye(D))
         logdetC = - logdetiC
-        m = C.dot(Phi.T.dot(y)) / _var
+        m = C.dot(Phi.T.dot(y)) / var
 
         # Common calcs
         TrPhiPhiC = (PhiPhi * C).sum()
@@ -114,89 +154,88 @@ def learn(X, y, basis, var=Parameter(1., Positive()),
         mm = (m**2).sum()
 
         # Calculate ELBO
-        ELBO = -0.5 * (N * np.log(2 * np.pi * _var)
-                       + sqErr / _var
-                       + TrPhiPhiC / _var
-                       + (TrC + mm) / _lambda
+        ELBO = -0.5 * (N * np.log(2 * np.pi * var)
+                       + sqErr / var
+                       + TrPhiPhiC / var
+                       + (TrC + mm) / reg
                        - logdetC
-                       + D * np.log(_lambda)
+                       + D * np.log(reg)
                        - D)
 
-        # NOTE: In the above, TriPhiPhiC / _var = D - TrC / _lambda when we
+        # NOTE: In the above, TriPhiPhiC / var = D - TrC / reg when we
         # analytically solve for C, but we need the trace terms for gradients
         # anyway, so we'll keep them.
 
-        # Cache square error to compute corrected variance
-        if ELBO > ELBOcache[0]:
-            mcache[:] = m
-            Ccache[:] = C
-            ELBOcache[0] = ELBO
+        # Cache optimal parameters so we don't have to recompute them later
+        if ELBO > self.obj:
+            self.weights = m
+            self.covariance = C
+            self.obj = ELBO
 
         log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
-                 .format(ELBO, _var, _lambda, _theta))
+                 .format(ELBO, var, reg, hypers))
 
         # Grad var
-        dvar = 0.5 * (-N + (sqErr + TrPhiPhiC) / _var) / _var
+        dvar = 0.5 * (-N + (sqErr + TrPhiPhiC) / var) / var
 
         # Grad reg
-        dlambda = 0.5 * ((TrC + mm) / _lambda - D) / _lambda
+        dreg = 0.5 * ((TrC + mm) / reg - D) / reg
 
         # Get structured basis function gradients
-        def dtheta(dPhi):
+        def dhypers(dPhi):
             return - (m.T.dot(Err.dot(dPhi))
-                      - (dPhi.T.dot(Phi) * C).sum()) / _var
+                      - (dPhi.T.dot(Phi) * C).sum()) / var
 
-        dtheta = apply_grad(dtheta, basis.grad(X, *_theta))
+        dhypers = apply_grad(dhypers, self.basis.grad(X, *hypers))
 
-        return -ELBO, append_or_extend([-dvar, -dlambda], dtheta)
+        return -ELBO, append_or_extend([-dvar, -dreg], dhypers)
 
-    params = append_or_extend([var, regulariser], basis.params)
-    nmin = structured_minimizer(logtrick_minimizer(minimize))
-    res = nmin(ELBO, params, method='L-BFGS-B', jac=True, tol=tol,
-               options={'maxiter': maxiter, 'maxcor': 100})
-    (var, regulariser), hypers = res.x[:2], res.x[2:]
+    def predict(self, X):
+        """
+        Predict mean from Bayesian linear regression.
 
-    log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, message = {}."
-             .format(-res['fun'], var, regulariser, hypers, res.message))
-
-    return mcache, Ccache, hypers, var
-
-
-def predict(Xs, basis, m, C, hypers, var):
-    """
-    Predict using Bayesian linear regression.
-
-    Parameters
-    ----------
-        Xs: ndarray
+        Parameters
+        ----------
+        X: ndarray
             (Ns,d) array query input dataset (Ns samples, d dimensions).
-        basis: Basis
-            A basis object, see the basis_functions module.
-        m: ndarray
-            (D,) array of regression weights (posterior).
-        C: ndarray
-            (D, D) array of regression weight covariances (posterior).
-        hypers: sequence
-            A sequence of hyperparameters of the basis object.
-        var: float
-            observation variance.
 
-    Returns
-    -------
+        Returns
+        -------
         Ey: ndarray
-            The expected value of y_star for the query inputs, X_star
-            of shape (N_star,).
+            The expected value of y_star for the query inputs, X_star of shape
+            (N_star,).
+        """
+
+        Ey, _, _ = self.predict_proba(X)
+
+        return Ey
+
+    def predict_proba(self, X):
+        """
+        Full predictive distribution from Bayesian linear regression.
+
+        Parameters
+        ----------
+        X: ndarray
+            (Ns,d) array query input dataset (Ns samples, d dimensions).
+
+        Returns
+        -------
+        Ey: ndarray
+            The expected value of y_star for the query inputs, X_star of shape
+            (N_star,).
         Vf: ndarray
-            The expected variance of f_star for the query inputs,
-            X_star of shape (N_star,).
+            The expected variance of f_star for the query inputs, X_star of
+            shape (N_star,).
         Vy: ndarray
-            The expected variance of y_star for the query inputs,
-            X_star of shape (N_star,).
-    """
+            The expected variance of y_star for the query inputs, X_star of
+            shape (N_star,).
+        """
 
-    Phi_s = basis(Xs, *hypers)
+        check_is_fitted(self, ['weights', 'covariance', 'hypers'])
 
-    Ey = Phi_s.dot(m)
-    Vf = (Phi_s.dot(C) * Phi_s).sum(axis=1)
+        Phi = self.basis(X, *self.hypers)
+        Ey = Phi.dot(self.weights)
+        Vf = (Phi.dot(self.covariance) * Phi).sum(axis=1)
 
-    return Ey, Vf, Vf + var
+        return Ey, Vf, Vf + self.var

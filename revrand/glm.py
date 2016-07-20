@@ -15,13 +15,14 @@ from itertools import chain
 from multiprocessing import Pool
 
 from scipy.stats.distributions import gamma
-from scipy.optimize import brentq, minimize
+from scipy.optimize import brentq
+from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.utils.validation import check_is_fitted
 
 from .utils import couple, append_or_extend, atleast_list
 from .mathfun.special import logsumexp
 from .basis_functions import apply_grad
-from .optimize import sgd, structured_sgd, structured_minimizer, logtrick_sgd,\
-    logtrick_minimizer
+from .optimize import sgd, structured_sgd, logtrick_sgd
 from .btypes import Bound, Positive, Parameter, get_values
 
 
@@ -29,61 +30,32 @@ from .btypes import Bound, Positive, Parameter, get_values
 log = logging.getLogger(__name__)
 
 
-def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
-          likelihood_args=(), postcomp=10, use_sgd=True, maxiter=3000,
-          tol=1e-7, batch_size=10, updater=None):
+class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     r"""
-    Learn the parameters of a Bayesian generalised linear model (GLM).
+    Generalised linear model interface class.
 
-    The learning algorithm uses nonparametric variational inference [1]_, and
-    optionally stochastic gradients.
+    This provides a scikit learn compatible interface for the glm module.
 
     Parameters
     ----------
-    X: ndarray
-        (N, d) array input dataset (N samples, d dimensions).
-    y: ndarray
-        (N,) array targets (N samples)
     likelihood: Object
         A likelihood object, see the likelihoods module.
     basis: Basis
         A basis object, see the basis_functions module.
     regulariser: Parameter, optional
         weight regulariser (variance) initial value.
-    likelihood_args: sequence, optional
-        sequence of arguments to pass to the likelihood function. These are
-        non-learnable parameters. They can be scalars or arrays of length N.
     postcomp: int, optional
         Number of diagonal Gaussian components to use to approximate the
         posterior distribution.
-    use_sgd: bool, optional
-        If :code:`True` then use SGD (Adadelta) optimisation instead of L-BFGS.
-    maxiter: int, optional
-        Maximum number of iterations of the optimiser to run. If
-        :code:`use_sgd` is :code:`True` then this is the number of mini batches
-        to evaluate before termination.
     tol: float, optional
-        Optimiser relative tolerance convergence criterion (only if L-BFGS
-        is used as the optimiser).
+       Optimiser relative tolerance convergence criterion.
+    maxiter: int, optional
+        Maximum number of iterations of stochastic gradients to run.
     batch_size: int, optional
-        number of observations to use per SGD batch. Ignored if
-        :code:`use_sgd=False`.
+        number of observations to use per SGD batch.
     updater: SGDUpdater, optional
         The SGD learning rate updating algorithm to use, by default this is
-        AdaDelta. See revrand.optimize.sgd for different options (another good
-        alternative is Adam).
-
-    Returns
-    -------
-    m: ndarray
-        (D, postcomp) array of posterior weight means (D is the dimension of
-        the features).
-    C: ndarray
-        (D, postcomp) array of posterior weight variances.
-    likelihood_hypers: sequence
-        learned sequence of likelihood object hyperparameters.
-    basis_hypers: sequence
-        learned sequence of basis object hyperparameters.
+        AdaDelta. See revrand.optimize.sgd for different options.
 
     Notes
     -----
@@ -128,237 +100,294 @@ def learn(X, y, likelihood, basis, regulariser=Parameter(1., Positive()),
         log = logging.getLogger(__name__)
 
     in your calling code.
+
     """
 
-    if y.ndim != 1:
-        raise ValueError("y has to be a 1-d array (single task)")
-    if X.ndim != 2:
-        raise ValueError("X has to be a 2-d array")
+    def __init__(self,
+                 likelihood,
+                 basis,
+                 regulariser=Parameter(1., Positive()),
+                 postcomp=10,
+                 maxiter=3000,
+                 tol=1e-8,
+                 batch_size=10,
+                 updater=None):
 
-    # Shapes of things
-    N, d = X.shape
-    D = basis(np.atleast_2d(X[0, :]), *get_values(basis.params)).shape[1]
-    K = postcomp
+        self.likelihood = likelihood
+        self.basis = basis
+        self.regulariser = regulariser
+        self.K = postcomp
+        self.maxiter = maxiter
+        self.tol = tol
+        self.batch_size = batch_size
+        self.updater = updater
 
-    # Number of hyperparameters
-    nlpams = len(atleast_list(get_values(likelihood.params)))
-    nbpams = len(atleast_list(get_values(basis.params)))
-    tothypers = nlpams + nbpams
+    def fit(self, X, y, likelihood_args=()):
+        r"""
+        Learn the parameters of a Bayesian generalised linear model (GLM).
 
-    # Pre-allocate here
-    dm = np.zeros((D, K))
-    dC = np.zeros((D, K))
-    H = np.empty((D, K))
+        The learning algorithm uses nonparametric variational inference [1]_,
+        and optionally stochastic gradients.
 
-    # Make sure we get list output from likelihood parameter gradients
-    lgrads = couple(lambda *a: atleast_list(likelihood.dp(*a)),
-                    lambda *a: atleast_list(likelihood.dpd2f(*a)))
+        Parameters
+        ----------
+        X: ndarray
+            (N, d) array input dataset (N samples, d dimensions).
+        y: ndarray
+            (N,) array targets (N samples)
+        likelihood: Object
+            A likelihood object, see the likelihoods module.
+        likelihood_args: sequence, optional
+            sequence of arguments to pass to the likelihood function. These are
+            non-learnable parameters. They can be scalars or arrays of length
+            N.
+        """
 
-    # Objective function Eq. 10 from [1], and gradients of ALL params
-    def L2(m, C, reg, *args):
+        if y.ndim != 1:
+            raise ValueError("y has to be a 1-d array (single task)")
+        if X.ndim != 2:
+            raise ValueError("X has to be a 2-d array")
 
-        # Unpack data and likelihood arguments if they exist
-        y, X = args[tothypers], args[tothypers + 1]
-        largs = args[(tothypers + 2):] if len(likelihood_args) > 0 else ()
+        # Shapes of things
+        N, d = X.shape
+        D = self.basis(np.atleast_2d(X[0, :]),
+                       *get_values(self.basis.params)).shape[1]
 
-        # Extract parameters
-        lpars, bpars, = args[:nlpams], args[nlpams:tothypers]
-        lpars_largs = tuple(chain(lpars, largs))
+        # Number of hyperparameters
+        nlpams = len(atleast_list(get_values(self.likelihood.params)))
+        nbpams = len(atleast_list(get_values(self.basis.params)))
+        tothypers = nlpams + nbpams
 
-        # Batchsize and discount factor
-        M, _ = X.shape
-        B = N / M
+        # Pre-allocate here
+        dm = np.zeros((D, self.K))
+        dC = np.zeros((D, self.K))
+        H = np.empty((D, self.K))
 
-        # Basis function stuff
-        Phi = basis(X, *bpars)  # M x D
-        Phi2 = Phi**2
-        Phi3 = Phi**3
-        f = Phi.dot(m)  # M x K
-        df, d2f, d3f = np.zeros((M, K)), np.zeros((M, K)), np.zeros((M, K))
+        # Objective function Eq. 10 from [1], and gradients of ALL params
+        def L2(m, C, reg, *args):
 
-        # Posterior responsability terms
-        logqkk = _qmatrix(m, C)
-        logqk = logsumexp(logqkk, axis=0)  # log term of Eq. 7 from [1]
-        pz = np.exp(logqkk - logqk)
+            # Unpack data and likelihood arguments if they exist
+            y, X = args[tothypers], args[tothypers + 1]
+            largs = args[(tothypers + 2):] if len(likelihood_args) > 0 else ()
 
-        # Zero starts for sums over posterior mixtures
-        ll = 0
-        dlpars = [np.zeros_like(p) for p in lpars]
+            # Extract parameters
+            lpars, bpars, = args[:nlpams], args[nlpams:tothypers]
+            lpars_largs = tuple(chain(lpars, largs))
 
-        # Big loop though posterior mixtures for calculating stuff
-        for k in range(K):
+            # Batchsize and discount factor
+            M, _ = X.shape
+            B = N / M
 
-            # Common likelihood calculations
-            ll += B * likelihood.loglike(y, f[:, k], *lpars_largs).sum()
-            df[:, k] = B * likelihood.df(y, f[:, k], *lpars_largs)
-            d2f[:, k] = B * likelihood.d2f(y, f[:, k], *lpars_largs)
-            d3f[:, k] = B * likelihood.d3f(y, f[:, k], *lpars_largs)
-            H[:, k] = d2f[:, k].dot(Phi2) - 1. / reg
+            # Basis function stuff
+            Phi = self.basis(X, *bpars)  # M x D
+            Phi2 = Phi**2
+            Phi3 = Phi**3
+            f = Phi.dot(m)  # M x K
+            df = np.zeros((M, self.K))
+            d2f = np.zeros((M, self.K))
+            d3f = np.zeros((M, self.K))
 
-            # Posterior mean and covariance gradients
-            mkmj = m[:, k][:, np.newaxis] - m
-            iCkCj = 1 / (C[:, k][:, np.newaxis] + C)
-            dC[:, k] = (-((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[:, k])
-                        + H[:, k]) / (2 * K)
-            dm[:, k] = (df[:, k].dot(Phi)
-                        + 0.5 * C[:, k] * d3f[:, k].dot(Phi3)
-                        + (iCkCj * mkmj).dot(pz[:, k])
-                        - m[:, k] / reg) / K
+            # Posterior responsability terms
+            logqkk = _qmatrix(m, C)
+            logqk = logsumexp(logqkk, axis=0)  # log term of Eq. 7 from [1]
+            pz = np.exp(logqkk - logqk)
 
-            # Likelihood parameter gradients
-            ziplgrads = zip(*lgrads(y, f[:, k], *lpars_largs))
-            for l, (dp, dp2df) in enumerate(ziplgrads):
-                dlpars[l] -= B * \
-                    (dp.sum() + 0.5 * (C[:, k] * dp2df.dot(Phi2)).sum()) / K
+            # Zero starts for sums over posterior mixtures
+            ll = 0
+            dlpars = [np.zeros_like(p) for p in lpars]
 
-        # Regulariser gradient
-        dreg = 0.5 * (((m**2).sum() + C.sum()) / (reg**2 * K) - D / reg)
+            # Big loop though posterior mixtures for calculating stuff
+            for k in range(self.K):
 
-        # Basis function parameter gradients
-        def dtheta(dPhi):
-            dt = 0
-            dPhiPhi = dPhi * Phi
-            for k in range(K):
-                dPhimk = dPhi.dot(m[:, k])
-                dPhiH = d2f[:, k].dot(dPhiPhi) + \
-                    0.5 * (d3f[:, k] * dPhimk).dot(Phi2)
-                dt -= (df[:, k].dot(dPhimk) + (C[:, k] * dPhiH).sum()) / K
-            return dt
+                # Common likelihood calculations
+                ll += B * self.likelihood.loglike(y, f[:, k],
+                                                  *lpars_largs).sum()
+                df[:, k] = B * self.likelihood.df(y, f[:, k], *lpars_largs)
+                d2f[:, k] = B * self.likelihood.d2f(y, f[:, k], *lpars_largs)
+                d3f[:, k] = B * self.likelihood.d3f(y, f[:, k], *lpars_largs)
+                H[:, k] = d2f[:, k].dot(Phi2) - 1. / reg
 
-        dbpars = apply_grad(dtheta, basis.grad(X, *bpars))
+                # Posterior mean and covariance gradients
+                mkmj = m[:, k][:, np.newaxis] - m
+                iCkCj = 1 / (C[:, k][:, np.newaxis] + C)
+                dC[:, k] = (-((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[:, k])
+                            + H[:, k]) / (2 * self.K)
+                dm[:, k] = (df[:, k].dot(Phi)
+                            + 0.5 * C[:, k] * d3f[:, k].dot(Phi3)
+                            + (iCkCj * mkmj).dot(pz[:, k])
+                            - m[:, k] / reg) / self.K
 
-        # Objective, Eq. 10 in [1]
-        L2 = 1. / K * (ll
-                       - 0.5 * D * K * np.log(2 * np.pi * reg)
-                       - 0.5 * (m**2).sum() / reg
-                       + 0.5 * (C * H).sum()
-                       - logqk.sum() + np.log(K))
+                # Likelihood parameter gradients
+                ziplgrads = zip(*self.__lgrads(y, f[:, k], *lpars_largs))
+                for l, (dp, dp2df) in enumerate(ziplgrads):
+                    dlpars[l] -= B * (dp.sum() + 0.5 *
+                                      (C[:, k] * dp2df.dot(Phi2)).sum()) / \
+                        self.K
 
-        log.info("L2 = {}, reg = {}, likelihood_hypers = {}, basis_hypers = {}"
-                 .format(L2, reg, lpars, bpars))
+            # Regulariser gradient
+            dreg = 0.5 * (((m**2).sum() + C.sum())
+                          / (reg**2 * self.K) - D / reg)
 
-        return -L2, append_or_extend([-dm, -dC, -dreg], dlpars, dbpars)
+            # Basis function parameter gradients
+            def dtheta(dPhi):
+                dt = 0
+                dPhiPhi = dPhi * Phi
+                for k in range(self.K):
+                    dPhimk = dPhi.dot(m[:, k])
+                    dPhiH = d2f[:, k].dot(dPhiPhi) + \
+                        0.5 * (d3f[:, k] * dPhimk).dot(Phi2)
+                    dt -= (df[:, k].dot(dPhimk) + (C[:, k] * dPhiH).sum()) /\
+                        self.K
+                return dt
 
-    # Intialise m and C
-    m = (np.random.randn(D, K) + np.random.randn(K)) * regulariser.value
-    C = gamma.rvs(2, scale=0.5, size=(D, K))
+            dbpars = apply_grad(dtheta, self.basis.grad(X, *bpars))
 
-    # Pack params
-    params = append_or_extend([Parameter(m, Bound()), Parameter(C, Positive()),
-                               regulariser], likelihood.params, basis.params)
+            # Objective, Eq. 10 in [1]
+            L2 = (ll
+                  - 0.5 * D * self.K * np.log(2 * np.pi * reg)
+                  - 0.5 * (m**2).sum() / reg
+                  + 0.5 * (C * H).sum()
+                  - logqk.sum() + np.log(self.K)) / self.K
 
-    # Pack data
-    likelihood_args = _reshape_likelihood_args(likelihood_args, N)
-    data = (y, X) + likelihood_args
+            log.info("L2 = {}, reg = {}, likelihood_hypers = {}, "
+                     "basis_hypers = {}"
+                     .format(L2, reg, lpars, bpars))
 
-    if use_sgd is False:
-        nmin = structured_minimizer(logtrick_minimizer(minimize))
-        res = nmin(L2, params, tol=tol, method='L-BFGS-B', jac=True,
-                   args=data, options={'maxiter': maxiter, 'maxcor': 100})
-    else:
+            return -L2, append_or_extend([-dm, -dC, -dreg], dlpars, dbpars)
+
+        # Intialise weights and covariances
+        self.weights = (np.random.randn(D, self.K) + np.random.randn(self.K)) \
+            * self.regulariser.value
+        self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
+
+        # Pack params
+        params = append_or_extend([Parameter(self.weights, Bound()),
+                                   Parameter(self.covariance, Positive()),
+                                   self.regulariser],
+                                  self.likelihood.params,
+                                  self.basis.params)
+
+        # Pack data
+        likelihood_args = _reshape_likelihood_args(likelihood_args, N)
+        data = (y, X) + likelihood_args
+
         nsgd = structured_sgd(logtrick_sgd(sgd))
-        res = nsgd(L2, params, data, maxiter=maxiter, updater=updater,
-                   batch_size=batch_size, eval_obj=True)
+        res = nsgd(L2,
+                   params,
+                   data,
+                   maxiter=self.maxiter,
+                   updater=self.updater,
+                   batch_size=self.batch_size,
+                   eval_obj=True
+                   )
 
-    # Unpack params
-    m, C, regulariser = res.x[:3]
-    likelihood_hypers = res.x[3:(3 + nlpams)]
-    basis_hypers = res.x[(3 + nlpams):]
+        # Unpack params
+        self.weights, self.covariance, self.regulariser = res.x[:3]
+        self.likelihood_hypers = res.x[3:(3 + nlpams)]
+        self.basis_hypers = res.x[(3 + nlpams):]
 
-    log.info("Finished! Objective = {}, reg = {}, likelihood_hypers = {}, "
-             "basis_hypers = {}, message: {}."
-             .format(-res.fun, regulariser, likelihood_hypers, basis_hypers,
-                     res.message))
+        log.info("Finished! Objective = {}, reg = {}, likelihood_hypers = {}, "
+                 "basis_hypers = {}, message: {}."
+                 .format(-res.fun,
+                         self.regulariser,
+                         self.likelihood_hypers,
+                         self.basis_hypers,
+                         res.message))
 
-    return m, C, likelihood_hypers, basis_hypers
+        return self
 
+    def __lgrads(self, *a):
 
-def predict_moments(Xs, likelihood, basis, m, C, likelihood_hypers,
-                    basis_hypers, likelihood_args=(), nsamples=100):
-    r"""
-    Predictive moments, in particular mean and variance, of a Bayesian GLM.
+        # Make sure we get list output from likelihood parameter gradients
+        lgrads = couple(lambda *a: atleast_list(self.likelihood.dp(*a)),
+                        lambda *a: atleast_list(self.likelihood.dpd2f(*a)))
 
-    This function uses Monte-Carlo sampling to evaluate the predictive mean and
-    variance of a Bayesian GLM. The exact expressions evaluated are,
+        return lgrads
 
-    .. math ::
+    def predict(self, X, likelihood_args=(), nsamples=100):
 
-        \mathbb{E}[y^*] = \int g(\mathbf{w}^T \boldsymbol\phi^{*})
-            p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
+        Ey, _, _, _ = self.predict_moments(X, likelihood_args, nsamples)
 
-        \mathbb{V}[y^*] = \int \left(g(\mathbf{w}^T \boldsymbol\phi^{*})
-            - \mathbb{E}[y^*]\right)^2
-            p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
+        return Ey
 
-    where :math:`g(\cdot)` is the activation (inverse link) link function used
-    by the GLM, and :math:`p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi)` is the
-    posterior distribution over weights (from :code:`learn`). Here are few
-    concrete examples of how we can use these values,
+    def predict_moments(self, X, likelihood_args=(), nsamples=100):
+        r"""
+        Predictive moments, in particular mean and variance, of a Bayesian GLM.
 
-    - Gaussian likelihood: these are just the predicted mean and variance, see
-      :code:`revrand.regression.predict`
-    - Bernoulli likelihood: The expected value is the probability, :math:`p(y^*
-      = 1)`, i.e. the probability of class one. The variance may not be so
-      useful.
-    - Poisson likelihood: The expected value is similar conceptually to the
-      Gaussian case, and is also a *continuous* value. The median (50%
-      quantile) from :code:`predict_interval` is a discrete value. Again, the
-      variance in this instance may not be so useful.
+        This function uses Monte-Carlo sampling to evaluate the predictive mean
+        and variance of a Bayesian GLM. The exact expressions evaluated are,
 
-    Parameters
-    ----------
-    Xs: ndarray
-        (Ns,d) array query input dataset (Ns samples, D dimensions).
-    likelihood: Object
-        A likelihood object, see the likelihoods module.
-    basis: Basis
-        A basis object, see the basis_functions module.
-    m: ndarray
-        (D,) array of regression weights (posterior).
-    C: ndarray
-        (D,) or (D, D) array of regression weight covariances (posterior).
-    likelihood_hypers: sequence
-        a sequence of parameters for the likelihood object, e.g. the
-        likelihoods.Gaussian object takes a variance parameter, so this should
-        be :code:`[var]`.
-    basis_hypers: sequence
-        A sequence of hyperparameters of the basis object.
-    likelihood_args: sequence, optional
-        sequence of arguments to pass to the likelihood function. These are
-        non-learnable parameters. They can be scalars or arrays of length Ns.
-    nsamples: int, optional
-        The number of samples to draw from the posterior in order to
-        approximate the predictive mean and variance.
+        .. math ::
 
-    Returns
-    -------
-    Ey: ndarray
-        The expected value of ys for the query inputs, Xs of shape (Ns,).
-    Vy: ndarray
-        The expected variance of ys (excluding likelihood noise terms) for the
-        query inputs, Xs of shape (Ns,).
-    Ey_min: ndarray
-        The minimum sampled values of the predicted mean (same shape as Ey)
-    Ey_max: ndarray
-        The maximum sampled values of the predicted mean (same shape as Ey)
-    """
+            \mathbb{E}[y^*] = \int g(\mathbf{w}^T \boldsymbol\phi^{*})
+                p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
 
-    # Get latent function samples
-    N = Xs.shape[0]
-    ys = np.empty((N, nsamples))
-    fsamples = sample_func(Xs, basis, m, C, basis_hypers, nsamples)
+            \mathbb{V}[y^*] = \int \left(g(\mathbf{w}^T \boldsymbol\phi^{*})
+                - \mathbb{E}[y^*]\right)^2
+                p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
 
-    # Push samples though likelihood expected value
-    for i, f in enumerate(fsamples):
-        ys[:, i] = likelihood.Ey(f, *chain(likelihood_hypers, likelihood_args))
+        where :math:`g(\cdot)` is the activation (inverse link) link function
+        used by the GLM, and :math:`p(\mathbf{w} | \mathbf{y},
+        \boldsymbol\Phi)` is the posterior distribution over weights (from
+        :code:`learn`). Here are few concrete examples of how we can use these
+        values,
 
-    # Average transformed samples (MC integration)
-    Ey = ys.mean(axis=1)
-    Vy = ((ys - Ey[:, np.newaxis])**2).sum(axis=1) / nsamples
-    Ey_min = ys.min(axis=1)
-    Ey_max = ys.max(axis=1)
+        - Gaussian likelihood: these are just the predicted mean and variance,
+          see :code:`revrand.regression.predict`
+        - Bernoulli likelihood: The expected value is the probability,
+          :math:`p(y^* = 1)`, i.e. the probability of class one. The variance
+          may not be so useful.
+        - Poisson likelihood: The expected value is similar conceptually to the
+          Gaussian case, and is also a *continuous* value. The median (50%
+          quantile) from :code:`predict_interval` is a discrete value. Again,
+          the variance in this instance may not be so useful.
 
-    return Ey, Vy, Ey_min, Ey_max
+        Parameters
+        ----------
+        X: ndarray
+            (N,d) array query input dataset (Ns samples, D dimensions).
+        likelihood_args: sequence, optional
+            sequence of arguments to pass to the likelihood function. These are
+            non-learnable parameters. They can be scalars or arrays of length
+            N.
+        nsamples: int, optional
+            The number of samples to draw from the posterior in order to
+            approximate the predictive mean and variance.
+
+        Returns
+        -------
+        Ey: ndarray
+            The expected value of ys for the query inputs, Xs of shape (Ns,).
+        Vy: ndarray
+            The expected variance of ys (excluding likelihood noise terms) for
+            the query inputs, Xs of shape (Ns,).
+        Ey_min: ndarray
+            The minimum sampled values of the predicted mean (same shape as Ey)
+        Ey_max: ndarray
+            The maximum sampled values of the predicted mean (same shape as Ey)
+        """
+
+        check_is_fitted(self, ['weights', 'covariance', 'basis_hypers',
+                               'likelihood_hypers'])
+
+        # Get latent function samples
+        N = X.shape[0]
+        ys = np.empty((N, nsamples))
+        fsamples = sample_func(X, self.basis, self.weights, self.covariance,
+                               self.basis_hypers, nsamples)
+
+        # Push samples though likelihood expected value
+        for i, f in enumerate(fsamples):
+            ys[:, i] = self.likelihood.Ey(f, *chain(self.likelihood_hypers,
+                                                    likelihood_args))
+
+        # Average transformed samples (MC integration)
+        Ey = ys.mean(axis=1)
+        Vy = ((ys - Ey[:, np.newaxis])**2).sum(axis=1) / nsamples
+        Ey_min = ys.min(axis=1)
+        Ey_max = ys.max(axis=1)
+
+        return Ey, Vy, Ey_min, Ey_max
 
 
 def predict_logpdf(ys, Xs, likelihood, basis, m, C, likelihood_hypers,

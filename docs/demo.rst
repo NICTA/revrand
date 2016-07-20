@@ -11,7 +11,7 @@ In this demo we compare various Gaussian process approximation methods provided
 by this library to a true Gaussian process at fitting a (noisy) random draw
 from a Gaussian process. 
 
-.. plot:: ../demos/demo_regression.py
+:download:`Regression notebook <../demos/Regression Demo.ipynb>`
 
 
 Generalised Linear Models
@@ -23,17 +23,7 @@ given noise from a non-Gaussian likelihood function. The noiseless transformed
 sample is then estimated using revrand's generlised linear model (which is a
 modification of the GLM presented in [3]_).
 
-.. plot:: ../demos/demo_glm.py
-
-
-Learning the SARCOS robot arm dynamics
-......................................
-
-Here we run a large scale Gaussian process approximation algorithm on the
-SARCOS robot arm dataset from [1]_. We compare against a Gaussian process only
-using a random subset of data.
-
-(:download:`Source code <../demos/demo_sarcos.py>`)
+:download:`GLM notebook <../demos/GLM Demo.ipynb>`
 
 
 Classification
