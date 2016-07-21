@@ -5,7 +5,7 @@ from itertools import chain
 import numpy as np
 from scipy.optimize import OptimizeResult
 
-from ..utils import issequence, check_random_state
+from ..utils import issequence, endless_permutations
 
 
 #
@@ -322,7 +322,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
         if len(bounds) != D:
             raise ValueError("The dimension of the bounds does not match x0!")
 
-        lower, upper = zip(*map(_normalize_bound, bounds))
+        lower, upper = zip(*map(normalize_bound, bounds))
         lower = np.array(lower)
         upper = np.array(upper)
 
@@ -330,7 +330,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     objs = []
     norms = []
 
-    for ind in _sgd_iter(maxiter, N, batch_size):
+    for ind in sgd_iter(maxiter, N, batch_size):
 
         if not eval_obj:
             grad = fun(x, *chain(_split_data(data, ind), args))
@@ -366,6 +366,67 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     return res
 
 
+def sgd_iter(maxiter, N, batch_size, random_state=None):
+    """
+    Batch index generator for SGD that will yeild random batches for a
+    a defined number of iterations. This calls _sgd_pass until the required
+    number of iterations have been reached.
+
+    Parameters
+    ----------
+    maxiter: int
+        The number of iterations
+    N: int
+        length of dataset.
+    batch_size: int
+        number of data points in each batch.
+    random_state: int or RandomState, optional
+        random seed
+
+    Yields
+    ------
+    ndarray:
+        of size (batch_size,) of random (int).
+    """
+
+    perms = endless_permutations(N, random_state)
+
+    for _ in range(maxiter):
+        yield np.array([next(perms) for _ in range(batch_size)])
+
+
+def normalize_bound(bound):
+    """
+    Examples
+    --------
+    >>> normalize_bound((2.6, 7.2))
+    (2.6, 7.2)
+
+    >>> normalize_bound((None, 7.2))
+    (-inf, 7.2)
+
+    >>> normalize_bound((2.6, None))
+    (2.6, inf)
+
+    >>> normalize_bound((None, None))
+    (-inf, inf)
+
+    This operation is idempotent:
+
+    >>> normalize_bound((-float("inf"), float("inf")))
+    (-inf, inf)
+    """
+    min_, max_ = bound
+
+    if min_ is None:
+        min_ = -float('inf')
+
+    if max_ is None:
+        max_ = float('inf')
+
+    return min_, max_
+
+
 #
 # Module Helpers
 #
@@ -389,75 +450,3 @@ def _split_data(data, ind):
         return (data[ind],)
 
     return [d[ind] for d in data]
-
-
-def _sgd_pass(N, batch_size, random_state=None):
-    """ Batch index generator for SGD that will yeild random batches for a
-        single pass through the whole dataset (i.e. a finitie sequence).
-
-        Arguments:
-            N, (int): length of dataset.
-            batch_size, (int): number of data points in each batch.
-
-        Yields:
-            array: of size (batch_size,) of random (int).
-    """
-    generator = check_random_state(random_state)
-    n_batches = -(-N // batch_size)  # ceiling
-    batch_inds = iter(np.array_split(generator.permutation(N), n_batches))
-    return batch_inds
-
-
-def _sgd_iter(maxiter, N, batch_size, random_state=None):
-    """ Batch index generator for SGD that will yeild random batches for a
-        a defined number of iterations. This calls _sgd_pass until the required
-        number of iterations have been reached.
-
-        Arguments:
-            maxiter, (int): The number of iterations
-            N, (int): length of dataset.
-            batch_size, (int): number of data points in each batch.
-
-        Yields:
-            array: of size (batch_size,) of random (int).
-    """
-
-    i = 0
-    while i < maxiter:
-        for ind in _sgd_pass(N, batch_size, random_state):
-            yield ind
-            i += 1
-            if i >= maxiter:
-                break
-
-
-def _normalize_bound(bound):
-    """
-    Examples
-    --------
-    >>> normalize_bound((2.6, 7.2)) # doctest: +SKIP
-    (2.6, 7.2)
-
-    >>> normalize_bound((None, 7.2)) # doctest: +SKIP
-    (-inf, 7.2)
-
-    >>> normalize_bound((2.6, None)) # doctest: +SKIP
-    (2.6, inf)
-
-    >>> normalize_bound((None, None)) # doctest: +SKIP
-    (-inf, inf)
-
-    This operation is idempotent:
-
-    >>> normalize_bound((-float("inf"), float("inf"))) # doctest: +SKIP
-    (-inf, inf)
-    """
-    min_, max_ = bound
-
-    if min_ is None:
-        min_ = -float('inf')
-
-    if max_ is None:
-        max_ = float('inf')
-
-    return min_, max_

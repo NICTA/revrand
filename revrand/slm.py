@@ -18,7 +18,7 @@ from functools import partial
 import numpy as np
 from scipy.optimize import minimize
 from sklearn.base import BaseEstimator, RegressorMixin
-from sklearn.utils.validation import check_is_fitted
+from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
 
 from .utils import append_or_extend
 from .mathfun.linalg import solve_posdef
@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 class StandardLinearModel(BaseEstimator, RegressorMixin):
     """
-    Standard linear model interface class.
+    Bayesian Standard linear model.
 
     Parameters
     ----------
@@ -57,8 +57,8 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                  ):
 
         self.basis = basis
-        self.var = var
-        self.regulariser = regulariser
+        self.var_init = var
+        self.regulariser_init = regulariser
         self.tol = tol
         self.maxiter = maxiter
 
@@ -98,15 +98,12 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         in your calling code.
         """
 
-        if y.ndim != 1:
-            raise ValueError("y has to be a 1-d array (single task)")
-        if X.ndim != 2:
-            raise ValueError("X has to be a 2-d array")
+        X, y = check_X_y(X, y)
 
         self.obj = -np.inf
 
         # Make list of parameters and decorate optimiser to undestand this
-        params = append_or_extend([self.var, self.regulariser],
+        params = append_or_extend([self.var_init, self.regulariser_init],
                                   self.basis.params)
         nmin = structured_minimizer(logtrick_minimizer(minimize))
 
@@ -136,7 +133,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
     def _elbo(self, X, y, var, reg, *hypers):
 
         # Get Basis
-        Phi = self.basis(X, *hypers)                      # N x D
+        Phi = self.basis.transform(X, *hypers)  # N x D
         PhiPhi = Phi.T.dot(Phi)
         N, D = Phi.shape
 
@@ -206,11 +203,11 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             (N_star,).
         """
 
-        Ey, _, _ = self.predict_proba(X)
+        Ey, _, _ = self.predict_moments(X)
 
         return Ey
 
-    def predict_proba(self, X):
+    def predict_moments(self, X):
         """
         Full predictive distribution from Bayesian linear regression.
 
@@ -232,9 +229,11 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             shape (N_star,).
         """
 
-        check_is_fitted(self, ['weights', 'covariance', 'hypers'])
+        check_is_fitted(self, ['var', 'regulariser', 'weights', 'covariance',
+                               'hypers'])
+        X = check_array(X)
 
-        Phi = self.basis(X, *self.hypers)
+        Phi = self.basis.transform(X, *self.hypers)
         Ey = Phi.dot(self.weights)
         Vf = (Phi.dot(self.covariance) * Phi).sum(axis=1)
 

@@ -1,21 +1,31 @@
 import numpy as np
 import numbers
 
+from sklearn.utils.validation import check_random_state
 
-def check_random_state(seed):
-    """
-    Turn seed into a np.random.RandomState instance
-    If seed is None, return the RandomState singleton used by np.random.
-    If seed is an int, return a new RandomState instance seeded with seed.
-    If seed is already a RandomState instance, return it.
-    Otherwise raise ValueError.
-    """
-    if seed is None or seed is np.random:
-        return np.random.mtrand._rand
-    if isinstance(seed, (numbers.Integral, np.integer)):
-        return np.random.RandomState(seed)
-    if isinstance(seed, np.random.RandomState):
-        return seed
-    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
-                     ' instance' % seed)
 
+def endless_permutations(N, random_state=None):
+    """
+    Generate an endless sequence of random integers from permutations of the
+    set [0, ..., N).
+
+    If we call this N times, we will sweep through the entire set without
+    replacement, on the (N+1)th call a new permutation will be created, etc.
+
+    Parameters
+    ----------
+    N: int
+        the length of the set
+    random_state: int or RandomState, optional
+        random seed
+
+    Yields
+    ------
+    int:
+        a random int from the set [0, ..., N)
+    """
+    generator = check_random_state(random_state)
+    while True:
+        batch_inds = generator.permutation(N)
+        for b in batch_inds:
+            yield b

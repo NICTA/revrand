@@ -7,6 +7,7 @@ from __future__ import division
 
 import sys
 import inspect
+
 import numpy as np
 from six import wraps
 from decorator import decorator  # Preserves function signature (pyth2 compat)
@@ -72,7 +73,7 @@ def slice_init(func):
 
     >>> X = np.ones((100, 20))
     >>> base = LinearBasis(onescol=False, apply_ind=slice(0, 10))
-    >>> base(X).shape
+    >>> base.transform(X).shape
     (100, 10)
     """
 
@@ -90,11 +91,11 @@ def slice_init(func):
 
 
 @decorator  # This needs to be signature preserving for concatenation
-def slice_call(func, self, X, *vargs, **kwargs):
+def slice_transform(func, self, X, *vargs, **kwargs):
     """
     Decorator for implementing partial application.
 
-    This must decorate the :code:`__call__` and :code:`grad` methods of basis
+    This must decorate the :code:`transform` and :code:`grad` methods of basis
     objects if the :code:`slice_init` decorator was used.
     """
 
@@ -116,7 +117,7 @@ def apply_grad(fun, grad):
     >>> N, d = X.shape
     >>> base = RandomRBF(Xdim=d, nbases=5) + RandomRBF(Xdim=d, nbases=5,
     ... lenscale_init=Parameter(np.ones(d), Positive()))
-    >>> Phi = base(X, 1., np.ones(d))
+    >>> Phi = base.transform(X, 1., np.ones(d))
     >>> dffun = lambda dPhi: y.dot(Phi).dot(dPhi.T).dot(y)
     >>> df = apply_grad(dffun, base.grad(X, 1., np.ones(d)))
     >>> np.isscalar(df[0])
@@ -195,7 +196,7 @@ class Basis(object):
 
         All the :code:`params` property does is inform algorithms of the
         intitial value and any bounds this basis object has. This will need to
-        correspond to any parameters input into the :code:`__call__` and
+        correspond to any parameters input into the :code:`transform` and
         :code:`grad` methods. All basis class objects MUST have a
         :code:`params` property, which is either:
 
@@ -206,8 +207,8 @@ class Basis(object):
         """
         pass
 
-    @slice_call
-    def __call__(self, X):
+    @slice_transform
+    def transform(self, X):
         """
         Return the basis function applied to X, i.e. Phi(X, params), where
         params can also optionally be used and learned.
@@ -227,7 +228,7 @@ class Basis(object):
         """
         return X
 
-    @slice_call
+    @slice_transform
     def grad(self, X):
         """
         Return the gradient of the basis function w.r.t.\ each of the
@@ -252,11 +253,11 @@ class Basis(object):
         """
         return []
 
-    def _call_popargs(self, X, *args):
+    def _transform_popargs(self, X, *args):
 
-        selfargs, otherargs = self._splitargs(args, self.__call__, offset=1)
+        selfargs, otherargs = self._splitargs(args, self.transform, offset=1)
 
-        return self.__call__(X, *selfargs), otherargs
+        return self.transform(X, *selfargs), otherargs
 
     def _grad_popargs(self, X, *args):
 
@@ -308,8 +309,8 @@ class BiasBasis(Basis):
 
         self.offset = offset
 
-    @slice_call
-    def __call__(self, X):
+    @slice_transform
+    def transform(self, X):
         """
         Return this basis applied to X.
 
@@ -344,8 +345,8 @@ class LinearBasis(Basis):
 
         self.onescol = onescol
 
-    @slice_call
-    def __call__(self, X):
+    @slice_transform
+    def transform(self, X):
         """
         Return this basis applied to X.
 
@@ -390,8 +391,8 @@ class PolynomialBasis(Basis):
 
         self.include_bias = include_bias
 
-    @slice_call
-    def __call__(self, X):
+    @slice_transform
+    def transform(self, X):
         """
         Return this basis applied to X.
 
@@ -456,8 +457,8 @@ class RadialBasis(Basis):
         self.C = centres
         self._init_lenscale(lenscale_init)
 
-    @slice_call
-    def __call__(self, X, lenscale):
+    @slice_transform
+    def transform(self, X, lenscale):
         """
         Apply the RBF to X.
 
@@ -482,7 +483,7 @@ class RadialBasis(Basis):
         den = (2 * lenscale**2)
         return np.exp(- cdist(X / den, self.C / den, 'sqeuclidean'))
 
-    @slice_call
+    @slice_transform
     def grad(self, X, lenscale):
         """
         Get the gradients of this basis w.r.t.\ the length scale.
@@ -506,7 +507,7 @@ class RadialBasis(Basis):
         N, d = X.shape
         lenscale = self._checkdim(d, lenscale)
 
-        Phi = self(X, lenscale)
+        Phi = self.transform(X, lenscale)
         dPhi = []
         for i, l in enumerate(lenscale):
             ldist = cdist(X[:, [i]] / l**3, self.C[:, [i]] / l**3,
@@ -555,8 +556,8 @@ class SigmoidalBasis(RadialBasis):
         optimization
     """
 
-    @slice_call
-    def __call__(self, X, lenscale):
+    @slice_transform
+    def transform(self, X, lenscale):
         r"""
         Apply the sigmoid basis function to X.
 
@@ -589,7 +590,7 @@ class SigmoidalBasis(RadialBasis):
 
         return expit(cdist(X / lenscale, self.C / lenscale, 'euclidean'))
 
-    @slice_call
+    @slice_transform
     def grad(self, X, lenscale):
         r"""
         Get the gradients of this basis w.r.t.\ the length scale.
@@ -620,7 +621,7 @@ class SigmoidalBasis(RadialBasis):
         N, d = X.shape
         lenscale = self._checkdim(d, lenscale)
 
-        Phi = self(X, lenscale)
+        Phi = self.transform(X, lenscale)
         dPhi = []
         for i, l in enumerate(lenscale):
             ldist = cdist(X[:, [i]] / l**2, self.C[:, [i]] / l**2, 'euclidean')
@@ -659,8 +660,8 @@ class RandomRBF(RadialBasis):
         self.W = self._weightsamples()
         self._init_lenscale(lenscale_init)
 
-    @slice_call
-    def __call__(self, X, lenscale):
+    @slice_transform
+    def transform(self, X, lenscale):
         """
         Apply the random RBF to X.
 
@@ -687,7 +688,7 @@ class RandomRBF(RadialBasis):
 
         return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
 
-    @slice_call
+    @slice_transform
     def grad(self, X, lenscale):
         r"""
         Get the gradients of this basis w.r.t.\ the length scales.
@@ -887,8 +888,8 @@ class FastFoodRBF(RandomRBF):
         self._init_lenscale(lenscale_init)
         self._init_matrices()
 
-    @slice_call
-    def __call__(self, X, lenscale):
+    @slice_transform
+    def transform(self, X, lenscale):
         """
         Apply the Fast Food RBF basis to X.
 
@@ -914,7 +915,7 @@ class FastFoodRBF(RandomRBF):
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
         return Phi
 
-    @slice_call
+    @slice_transform
     def grad(self, X, lenscale):
         """
         Get the gradients of this basis w.r.t.\ the length scale.
@@ -1032,8 +1033,8 @@ class FastFoodGM(FastFoodRBF):
                        self._init_param(lenscale_init)]
         self._init_matrices()
 
-    @slice_call
-    def __call__(self, X, mean, lenscale):
+    @slice_transform
+    def transform(self, X, mean, lenscale):
         """
         Apply the spectral mixture component basis to X.
 
@@ -1065,7 +1066,7 @@ class FastFoodGM(FastFoodRBF):
 
         return Phi
 
-    @slice_call
+    @slice_transform
     def grad(self, X, mean, lenscale):
         """
         Get the gradients of this basis w.r.t.\ the frequency mean and length
@@ -1221,13 +1222,13 @@ class BasisCat(object):
 
         self.bases = basis_list
 
-    def __call__(self, X, *params):
+    def transform(self, X, *params):
 
         Phi = []
         args = params
 
         for base in self.bases:
-            phi, args = base._call_popargs(X, *args)
+            phi, args = base._transform_popargs(X, *args)
             Phi.append(phi)
 
         return np.hstack(Phi)
@@ -1236,7 +1237,7 @@ class BasisCat(object):
 
         # Establish a few dimensions
         N = X.shape[0]
-        D = self(X[[0], :], *params).shape[1]
+        D = self.transform(X[[0], :], *params).shape[1]
 
         # Get all gradients
         args = list(params)
@@ -1254,7 +1255,7 @@ class BasisCat(object):
                 grads.extend([(i, gg) for gg in g])
 
             # Get the basis dimensionality for padding later
-            baseD = base(X[[0], :], *sargs).shape[1]
+            baseD = base.transform(X[[0], :], *sargs).shape[1]
             dims.append(baseD)
 
         # Padding indices

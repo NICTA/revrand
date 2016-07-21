@@ -4,6 +4,8 @@ import numpy as np
 from operator import add
 from functools import reduce
 
+from sklearn.pipeline import Pipeline
+
 import revrand.basis_functions as bs
 from revrand.btypes import Parameter, Positive, Bound
 from revrand.utils import issequence
@@ -15,19 +17,19 @@ def test_simple_concat(make_gaus_data):
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False) + bs.LinearBasis(onescol=False)
-    P = base(X)
+    P = base.transform(X)
 
     assert np.allclose(P, np.hstack((X, X)))
 
     base += bs.RadialBasis(centres=X)
-    P = base(X, 1.)
+    P = base.transform(X, 1.)
 
     assert P.shape == (N, d * 2 + N)
 
     D = 200
     base += bs.RandomRBF(nbases=D, Xdim=d,
                          lenscale_init=Parameter(np.ones(d), Positive()))
-    P = base(X, 1., np.ones(d))
+    P = base.transform(X, 1., np.ones(d))
 
     assert P.shape == (N, (D + d) * 2 + N)
 
@@ -73,21 +75,21 @@ def test_apply_grad(make_gaus_data):
     assert len(bs.apply_grad(obj, base.grad(X))) == 0
 
     base = bs.RadialBasis(centres=X)
-    obj = lambda dPhi: fun(base(X, 1.), dPhi)
+    obj = lambda dPhi: fun(base.transform(X, 1.), dPhi)
 
     assert np.isscalar(bs.apply_grad(obj, base.grad(X, 1.)))
 
     D = 200
     base = bs.RandomRBF(nbases=D, Xdim=d,
                         lenscale_init=Parameter(np.ones(d), Positive()))
-    obj = lambda dPhi: fun(base(X, np.ones(d)), dPhi)
+    obj = lambda dPhi: fun(base.transform(X, np.ones(d)), dPhi)
 
     assert bs.apply_grad(obj, base.grad(X, np.ones(d))).shape == (d,)
 
     base = bs.LinearBasis(onescol=False) + bs.RadialBasis(centres=X) \
         + bs.RandomRBF(nbases=D, Xdim=d,
                        lenscale_init=Parameter(np.ones(d), Positive()))
-    obj = lambda dPhi: fun(base(X, 1., np.ones(d)), dPhi)
+    obj = lambda dPhi: fun(base.transform(X, 1., np.ones(d)), dPhi)
 
     gs = bs.apply_grad(obj, base.grad(X, 1., np.ones(d)))
     assert np.isscalar(gs[0])
@@ -138,7 +140,7 @@ def test_bases(make_gaus_data):
               ]
 
     for b, h in zip(bases, hypers):
-        P = b(X, *h)
+        P = b.transform(X, *h)
         dP = b.grad(X, *h)
 
         assert P.shape[0] == N
@@ -153,7 +155,7 @@ def test_bases(make_gaus_data):
     hyps = []
     for h in hypers:
         hyps.extend(list(h))
-    P = bcat(X, *hyps)
+    P = bcat.transform(X, *hyps)
     dP = bcat.grad(X, *hyps)
 
     assert P.shape[0] == N
@@ -177,7 +179,7 @@ def test_slicing(make_gaus_data):
                        lenscale_init=Parameter(np.ones(2), Positive()),
                        apply_ind=[1, 0])
 
-    P = base(X, 1., np.ones(d))
+    P = base.transform(X, 1., np.ones(d))
     assert P.shape == (N, 9)
 
     dP = base.grad(X, 1., np.ones(d))
