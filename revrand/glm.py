@@ -106,7 +106,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     def __init__(self,
                  likelihood,
                  basis,
-                 regulariser=Parameter(1., Positive()),
+                 regulariser=Parameter(10., Positive()),
                  postcomp=10,
                  maxiter=3000,
                  tol=1e-8,
@@ -164,8 +164,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.B = N / self.batch_size
 
         # Intialise weights and covariances
-        self.weights = (np.random.randn(D, K) + np.random.randn(K)) \
-            * self.regulariser_init.value
+        self.weights = np.random.randn(D, K) + np.random.randn(K)
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, K))
 
         # Pack params

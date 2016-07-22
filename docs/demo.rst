@@ -11,7 +11,7 @@ In this demo we compare various Gaussian process approximation methods provided
 by this library to a true Gaussian process at fitting a (noisy) random draw
 from a Gaussian process. 
 
-:download:`Regression notebook <../demos/Regression Demo.ipynb>`
+`Regression notebook <https://github.com/NICTA/revrand/blob/master/demos/regression_demo.ipynb>`_
 
 
 Generalised Linear Models
@@ -23,7 +23,7 @@ given noise from a non-Gaussian likelihood function. The noiseless transformed
 sample is then estimated using revrand's generlised linear model (which is a
 modification of the GLM presented in [3]_).
 
-:download:`GLM notebook <../demos/GLM Demo.ipynb>`
+`GLM notebook <https://github.com/NICTA/revrand/blob/master/demos/glm_demo.ipynb>`_
 
 
 Classification
@@ -34,17 +34,15 @@ Classify `3` and `5` from the USPS digits dataset
 .................................................
 
 In this demo the GLM with a Bernoulli likelihood is compared against a logistic
-classifier from `scikit learn
-<http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_
-for classifying digits `3` and `5` from the USPS handwritten digits experiment
-used in [1]_.
+classifier from `scikit learn <http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_
+for classifying digits `3` and `5` from the USPS handwritten digits experiment used in [1]_.
 
-(:download:`Source code <../demos/demo_classification.py>`)
+`Binary classification notebook <https://github.com/NICTA/revrand/blob/master/demos/classification_demo.ipynb>`_
 
 
 
-Stochastic Gradient Descent
----------------------------
+Stochastic Gradients
+--------------------
 
 In this demo we fit radial basis functions to a sine wave using a 
 sum of squares objective. We compare three methods of solving for the radial
@@ -52,11 +50,11 @@ basis function weights,
 
 - Linear solve (analytic solution)
 - L-BFGS
-- Stochastic gradient descent (ADADELTA [2]_).
+- Stochastic gradient (ADADELTA [2]_ and more).
 
 We also plot the results of each iteration of stochasistic gradient descent.
 
-.. plot:: ../demos/demo_sgd.py
+`Stochastic gradients notebook <https://github.com/NICTA/revrand/blob/master/demos/classification_demo.ipynb>`_
 
 
 References
