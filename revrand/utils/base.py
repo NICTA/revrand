@@ -239,17 +239,21 @@ def nwise(iterable, n):
     return zip(*iters)
 
 
-def flatten2(arys, order='C', returns_shapes=True):
+def flatten2(arys, returns_shapes=True):
 
-    flat = partial(flatten2, order=order)
+    # TODO: make this work with multiple types!
+    # I.e using multiple dispatch.
+    # dispatch = {np.ndarray: np.flatten,
+    #             Parameter: flatten_bounds,
+    #             ...}
 
     if issequence(arys):
 
-        flat_arys, shapes = zip(*map(flat, arys))
+        flat_arys, shapes = zip(*map(flatten2, arys))
         flat_ary = np.hstack(flat_arys)
 
     else:
-        flat_ary = np.ravel(arys, order=order)
+        flat_ary = np.ravel(arys)
         shapes = np.shape(arys)
 
 
