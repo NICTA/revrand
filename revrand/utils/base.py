@@ -238,7 +238,22 @@ def nwise(iterable, n):
             next(it, None)
     return zip(*iters)
 
-pairwise = partial(nwise, n=2)
+
+def flatten2(arys, order='C', returns_shapes=True):
+
+    flat = partial(flatten2, order=order)
+
+    if issequence(arys):
+
+        flat_arys, shapes = zip(*map(flat, arys))
+        flat_ary = np.hstack(flat_arys)
+
+    else:
+        flat_ary = np.ravel(arys, order=order)
+        shapes = np.shape(arys)
+
+
+    return (flat_ary, shapes) if returns_shapes else flat_ary
 
 
 def flatten(arys, order='C', returns_shapes=True):

@@ -597,6 +597,12 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         return fs
 
 
+# For US spelling
+class GeneralizedLinearModel(GeneralisedLinearModel):
+
+    pass
+
+
 #
 #  Internal Module Utilities
 #

@@ -288,7 +288,7 @@ def structured_minimizer(minimizer):
 
         array1d, shapes = flatten(get_values(parameters))
         fbounds = flatten_bounds(parameters)
-        flatten_args_dec = _flatten_args(shapes)
+        flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
 
@@ -297,7 +297,7 @@ def structured_minimizer(minimizer):
         else:
             new_jac = jac
             if bool(jac):
-                new_fun = _flatten_func_grad(new_fun)
+                new_fun = flatten_func_grad(new_fun)
 
         result = minimizer(new_fun, array1d, jac=new_jac, bounds=fbounds,
                            **minimizer_kwargs)
@@ -361,12 +361,12 @@ def structured_sgd(sgd):
 
         array1d, shapes = flatten(get_values(parameters))
         fbounds = flatten_bounds(parameters)
-        flatten_args_dec = _flatten_args(shapes)
+        flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
 
         if bool(eval_obj):
-            new_fun = _flatten_func_grad(new_fun)
+            new_fun = flatten_func_grad(new_fun)
         else:
             new_fun = flatten(new_fun, returns_shapes=False)
 
@@ -426,7 +426,7 @@ def logtrick_minimizer(minimizer):
             return minimizer(fun, x0, jac=jac, bounds=bounds,
                              **minimizer_kwargs)
 
-        logx, expx, gradx, bounds = _logtrick_gen(bounds)
+        logx, expx, gradx, bounds = logtrick_gen(bounds)
 
         # Intercept gradient
         if callable(jac):
@@ -512,7 +512,7 @@ def logtrick_sgd(sgd):
             return sgd(fun, x0, data, bounds=bounds, eval_obj=eval_obj,
                        **sgd_kwargs)
 
-        logx, expx, gradx, bounds = _logtrick_gen(bounds)
+        logx, expx, gradx, bounds = logtrick_gen(bounds)
 
         if bool(eval_obj):
             def new_fun(x, *fargs, **fkwargs):
@@ -535,7 +535,7 @@ def logtrick_sgd(sgd):
 # Helper functions
 #
 
-def _logtrick_gen(bounds):
+def logtrick_gen(bounds):
 
     # Test which parameters we can apply the log trick too
     ispos = [(type(b) is Positive) for b in bounds]
@@ -556,7 +556,7 @@ def _logtrick_gen(bounds):
     return logx, expx, gradx, bounds
 
 
-def _flatten_func_grad(func):
+def flatten_func_grad(func):
     """
     Examples
     --------
@@ -580,7 +580,7 @@ def _flatten_func_grad(func):
     >>> np.isclose(grad_lambda, 0.15)
     True
 
-    >>> cost_new = _flatten_func_grad(cost)
+    >>> cost_new = flatten_func_grad(cost)
     >>> val_new, grad_new = cost_new(np.array([.5, .1, -.2]), .25)
     >>> val == val_new
     True
@@ -595,11 +595,11 @@ def _flatten_func_grad(func):
     return new_func
 
 
-def _flatten_args(shapes, order='C'):
+def flatten_args(shapes, order='C'):
     """
     Examples
     --------
-    >>> @_flatten_args([(5,), ()])
+    >>> @flatten_args([(5,), ()])
     ... def f(w, lambda_):
     ...     return .5 * lambda_ * w.T.dot(w)
     >>> np.isclose(f(np.array([2., .5, .6, -.2, .9, .2])), .546)
@@ -611,13 +611,13 @@ def _flatten_args(shapes, order='C'):
 
     Some other curious applications
     >>> from operator import mul
-    >>> flatten_args_dec = _flatten_args([(), (3,)])
+    >>> flatten_args_dec = flatten_args([(), (3,)])
     >>> func = flatten_args_dec(mul)
     >>> func(np.array([3.1, .6, 1.71, -1.2]))
     array([ 1.86 ,  5.301, -3.72 ])
     >>> 3.1 * np.array([.6, 1.71, -1.2])
     array([ 1.86 ,  5.301, -3.72 ])
-    >>> flatten_args_dec = _flatten_args([(9,), (15,)])
+    >>> flatten_args_dec = flatten_args([(9,), (15,)])
     >>> func = flatten_args_dec(np.meshgrid)
     >>> x, y = func(np.arange(-5, 7, .5)) # 7 - (-5) / 0.5 = 24 = 9 + 15
     >>> x.shape
