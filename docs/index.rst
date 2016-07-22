@@ -21,7 +21,6 @@ Contents:
    optimize
    utils
    mathfun
-   skl
    demo
 
    dev/index.rst

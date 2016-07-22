@@ -26,6 +26,8 @@ regression) and generalised linear models. A few features of this library are:
   presented in [4]_.
 - Large scale learning using stochastic gradient descent (Adam, AdaDelta and 
   more).
+- Scikit Learn compatibility, i.e. usable with `pipelines
+    <http://scikit-learn.org/stable/modules/pipeline.html>`_.
 
 
 Quickstart
@@ -72,8 +74,8 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
 
     import matplotlib.pyplot as pl
     import numpy as np
+    from revrand import StandardLinearModel
     from revrand.basis_functions import LinearBasis, RandomRBF
-    from revrand.slm import learn, predict
     from revrand.btypes import Parameter, Positive
 
     ...
@@ -84,8 +86,9 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
         + RandomRBF(nbases=300, Xdim=X.shape[1], init_lenscale)
 
     # Learn regression parameters and predict
-    params = slm.learn(X, y, basis)
-    Eys, Vfs, Vys = slm.predict(Xs, basis, *params) 
+    slm = StandardLinearModel(basis)
+    slm.fit(X, y)
+    Eys, Vfs, Vys = slm.predict_moments(Xs)
 
     # Training/Truth
     pl.plot(X, y, 'k.', label='Training')
@@ -123,8 +126,8 @@ associated with the prediction.
 
     import matplotlib.pyplot as pl
     import numpy as np
+    from revrand import GeneralisedLinearModel
     from revrand.basis_functions import RandomRBF
-    from revrand.glm import learn, predict_moments, predict_interval
 
     ...
     
@@ -136,9 +139,10 @@ associated with the prediction.
     llhood = likelihoods.Poisson(tranfcn='exp')  # log link
 
     # Learn regression parameters and predict
-    params = learn(X, y, llhood, basis)
-    Eys, _, _, _ = predict_moments(Xs, llhood, basis, *params) 
-    y95n, y95x = predict_interval(0.95, Xs, llhood, basis, *params)
+    glm = GeneralisedLinearModel(llhood, basis)
+    glm.fit(X, y)
+    Eys, _, _, _ = glm.predict_moments(Xs)
+    y95n, y95x = glm.predict_interval(0.95, Xs)
 
     # Training/Truth
     pl.plot(X, y, 'k.', label='Training')
@@ -176,7 +180,7 @@ instance, if we modify the Bayesian linear regression example from before,
 
     ...
 
-    from revrand import glm, likelihoods
+    from revrand import likelihoods
 
     ...
 
@@ -184,12 +188,14 @@ instance, if we modify the Bayesian linear regression example from before,
     llhood = likelihoods.Gaussian(var_init=Parameter(1., Positive()))
 
     # Learn regression parameters and predict
-    params = glm.learn(X, y, llhood, basis)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest, llhood, base, *params)
+    glm = GeneralisedLinearModel(llhood, basis)
+    glm.fit(X, y)
+    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest)
 
     ...
 
     # Plot GLM SGD Regressor
+    Vy_g = Vf_g + glm.like_hypers[0]
     Sy_g = np.sqrt(Vy_g)
     pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
     pl.fill_between(Xs, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
@@ -221,7 +227,7 @@ examples, i.e. concatenation of basis functions,
     >>> N, d = X.shape
     >>> base = LinearBasis(onescol=True) + RandomRBF(Xdim=d, nbases=100)
     >>> lenscale = 1.
-    >>> Phi = base(X, lenscale)
+    >>> Phi = base.transform(X, lenscale)
     >>> Phi.shape
     (100, 206)
 
@@ -244,7 +250,7 @@ We can also use *partial application* of basis functions, e.g.
 
     >>> base = LinearBasis(onescol=True, apply_ind=slice(0, 2)) \
         + RandomRBF(Xdim=d, nbases=100, apply_ind=slice(2, 5))
-    >>> Phi = base(X, lenscale)
+    >>> Phi = base.transform(X, lenscale)
     >>> Phi.shape
     (100, 203)
 
@@ -258,17 +264,6 @@ really in the above example ``lenscale = 1.`` is just an initial value for
 the kernel function length-scale!
 
 
-Scikit Learn Interface and Pipeline Compatibility
-.................................................
-
-We also provide the ability to use the standard and generalised linear models,
-and our basis function objects with Scikit Learn pipelines. Have a look at the
-``revrand.skl`` module for the compatible interfaces. You can also use these
-interfaces if you prefer the Scikit Learn class paradigm (fit, predict,
-transform etc methods), instead of our function-based paradigm (learn, predict
-functions).
-
-
 Useful Links
 ------------
 
@@ -280,6 +275,7 @@ Documentation
 
 Issue tracking
     https://github.com/nicta/revrand/issues
+
 
 Bugs & Feedback
 ---------------
@@ -302,6 +298,7 @@ References
    machines." Advances in neural information processing systems. 2007. 
 .. [4] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
    inference". arXiv preprint arXiv:1206.4665 (2012).
+
 
 Copyright & License
 -------------------

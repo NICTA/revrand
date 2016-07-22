@@ -607,12 +607,12 @@ class Poisson(Bernoulli):
             likelihood.
         """
 
-        g = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
-        logg = np.log(g)
-        if not np.isscalar(logg):
-            logg[np.isinf(logg)] = LOGTINY
+        if self.tranfcn == 'exp':
+            g = np.exp(f)
+            logg = f
         else:
-            logg = LOGTINY if np.isinf(logg) else logg
+            g = softplus(f)
+            logg = np.log(g)
         return y * logg - g - gammaln(y + 1)
 
     def Ey(self, f):
