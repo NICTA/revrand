@@ -1,13 +1,15 @@
-""" Bound types and bounded parameter types. """
+"""Bound types and bounded parameter types."""
 
 import numpy as np
 from collections import namedtuple
+from itertools import chain
 
 
 class Bound(namedtuple('Bound', ['lower', 'upper'])):
     """
-    Define bounds on a variable for the optimiser. This defaults to all
-    real values allowed (i.e. no bounds).
+    Define bounds on a variable for the optimiser.
+
+    This defaults to all real values allowed (i.e. no bounds).
 
     Parameters
     ----------
@@ -56,7 +58,7 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
         return super(Bound, cls).__new__(cls, lower, upper)
 
     def __getnewargs__(self):
-        """Required for pickling!"""
+        """Required for pickling."""
         return (self.lower, self.upper)
 
     # TODO: Transformation details for optimiser (logistic/identity)
@@ -64,9 +66,10 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
 
 class Positive(namedtuple('Positive', ['lower', 'upper'])):
     """
-    Define a positive only bound for the optimiser. This may induce the
-    'log trick' in the optimiser (when using an appropriate decorator), which
-    will ignore the 'smallest' value (but will stay above 0).
+    Define a positive only bound for the optimiser.
+
+    This may induce the 'log trick' in the optimiser (when using an appropriate
+    decorator), which will ignore the 'smallest' value (but will stay above 0).
 
     Parameters
     ---------
@@ -84,22 +87,20 @@ class Positive(namedtuple('Positive', ['lower', 'upper'])):
     the lower bound for all instances of ``Positive`` are guaranteed to
     be positive.
     """
+
     def __new__(cls, upper=None):
 
         lower = 1e-14
         if upper is not None:
             if lower > upper:
                 raise ValueError('Upper bound must be greater than {}'
-                                 .format(lower))    
+                                 .format(lower))
 
         return super(Positive, cls).__new__(cls, lower=lower, upper=upper)
 
     def __getnewargs__(self):
-        """Required for pickling!"""
+        """Required for pickling."""
         return (self.upper,)
-
-
-    # TODO: Transformation details for optimiser (log)
 
 
 class Parameter(object):
@@ -121,12 +122,75 @@ class Parameter(object):
     def __init__(self, value, bounds=Bound()):
 
         self.value = value
-        self.shape = (1,) if np.isscalar(value) else value.shape
+        self.shape = np.shape(value)
         self.bounds = bounds
 
 
+def ravel(parameter):
+    """
+    Flatten a :code:`Parameter`.
+
+    Parameter
+    --------
+    parameter: Parameter
+        A :code:`Parameter` object
+
+    Returns
+    -------
+    flatvalue: ndarray
+        a flattened array of shape :code:`(prod(parameter.shape),)`
+    flatbounds: list
+        a list of bound tuples of length :code:`prod(parameter.shape)`
+    """
+    flatvalue = np.ravel(parameter.value)
+    flatbounds = [parameter.bounds
+                  for _ in range(np.prod(parameter.shape, dtype=int))]
+
+    return flatvalue, flatbounds
+
+
+def hstack(tup):
+    """
+    Horizontally stack a sequence of value bounds pairs.
+
+    Parameters
+    ----------
+    tup: sequence
+        a sequence of value, :code:`Bound` pairs
+
+    Returns
+    -------
+    value: ndarray
+        a horizontally concatenated array1d
+    bounds:
+        a list of Bounds
+    """
+    vals, bounds = zip(*tup)
+    stackvalue = np.hstack(vals)
+    stackbounds = list(chain(*bounds))
+
+    return stackvalue, stackbounds
+
+
+def shape(parameter):
+    """
+    Get the shape of a :code:`Parameter`.
+
+    Parameters
+    ----------
+    parameter: Parameter
+        :code:`Parameter` object to get the shape of
+
+    Returns
+    -------
+    tuple:
+        shape of the :code:`Parameter` object
+    """
+    return parameter.shape
+
+
 def get_values(parameters):
-    """ 
+    """
     Get all of the values in a sequence of Parameter instances.
 
     Parameters
@@ -145,40 +209,7 @@ def get_values(parameters):
     >>> get_values(params)
     [array([ 1.,  1.]), 2.0]
     """
-
     if isinstance(parameters, Parameter):
         return [parameters.value]
 
     return [p.value for p in parameters]
-
-
-def flatten_bounds(parameters):
-    """
-    Return flattened bounds for all of the Parameters in a sequence
-
-    Parameters
-    ----------
-    parameters: sequence or Parameter
-        A sequence of Parameter objects or a single Parameter object
-
-    Returns
-    -------
-    list:
-        a list of Bounds objects/tuples that is the length of the *total*
-        number of elements in all of the Parameters values. This is a list
-        even if parameters is a single parameter object
-
-    Examples
-    --------
-    >>> params = [Parameter(np.ones(2), Bound()), Parameter(2., Positive())]
-    >>> flatten_bounds(params)
-    [Bound(lower=None, upper=None), Bound(lower=None, upper=None), Positive(lower=1e-14, upper=None)]
-
-    """
-
-    inflate = lambda p: [p.bounds for _ in range(np.prod(p.shape))]
-
-    if isinstance(parameters, Parameter):
-        return inflate(parameters)
-
-    return [b for p in parameters for b in inflate(p)]

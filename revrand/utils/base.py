@@ -239,32 +239,10 @@ def nwise(iterable, n):
     return zip(*iters)
 
 
-def flatten2(arys, returns_shapes=True):
-
-    # TODO: make this work with multiple types!
-    # I.e using multiple dispatch.
-    # dispatch = {np.ndarray: np.flatten,
-    #             Parameter: flatten_bounds,
-    #             ...}
-
-    if issequence(arys):
-
-        flat_arys, shapes = zip(*map(flatten2, arys))
-        flat_ary = np.hstack(flat_arys)
-
-    else:
-        flat_ary = np.ravel(arys)
-        shapes = np.shape(arys)
-
-
-    return (flat_ary, shapes) if returns_shapes else flat_ary
-
-
-def flatten(arys, order='C', returns_shapes=True):
+def flatten(arys, returns_shapes=True, hstack=np.hstack, ravel=np.ravel,
+            shape=np.shape):
     """
-    Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly
-    heterogenous dimensions and shapes and concatenate them together into a
-    flat (1d) array.
+    Flatten a potentially recursive list of multidimensional objects.
 
     .. note::
 
@@ -276,65 +254,30 @@ def flatten(arys, order='C', returns_shapes=True):
 
     Parameters
     ----------
-    arys : list of array_like
+    arys: list of objects
         One or more input arrays of possibly heterogenous shapes and
         sizes.
-
-    order : {'C', 'F', 'A'}, optional
-        Whether to flatten in C (row-major), Fortran (column-major)
-        order, or preserve the C/Fortran ordering. The default is 'C'.
-
-    returns_shapes : bool, optional
+    returns_shapes: bool, optional
         Default is `True`. If `True`, the tuple `(flattened, shapes)` is
         returned, otherwise only `flattened` is returned.
+    hstack: callable, optional
+        a function that implements horizontal stacking
+    ravel: callable, optional
+        a function that flattens the object
+    shape: callable, optional
+        a function that returns the shape of the object
 
     Returns
     -------
-
-    flattened,[shapes] : {1darray, list of tuples}
-        Return the flat (1d) array resulting from the concatenation of
-        flattened ndarrays. When `returns_shapes` is `True`, return a
-        list of tuples containing also the shapes of each array as the
+    flattened,[shapes] : {1dobject, list of tuples}
+        Return the flat (1d) object resulting from the concatenation of
+        flattened multidimensional objects. When `returns_shapes` is `True`,
+        return a list of tuples containing also the shapes of each array as the
         second element.
 
     See Also
     --------
     revrand.utils.unflatten : its inverse
-
-    Notes
-    -----
-    Equivalent to::
-
-        lambda arys, order='C', returns_shapes=True: \
-            (np.hstack(map(partial(np.ravel, order=order), ndarrays)),
-             list(map(np.shape, ndarrays))) if returns_shapes \
-             else np.hstack(map(partial(np.ravel, order=order), ndarrays))
-
-    This implementation relies on the fact that scalars are treated as
-    0-dimensional arrays. That is,
-
-    >>> a = 4.6
-    >>> np.ndim(a)
-    0
-    >>> np.shape(a)
-    ()
-
-    >>> np.ravel(a)
-    array([ 4.6])
-
-    Note also that the following is also a 0-dimensional array
-
-    >>> b = np.array(3.14)
-    >>> np.ndim(b)
-    0
-    >>> np.shape(b)
-    ()
-
-    .. important::
-
-       When 0-dimensional arrays of the latter form are flattened,
-       *they  will be unflattened as a scalar*. (Because special cases
-       aren't special enough to break the rules.)
 
     Examples
     --------
@@ -351,11 +294,6 @@ def flatten(arys, order='C', returns_shapes=True):
     (array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,
             1, 9, 4, 1]), [(), (5,), (2, 3), (2, 2, 3)])
 
-    >>> flatten([a, b, c, d], order='F')
-    ... # doctest: +NORMALIZE_WHITESPACE
-    (array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,
-            5, 1, 9, 1]), [(), (5,), (2, 3), (2, 2, 3)])
-
     Note that scalars and 0-dimensional arrays are treated differently
     from 1-dimensional singleton arrays.
 
@@ -367,11 +305,6 @@ def flatten(arys, order='C', returns_shapes=True):
     ... # doctest: +NORMALIZE_WHITESPACE
     array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,
            1, 9, 4, 1])
-
-    >>> flatten([a, b, c, d], order='F', returns_shapes=False)
-    ... # doctest: +NORMALIZE_WHITESPACE
-    array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,
-           5, 1, 9, 1])
 
     >>> w, x, y, z = unflatten(*flatten([a, b, c, d]))
 
@@ -387,18 +320,35 @@ def flatten(arys, order='C', returns_shapes=True):
     >>> np.array_equal(z, d)
     True
 
+    >>> flatten([3.14, [np.array(2.71), np.array([1.61])]])
+    ... # doctest: +NORMALIZE_WHITESPACE
+    (array([ 3.14,  2.71,  1.61]), [(), [(), (1,)]])
+
     """
-    ravel = partial(np.ravel, order=order)
-    flattened = np.hstack(map(ravel, arys))
 
-    if returns_shapes:
-        shapes = list(map(np.shape, arys))
-        return flattened, shapes
+    if issequence(arys):
 
-    return flattened
+        flat = partial(flatten,
+                       returns_shapes=True,
+                       hstack=hstack,
+                       ravel=ravel,
+                       shape=shape
+                       )
+
+        flat_arys, shapes = zip(*map(flat, arys))
+        flat_ary = hstack(flat_arys)
+        shapes = list(shapes)
+
+    else:
+
+        flat_ary = ravel(arys)
+        shapes = shape(arys)
 
 
-def unflatten(ary, shapes, order='C'):
+    return (flat_ary, shapes) if returns_shapes else flat_ary
+
+
+def unflatten(ary, shapes):
     """
     Given a flat (1d) array, and a list of shapes (represented as tuples),
     return a list of ndarrays with the specified shapes.
@@ -410,11 +360,6 @@ def unflatten(ary, shapes, order='C'):
 
     shapes : list of tuples
         A list of ndarray shapes (tuple of array dimensions)
-
-    order : {'C', 'F', 'A'}, optional
-        Reshape array using index order: C (row-major), Fortran
-        (column-major) order, or preserve the C/Fortran ordering.
-        The default is 'C'.
 
     Returns
     -------
@@ -448,17 +393,6 @@ def unflatten(ary, shapes, order='C'):
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
-    Fortran-order:
-
-    >>> list(unflatten(a, [(1,), (1,), (4,), (2, 3)], order='F'))
-    ... # doctest: +NORMALIZE_WHITESPACE
-    [array([7]), array([4]), array([5, 8, 9, 1]), array([[4, 5, 4],
-        [2, 3, 3]])]
-
-    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)], order='F'))
-    ... # doctest: +NORMALIZE_WHITESPACE
-    [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
-
     >>> list(unflatten(a, [(), (1,), (3,), (2, 3)]))
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9]), array([[1, 4, 2], [5, 3, 4]])]
@@ -481,7 +415,7 @@ def unflatten(ary, shapes, order='C'):
     subarrays = np.hsplit(ary, sections)
     # Subtle but important: last element of subarrays is always a extraneous
     # empty array but is ignored when zipped with shapes. Not really a bug...
-    return map(partial(custom_reshape, order=order), subarrays, shapes)
+    return map(partial(custom_reshape, order='C'), subarrays, shapes)
 
 
 def custom_reshape(a, newshape, order='C'):

@@ -519,7 +519,7 @@ class RadialBasis(Basis):
     def _init_lenscale(self, lenscale_init):
 
         if (lenscale_init.shape != (self.d,)) \
-                and (lenscale_init.shape[0] != 1):
+                and not np.isscalar(lenscale_init.value):
             raise ValueError("Parameter dimension doesn't agree with X"
                              " dimensions!")
 
@@ -536,10 +536,11 @@ class RadialBasis(Basis):
 
         sparam = self.params if paramind is None else self.params[paramind]
 
-        if sparam.shape[0] != len(param):
+        if (np.isscalar(sparam.value) and len(param) == 1) \
+                or np.shape(param) == sparam.shape:
+            return param
+        else:
             raise ValueError("Dimensions of basis parameter is inconsistent!")
-
-        return param
 
 
 class SigmoidalBasis(RadialBasis):
@@ -1132,7 +1133,7 @@ class FastFoodGM(FastFoodRBF):
 
         if param.shape == (self.d,):
             return param
-        elif param.shape[0] == 1:
+        elif param.shape in ((), (1,)):
             return (Parameter(np.ones(self.d) * param.value, param.bounds))
         else:
             raise ValueError("Parameter dimension doesn't agree with X"

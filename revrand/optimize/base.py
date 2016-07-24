@@ -1,10 +1,11 @@
+"""Optimize Base Decorators."""
 import numpy as np
 
 from itertools import repeat
 from six import wraps
 
+import revrand.btypes as bt
 from ..utils import flatten, unflatten, check_random_state
-from ..btypes import Bound, Positive, get_values, flatten_bounds
 
 
 # Constants
@@ -286,8 +287,11 @@ def structured_minimizer(minimizer):
     @wraps(minimizer)
     def new_minimizer(fun, parameters, jac=True, **minimizer_kwargs):
 
-        array1d, shapes = flatten(get_values(parameters))
-        fbounds = flatten_bounds(parameters)
+        (array1d, fbounds), shapes = flatten(parameters,
+                                             hstack=bt.hstack,
+                                             shape=bt.shape,
+                                             ravel=bt.ravel
+                                             )
         flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -359,8 +363,11 @@ def structured_sgd(sgd):
     @wraps(sgd)
     def new_sgd(fun, parameters, data, eval_obj=False, **sgd_kwargs):
 
-        array1d, shapes = flatten(get_values(parameters))
-        fbounds = flatten_bounds(parameters)
+        (array1d, fbounds), shapes = flatten(parameters,
+                                             hstack=bt.hstack,
+                                             shape=bt.shape,
+                                             ravel=bt.ravel
+                                             )
         flatten_args_dec = flatten_args(shapes)
 
         new_fun = flatten_args_dec(fun)
@@ -538,7 +545,7 @@ def logtrick_sgd(sgd):
 def logtrick_gen(bounds):
 
     # Test which parameters we can apply the log trick too
-    ispos = [(type(b) is Positive) for b in bounds]
+    ispos = [(type(b) is bt.Positive) for b in bounds]
 
     # Functions that implement the log trick
     logx = lambda x: np.array([np.log(xi) if pos else xi
@@ -549,8 +556,8 @@ def logtrick_gen(bounds):
                                       for lxi, gi, pos in zip(logx, g, ispos)])
 
     # Redefine bounds as appropriate for new ranges
-    bounds = [Bound(lower=logminpos, upper=np.log(b.upper)
-                    if b.upper is not None else None)
+    bounds = [bt.Bound(lower=logminpos, upper=np.log(b.upper)
+                       if b.upper is not None else None)
               if pos else b for b, pos in zip(bounds, ispos)]
 
     return logx, expx, gradx, bounds
@@ -595,7 +602,7 @@ def flatten_func_grad(func):
     return new_func
 
 
-def flatten_args(shapes, order='C'):
+def flatten_args(shapes):
     """
     Examples
     --------
@@ -634,7 +641,7 @@ def flatten_args(shapes, order='C'):
 
         @wraps(func)
         def new_func(array1d, *args, **kwargs):
-            args = tuple(unflatten(array1d, shapes, order)) + args
+            args = tuple(unflatten(array1d, shapes)) + args
             return func(*args, **kwargs)
 
         return new_func
