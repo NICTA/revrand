@@ -239,6 +239,30 @@ def nwise(iterable, n):
     return zip(*iters)
 
 
+def scalar_reshape(a, newshape, order='C'):
+    """
+    Identical to `numpy.reshape` except in the case where `newshape` is
+    the empty tuple, in which case we return a scalar instead of a
+    0-dimensional array.
+
+    Examples
+    --------
+    >>> a = np.arange(6)
+    >>> np.array_equal(np.reshape(a, (3, 2)), scalar_reshape(a, (3, 2)))
+    True
+
+    >>> scalar_reshape(np.array([3.14]), newshape=())
+    3.14
+
+    >>> scalar_reshape(np.array([2.71]), newshape=(1,))
+    array([ 2.71])
+    """
+    if newshape == ():
+        return np.asscalar(a)
+
+    return np.reshape(a, newshape, order)
+
+
 def flatten(arys, returns_shapes=True, hstack=np.hstack, ravel=np.ravel,
             shape=np.shape):
     """
@@ -348,7 +372,7 @@ def flatten(arys, returns_shapes=True, hstack=np.hstack, ravel=np.ravel,
     return (flat_ary, shapes) if returns_shapes else flat_ary
 
 
-def unflatten(ary, shapes):
+def unflatten(ary, shapes, reshape=scalar_reshape):
     """
     Given a flat (1d) array, and a list of shapes (represented as tuples),
     return a list of ndarrays with the specified shapes.
@@ -407,39 +431,39 @@ def unflatten(ary, shapes):
     ... # doctest: +NORMALIZE_WHITESPACE
     (array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]),
         [(), (1,), (4,), (2, 3)])
+
+    >>> list(unflatten(a, [[(1,), (1,)], (4,), (2, 3)]))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [[array([7]), array([4])], array([5, 8, 9, 1]), array([[4, 2, 5],
+        [3, 4, 3]])]
+
+    >>> flatten(list(unflatten(a, [(), (1,), [(4,), (2, 3)]])))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    (array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]),
+        [(), (1,), [(4,), (2, 3)]])
     """
-    # important to make sure dtype is int
-    # since prod on empty tuple is a float (1.0)
-    sizes = list(map(partial(np.prod, dtype=int), shapes))
-    sections = np.cumsum(sizes)
-    subarrays = np.hsplit(ary, sections)
-    # Subtle but important: last element of subarrays is always a extraneous
-    # empty array but is ignored when zipped with shapes. Not really a bug...
-    return map(partial(custom_reshape, order='C'), subarrays, shapes)
+    if isinstance(shapes, list):
+        sizes = list(map(sumprod, shapes))
+        ends = np.cumsum(sizes)
+        begs = np.concatenate(([0], ends[:-1]))
+        struct_arys = [unflatten(ary[b:e], s, reshape=reshape)
+                       for b, e, s in zip(begs, ends, shapes)]
+        return struct_arys
+    else:
+        struct_ary = reshape(ary, shapes)
+        return struct_ary
 
 
-def custom_reshape(a, newshape, order='C'):
-    """
-    Identical to `numpy.reshape` except in the case where `newshape` is
-    the empty tuple, in which case we return a scalar instead of a
-    0-dimensional array.
+def sumprod(seq):
 
-    Examples
-    --------
-    >>> a = np.arange(6)
-    >>> np.array_equal(np.reshape(a, (3, 2)), custom_reshape(a, (3, 2)))
-    True
+    if isinstance(seq, tuple):
+        # important to make sure dtype is int
+        # since prod on empty tuple is a float (1.0)
+        return np.prod(seq, dtype=int)
+    else:
+        return np.sum((sumprod(s) for s in seq), dtype=int)
 
-    >>> custom_reshape(np.array([3.14]), newshape=())
-    3.14
 
-    >>> custom_reshape(np.array([2.71]), newshape=(1,))
-    array([ 2.71])
-    """
-    if newshape == ():
-        return np.asscalar(a)
-
-    return np.reshape(a, newshape, order)
 
 
 def map_indices(fn, iterable, indices):
