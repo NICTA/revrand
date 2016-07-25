@@ -4,8 +4,6 @@ import numpy as np
 from operator import add
 from functools import reduce
 
-from sklearn.pipeline import Pipeline
-
 import revrand.basis_functions as bs
 from revrand.btypes import Parameter, Positive, Bound
 from revrand.utils import issequence
@@ -158,6 +156,7 @@ def test_bases(make_gaus_data):
     P = bcat.transform(X, *hyps)
     dP = bcat.grad(X, *hyps)
 
+    assert bcat.get_dim(X) == P.shape[1]
     assert P.shape[0] == N
     assert P.ndim == 2
     for dp in dP:

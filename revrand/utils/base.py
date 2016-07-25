@@ -1,3 +1,5 @@
+"""Assortment of handy functions."""
+
 import inspect
 import numpy as np
 
@@ -9,8 +11,9 @@ from inspect import isgenerator
 
 class Bunch(dict):
     """
-    Container object for datasets: dictionary-like object that exposes
-    its keys as attributes.
+    Container object for datasets.
+
+    Dictionary-like object that exposes its keys as attributes.
 
     Examples
     --------
@@ -29,6 +32,7 @@ class Bunch(dict):
     >>> b['baz']
     61
     """
+
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
         self.__dict__ = self
@@ -51,7 +55,6 @@ def append_or_extend(mylist, *objs):
     list
         the extended list.
     """
-
     for obj in objs:
         mylist.extend(obj if isinstance(obj, list) else [obj])
     return mylist
@@ -59,8 +62,7 @@ def append_or_extend(mylist, *objs):
 
 def issequence(obj):
     """
-    Tests if an object is an iterable sequence of type generator, list or
-    tuple.
+    Test if an object is an iterable generator, list or tuple.
 
     Parameters
     ----------
@@ -70,7 +72,7 @@ def issequence(obj):
     Returns
     -------
     bool:
-        True if :code:`obj` is a tuple, list or generator
+        True if :code:`obj` is a tuple, list or generator only.
 
     Examples
     --------
@@ -83,13 +85,12 @@ def issequence(obj):
     >>> issequence(np.array([1, 2, 3]))
     False
     """
-
     return inspect.isgenerator(obj) or isinstance(obj, (list, tuple))
 
 
 def atleast_list(a):
     """
-    Promote an object to a list if not a list or generator
+    Promote an object to a list if not a list or generator.
 
     Parameters
     ----------
@@ -101,12 +102,13 @@ def atleast_list(a):
     list or generator:
         untounched if :code:`a` was a generator or list, otherwise :code:`[a]`.
     """
-
     return a if isinstance(a, list) or isgenerator(a) else [a]
 
 
 def couple(f, g):
     """
+    Compose a function thate returns two arguments.
+
     Given a pair of functions that take the same arguments, return a
     single function that returns a pair consisting of the return values
     of each function.
@@ -134,6 +136,8 @@ def couple(f, g):
 
 def decouple(fn):
     """
+    Inverse operation of couple.
+
     Create two functions of one argument and one return from a function that
     takes two arguments and has two returns
 
@@ -159,6 +163,8 @@ def decouple(fn):
 
 def nwise(iterable, n):
     """
+    Sliding window iterator.
+
     Iterator that acts like a sliding window of size `n`; slides over
     some iterable `n` items at a time. If iterable has `m` elements,
     this function will return an iterator over `m-n+1` tuples.
@@ -231,21 +237,49 @@ def nwise(iterable, n):
     >>> len(a) - len(list(nwise(a, 7))) == 6
     True
     """
-
     iters = tee(iterable, n)
     for i, it in enumerate(iters):
         for _ in range(i):
             next(it, None)
     return zip(*iters)
 
-pairwise = partial(nwise, n=2)
 
-
-def flatten(arys, order='C', returns_shapes=True):
+def scalar_reshape(a, newshape, order='C'):
     """
-    Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly
-    heterogenous dimensions and shapes and concatenate them together into a
-    flat (1d) array.
+    Reshape, but also return scalars or empty lists.
+
+    Identical to `numpy.reshape` except in the case where `newshape` is
+    the empty tuple, in which case we return a scalar instead of a
+    0-dimensional array.
+
+    Examples
+    --------
+    >>> a = np.arange(6)
+    >>> np.array_equal(np.reshape(a, (3, 2)), scalar_reshape(a, (3, 2)))
+    True
+
+    >>> scalar_reshape(np.array([3.14]), newshape=())
+    3.14
+
+    >>> scalar_reshape(np.array([2.71]), newshape=(1,))
+    array([ 2.71])
+
+    >>> scalar_reshape(np.array([]), newshape=(0,))
+    []
+    """
+    if newshape == ():
+        return np.asscalar(a)
+
+    if newshape == (0,):
+        return []
+
+    return np.reshape(a, newshape, order)
+
+
+def flatten(arys, returns_shapes=True, hstack=np.hstack, ravel=np.ravel,
+            shape=np.shape):
+    """
+    Flatten a potentially recursive list of multidimensional objects.
 
     .. note::
 
@@ -257,65 +291,30 @@ def flatten(arys, order='C', returns_shapes=True):
 
     Parameters
     ----------
-    arys : list of array_like
+    arys: list of objects
         One or more input arrays of possibly heterogenous shapes and
         sizes.
-
-    order : {'C', 'F', 'A'}, optional
-        Whether to flatten in C (row-major), Fortran (column-major)
-        order, or preserve the C/Fortran ordering. The default is 'C'.
-
-    returns_shapes : bool, optional
+    returns_shapes: bool, optional
         Default is `True`. If `True`, the tuple `(flattened, shapes)` is
         returned, otherwise only `flattened` is returned.
+    hstack: callable, optional
+        a function that implements horizontal stacking
+    ravel: callable, optional
+        a function that flattens the object
+    shape: callable, optional
+        a function that returns the shape of the object
 
     Returns
     -------
-
-    flattened,[shapes] : {1darray, list of tuples}
-        Return the flat (1d) array resulting from the concatenation of
-        flattened ndarrays. When `returns_shapes` is `True`, return a
-        list of tuples containing also the shapes of each array as the
+    flattened,[shapes] : {1dobject, list of tuples}
+        Return the flat (1d) object resulting from the concatenation of
+        flattened multidimensional objects. When `returns_shapes` is `True`,
+        return a list of tuples containing also the shapes of each array as the
         second element.
 
     See Also
     --------
     revrand.utils.unflatten : its inverse
-
-    Notes
-    -----
-    Equivalent to::
-
-        lambda arys, order='C', returns_shapes=True: \
-            (np.hstack(map(partial(np.ravel, order=order), ndarrays)),
-             list(map(np.shape, ndarrays))) if returns_shapes \
-             else np.hstack(map(partial(np.ravel, order=order), ndarrays))
-
-    This implementation relies on the fact that scalars are treated as
-    0-dimensional arrays. That is,
-
-    >>> a = 4.6
-    >>> np.ndim(a)
-    0
-    >>> np.shape(a)
-    ()
-
-    >>> np.ravel(a)
-    array([ 4.6])
-
-    Note also that the following is also a 0-dimensional array
-
-    >>> b = np.array(3.14)
-    >>> np.ndim(b)
-    0
-    >>> np.shape(b)
-    ()
-
-    .. important::
-
-       When 0-dimensional arrays of the latter form are flattened,
-       *they  will be unflattened as a scalar*. (Because special cases
-       aren't special enough to break the rules.)
 
     Examples
     --------
@@ -332,11 +331,6 @@ def flatten(arys, order='C', returns_shapes=True):
     (array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,
             1, 9, 4, 1]), [(), (5,), (2, 3), (2, 2, 3)])
 
-    >>> flatten([a, b, c, d], order='F')
-    ... # doctest: +NORMALIZE_WHITESPACE
-    (array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,
-            5, 1, 9, 1]), [(), (5,), (2, 3), (2, 2, 3)])
-
     Note that scalars and 0-dimensional arrays are treated differently
     from 1-dimensional singleton arrays.
 
@@ -348,11 +342,6 @@ def flatten(arys, order='C', returns_shapes=True):
     ... # doctest: +NORMALIZE_WHITESPACE
     array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,
            1, 9, 4, 1])
-
-    >>> flatten([a, b, c, d], order='F', returns_shapes=False)
-    ... # doctest: +NORMALIZE_WHITESPACE
-    array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,
-           5, 1, 9, 1])
 
     >>> w, x, y, z = unflatten(*flatten([a, b, c, d]))
 
@@ -368,19 +357,36 @@ def flatten(arys, order='C', returns_shapes=True):
     >>> np.array_equal(z, d)
     True
 
+    >>> flatten([3.14, [np.array(2.71), np.array([1.61])]])
+    ... # doctest: +NORMALIZE_WHITESPACE
+    (array([ 3.14,  2.71,  1.61]), [(), [(), (1,)]])
+
     """
-    ravel = partial(np.ravel, order=order)
-    flattened = np.hstack(map(ravel, arys))
+    if issequence(arys) and len(arys) > 0:
 
-    if returns_shapes:
-        shapes = list(map(np.shape, arys))
-        return flattened, shapes
+        flat = partial(flatten,
+                       returns_shapes=True,
+                       hstack=hstack,
+                       ravel=ravel,
+                       shape=shape
+                       )
 
-    return flattened
+        flat_arys, shapes = zip(*map(flat, arys))
+        flat_ary = hstack(flat_arys)
+        shapes = list(shapes)
+
+    else:
+
+        flat_ary = ravel(arys)
+        shapes = shape(arys)
+
+    return (flat_ary, shapes) if returns_shapes else flat_ary
 
 
-def unflatten(ary, shapes, order='C'):
-    """
+def unflatten(ary, shapes, reshape=scalar_reshape):
+    r"""
+    Inverse opertation of flatten.
+
     Given a flat (1d) array, and a list of shapes (represented as tuples),
     return a list of ndarrays with the specified shapes.
 
@@ -391,11 +397,6 @@ def unflatten(ary, shapes, order='C'):
 
     shapes : list of tuples
         A list of ndarray shapes (tuple of array dimensions)
-
-    order : {'C', 'F', 'A'}, optional
-        Reshape array using index order: C (row-major), Fortran
-        (column-major) order, or preserve the C/Fortran ordering.
-        The default is 'C'.
 
     Returns
     -------
@@ -429,17 +430,6 @@ def unflatten(ary, shapes, order='C'):
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9, 1]), array([[4, 2, 5], [3, 4, 3]])]
 
-    Fortran-order:
-
-    >>> list(unflatten(a, [(1,), (1,), (4,), (2, 3)], order='F'))
-    ... # doctest: +NORMALIZE_WHITESPACE
-    [array([7]), array([4]), array([5, 8, 9, 1]), array([[4, 5, 4],
-        [2, 3, 3]])]
-
-    >>> list(unflatten(a, [(), (1,), (4,), (2, 3)], order='F'))
-    ... # doctest: +NORMALIZE_WHITESPACE
-    [7, array([4]), array([5, 8, 9, 1]), array([[4, 5, 4], [2, 3, 3]])]
-
     >>> list(unflatten(a, [(), (1,), (3,), (2, 3)]))
     ... # doctest: +NORMALIZE_WHITESPACE
     [7, array([4]), array([5, 8, 9]), array([[1, 4, 2], [5, 3, 4]])]
@@ -454,44 +444,68 @@ def unflatten(ary, shapes, order='C'):
     ... # doctest: +NORMALIZE_WHITESPACE
     (array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]),
         [(), (1,), (4,), (2, 3)])
+
+    >>> list(unflatten(a, [[(1,), (1,)], (4,), (2, 3)]))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    [[array([7]), array([4])], array([5, 8, 9, 1]), array([[4, 2, 5],
+        [3, 4, 3]])]
+
+    >>> flatten(list(unflatten(a, [(), (1,), [(4,), (2, 3)]])))
+    ... # doctest: +NORMALIZE_WHITESPACE
+    (array([7, 4, 5, 8, 9, 1, 4, 2, 5, 3, 4, 3]),
+        [(), (1,), [(4,), (2, 3)]])
     """
-    # important to make sure dtype is int
-    # since prod on empty tuple is a float (1.0)
-    sizes = list(map(partial(np.prod, dtype=int), shapes))
-    sections = np.cumsum(sizes)
-    subarrays = np.hsplit(ary, sections)
-    # Subtle but important: last element of subarrays is always a extraneous
-    # empty array but is ignored when zipped with shapes. Not really a bug...
-    return map(partial(custom_reshape, order=order), subarrays, shapes)
+    if isinstance(shapes, list):
+        sizes = list(map(sumprod, shapes))
+        ends = np.cumsum(sizes)
+        begs = np.concatenate(([0], ends[:-1]))
+        struct_arys = [unflatten(ary[b:e], s, reshape=reshape)
+                       for b, e, s in zip(begs, ends, shapes)]
+        return struct_arys
+    else:
+        struct_ary = reshape(ary, shapes)
+        return struct_ary
 
 
-def custom_reshape(a, newshape, order='C'):
+def sumprod(seq):
     """
-    Identical to `numpy.reshape` except in the case where `newshape` is
-    the empty tuple, in which case we return a scalar instead of a
-    0-dimensional array.
+    Product of tuple, or sum of products of lists of tuples.
+
+    Parameters
+    ----------
+    seq: tuple or list
+
+    Returns
+    -------
+    int:
+        the product of input tuples, or the sum of products of lists of tuples,
+        recursively.
 
     Examples
     --------
-    >>> a = np.arange(6)
-    >>> np.array_equal(np.reshape(a, (3, 2)), custom_reshape(a, (3, 2)))
-    True
+    >>> tup = (1, 2, 3)
+    >>> sumprod(tup)
+    6
 
-    >>> custom_reshape(np.array([3.14]), newshape=())
-    3.14
+    >>> lis = [(1, 2, 3), (2, 2)]
+    >>> sumprod(lis)
+    10
 
-    >>> custom_reshape(np.array([2.71]), newshape=(1,))
-    array([ 2.71])
+    >>> lis = [(1, 2, 3), [(2, 1), (3,)]]
+    >>> sumprod(lis)
+    11
     """
-    if newshape == ():
-        return np.asscalar(a)
-
-    return np.reshape(a, newshape, order)
+    if isinstance(seq, tuple):
+        # important to make sure dtype is int
+        # since prod on empty tuple is a float (1.0)
+        return np.prod(seq, dtype=int)
+    else:
+        return np.sum((sumprod(s) for s in seq), dtype=int)
 
 
 def map_indices(fn, iterable, indices):
     """
-    Map a function across indices of an iterable
+    Map a function across indices of an iterable.
 
     Notes
     -----
