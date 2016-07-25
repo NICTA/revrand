@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" Setup utility for the revrand package. """
+"""Setup utility for the revrand package."""
 
 from setuptools import setup, find_packages
 
@@ -36,22 +36,19 @@ setup(
     cmdclass={
         'test': PyTest
     },
-    tests_require=['pytest', 'scikit-learn'],
+    tests_require=['pytest'],
     install_requires=[
         'scipy >= 0.15.1',
         'numpy >= 1.8.2',
         'six >= 1.9.0',
-        'decorator >= 4.0.6'
+        'decorator >= 4.0.6',
+        'scikit-learn'
     ],
     extras_require={
         'demos': [
             'unipath',
             'requests',
             'matplotlib',
-            'scikit-learn'
-        ],
-        'sklearn': [
-            'scikit-learn'
         ],
     },
     license="Apache Software License 2.0",

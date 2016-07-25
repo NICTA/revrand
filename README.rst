@@ -26,8 +26,8 @@ regression) and generalised linear models. A few features of this library are:
   presented in [4]_.
 - Large scale learning using stochastic gradient descent (Adam, AdaDelta and 
   more).
-- Scikit Learn compatibility, i.e. usable with `pipelines
-    <http://scikit-learn.org/stable/modules/pipeline.html>`_.
+- Scikit Learn compatibility, i.e. usable with 
+  `pipelines <http://scikit-learn.org/stable/modules/pipeline.html>`_.
 
 
 Quickstart
