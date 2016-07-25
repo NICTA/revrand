@@ -20,7 +20,7 @@ from scipy.optimize import minimize
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
 
-from .utils import append_or_extend
+from .utils import atleast_list
 from .mathfun.linalg import solve_posdef
 from .optimize import structured_minimizer, logtrick_minimizer
 from .btypes import Parameter, Positive
@@ -64,8 +64,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
     def fit(self, X, y):
         """
-        Learn the parameters and hyperparameters of a Bayesian linear
-        regressor.
+        Learn the hyperparameters of a Bayesian linear regressor.
 
         Parameters
         ----------
@@ -97,14 +96,12 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         in your calling code.
         """
-
         X, y = check_X_y(X, y)
 
         self.obj = -np.inf
 
         # Make list of parameters and decorate optimiser to undestand this
-        params = append_or_extend([self.var_init, self.regulariser_init],
-                                  self.basis.params)
+        params = [self.var_init, self.regulariser_init, self.basis.params]
         nmin = structured_minimizer(logtrick_minimizer(minimize))
 
         # Close over objective and learn parameters
@@ -117,7 +114,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                    )
 
         # Upack learned parameters and report
-        (self.var, self.regulariser), self.hypers = res.x[:2], res.x[2:]
+        self.var, self.regulariser, self.hypers = res.x
 
         log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, "
                  "message = {}."
@@ -130,10 +127,10 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         return self
 
-    def _elbo(self, X, y, var, reg, *hypers):
+    def _elbo(self, X, y, var, reg, hypers):
 
         # Get Basis
-        Phi = self.basis.transform(X, *hypers)  # N x D
+        Phi = self.basis.transform(X, *atleast_list(hypers))  # N x D
         PhiPhi = Phi.T.dot(Phi)
         N, D = Phi.shape
 
@@ -179,13 +176,13 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         dreg = 0.5 * ((TrC + mm) / reg - D) / reg
 
         # Get structured basis function gradients
-        def dhypers(dPhi):
+        def dhyps(dPhi):
             return - (m.T.dot(Err.dot(dPhi))
                       - (dPhi.T.dot(Phi) * C).sum()) / var
 
-        dhypers = apply_grad(dhypers, self.basis.grad(X, *hypers))
+        dhypers = apply_grad(dhyps, self.basis.grad(X, *atleast_list(hypers)))
 
-        return -ELBO, append_or_extend([-dvar, -dreg], dhypers)
+        return -ELBO, [-dvar, -dreg, dhypers]
 
     def predict(self, X):
         """
@@ -202,7 +199,6 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
         """
-
         Ey, _, _ = self.predict_moments(X)
 
         return Ey
@@ -228,12 +224,11 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             The expected variance of y_star for the query inputs, X_star of
             shape (N_star,).
         """
-
         check_is_fitted(self, ['var', 'regulariser', 'weights', 'covariance',
                                'hypers'])
         X = check_array(X)
 
-        Phi = self.basis.transform(X, *self.hypers)
+        Phi = self.basis.transform(X, *atleast_list(self.hypers))
         Ey = Phi.dot(self.weights)
         Vf = (Phi.dot(self.covariance) * Phi).sum(axis=1)
 

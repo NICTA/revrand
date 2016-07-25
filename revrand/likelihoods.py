@@ -1,7 +1,4 @@
-"""
-Likelihood objects for inference within the GLM framework.
-
-"""
+"""Likelihood objects for inference within the GLM framework."""
 
 from __future__ import division
 
@@ -26,7 +23,7 @@ class Bernoulli():
     the GLM prior into a probability.
     """
 
-    _params = []
+    _params = Parameter()
 
     def __init__(self):
 
@@ -34,12 +31,12 @@ class Bernoulli():
 
     @property
     def params(self):
-        """ Get this object's Parameter types. """
+        """Get this object's Parameter types."""
         return self._params
 
     @params.setter
     def params(self, params):
-        """ Set this object's Parameter types. """
+        """Set this object's Parameter types."""
         self._params = params
 
     def loglike(self, y, f):
@@ -60,13 +57,13 @@ class Bernoulli():
             the log likelihood of each y given each f under this
             likelihood.
         """
-
         ll = bernoulli.logpmf(y, expit(f))
         ll[np.isinf(ll)] = LOGTINY
         return ll
 
     def Ey(self, f):
-        r""" Expected value of the Bernoulli likelihood.
+        r"""
+        Expected value of the Bernoulli likelihood.
 
         Parameters
         ----------
@@ -79,7 +76,6 @@ class Bernoulli():
         Ey: ndarray
             expected value of y, :math:`\mathbb{E}[y|f]`.
         """
-
         return expit(f)
 
     def df(self, y, f):
@@ -99,7 +95,6 @@ class Bernoulli():
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
-
         return y - expit(f)
 
     def d2f(self, y, f):
@@ -120,7 +115,6 @@ class Bernoulli():
             the second derivative
             :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
-
         sig = expit(f)
         return (sig - 1) * sig
 
@@ -142,7 +136,6 @@ class Bernoulli():
             the third derivative
             :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
-
         sig = expit(f)
         return (2 * sig - 1) * (1 - sig) * sig
 
@@ -167,7 +160,6 @@ class Bernoulli():
             each parameter. If there is only one parameter, this is not a
             list.
         """
-
         return []
 
     def dpd2f(self, y, f, *args):
@@ -191,7 +183,6 @@ class Bernoulli():
             :math:`\theta` for each parameter. If there is only one
             parameter, this is not a list.
         """
-
         return []
 
     def cdf(self, y, f):
@@ -211,7 +202,6 @@ class Bernoulli():
         cdf: ndarray
             Cumulative density function evaluated at y.
         """
-
         return bernoulli.cdf(y, expit(f))
 
 
@@ -243,13 +233,13 @@ class Binomial(Bernoulli):
             the log likelihood of each y given each f under this
             likelihood.
         """
-
         ll = binom.logpmf(y, n=n, p=expit(f))
         ll[np.isinf(ll)] = LOGTINY
         return ll
 
     def Ey(self, f, n):
-        r""" Expected value of the Binomial likelihood.
+        r"""
+        Expected value of the Binomial likelihood.
 
         Parameters
         ----------
@@ -264,7 +254,6 @@ class Binomial(Bernoulli):
         Ey: ndarray
             expected value of y, :math:`\mathbb{E}[y|f]`.
         """
-
         return expit(f) * n
 
     def df(self, y, f, n):
@@ -286,7 +275,6 @@ class Binomial(Bernoulli):
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
-
         return y - expit(f) * n
 
     def d2f(self, y, f, n):
@@ -309,7 +297,6 @@ class Binomial(Bernoulli):
             the second derivative
             :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
-
         sig = expit(f)
         return (sig - 1) * sig * n
 
@@ -333,7 +320,6 @@ class Binomial(Bernoulli):
             the third derivative
             :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
-
         sig = expit(f)
         return (2 * sig - 1) * (1 - sig) * sig * n
 
@@ -356,7 +342,6 @@ class Binomial(Bernoulli):
         cdf: ndarray
             Cumulative density function evaluated at y.
         """
-
         return binom.cdf(y, n=n, p=expit(f))
 
 
@@ -398,11 +383,11 @@ class Gaussian(Bernoulli):
             the log likelihood of each y given each f under this
             likelihood.
         """
-
         return norm.logpdf(y, loc=f, scale=np.sqrt(var))
 
     def Ey(self, f, var):
-        r""" Expected value of the Gaussian likelihood.
+        r"""
+        Expected value of the Gaussian likelihood.
 
         Parameters
         ----------
@@ -417,7 +402,6 @@ class Gaussian(Bernoulli):
         Ey: ndarray
             expected value of y, :math:`\mathbb{E}[y|f]`.
         """
-
         return f
 
     def df(self, y, f, var):
@@ -439,7 +423,6 @@ class Gaussian(Bernoulli):
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
-
         return (y - f) / var
 
     def d2f(self, y, f, var):
@@ -462,7 +445,6 @@ class Gaussian(Bernoulli):
             the second derivative
             :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
-
         return - np.ones_like(f) / var
 
     def d3f(self, y, f, var):
@@ -485,7 +467,6 @@ class Gaussian(Bernoulli):
             the third derivative
             :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
-
         return np.zeros_like(f)
 
     def dp(self, y, f, var):
@@ -510,7 +491,6 @@ class Gaussian(Bernoulli):
             :math:`\partial \log p(y|f, \sigma^2)/ \partial \sigma^2`
             where :math:`sigma^2` is the variance.
         """
-
         ivar = 1. / var
         return 0.5 * (((y - f) * ivar)**2 - ivar)
 
@@ -536,7 +516,6 @@ class Gaussian(Bernoulli):
             the derivative of the likelihood Hessian w.r.t.\ the variance
             :math:`\sigma^2`.
         """
-
         return np.ones_like(f) / var**2
 
     def cdf(self, y, f, var):
@@ -558,7 +537,6 @@ class Gaussian(Bernoulli):
         cdf: ndarray
             Cumulative density function evaluated at y.
         """
-
         return norm.cdf(y, loc=f, scale=np.sqrt(var))
 
 
@@ -577,11 +555,6 @@ class Poisson(Bernoulli):
     """
 
     def __init__(self, tranfcn='exp'):
-        """
-        Construct an instance of the Poisson likelihood class.
-
-
-        """
 
         if tranfcn == 'exp' or tranfcn == 'softplus':
             self.tranfcn = tranfcn
@@ -606,7 +579,6 @@ class Poisson(Bernoulli):
             the log likelihood of each y given each f under this
             likelihood.
         """
-
         if self.tranfcn == 'exp':
             g = np.exp(f)
             logg = f
@@ -616,7 +588,8 @@ class Poisson(Bernoulli):
         return y * logg - g - gammaln(y + 1)
 
     def Ey(self, f):
-        r""" Expected value of the Poisson likelihood.
+        r"""
+        Expected value of the Poisson likelihood.
 
         Parameters
         ----------
@@ -629,7 +602,6 @@ class Poisson(Bernoulli):
         Ey: ndarray
             expected value of y, :math:`\mathbb{E}[y|f]`.
         """
-
         return np.exp(f) if self.tranfcn == 'exp' else softplus(f)
 
     def df(self, y, f):
@@ -649,7 +621,6 @@ class Poisson(Bernoulli):
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
-
         if self.tranfcn == 'exp':
             return y - np.exp(f)
         else:
@@ -673,7 +644,6 @@ class Poisson(Bernoulli):
             the second derivative
             :math:`\partial^2 \log p(y|f)/ \partial f^2`
         """
-
         if self.tranfcn == 'exp':
             return - np.exp(f)
         else:
@@ -700,7 +670,6 @@ class Poisson(Bernoulli):
             the third derivative
             :math:`\partial^3 \log p(y|f)/ \partial f^3`
         """
-
         if self.tranfcn == 'exp':
             return self.d2f(y, f)
         else:
@@ -728,6 +697,5 @@ class Poisson(Bernoulli):
         cdf: ndarray
             Cumulative density function evaluated at y.
         """
-
         mu = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
         return poisson.cdf(y, mu=mu)

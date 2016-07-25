@@ -1,4 +1,5 @@
-"""
+"""Bayesian Generalised Linear Model implementation.
+
 Implementation of Bayesian GLMs with nonparametric variational inference [1]_,
 with a few modifications and tweaks.
 
@@ -19,11 +20,11 @@ from scipy.optimize import brentq
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
 
-from .utils import couple, append_or_extend, atleast_list
+from .utils import couple, atleast_list
 from .mathfun.special import logsumexp
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, logtrick_sgd
-from .btypes import Bound, Positive, Parameter, get_values
+from .btypes import Bound, Positive, Parameter
 
 
 # Set up logging
@@ -122,11 +123,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.batch_size = batch_size
         self.updater = updater
 
-        # Number of hyperparameters
-        self._nlpams = len(atleast_list(get_values(self.like.params)))
-        self._nbpams = len(atleast_list(get_values(self.basis.params)))
-        self._tothypers = self._nlpams + self._nbpams
-
         # Make sure we get list output from likelihood parameter gradients
         self.lgrads = couple(lambda *a: atleast_list(self.like.dp(*a)),
                              lambda *a: atleast_list(self.like.dpd2f(*a)))
@@ -151,14 +147,12 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             non-learnable parameters. They can be scalars or arrays of length
             N.
         """
-
         X, y = check_X_y(X, y)
 
         # Shapes of things
         K = self.postcomp
         N, _ = X.shape
-        D = self.basis.transform(np.atleast_2d(X[0, :]),
-                                 *get_values(self.basis.params)).shape[1]
+        D = self.basis.get_dim(X)
 
         # Batchsize and discount factor
         self.B = N / self.batch_size
@@ -168,15 +162,15 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, K))
 
         # Pack params
-        params = append_or_extend([Parameter(self.weights, Bound()),
-                                   Parameter(self.covariance, Positive()),
-                                   self.regulariser_init],
-                                  self.like.params,
-                                  self.basis.params)
+        params = [Parameter(self.weights, Bound()),
+                  Parameter(self.covariance, Positive()),
+                  self.regulariser_init,
+                  self.like.params,
+                  self.basis.params]
 
         # Pack data
         likelihood_args = _reshape_likelihood_args(likelihood_args, N)
-        data = (y, X) + likelihood_args
+        data = (X, y) + likelihood_args
 
         nsgd = structured_sgd(logtrick_sgd(sgd))
 
@@ -192,9 +186,12 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self._delete_cache()
 
         # Unpack params
-        self.weights, self.covariance, self.regulariser = res.x[:3]
-        self.like_hypers = res.x[3:(3 + self._nlpams)]
-        self.basis_hypers = res.x[(3 + self._nlpams):]
+        (self.weights,
+         self.covariance,
+         self.regulariser,
+         self.like_hypers,
+         self.basis_hypers
+         ) = res.x
 
         log.info("Finished! Objective = {}, reg = {}, likelihood_hypers = {}, "
                  "basis_hypers = {}, message: {}."
@@ -224,24 +221,17 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         del self.df, self.d2f, self.d3f, self.dm, self.dC, self.H
 
-    def _l2(self, m, C, reg, *args):
+    def _l2(self, m, C, reg, lpars, bpars, X, y, *largs):
         # Objective function Eq. 10 from [1], and gradients of ALL params
 
         # Shapes
         D, K = m.shape
 
-        # Unpack data and likelihood arguments if they exist
-        y, X = args[self._tothypers], args[self._tothypers + 1]
-        largs = ()
-        if len(args) > (self._tothypers + 2):
-            largs = args[(self._tothypers + 2):]
-
-        # Extract parameters
-        lpars, bpars, = args[:self._nlpams], args[self._nlpams:self._tothypers]
-        lpars_largs = tuple(chain(lpars, largs))
+        # Make sure hypers and args can be unpacked into callables
+        lpars_largs = tuple(chain(atleast_list(lpars), largs))
 
         # Basis function stuff
-        Phi = self.basis.transform(X, *bpars)  # M x D
+        Phi = self.basis.transform(X, *atleast_list(bpars))  # M x D
         Phi2 = Phi**2
         Phi3 = Phi**3
         f = Phi.dot(m)  # M x K
@@ -253,7 +243,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Zero starts for sums over posterior mixtures
         ll = 0
-        dlpars = [np.zeros_like(p) for p in lpars]
+        dlpars = [np.zeros_like(p) for p in atleast_list(lpars)]
 
         # Big loop though posterior mixtures for calculating stuff
         for k in range(K):
@@ -295,7 +285,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                 dt -= (self.df[:, k].dot(dPhimk) + (C[:, k] * dPhiH).sum()) / K
             return dt
 
-        dbpars = apply_grad(dtheta, self.basis.grad(X, *bpars))
+        dbpars = apply_grad(dtheta, self.basis.grad(X, *atleast_list(bpars)))
 
         # Objective, Eq. 10 in [1]
         L2 = (ll
@@ -307,11 +297,30 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         log.info("L2 = {}, reg = {}, likelihood_hypers = {}, basis_hypers = {}"
                  .format(L2, reg, lpars, bpars))
 
-        return -L2, append_or_extend([-self.dm, -self.dC, -dreg], dlpars,
-                                     dbpars)
+        return -L2, [-self.dm, -self.dC, -dreg, dlpars, dbpars]
 
     def predict(self, X, likelihood_args=(), nsamples=100):
+        """
+        Predict target values from Bayesian generalised linear regression.
 
+        Parameters
+        ----------
+        X: ndarray
+            (Ns,d) array query input dataset (Ns samples, d dimensions).
+        likelihood_args: sequence, optional
+            sequence of arguments to pass to the likelihood function. These are
+            non-learnable parameters. They can be scalars or arrays of length
+            N.
+        nsamples: int, optional
+            The number of samples to draw from the posterior in order to
+            approximate the predictive mean and variance.
+
+        Returns
+        -------
+        Ey: ndarray
+            The expected value of y_star for the query inputs, X_star of shape
+            (N_star,).
+        """
         Ey, _, _, _ = self.predict_moments(X, likelihood_args, nsamples)
 
         return Ey
@@ -372,15 +381,14 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         Ey_max: ndarray
             The maximum sampled values of the predicted mean (same shape as Ey)
         """
-
         # Get latent function samples
         N = X.shape[0]
         ys = np.empty((N, nsamples))
         fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood expected value
+        Ey_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
         for i, f in enumerate(fsamples):
-            Ey_args = chain(self.like_hypers, likelihood_args)
             ys[:, i] = self.like.Ey(f, *Ey_args)
 
         # Average transformed samples (MC integration)
@@ -421,7 +429,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             The maximum sampled values of the predicted log probability (same
             shape as p)
         """
-
         X, y = check_X_y(X, y)
 
         # Get latent function samples
@@ -430,8 +437,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood pdf
+        ll_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
         for i, f in enumerate(fsamples):
-            ll_args = chain(self.like_hypers, likelihood_args)
             ps[:, i] = self.like.loglike(y, f, *ll_args)
 
         # Average transformed samples (MC integration)
@@ -472,16 +479,15 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             The maximum sampled values of the predicted probability (same shape
             as p)
         """
-
         # Get latent function samples
         N = X.shape[0]
         ps = np.empty((N, nsamples))
         fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood cdf
+        cdf_arg = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
         for i, f in enumerate(fsamples):
-            cdf_args = chain(self.like_hypers, likelihood_args)
-            ps[:, i] = self.like.cdf(quantile, f, *cdf_args)
+            ps[:, i] = self.like.cdf(quantile, f, *cdf_arg)
 
         # Average transformed samples (MC integration)
         p = ps.mean(axis=1)
@@ -493,8 +499,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     def predict_interval(self, percentile, X, likelihood_args=(), nsamples=100,
                          multiproc=True):
         """
-        Predictive percentile interval (upper and lower quantiles) for a
-        Bayesian GLM.
+        Predictive percentile interval (upper and lower quantiles).
 
         Parameters
         ----------
@@ -519,7 +524,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         qu: ndarray
             The upper end point of the interval with shape (Ns,)
         """
-
         N = X.shape[0]
 
         # Generate latent function samples per observation (n in N)
@@ -530,7 +534,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             likelihood_args = _reshape_likelihood_args(likelihood_args, N)
 
         # Now create work for distrbuted workers
-        work = ((f[0], self.like, self.like_hypers, f[1:], percentile)
+        like_hypers = atleast_list(self.like_hypers)
+        work = ((f[0], self.like, like_hypers, f[1:], percentile)
                 for f in zip(fsamples, *likelihood_args))
 
         # Distribute sampling and rootfinding
@@ -574,7 +579,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             (nsamples,) if :code:`genaxis=0`, with each call being a all
             samples for an observation, n in Ns.
         """
-
         check_is_fitted(self, ['weights', 'covariance', 'basis_hypers',
                                'like_hypers', 'regulariser'])
         X = check_array(X)
@@ -584,7 +588,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         k = np.random.randint(0, K, size=(nsamples,))
         w = self.weights[:, k] + np.random.randn(D, nsamples) \
             * np.sqrt(self.covariance[:, k])
-        Phi = self.basis.transform(X, *self.basis_hypers)  # Keep this 4 speed
+
+        # Do this here for *massive* speed improvements
+        Phi = self.basis.transform(X, *atleast_list(self.basis_hypers))
 
         # Now generate latent functions samples either colwise or rowwise
         if genaxis == 1:

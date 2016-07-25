@@ -1,3 +1,5 @@
+"""Assortment of handy functions."""
+
 import inspect
 import numpy as np
 
@@ -9,8 +11,9 @@ from inspect import isgenerator
 
 class Bunch(dict):
     """
-    Container object for datasets: dictionary-like object that exposes
-    its keys as attributes.
+    Container object for datasets.
+
+    Dictionary-like object that exposes its keys as attributes.
 
     Examples
     --------
@@ -29,6 +32,7 @@ class Bunch(dict):
     >>> b['baz']
     61
     """
+
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
         self.__dict__ = self
@@ -51,7 +55,6 @@ def append_or_extend(mylist, *objs):
     list
         the extended list.
     """
-
     for obj in objs:
         mylist.extend(obj if isinstance(obj, list) else [obj])
     return mylist
@@ -59,8 +62,7 @@ def append_or_extend(mylist, *objs):
 
 def issequence(obj):
     """
-    Tests if an object is an iterable sequence of type generator, list or
-    tuple.
+    Test if an object is an iterable generator, list or tuple.
 
     Parameters
     ----------
@@ -70,7 +72,7 @@ def issequence(obj):
     Returns
     -------
     bool:
-        True if :code:`obj` is a tuple, list or generator
+        True if :code:`obj` is a tuple, list or generator only.
 
     Examples
     --------
@@ -83,13 +85,12 @@ def issequence(obj):
     >>> issequence(np.array([1, 2, 3]))
     False
     """
-
     return inspect.isgenerator(obj) or isinstance(obj, (list, tuple))
 
 
 def atleast_list(a):
     """
-    Promote an object to a list if not a list or generator
+    Promote an object to a list if not a list or generator.
 
     Parameters
     ----------
@@ -101,12 +102,13 @@ def atleast_list(a):
     list or generator:
         untounched if :code:`a` was a generator or list, otherwise :code:`[a]`.
     """
-
     return a if isinstance(a, list) or isgenerator(a) else [a]
 
 
 def couple(f, g):
     """
+    Compose a function thate returns two arguments.
+
     Given a pair of functions that take the same arguments, return a
     single function that returns a pair consisting of the return values
     of each function.
@@ -134,6 +136,8 @@ def couple(f, g):
 
 def decouple(fn):
     """
+    Inverse operation of couple.
+
     Create two functions of one argument and one return from a function that
     takes two arguments and has two returns
 
@@ -159,6 +163,8 @@ def decouple(fn):
 
 def nwise(iterable, n):
     """
+    Sliding window iterator.
+
     Iterator that acts like a sliding window of size `n`; slides over
     some iterable `n` items at a time. If iterable has `m` elements,
     this function will return an iterator over `m-n+1` tuples.
@@ -231,7 +237,6 @@ def nwise(iterable, n):
     >>> len(a) - len(list(nwise(a, 7))) == 6
     True
     """
-
     iters = tee(iterable, n)
     for i, it in enumerate(iters):
         for _ in range(i):
@@ -241,6 +246,8 @@ def nwise(iterable, n):
 
 def scalar_reshape(a, newshape, order='C'):
     """
+    Reshape, but also return scalars or empty lists.
+
     Identical to `numpy.reshape` except in the case where `newshape` is
     the empty tuple, in which case we return a scalar instead of a
     0-dimensional array.
@@ -256,9 +263,15 @@ def scalar_reshape(a, newshape, order='C'):
 
     >>> scalar_reshape(np.array([2.71]), newshape=(1,))
     array([ 2.71])
+
+    >>> scalar_reshape(np.array([]), newshape=(0,))
+    []
     """
     if newshape == ():
         return np.asscalar(a)
+
+    if newshape == (0,):
+        return []
 
     return np.reshape(a, newshape, order)
 
@@ -349,8 +362,7 @@ def flatten(arys, returns_shapes=True, hstack=np.hstack, ravel=np.ravel,
     (array([ 3.14,  2.71,  1.61]), [(), [(), (1,)]])
 
     """
-
-    if issequence(arys):
+    if issequence(arys) and len(arys) > 0:
 
         flat = partial(flatten,
                        returns_shapes=True,
@@ -368,12 +380,13 @@ def flatten(arys, returns_shapes=True, hstack=np.hstack, ravel=np.ravel,
         flat_ary = ravel(arys)
         shapes = shape(arys)
 
-
     return (flat_ary, shapes) if returns_shapes else flat_ary
 
 
 def unflatten(ary, shapes, reshape=scalar_reshape):
-    """
+    r"""
+    Inverse opertation of flatten.
+
     Given a flat (1d) array, and a list of shapes (represented as tuples),
     return a list of ndarrays with the specified shapes.
 
@@ -455,7 +468,33 @@ def unflatten(ary, shapes, reshape=scalar_reshape):
 
 
 def sumprod(seq):
+    """
+    Product of tuple, or sum of products of lists of tuples.
 
+    Parameters
+    ----------
+    seq: tuple or list
+
+    Returns
+    -------
+    int:
+        the product of input tuples, or the sum of products of lists of tuples,
+        recursively.
+
+    Examples
+    --------
+    >>> tup = (1, 2, 3)
+    >>> sumprod(tup)
+    6
+
+    >>> lis = [(1, 2, 3), (2, 2)]
+    >>> sumprod(lis)
+    10
+
+    >>> lis = [(1, 2, 3), [(2, 1), (3,)]]
+    >>> sumprod(lis)
+    11
+    """
     if isinstance(seq, tuple):
         # important to make sure dtype is int
         # since prod on empty tuple is a float (1.0)
@@ -464,11 +503,9 @@ def sumprod(seq):
         return np.sum((sumprod(s) for s in seq), dtype=int)
 
 
-
-
 def map_indices(fn, iterable, indices):
     """
-    Map a function across indices of an iterable
+    Map a function across indices of an iterable.
 
     Notes
     -----

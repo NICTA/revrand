@@ -359,7 +359,6 @@ def structured_sgd(sgd):
     ...               eval_obj=True)
     >>> res_w, res_lambda = res.x
     """
-
     @wraps(sgd)
     def new_sgd(fun, parameters, data, eval_obj=False, **sgd_kwargs):
 
@@ -368,8 +367,8 @@ def structured_sgd(sgd):
                                              shape=bt.shape,
                                              ravel=bt.ravel
                                              )
-        flatten_args_dec = flatten_args(shapes)
 
+        flatten_args_dec = flatten_args(shapes)
         new_fun = flatten_args_dec(fun)
 
         if bool(eval_obj):
@@ -379,6 +378,7 @@ def structured_sgd(sgd):
 
         result = sgd(new_fun, array1d, data=data, bounds=fbounds,
                      eval_obj=eval_obj, **sgd_kwargs)
+
         result['x'] = tuple(unflatten(result['x'], shapes))
         return result
 
@@ -425,7 +425,6 @@ def logtrick_minimizer(minimizer):
     This decorator only works on unstructured optimizers. However, it can be
     use with structured_minimizer, so long as it is the inner wrapper.
     """
-
     @wraps(minimizer)
     def new_minimizer(fun, x0, jac=True, bounds=None, **minimizer_kwargs):
 

@@ -1,6 +1,8 @@
-""" Various basis function objects specialised for parameter learning.
+"""
+Various basis function objects specialised for parameter learning.
 
-    To make a new basis object, see the documentation of the Basis class.
+To make a new basis object, see the documentation of the Basis class.
+
 """
 
 from __future__ import division
@@ -18,7 +20,7 @@ from scipy.stats import cauchy, chi, chi2, gamma
 
 from .btypes import Positive, Bound, Parameter
 from .mathfun.linalg import hadamard
-from .utils import append_or_extend, issequence
+from .utils import append_or_extend, issequence, atleast_list
 
 
 #
@@ -76,7 +78,6 @@ def slice_init(func):
     >>> base.transform(X).shape
     (100, 10)
     """
-
     @wraps(func)
     def new_init(self, *args, **kwargs):
 
@@ -98,7 +99,6 @@ def slice_transform(func, self, X, *vargs, **kwargs):
     This must decorate the :code:`transform` and :code:`grad` methods of basis
     objects if the :code:`slice_init` decorator was used.
     """
-
     X = X if self.apply_ind is None else X[:, self.apply_ind]
     return func(self, X, *vargs, **kwargs)
 
@@ -137,7 +137,6 @@ def apply_grad(fun, grad):
     scalar, ndarray or sequence:
         the result of applying fun(grad) for a structured grad.
     """
-
     if issequence(grad):
         fgrad = [apply_grad(fun, g) for g in grad]
         return fgrad if len(fgrad) != 1 else fgrad[0]
@@ -157,9 +156,10 @@ def apply_grad(fun, grad):
 
 class Basis(object):
     """
-    The base Basis class. To make other basis classes, make sure they are
-    subclasses of this class to enable concatenation and operation with the
-    machine learning algorithms.
+    The base Basis class.
+
+    To make other basis classes, make sure they are subclasses of this class to
+    enable concatenation and operation with the machine learning algorithms.
 
     Example
     -------
@@ -168,22 +168,15 @@ class Basis(object):
     >>> base = MyBasis1(properties1) + MyBasis2(properties2)  # doctest: +SKIP
     """
 
-    _params = []
+    _params = Parameter()
 
     @slice_init
     def __init__(self):
         """
-        Construct this an instance of this     def _init_param(self, param):
+        Construct this an instance of this class.
 
-        if param.shape == (self.d,):
-            return param
-        elif param.shape[0] == 1:
-            return (Parameter(np.ones(self.d) * param.value, param.bounds))
-        else:
-            raise ValueError("Parameter dimension doesn't agree with X"
-                             " dimensions!")class. This is also a good place
-        to set non-learnable properties, and bounded Parameter types. An
-        example Basis class with parameters may be,
+        This is also a good place to set non-learnable properties, and bounded
+        Parameter types. An example Basis class with parameters may be
 
         Example:
 
@@ -199,10 +192,9 @@ class Basis(object):
         correspond to any parameters input into the :code:`transform` and
         :code:`grad` methods. All basis class objects MUST have a
         :code:`params` property, which is either:
-
-        - an empty list for basis functions with no learnable parameters
-          (just subclass this class)
-        - one Parameter object for an optimisable parameter, see btypes.py
+        - one Parameter object for an optimisable parameter, see btypes.py.
+          Parameter objects with :code:`[]` values are interpreted as having no
+          parameters.
         - a list of Parameter objects, one for each optimisable parameter
         """
         pass
@@ -210,8 +202,10 @@ class Basis(object):
     @slice_transform
     def transform(self, X):
         """
-        Return the basis function applied to X, i.e. Phi(X, params), where
-        params can also optionally be used and learned.
+        Return the basis function applied to X.
+
+        I.e. Phi(X, params), where params can also optionally be used and
+        learned.
 
         Parameters
         ----------
@@ -231,8 +225,7 @@ class Basis(object):
     @slice_transform
     def grad(self, X):
         """
-        Return the gradient of the basis function w.r.t.\ each of the
-        parameters.
+        Return the gradient of the basis function for each parameter.
 
         Parameters
         ----------
@@ -252,6 +245,29 @@ class Basis(object):
             *no* parameters, :code:`[]` is returned.
         """
         return []
+
+    @slice_transform
+    def get_dim(self, X):
+        """
+        Get the output dimensionality of this basis.
+
+        This makes a cheap call to transform with the initial parameter values
+        to ascertain the dimensionality of the output features.
+
+        Parameter
+        --------
+        X: ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+
+        Returns
+        -------
+        int:
+            The dimensionality of the basis.
+        """
+        args = [p.value for p in atleast_list(self.params) if p.value != []]
+        D = self.transform(X[[0]], *args).shape[1]
+        return D
 
     def _transform_popargs(self, X, *args):
 
@@ -274,12 +290,12 @@ class Basis(object):
 
     @property
     def params(self):
-        """ Get this object's Parameter types. """
+        """Get this object's Parameter types."""
         return self._params
 
     @params.setter
     def params(self, params):
-        """ Set this object's Parameter types. """
+        """Set this object's Parameter types."""
         self._params = params
 
     def __add__(self, other):
@@ -325,14 +341,13 @@ class BiasBasis(Basis):
         ndarray:
             of shape (N, 1) of ones * self.offset.
         """
-
         N = len(X)
         return np.ones((N, 1)) * self.offset
 
 
 class LinearBasis(Basis):
     """
-    Linear basis class, basically this just prepends a columns of ones onto X
+    Linear basis class, basically this just prepends a columns of ones onto X.
 
     Parameters
     ----------
@@ -361,14 +376,15 @@ class LinearBasis(Basis):
         ndarray:
             of shape (N, d+1), or (N, d) depending on onescol.
         """
-
         N, D = X.shape
         return np.hstack((np.ones((N, 1)), X)) if self.onescol else X
 
 
 class PolynomialBasis(Basis):
     r"""
-    Polynomial basis class, this essentially creates the concatenation,
+    Polynomial basis class.
+
+    This essentially creates the concatenation,
     :math:`\boldsymbol\Phi = [\mathbf{X}^0, \mathbf{X}^1, ..., \mathbf{X}^p]`
     where :math:`p` is the :code:`order` of the polynomial.
 
@@ -408,7 +424,6 @@ class PolynomialBasis(Basis):
             of shape (N, d*order+1), the extra 1 is from a prepended ones
             column.
         """
-
         N, D = X.shape
 
         pow_arr = np.arange(self.order) + 1
@@ -476,7 +491,6 @@ class RadialBasis(Basis):
         ndarray:
             of shape (N, D) where D is number of RBF centres.
         """
-
         N, d = X.shape
         lenscale = self._checkdim(d, lenscale)
 
@@ -485,7 +499,7 @@ class RadialBasis(Basis):
 
     @slice_transform
     def grad(self, X, lenscale):
-        """
+        r"""
         Get the gradients of this basis w.r.t.\ the length scale.
 
         Parameters
@@ -503,7 +517,6 @@ class RadialBasis(Basis):
             of shape (N, D) where D is number of RBF centres. This is
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
-
         N, d = X.shape
         lenscale = self._checkdim(d, lenscale)
 
@@ -545,16 +558,16 @@ class RadialBasis(Basis):
 
 class SigmoidalBasis(RadialBasis):
     """
-    Sigmoidal Basis
+    Sigmoidal Basis.
 
     Parameters
     ----------
     centres: ndarray
-        array of shape (Dxd) where D is the number of centres for
-        the bases, and d is the dimensionality of X.
+        array of shape (Dxd) where D is the number of centres for the bases,
+        and d is the dimensionality of X.
     lenscale_init: Parameter, optional
         A scalar parameter to bound and initialise the length scales for
-        optimization
+        optimization.
     """
 
     @slice_transform
@@ -585,7 +598,6 @@ class SigmoidalBasis(RadialBasis):
         ndarray:
             of shape (N, D) where D is number of centres.
         """
-
         N, d = X.shape
         lenscale = self._checkdim(d, lenscale)
 
@@ -618,7 +630,6 @@ class SigmoidalBasis(RadialBasis):
             of shape (N, D) where D is number of centres. This is
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
-
         N, d = X.shape
         lenscale = self._checkdim(d, lenscale)
 
@@ -633,7 +644,7 @@ class SigmoidalBasis(RadialBasis):
 
 class RandomRBF(RadialBasis):
     """
-    Random RBF Basis -- Approximates an RBF kernel function
+    Random RBF Basis -- Approximates an RBF kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) RBF covariance function.
@@ -681,7 +692,6 @@ class RandomRBF(RadialBasis):
             of shape (N, 2*nbases) where nbases is number of random bases to
             use, given in the constructor.
         """
-
         N, D = X.shape
         lenscale = self._checkdim(D, lenscale)[:, np.newaxis]
 
@@ -710,7 +720,6 @@ class RandomRBF(RadialBasis):
             ARD, i.e. scalar lenscale, this is just a 2D array). This is
             :math:`\partial \Phi(\mathbf{X}) / \partial \mathbf{l}`
         """
-
         N, D = X.shape
         lenscale = self._checkdim(D, lenscale)[:, np.newaxis]
 
@@ -732,7 +741,7 @@ class RandomRBF(RadialBasis):
 
 class RandomLaplace(RandomRBF):
     """
-    Random Laplace Basis -- Approximates a Laplace kernel function
+    Random Laplace Basis -- Approximates a Laplace kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Laplace covariance function.
@@ -758,7 +767,7 @@ class RandomLaplace(RandomRBF):
 
 class RandomCauchy(RandomRBF):
     """
-    Random Cauchy Basis -- Approximates a Cauchy kernel function
+    Random Cauchy Basis -- Approximates a Cauchy kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Cauchy covariance function.
@@ -777,6 +786,7 @@ class RandomCauchy(RandomRBF):
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
     """
+
     def _weightsamples(self):
 
         # A draw from a (regular) mv laplace is the same as:
@@ -793,7 +803,7 @@ class RandomCauchy(RandomRBF):
 
 class RandomMatern32(RandomRBF):
     """
-    Random Matern 3/2 Basis -- Approximates a Matern 3/2 kernel function
+    Random Matern 3/2 Basis -- Approximates a Matern 3/2 kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Matern covariance function.
@@ -835,7 +845,7 @@ class RandomMatern32(RandomRBF):
 
 class RandomMatern52(RandomMatern32):
     """
-    Random Matern 5/2 Basis -- Approximates a Matern 5/2 kernel function
+    Random Matern 5/2 Basis -- Approximates a Matern 5/2 kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Matern covariance function.
@@ -861,8 +871,10 @@ class RandomMatern52(RandomMatern32):
 
 class FastFoodRBF(RandomRBF):
     """
-    Fast Food radial basis function, which is an approximation of the random
-    radial basis function for a large number of bases.
+    Fast Food radial basis function.
+
+    This is an approximation of the random radial basis function for a large
+    number of bases.
 
     This will make a linear regression model approximate a GP with an RBF
     covariance function.
@@ -909,7 +921,6 @@ class FastFoodRBF(RandomRBF):
             of shape (N, 2*nbases) where nbases is number of random bases to
             use, given in the constructor (to nearest larger two power).
         """
-
         lenscale = self._checkdim(X.shape[1], lenscale)
 
         VX = self._makeVX(X / lenscale)
@@ -918,7 +929,7 @@ class FastFoodRBF(RandomRBF):
 
     @slice_transform
     def grad(self, X, lenscale):
-        """
+        r"""
         Get the gradients of this basis w.r.t.\ the length scale.
 
         parameters
@@ -937,7 +948,6 @@ class FastFoodRBF(RandomRBF):
             again to the nearest larger two power. This is
             :math:`\partial \phi(\mathbf{x}) / \partial l`
         """
-
         d = X.shape[1]
         lenscale = self._checkdim(d, lenscale)
 
@@ -999,8 +1009,7 @@ class FastFoodRBF(RandomRBF):
 
 class FastFoodGM(FastFoodRBF):
     """
-    A single mixture component from a Gaussian spectral mixture kernel
-    approximation.
+    A mixture component from a Gaussian spectral mixture kernel approximation.
 
     This (paritally) implements the GM basis from "A la Carte - Learning Fast
     Kernels".
@@ -1055,7 +1064,6 @@ class FastFoodGM(FastFoodRBF):
             of shape (N, 4*nbases) where nbases is number of random bases to
             use, given in the constructor (to nearest larger two power).
         """
-
         mean = self._checkdim(X.shape[1], mean, paramind=0)
         lenscale = self._checkdim(X.shape[1], lenscale, paramind=1)
 
@@ -1069,9 +1077,8 @@ class FastFoodGM(FastFoodRBF):
 
     @slice_transform
     def grad(self, X, mean, lenscale):
-        """
-        Get the gradients of this basis w.r.t.\ the frequency mean and length
-        scale.
+        r"""
+        Get the gradients of this basis w.r.t.\ the mean and length scales.
 
         parameters
         ----------
@@ -1094,7 +1101,6 @@ class FastFoodGM(FastFoodRBF):
             again to the nearest larger two power. This is
             :math:`\partial \phi(\mathbf{x}) / \partial l`
         """
-
         d = X.shape[1]
         mean = self._checkdim(d, mean, paramind=0)
         lenscale = self._checkdim(d, lenscale, paramind=1)
@@ -1147,7 +1153,7 @@ class FastFoodGM(FastFoodRBF):
 def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
                     ncomponents=5, means_init=None, lenscales_init=None):
     """
-    Make a Gaussian spectral mixture basis
+    Make a Gaussian spectral mixture basis.
 
     This is a helper function for easily creating a Gaussian spectral mixture
     basis from multiple FasFoodGM mixture components. This implements the full
@@ -1181,7 +1187,6 @@ def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
     GausSpecMix: BasisCat
         A concatenation of :code:`FastFoodGM` bases to make the full mixture.
     """
-
     if means_init is None:
         # Random values with random offset
         if Xdim > 1:
@@ -1217,7 +1222,7 @@ def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
 #
 
 class BasisCat(object):
-    """ A class that implements concatenation of bases. """
+    """A class that implements concatenation of bases."""
 
     def __init__(self, basis_list):
 
@@ -1275,10 +1280,14 @@ class BasisCat(object):
 
             yield dPhi
 
+    def get_dim(self, X):
+
+        return np.sum((b.get_dim(X) for b in self.bases))
+
     @property
     def params(self):
 
-        paramlist = [b.params for b in self.bases if b.params != []]
+        paramlist = [b.params for b in self.bases if b.params.value != []]
         params = append_or_extend([], *paramlist)
 
         return params[0] if len(params) == 1 else params

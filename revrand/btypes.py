@@ -109,7 +109,7 @@ class Parameter(object):
 
     Attributes
     ----------
-    value: scalar or ndarray
+    value: scalar or ndarray, optional
         a value to associate with this parameter. This is typically used as an
         initial value for an optimizer.
     bound: Bound
@@ -119,7 +119,7 @@ class Parameter(object):
         the shape of value, returning (1,) if value is scalar
     """
 
-    def __init__(self, value, bounds=Bound()):
+    def __init__(self, value=[], bounds=Bound()):
 
         self.value = value
         self.shape = np.shape(value)
@@ -187,29 +187,3 @@ def shape(parameter):
         shape of the :code:`Parameter` object
     """
     return parameter.shape
-
-
-def get_values(parameters):
-    """
-    Get all of the values in a sequence of Parameter instances.
-
-    Parameters
-    ----------
-    parameters: sequence or Parameter
-        A sequence of Parameter objects or a single Parameter object
-
-    Returns
-    -------
-    list:
-        returns a list of Parameter.value calls, even for a single parameter
-
-    Examples
-    --------
-    >>> params = [Parameter(np.ones(2), Bound()), Parameter(2., Positive())]
-    >>> get_values(params)
-    [array([ 1.,  1.]), 2.0]
-    """
-    if isinstance(parameters, Parameter):
-        return [parameters.value]
-
-    return [p.value for p in parameters]

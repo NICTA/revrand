@@ -368,6 +368,8 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
 
 def sgd_iter(maxiter, N, batch_size, random_state=None):
     """
+    Create random batches for Stochastic gradients.
+
     Batch index generator for SGD that will yeild random batches for a
     a defined number of iterations. This calls _sgd_pass until the required
     number of iterations have been reached.
@@ -388,7 +390,6 @@ def sgd_iter(maxiter, N, batch_size, random_state=None):
     ndarray:
         of size (batch_size,) of random (int).
     """
-
     perms = endless_permutations(N, random_state)
 
     for _ in range(maxiter):
