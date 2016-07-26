@@ -130,8 +130,8 @@ def ravel(parameter):
     """
     Flatten a :code:`Parameter`.
 
-    Parameter
-    --------
+    Parameters
+    ----------
     parameter: Parameter
         A :code:`Parameter` object
 

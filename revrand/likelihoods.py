@@ -16,11 +16,19 @@ from .mathfun.special import safesoftplus, softplus, LOGTINY
 #
 
 class Bernoulli():
-    """
+    r"""
     Bernoulli likelihood class for (binary) classification tasks.
 
     A logistic transformation function is used to map the latent function from
     the GLM prior into a probability.
+
+    .. math::
+
+        p(y_i | f_i) = \sigma(f_i) ^ {y_i} (1 - \sigma(f_i))^{1 - y_i}
+
+    where :math:`y_i` is a target, :math:`f_i` the value of the latent function
+    corresponding to the target, and :math:`\sigma(\cdot)` is the logistic
+    sigmoid.
     """
 
     _params = Parameter()
@@ -74,7 +82,7 @@ class Bernoulli():
         Returns
         -------
         Ey: ndarray
-            expected value of y, :math:`\mathbb{E}[y|f]`.
+            expected value of y, :math:`\mathbb{E}[\mathbf{y}|\mathbf{f}]`.
         """
         return expit(f)
 
@@ -206,11 +214,21 @@ class Bernoulli():
 
 
 class Binomial(Bernoulli):
-    """
+    r"""
     Binomial likelihood class.
 
     A logistic transformation function is used to map the latent function from
     the GLM prior into a probability.
+
+    .. math::
+
+        p(y_i | f_i) = \genfrac(){0pt}{}{n}{y_i}
+            \sigma(f_i) ^ {y_i} (1 - \sigma(f_i))^{n - y_i}
+
+    where :math:`y_i` is a target, :math:`f_i` the value of the latent function
+    corresponding to the target, :math:`n` is the total possible count, and
+    :math:`\sigma(\cdot)` is the logistic sigmoid. :math:`n` can also be
+    applied per observation.
     """
 
     def loglike(self, y, f, n):
@@ -252,7 +270,7 @@ class Binomial(Bernoulli):
         Returns
         -------
         Ey: ndarray
-            expected value of y, :math:`\mathbb{E}[y|f]`.
+            expected value of y, :math:`\mathbb{E}[\mathbf{y}|\mathbf{f}]`.
         """
         return expit(f) * n
 
@@ -346,11 +364,20 @@ class Binomial(Bernoulli):
 
 
 class Gaussian(Bernoulli):
-    """
+    r"""
     A univariate Gaussian likelihood for general regression tasks.
 
     No transformation function is needed since this is (conditionally)
     conjugate to the GLM prior.
+
+    .. math::
+
+        p(y_i | f_i) = \frac{1}{\sqrt{2 \pi \sigma^2}}
+            \exp\left(- \frac{(y_i - f_i)^2}{2 \sigma^2} \right)
+
+    where :math:`y_i` is a target, :math:`f_i` the value of the latent function
+    corresponding to the target and :math:`\sigma` is the observation noise
+    (standard deviation).
 
     Parameters
     ----------
@@ -400,7 +427,7 @@ class Gaussian(Bernoulli):
         Returns
         -------
         Ey: ndarray
-            expected value of y, :math:`\mathbb{E}[y|f]`.
+            expected value of y, :math:`\mathbb{E}[\mathbf{y}|\mathbf{f}]`.
         """
         return f
 
@@ -541,11 +568,20 @@ class Gaussian(Bernoulli):
 
 
 class Poisson(Bernoulli):
-    """
+    r"""
     A Poisson likelihood, useful for various Poisson process tasks.
 
     An exponential transformation function and a softplus transformation
     function have been implemented.
+
+    .. math::
+
+        p(y_i | f_i) = \frac{g(f_i)^{y_i} e^{-g(f_i)}}{y_i!}
+
+    where :math:`y_i` is a target, :math:`f_i` the value of the latent function
+    corresponding to the target, and :math:`g(\cdot)` is the tranformation
+    function, which can be either an exponential function, or a softplus
+    function (:math:`\log(1 + \exp(f_i)`).
 
     Parameters
     ----------
@@ -600,7 +636,7 @@ class Poisson(Bernoulli):
         Returns
         -------
         Ey: ndarray
-            expected value of y, :math:`\mathbb{E}[y|f]`.
+            expected value of y, :math:`\mathbb{E}[\mathbf{y}|\mathbf{f}]`.
         """
         return np.exp(f) if self.tranfcn == 'exp' else softplus(f)
 

@@ -334,18 +334,20 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         .. math ::
 
-            \mathbb{E}[y^*] = \int g(\mathbf{w}^T \boldsymbol\phi^{*})
+            \mathbb{E}[y^* | \mathbf{x^*}, \mathbf{X}, y] &=
+                \int \mathbb{E}[y^* | \mathbf{w}, \phi(\mathbf{x}^*)]
                 p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
 
-            \mathbb{V}[y^*] = \int \left(g(\mathbf{w}^T \boldsymbol\phi^{*})
-                - \mathbb{E}[y^*]\right)^2
+            \mathbb{V}[y^* | \mathbf{x^*}, \mathbf{X}, y] &=
+                \int \left(\mathbb{E}[y^* | \mathbf{w}, \phi(\mathbf{x}^*)]
+                - \mathbb{E}[y^* | \mathbf{x^*}, \mathbf{X}, y]\right)^2
                 p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi) d\mathbf{w},
 
-        where :math:`g(\cdot)` is the activation (inverse link) link function
-        used by the GLM, and :math:`p(\mathbf{w} | \mathbf{y},
-        \boldsymbol\Phi)` is the posterior distribution over weights (from
-        :code:`learn`). Here are few concrete examples of how we can use these
-        values,
+        where :math:`\mathbb{E}[y^* | \mathbf{w}, \phi(\mathbf{x}^*)]` is the
+        the expected value of :math:`y^*` from  the likelihood, and
+        :math:`p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi)` is the posterior
+        distribution over weights (from :code:`learn`). Here are few concrete
+        examples of how we can use these values,
 
         - Gaussian likelihood: these are just the predicted mean and variance,
           see :code:`revrand.regression.predict`

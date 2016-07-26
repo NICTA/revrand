@@ -254,8 +254,8 @@ class Basis(object):
         This makes a cheap call to transform with the initial parameter values
         to ascertain the dimensionality of the output features.
 
-        Parameter
-        --------
+        Parameters
+        ----------
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
@@ -308,11 +308,15 @@ class Basis(object):
 
 
 class BiasBasis(Basis):
-    """
+    r"""
     Bias Basis for adding a bias term to a regressor.
 
     This just returns a column of a constant value so a bias term can be
     learned by a regressor.
+
+    .. math::
+
+        \phi(\mathbf{X}) = \mathbf{1} * \text{const}
 
     Parameters
     ----------
@@ -346,8 +350,12 @@ class BiasBasis(Basis):
 
 
 class LinearBasis(Basis):
-    """
+    r"""
     Linear basis class, basically this just prepends a columns of ones onto X.
+
+    .. math::
+
+        \phi(\mathbf{X}) = [\mathbf{1}, \mathbf{X}]
 
     Parameters
     ----------
@@ -385,14 +393,17 @@ class PolynomialBasis(Basis):
     Polynomial basis class.
 
     This essentially creates the concatenation,
-    :math:`\boldsymbol\Phi = [\mathbf{X}^0, \mathbf{X}^1, ..., \mathbf{X}^p]`
+
+    .. math::
+
+        \phi(\mathbf{X}) = [\mathbf{1}, \mathbf{X}^1, \ldots, \mathbf{X}^p]
+
     where :math:`p` is the :code:`order` of the polynomial.
 
     Parameters
     ----------
     order: int
-        the order of the polynomial to create, i.e. the last power to raise
-        X to in the concatenation Phi = [X^0, X^1, ..., X^order].
+        the order of the polynomial to create.
     include_bias: bool, optional
         If True (default), include the bias column (column of ones which
         acts as the intercept term in a linear model)
@@ -446,8 +457,16 @@ class PolynomialBasis(Basis):
 
 
 class RadialBasis(Basis):
-    """
+    r"""
     Radial basis class.
+
+    .. math::
+
+        \phi(\mathbf{X}) =
+            \exp \left( -\frac{\|\mathbf{X} - \mathbf{C}\|^2} {2 l^2} \right)
+
+    Where :math:`\mathbf{C}` are radial basis centres, and :math:`l` is a
+    length scale.
 
     Parameters
     ----------
@@ -557,8 +576,20 @@ class RadialBasis(Basis):
 
 
 class SigmoidalBasis(RadialBasis):
-    """
+    r"""
     Sigmoidal Basis.
+
+    .. math::
+
+        \phi(\mathbf{X}) =
+            \sigma \left( \frac{\|\mathbf{X} - \mathbf{C}\|}{l} \right)
+
+    where :math:`\mathbf{C}` are sigmoidal basis centres, :math:`l` is a
+    length scale and :math:`\sigma` is the logistic sigmoid function defined by
+
+    .. math::
+
+        \sigma(a) = \frac{1}{1+e^{-a}}.
 
     Parameters
     ----------
@@ -574,16 +605,6 @@ class SigmoidalBasis(RadialBasis):
     def transform(self, X, lenscale):
         r"""
         Apply the sigmoid basis function to X.
-
-        .. math::
-
-            \phi_j (x) = \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
-
-        where :math:`\sigma` is the logistic sigmoid function defined by
-
-        .. math::
-
-            \sigma(a) = \frac{1}{1+e^{-a}}
 
         Parameters
         ----------
@@ -606,15 +627,7 @@ class SigmoidalBasis(RadialBasis):
     @slice_transform
     def grad(self, X, lenscale):
         r"""
-        Get the gradients of this basis w.r.t.\ the length scale.
-
-        .. math::
-
-            \frac{\partial}{\partial s} \phi_j(x) =
-            - \frac{\| x - \mu_j \|_2}{s^2}
-            \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
-            \left ( 1 - \sigma \left ( \frac{\| x - \mu_j \|_2}{s} \right )
-            \right )
+        Get the gradients of this basis w.r.t.\  the length scale.
 
         Parameters
         ----------
@@ -643,11 +656,18 @@ class SigmoidalBasis(RadialBasis):
 
 
 class RandomRBF(RadialBasis):
-    """
+    r"""
     Random RBF Basis -- Approximates an RBF kernel function.
 
     This will make a linear regression model approximate a GP with an
-    (optionally ARD) RBF covariance function.
+    (optionally ARD) RBF covariance function,
+
+    .. math::
+
+        \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+            \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|^2}{2 l^2} \right)
+
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
     Parameters
     ----------
@@ -740,11 +760,18 @@ class RandomRBF(RadialBasis):
 
 
 class RandomLaplace(RandomRBF):
-    """
+    r"""
     Random Laplace Basis -- Approximates a Laplace kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Laplace covariance function.
+
+    .. math::
+
+        \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+            \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
+
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
     Parameters
     ----------
@@ -766,11 +793,18 @@ class RandomLaplace(RandomRBF):
 
 
 class RandomCauchy(RandomRBF):
-    """
+    r"""
     Random Cauchy Basis -- Approximates a Cauchy kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Cauchy covariance function.
+
+    .. math::
+
+        \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+            \frac{1}{1 + (\| \mathbf{x} - \mathbf{x}' \| / l)^2}
+
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
     Parameters
     ----------
@@ -802,11 +836,20 @@ class RandomCauchy(RandomRBF):
 
 
 class RandomMatern32(RandomRBF):
-    """
+    r"""
     Random Matern 3/2 Basis -- Approximates a Matern 3/2 kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Matern covariance function.
+
+    .. math::
+
+        \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+            \left(1 + \sqrt{3} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
+            \exp
+            \left(- \sqrt{3} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
+
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
     Parameters
     ----------
@@ -844,11 +887,22 @@ class RandomMatern32(RandomRBF):
 
 
 class RandomMatern52(RandomMatern32):
-    """
+    r"""
     Random Matern 5/2 Basis -- Approximates a Matern 5/2 kernel function.
 
     This will make a linear regression model approximate a GP with an
     (optionally ARD) Matern covariance function.
+
+    .. math::
+
+        \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+            \left(1 + \sqrt{5} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l}
+                + \frac{5 \| \mathbf{x} - \mathbf{x}' \|^2}{3l^2}
+            \right)
+            \exp
+            \left(- \sqrt{5} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
+
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
     Parameters
     ----------
@@ -870,14 +924,18 @@ class RandomMatern52(RandomMatern32):
 
 
 class FastFoodRBF(RandomRBF):
-    """
+    r"""
     Fast Food radial basis function.
 
     This is an approximation of the random radial basis function for a large
     number of bases.
 
-    This will make a linear regression model approximate a GP with an RBF
-    covariance function.
+    .. math::
+
+        \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+            \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|^2}{2 l^2} \right)
+
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
     Parameters
     ----------
@@ -1011,8 +1069,9 @@ class FastFoodGM(FastFoodRBF):
     """
     A mixture component from a Gaussian spectral mixture kernel approximation.
 
-    This (paritally) implements the GM basis from "A la Carte - Learning Fast
-    Kernels".
+    This implements a GM basis component from "A la Carte - Learning Fast
+    Kernels". This essentially learns the form of a kernel function, and so has
+    no explicit kernel representation!
 
     Parameters
     ----------
