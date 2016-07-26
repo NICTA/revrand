@@ -12,13 +12,14 @@ revrand.utils.base
       append_or_extend
       atleast_list
       couple
-      custom_reshape
       decouple
       flatten
       isgenerator
       issequence
       map_indices
       nwise
+      scalar_reshape
+      sumprod
       tee
       unflatten
    

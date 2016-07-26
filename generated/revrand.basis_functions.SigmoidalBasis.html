@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.SigmoidalBasis &mdash; revrand 0.4.2 documentation</title>
+    <title>revrand.basis_functions.SigmoidalBasis &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
     <link rel="next" title="revrand.basis_functions.RandomRBF" href="revrand.basis_functions.RandomRBF.html" />
     <link rel="prev" title="revrand.basis_functions.RadialBasis" href="revrand.basis_functions.RadialBasis.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.basis_functions.RadialBasis.html" title="revrand.basis_functions.RadialBasis"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" accesskey="U">Basis Functions</a> &raquo;</li> 
       </ul>
     </div>  
@@ -67,16 +67,23 @@
 <dl class="class">
 <dt id="revrand.basis_functions.SigmoidalBasis">
 <em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">SigmoidalBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sigmoidal Basis</p>
+<dd><p>Sigmoidal Basis.</p>
+<div class="math">
+\[\phi(\mathbf{X}) =
+    \sigma \left( \frac{\|\mathbf{X} - \mathbf{C}\|}{l} \right)\]</div>
+<p>where <span class="math">\(\mathbf{C}\)</span> are sigmoidal basis centres, <span class="math">\(l\)</span> is a
+length scale and <span class="math">\(\sigma\)</span> is the logistic sigmoid function defined by</p>
+<div class="math">
+\[\sigma(a) = \frac{1}{1+e^{-a}}.\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for
-the bases, and d is the dimensionality of X.</li>
+<li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for the bases,
+and d is the dimensionality of X.</li>
 <li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
-optimization</li>
+optimization.</li>
 </ul>
 </td>
 </tr>
@@ -97,8 +104,14 @@ optimization</li>
 <tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.SigmoidalBasis.__init__" title="revrand.basis_functions.SigmoidalBasis.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(centres[,&nbsp;lenscale_init])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X,&nbsp;lenscale)</td>
-<td>Get the gradients of this basis w.r.t.the length scale.</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_dim</span></code>(X)</td>
+<td>Get the output dimensionality of this basis.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X,&nbsp;lenscale)</td>
+<td>Get the gradients of this basis w.r.t. the length scale.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X,&nbsp;lenscale)</td>
+<td>Apply the sigmoid basis function to X.</td>
 </tr>
 </tbody>
 </table>
@@ -124,12 +137,51 @@ optimization</li>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.BiasBasis.html">revrand.basis_functions.BiasBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.LinearBasis.html">revrand.basis_functions.LinearBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.PolynomialBasis.html">revrand.basis_functions.PolynomialBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RadialBasis.html">revrand.basis_functions.RadialBasis</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.basis_functions.SigmoidalBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomRBF.html">revrand.basis_functions.RandomRBF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomLaplace.html">revrand.basis_functions.RandomLaplace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomCauchy.html">revrand.basis_functions.RandomCauchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern32.html">revrand.basis_functions.RandomMatern32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern52.html">revrand.basis_functions.RandomMatern52</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodRBF.html">revrand.basis_functions.FastFoodRBF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodGM.html">revrand.basis_functions.FastFoodGM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.spectralmixture.html">revrand.basis_functions.spectralmixture</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="revrand.basis_functions.RadialBasis.html"
                         title="previous chapter">revrand.basis_functions.RadialBasis</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="revrand.basis_functions.RandomRBF.html"
                         title="next chapter">revrand.basis_functions.RandomRBF</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/revrand.basis_functions.SigmoidalBasis.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -159,7 +211,7 @@ optimization</li>
         <li class="right" >
           <a href="revrand.basis_functions.RadialBasis.html" title="revrand.basis_functions.RadialBasis"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../basis_funcs.html" >Basis Functions</a> &raquo;</li> 
       </ul>
     </div>

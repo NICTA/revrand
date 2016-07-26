@@ -14,7 +14,9 @@ revrand.basis_functions.FastFoodRBF
    .. autosummary::
    
       ~FastFoodRBF.__init__
+      ~FastFoodRBF.get_dim
       ~FastFoodRBF.grad
+      ~FastFoodRBF.transform
    
    
 

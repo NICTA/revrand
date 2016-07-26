@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Standard Linear Model &mdash; revrand 0.4.2 documentation</title>
+    <title>Standard Linear Model &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
     <link rel="next" title="Generalised Linear Model" href="glm.html" />
     <link rel="prev" title="revrand.basis_functions.spectralmixture" href="generated/revrand.basis_functions.spectralmixture.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="generated/revrand.basis_functions.spectralmixture.html" title="revrand.basis_functions.spectralmixture"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -62,7 +62,7 @@
             
   <div class="section" id="module-revrand.slm">
 <span id="standard-linear-model"></span><h1>Standard Linear Model<a class="headerlink" href="#module-revrand.slm" title="Permalink to this headline">¶</a></h1>
-<p>Various Bayesian linear regression learning and prediction functions.</p>
+<p>The standard Bayesian linear regression model.</p>
 <p>By using the appropriate bases, this will also yield a simple implementation of
 the &#8220;A la Carte&#8221; GP <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
 <table class="docutils footnote" frame="void" id="id2" rules="none">
@@ -74,17 +74,15 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 2015.</td></tr>
 </tbody>
 </table>
-<dl class="function">
-<dt id="revrand.slm.learn">
-<code class="descclassname">revrand.slm.</code><code class="descname">learn</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-08</em>, <em>maxiter=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.learn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Learn the parameters and hyperparameters of a Bayesian linear regressor.</p>
+<dl class="class">
+<dt id="revrand.slm.StandardLinearModel">
+<em class="property">class </em><code class="descclassname">revrand.slm.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-08</em>, <em>maxiter=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bayesian Standard linear model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array input dataset (N samples, d dimensions).</li>
-<li><strong>y</strong> (<em>ndarray</em>) &#8211; (N,) array targets (N samples)</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>var</strong> (<em>Parameter, optional</em>) &#8211; observation variance initial value.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
@@ -93,14 +91,26 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of posterior weight means (D is the dimension of the
-features).</li>
-<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D, D) array of posterior weight variances.</li>
-<li><strong>bparams</strong> (<em>sequence</em>) &#8211; learned sequence of basis object hyperparameters.</li>
-<li><em>float</em> &#8211; learned observation variance</li>
+</tbody>
+</table>
+<dl class="method">
+<dt id="revrand.slm.StandardLinearModel.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the hyperparameters of a Bayesian linear regressor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array input dataset (N samples, d dimensions).</li>
+<li><strong>y</strong> (<em>ndarray</em>) &#8211; (N,) array targets (N samples)</li>
 </ul>
-</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">self</p>
 </td>
 </tr>
 </tbody>
@@ -111,8 +121,8 @@ likelihood, rather than log marginal likelihood directly. In the case
 of a full posterior convariance matrix, this bound is tight and the
 exact solution will be found (modulo local minima for the
 hyperparameters).</p>
-<p>This uses the python logging module for displaying learning status.
-To view these messages have something like,</p>
+<p>This uses the python logging module for displaying learning status. To
+view these messages have something like,</p>
 <div class="code highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
@@ -121,37 +131,49 @@ To view these messages have something like,</p>
 <p>in your calling code.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="revrand.slm.predict">
-<code class="descclassname">revrand.slm.</code><code class="descname">predict</code><span class="sig-paren">(</span><em>Xs</em>, <em>basis</em>, <em>m</em>, <em>C</em>, <em>hypers</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Predict using Bayesian linear regression.</p>
+<dl class="method">
+<dt id="revrand.slm.StandardLinearModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict mean from Bayesian linear regression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>Xs</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</li>
-<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
-<li><strong>m</strong> (<em>ndarray</em>) &#8211; (D,) array of regression weights (posterior).</li>
-<li><strong>C</strong> (<em>ndarray</em>) &#8211; (D, D) array of regression weight covariances (posterior).</li>
-<li><strong>hypers</strong> (<em>sequence</em>) &#8211; A sequence of hyperparameters of the basis object.</li>
-<li><strong>var</strong> (<em>float</em>) &#8211; observation variance.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y_star for the query inputs, X_star
-of shape (N_star,).</li>
-<li><strong>Vf</strong> (<em>ndarray</em>) &#8211; The expected variance of f_star for the query inputs,
-X_star of shape (N_star,).</li>
-<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of y_star for the query inputs,
-X_star of shape (N_star,).</li>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; The expected value of y_star for the query inputs, X_star of shape
+(N_star,).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="revrand.slm.StandardLinearModel.predict_moments">
+<code class="descname">predict_moments</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel.predict_moments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full predictive distribution from Bayesian linear regression.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y_star for the query inputs, X_star of shape
+(N_star,).</li>
+<li><strong>Vf</strong> (<em>ndarray</em>) &#8211; The expected variance of f_star for the query inputs, X_star of
+shape (N_star,).</li>
+<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of y_star for the query inputs, X_star of
+shape (N_star,).</li>
 </ul>
-</p>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -162,12 +184,35 @@ X_star of shape (N_star,).</li>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="generated/revrand.basis_functions.spectralmixture.html"
                         title="previous chapter">revrand.basis_functions.spectralmixture</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="glm.html"
                         title="next chapter">Generalised Linear Model</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/slm.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -197,7 +242,7 @@ X_star of shape (N_star,).</li>
         <li class="right" >
           <a href="generated/revrand.basis_functions.spectralmixture.html" title="revrand.basis_functions.spectralmixture"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

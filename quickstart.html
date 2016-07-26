@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Quickstart Guide &mdash; revrand 0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Welcome to revrand’s documentation!" href="index.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to revrand’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quickstart-guide">
+<h1>Quickstart Guide<a class="headerlink" href="#quickstart-guide" title="Permalink to this headline">¶</a></h1>
+<p>To install, simply run <code class="docutils literal"><span class="pre">setup.py</span></code>:</p>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>$ python setup.py install
+</pre></div>
+</div>
+<p>or install with <code class="docutils literal"><span class="pre">pip</span></code>:</p>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>$ pip install git+https://github.com/nicta/revrand.git
+</pre></div>
+</div>
+<p>Refer to <a class="reference external" href="docs/installation.rst">docs/installation.rst</a> for advanced
+installation instructions.</p>
+<p>Have a look at some of the demo
+<a class="reference external" href="https://github.com/NICTA/revrand/tree/master/demos">notebooks</a>.</p>
+<div class="section" id="bayesian-linear-regression-example">
+<h2>Bayesian Linear Regression Example<a class="headerlink" href="#bayesian-linear-regression-example" title="Permalink to this headline">¶</a></h2>
+<p>Here is a very quick example of how to use Bayesian linear regression with
+optimisation of the likelihood noise, regulariser and basis function
+parameters. Assuming we already have training noisy targets <code class="docutils literal"><span class="pre">y</span></code>, inputs
+<code class="docutils literal"><span class="pre">X</span></code>, and some query inputs <code class="docutils literal"><span class="pre">Xs</span></code> (as well as the true noiseless function
+<code class="docutils literal"><span class="pre">f</span></code>):</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">StandardLinearModel</span>
+<span class="kn">from</span> <span class="nn">revrand.basis_functions</span> <span class="k">import</span> <span class="n">LinearBasis</span><span class="p">,</span> <span class="n">RandomRBF</span>
+<span class="kn">from</span> <span class="nn">revrand.btypes</span> <span class="k">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Positive</span>
+
+<span class="o">...</span>
+
+<span class="c1"># Concatenate a linear basis and a Random radial basis (GP approx)</span>
+<span class="n">init_lenscale</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Positive</span><span class="p">())</span>  <span class="c1"># init val and bounds</span>
+<span class="n">basis</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> \
+    <span class="o">+</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">nbases</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">Xdim</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">init_lenscale</span><span class="p">)</span>
+
+<span class="c1"># Learn regression parameters and predict</span>
+<span class="n">slm</span> <span class="o">=</span> <span class="n">StandardLinearModel</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
+<span class="n">slm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">Eys</span><span class="p">,</span> <span class="n">Vfs</span><span class="p">,</span> <span class="n">Vys</span> <span class="o">=</span> <span class="n">slm</span><span class="o">.</span><span class="n">predict_moments</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span>
+
+<span class="c1"># Training/Truth</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;k.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Training&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Truth&#39;</span><span class="p">)</span>
+
+<span class="c1"># Plot Regressor</span>
+<span class="n">Sys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Vys</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">Eys</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Bayesian linear regression&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">Eys</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Sys</span><span class="p">,</span> <span class="n">Eys</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Sys</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Regression demo&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This script will output something like the following,</p>
+<img alt="_images/blr_demo.png" src="_images/blr_demo.png" />
+</div>
+<div class="section" id="bayesian-generalised-linear-model-example">
+<h2>Bayesian Generalised Linear Model Example<a class="headerlink" href="#bayesian-generalised-linear-model-example" title="Permalink to this headline">¶</a></h2>
+<p>This example is very similar to that above, but now let&#8217;s assume our targets
+<code class="docutils literal"><span class="pre">y</span></code> are drawn from a Poisson likelihood, or observation, distribution which
+is a function of the inputs, <code class="docutils literal"><span class="pre">X</span></code>. The task here is to predict the mean of the
+Poisson distribution for query inputs <code class="docutils literal"><span class="pre">Xs</span></code>, as well as the uncertainty
+associated with the prediction.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">GeneralisedLinearModel</span>
+<span class="kn">from</span> <span class="nn">revrand.basis_functions</span> <span class="k">import</span> <span class="n">RandomRBF</span>
+
+<span class="o">...</span>
+
+<span class="c1"># Random radial basis (GP approx)</span>
+<span class="n">init_lenscale</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Positive</span><span class="p">())</span>  <span class="c1"># init val and bounds</span>
+<span class="n">basis</span> <span class="o">=</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">nbases</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">Xdim</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">init_lenscale</span><span class="p">)</span>
+
+<span class="c1"># Set up the likelihood of the GLM</span>
+<span class="n">llhood</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="o">.</span><span class="n">Poisson</span><span class="p">(</span><span class="n">tranfcn</span><span class="o">=</span><span class="s1">&#39;exp&#39;</span><span class="p">)</span>  <span class="c1"># log link</span>
+
+<span class="c1"># Learn regression parameters and predict</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GeneralisedLinearModel</span><span class="p">(</span><span class="n">llhood</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
+<span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">Eys</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span>
+<span class="n">y95n</span><span class="p">,</span> <span class="n">y95x</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict_interval</span><span class="p">(</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">Xs</span><span class="p">)</span>
+
+<span class="c1"># Training/Truth</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;k.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Training&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Truth&#39;</span><span class="p">)</span>
+
+<span class="c1"># Plot GLM SGD Regressor</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">Eys</span><span class="p">,</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;GLM mean.&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">y95n</span><span class="p">,</span> <span class="n">y95x</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Regression demo&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This script will output something like the following,</p>
+<img alt="_images/glm_demo.png" src="_images/glm_demo.png" />
+</div>
+<div class="section" id="large-scale-learning-with-stochastic-gradients">
+<h2>Large-scale Learning with Stochastic Gradients<a class="headerlink" href="#large-scale-learning-with-stochastic-gradients" title="Permalink to this headline">¶</a></h2>
+<p>By default the GLM uses stochastic gradients to learn all of its
+parameters/hyperparameters and does not require any matrix inversion, and so it
+can be used to learn from large datasets with lots of features
+(slm.learn uses L-BFGS and requires a matrix inversion). We can also use
+the GLM to approximate and scale up regular Bayesian linear regression. For
+instance, if we modify the Bayesian linear regression example from before,</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">...</span>
+
+<span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">likelihoods</span>
+
+<span class="o">...</span>
+
+<span class="c1"># Set up the likelihood of the GLM</span>
+<span class="n">llhood</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">var_init</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">Positive</span><span class="p">()))</span>
+
+<span class="c1"># Learn regression parameters and predict</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GeneralisedLinearModel</span><span class="p">(</span><span class="n">llhood</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
+<span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">Ey_g</span><span class="p">,</span> <span class="n">Vf_g</span><span class="p">,</span> <span class="n">Eyn</span><span class="p">,</span> <span class="n">Eyx</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict_moments</span><span class="p">(</span><span class="n">Xtest</span><span class="p">)</span>
+
+<span class="o">...</span>
+
+<span class="c1"># Plot GLM SGD Regressor</span>
+<span class="n">Vy_g</span> <span class="o">=</span> <span class="n">Vf_g</span> <span class="o">+</span> <span class="n">glm</span><span class="o">.</span><span class="n">like_hypers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Sy_g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Vy_g</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Xpl_s</span><span class="p">,</span> <span class="n">Ey_g</span><span class="p">,</span> <span class="s1">&#39;m-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;GLM&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">Ey_g</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Sy_g</span><span class="p">,</span> <span class="n">Ey_g</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Sy_g</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>This script will output something like the following,</p>
+<img alt="_images/glm_sgd_demo.png" src="_images/glm_sgd_demo.png" />
+<p>We can see the approximation from the GLM is pretty good - this is because it
+uses a mixture of diagonal Gaussians posterior (thereby avoiding a full matrix
+inversion) to approximate the full Gaussian posterior covariance over the
+weights. This also has the advantage of allowing the model to learn multi-modal
+posterior distributions when non-Gaussian likelihoods are required.</p>
+</div>
+<div class="section" id="feature-composition-framework">
+<h2>Feature Composition Framework<a class="headerlink" href="#feature-composition-framework" title="Permalink to this headline">¶</a></h2>
+<p>We have implemented an easy to use and extensible feature-building framework
+within revrand. You have already seen the basics demonstrated in the above
+examples, i.e. concatenation of basis functions,</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">N</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">Xdim</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">nbases</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lenscale</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">lenscale</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(100, 206)</span>
+</pre></div>
+</div>
+<p>There are a few things at work in this example:</p>
+<ul class="simple">
+<li>Both <code class="docutils literal"><span class="pre">LinearBasis</span></code> and <code class="docutils literal"><span class="pre">RandomRBF</span></code> are applied to all of <code class="docutils literal"><span class="pre">X</span></code>, and the
+result is concatenated.</li>
+<li><code class="docutils literal"><span class="pre">LinearBasis</span></code> has pre-pended a column of ones onto <code class="docutils literal"><span class="pre">X</span></code> so a subsequent
+algorithm can learn a &#8220;bias&#8221; term.</li>
+<li><code class="docutils literal"><span class="pre">RandomRBF</span></code> is actually approximating a radial basis <em>kernel</em> function,
+<a class="footnote-reference" href="#id4" id="id1">[3]</a>, so we can approximate how a kernel machine functions with a basis
+function!  This also outputs <code class="docutils literal"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">nbases</span></code> number of basis functions.</li>
+<li>Hence the resulting basis function has a shape of
+<code class="docutils literal"><span class="pre">(N,</span> <span class="pre">d</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">nbases)</span></code>.</li>
+</ul>
+<p>We can also use <em>partial application</em> of basis functions, e.g.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_ind</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> \
+<span class="go">    + RandomRBF(Xdim=d, nbases=100, apply_ind=slice(2, 5))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">lenscale</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(100, 203)</span>
+</pre></div>
+</div>
+<p>Now the basis functions are applied to separate dimensions of the input, <code class="docutils literal"><span class="pre">X</span></code>.
+That is, <code class="docutils literal"><span class="pre">LinearBasis</span></code> takes dimensions 0 and 1, and <code class="docutils literal"><span class="pre">RandomRBF</span></code> takes the
+rest, and again the results are concatenated.</p>
+<p>Finally, if we use these basis functions with any of the algorithms in this
+revrand, <em>the parameters of the basis functions are learned</em> as well! So
+really in the above example <code class="docutils literal"><span class="pre">lenscale</span> <span class="pre">=</span> <span class="pre">1.</span></code> is just an initial value for
+the kernel function length-scale!</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Yang, Z., Smola, A. J., Song, L., &amp; Wilson, A. G. &#8220;A la Carte &#8211;
+Learning Fast Kernels&#8221;. Proceedings of the Eighteenth International
+Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
+2015.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td>Le, Q., Sarlos, T., &amp; Smola, A. &#8220;Fastfood-approximating kernel
+expansions in loglinear time.&#8221; Proceedings of the international conference
+on machine learning. 2013.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[3]</a></td><td>Rahimi, A., &amp; Recht, B. &#8220;Random features for large-scale kernel
+machines.&#8221; Advances in neural information processing systems. 2007.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[4]</td><td>Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
+inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bayesian-linear-regression-example">Bayesian Linear Regression Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bayesian-generalised-linear-model-example">Bayesian Generalised Linear Model Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#large-scale-learning-with-stochastic-gradients">Large-scale Learning with Stochastic Gradients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-composition-framework">Feature Composition Framework</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to revrand&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/quickstart.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to revrand’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

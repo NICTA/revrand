@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Utilities &mdash; revrand 0.4.2 documentation</title>
+    <title>Utilities &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
     <link rel="next" title="revrand.utils.base" href="generated/revrand.utils.base.html" />
     <link rel="prev" title="revrand.optimize.sgd.Momentum" href="generated/revrand.optimize.sgd.Momentum.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="generated/revrand.optimize.sgd.Momentum.html" title="revrand.optimize.sgd.Momentum"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -69,28 +69,28 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.html#module-revrand.utils.base" title="revrand.utils.base"><code class="xref py py-obj docutils literal"><span class="pre">base</span></code></a></td>
-<td></td>
+<td>Assortment of handy functions.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.base.flatten.html#revrand.utils.base.flatten" title="revrand.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">base.flatten</span></code></a>(arys[,&nbsp;order,&nbsp;returns_shapes])</td>
-<td>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly heterogenous dimensions and shapes and concatenate them together into a flat (1d) array.</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.base.flatten.html#revrand.utils.base.flatten" title="revrand.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">base.flatten</span></code></a>(arys[,&nbsp;returns_shapes,&nbsp;hstack,&nbsp;...])</td>
+<td>Flatten a potentially recursive list of multidimensional objects.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.unflatten.html#revrand.utils.base.unflatten" title="revrand.utils.base.unflatten"><code class="xref py py-obj docutils literal"><span class="pre">base.unflatten</span></code></a>(ary,&nbsp;shapes[,&nbsp;order])</td>
-<td>Given a flat (1d) array, and a list of shapes (represented as tuples), return a list of ndarrays with the specified shapes.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.unflatten.html#revrand.utils.base.unflatten" title="revrand.utils.base.unflatten"><code class="xref py py-obj docutils literal"><span class="pre">base.unflatten</span></code></a>(ary,&nbsp;shapes[,&nbsp;reshape])</td>
+<td>Inverse opertation of flatten.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.base.couple.html#revrand.utils.base.couple" title="revrand.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">base.couple</span></code></a>(f,&nbsp;g)</td>
-<td>Given a pair of functions that take the same arguments, return a single function that returns a pair consisting of the return values of each function.</td>
+<td>Compose a function thate returns two arguments.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.decouple.html#revrand.utils.base.decouple" title="revrand.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">base.decouple</span></code></a>(fn)</td>
-<td>Create two functions of one argument and one return from a function that</td>
+<td>Inverse operation of couple.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.base.nwise.html#revrand.utils.base.nwise" title="revrand.utils.base.nwise"><code class="xref py py-obj docutils literal"><span class="pre">base.nwise</span></code></a>(iterable,&nbsp;n)</td>
-<td>Iterator that acts like a sliding window of size <cite>n</cite>; slides over some iterable <cite>n</cite> items at a time.</td>
+<td>Sliding window iterator.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.map_indices.html#revrand.utils.base.map_indices" title="revrand.utils.base.map_indices"><code class="xref py py-obj docutils literal"><span class="pre">base.map_indices</span></code></a>(fn,&nbsp;iterable,&nbsp;indices)</td>
-<td>Map a function across indices of an iterable</td>
+<td>Map a function across indices of an iterable.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.base.atleast_list.html#revrand.utils.base.atleast_list" title="revrand.utils.base.atleast_list"><code class="xref py py-obj docutils literal"><span class="pre">base.atleast_list</span></code></a>(a)</td>
-<td>Promote an object to a list if not a list or generator</td>
+<td>Promote an object to a list if not a list or generator.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.append_or_extend.html#revrand.utils.base.append_or_extend" title="revrand.utils.base.append_or_extend"><code class="xref py py-obj docutils literal"><span class="pre">base.append_or_extend</span></code></a>(mylist,&nbsp;*objs)</td>
 <td>Append an object to a list, or extend the list if the object is a list.</td>
@@ -120,12 +120,51 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.html">revrand.utils.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.flatten.html">revrand.utils.base.flatten</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.unflatten.html">revrand.utils.base.unflatten</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.couple.html">revrand.utils.base.couple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.decouple.html">revrand.utils.base.decouple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.nwise.html">revrand.utils.base.nwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.map_indices.html">revrand.utils.base.map_indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.atleast_list.html">revrand.utils.base.atleast_list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.append_or_extend.html">revrand.utils.base.append_or_extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.make_regression.html">revrand.utils.datasets.make_regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.make_polynomial.html">revrand.utils.datasets.make_polynomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.gen_gausprocess_se.html">revrand.utils.datasets.gen_gausprocess_se</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_usps_resampled_data.html">revrand.utils.datasets.fetch_gpml_usps_resampled_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html">revrand.utils.datasets.fetch_gpml_sarcos_data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="generated/revrand.optimize.sgd.Momentum.html"
                         title="previous chapter">revrand.optimize.sgd.Momentum</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="generated/revrand.utils.base.html"
                         title="next chapter">revrand.utils.base</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/utils.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -155,7 +194,7 @@
         <li class="right" >
           <a href="generated/revrand.optimize.sgd.Momentum.html" title="revrand.optimize.sgd.Momentum"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

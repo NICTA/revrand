@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.base.nwise &mdash; revrand 0.4.2 documentation</title>
+    <title>revrand.utils.base.nwise &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
     <link rel="next" title="revrand.utils.base.map_indices" href="revrand.utils.base.map_indices.html" />
     <link rel="prev" title="revrand.utils.base.decouple" href="revrand.utils.base.decouple.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.utils.base.decouple.html" title="revrand.utils.base.decouple"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -67,7 +67,8 @@
 <dl class="function">
 <dt id="revrand.utils.base.nwise">
 <code class="descclassname">revrand.utils.base.</code><code class="descname">nwise</code><span class="sig-paren">(</span><em>iterable</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.base.nwise" title="Permalink to this definition">¶</a></dt>
-<dd><p>Iterator that acts like a sliding window of size <cite>n</cite>; slides over
+<dd><p>Sliding window iterator.</p>
+<p>Iterator that acts like a sliding window of size <cite>n</cite>; slides over
 some iterable <cite>n</cite> items at a time. If iterable has <cite>m</cite> elements,
 this function will return an iterator over <cite>m-n+1</cite> tuples.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -160,12 +161,51 @@ gives <cite>m-n+1</cite> windows</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../optimize.html">Optimization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.html">revrand.utils.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.flatten.html">revrand.utils.base.flatten</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.unflatten.html">revrand.utils.base.unflatten</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.couple.html">revrand.utils.base.couple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.decouple.html">revrand.utils.base.decouple</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.utils.base.nwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.map_indices.html">revrand.utils.base.map_indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.atleast_list.html">revrand.utils.base.atleast_list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.append_or_extend.html">revrand.utils.base.append_or_extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_regression.html">revrand.utils.datasets.make_regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_polynomial.html">revrand.utils.datasets.make_polynomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.gen_gausprocess_se.html">revrand.utils.datasets.gen_gausprocess_se</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.fetch_gpml_usps_resampled_data.html">revrand.utils.datasets.fetch_gpml_usps_resampled_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.fetch_gpml_sarcos_data.html">revrand.utils.datasets.fetch_gpml_sarcos_data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="revrand.utils.base.decouple.html"
                         title="previous chapter">revrand.utils.base.decouple</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="revrand.utils.base.map_indices.html"
                         title="next chapter">revrand.utils.base.map_indices</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/revrand.utils.base.nwise.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -195,7 +235,7 @@ gives <cite>m-n+1</cite> windows</p>
         <li class="right" >
           <a href="revrand.utils.base.decouple.html" title="revrand.utils.base.decouple"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>

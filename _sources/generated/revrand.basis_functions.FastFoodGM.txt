@@ -14,7 +14,9 @@ revrand.basis_functions.FastFoodGM
    .. autosummary::
    
       ~FastFoodGM.__init__
+      ~FastFoodGM.get_dim
       ~FastFoodGM.grad
+      ~FastFoodGM.transform
    
    
 

@@ -1,9 +1,9 @@
-revrand.basis_functions.RandomRBF
+revrand.basis_functions.BiasBasis
 =================================
 
 .. currentmodule:: revrand.basis_functions
 
-.. autoclass:: RandomRBF
+.. autoclass:: BiasBasis
 
    
    .. automethod:: __init__
@@ -13,10 +13,10 @@ revrand.basis_functions.RandomRBF
 
    .. autosummary::
    
-      ~RandomRBF.__init__
-      ~RandomRBF.get_dim
-      ~RandomRBF.grad
-      ~RandomRBF.transform
+      ~BiasBasis.__init__
+      ~BiasBasis.get_dim
+      ~BiasBasis.grad
+      ~BiasBasis.transform
    
    
 
@@ -26,6 +26,6 @@ revrand.basis_functions.RandomRBF
 
    .. autosummary::
    
-      ~RandomRBF.params
+      ~BiasBasis.params
    
    

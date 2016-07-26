@@ -14,7 +14,9 @@ revrand.basis_functions.RandomMatern52
    .. autosummary::
    
       ~RandomMatern52.__init__
+      ~RandomMatern52.get_dim
       ~RandomMatern52.grad
+      ~RandomMatern52.transform
    
    
 

@@ -14,7 +14,9 @@ revrand.basis_functions.RandomLaplace
    .. autosummary::
    
       ~RandomLaplace.__init__
+      ~RandomLaplace.get_dim
       ~RandomLaplace.grad
+      ~RandomLaplace.transform
    
    
 

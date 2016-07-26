@@ -14,7 +14,9 @@ revrand.basis_functions.LinearBasis
    .. autosummary::
    
       ~LinearBasis.__init__
+      ~LinearBasis.get_dim
       ~LinearBasis.grad
+      ~LinearBasis.transform
    
    
 

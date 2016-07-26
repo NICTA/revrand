@@ -9,22 +9,22 @@ Welcome to revrand's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   installation
-   basis_funcs
-   slm
-   glm
-   likelihoods
-   btypes
-   metrics
-   optimize
-   utils
-   mathfun
-   skl
-   demo
+    quickstart
+    installation
+    basis_funcs
+    slm
+    glm
+    likelihoods
+    btypes
+    metrics
+    optimize
+    utils
+    mathfun
+    demo
 
-   dev/index.rst
+    dev/index.rst
 
 Indices and tables
 ==================

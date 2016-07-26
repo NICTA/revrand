@@ -13,8 +13,9 @@ revrand.optimize.base
       candidate_start_points_random
       check_random_state
       flatten
-      flatten_bounds
-      get_values
+      flatten_args
+      flatten_func_grad
+      logtrick_gen
       logtrick_minimizer
       logtrick_sgd
       minimize_bounded_start
@@ -31,8 +32,6 @@ revrand.optimize.base
 
    .. autosummary::
    
-      Bound
-      Positive
       repeat
    
    

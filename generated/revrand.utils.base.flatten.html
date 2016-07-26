@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.base.flatten &mdash; revrand 0.4.2 documentation</title>
+    <title>revrand.utils.base.flatten &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
     <link rel="next" title="revrand.utils.base.unflatten" href="revrand.utils.base.unflatten.html" />
     <link rel="prev" title="revrand.utils.base" href="revrand.utils.base.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.utils.base.html" title="revrand.utils.base"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -66,10 +66,8 @@
 <h1>revrand.utils.base.flatten<a class="headerlink" href="#revrand-utils-base-flatten" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="revrand.utils.base.flatten">
-<code class="descclassname">revrand.utils.base.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>arys</em>, <em>order='C'</em>, <em>returns_shapes=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.base.flatten" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flatten a list of ndarrays and/or numpy scalars (0d-array) with possibly
-heterogenous dimensions and shapes and concatenate them together into a
-flat (1d) array.</p>
+<code class="descclassname">revrand.utils.base.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>arys</em>, <em>returns_shapes=True</em>, <em>hstack=&lt;function hstack&gt;</em>, <em>ravel=&lt;function ravel&gt;</em>, <em>shape=&lt;function shape&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.base.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flatten a potentially recursive list of multidimensional objects.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Not to be confused with <cite>np.ndarray.flatten()</cite> (a more befitting
@@ -83,22 +81,23 @@ with the latter.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>arys</strong> (<em>list of array_like</em>) &#8211; One or more input arrays of possibly heterogenous shapes and
+<li><strong>arys</strong> (<em>list of objects</em>) &#8211; One or more input arrays of possibly heterogenous shapes and
 sizes.</li>
-<li><strong>order</strong> (<em>{'C', 'F', 'A'}, optional</em>) &#8211; Whether to flatten in C (row-major), Fortran (column-major)
-order, or preserve the C/Fortran ordering. The default is &#8216;C&#8217;.</li>
 <li><strong>returns_shapes</strong> (<em>bool, optional</em>) &#8211; Default is <cite>True</cite>. If <cite>True</cite>, the tuple <cite>(flattened, shapes)</cite> is
 returned, otherwise only <cite>flattened</cite> is returned.</li>
+<li><strong>hstack</strong> (<em>callable, optional</em>) &#8211; a function that implements horizontal stacking</li>
+<li><strong>ravel</strong> (<em>callable, optional</em>) &#8211; a function that flattens the object</li>
+<li><strong>shape</strong> (<em>callable, optional</em>) &#8211; a function that returns the shape of the object</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>flattened,[shapes]</strong> &#8211; Return the flat (1d) array resulting from the concatenation of
-flattened ndarrays. When <cite>returns_shapes</cite> is <cite>True</cite>, return a
-list of tuples containing also the shapes of each array as the
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>flattened,[shapes]</strong> &#8211; Return the flat (1d) object resulting from the concatenation of
+flattened multidimensional objects. When <cite>returns_shapes</cite> is <cite>True</cite>,
+return a list of tuples containing also the shapes of each array as the
 second element.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">{1darray, list of tuples}</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">{1dobject, list of tuples}</p>
 </td>
 </tr>
 </tbody>
@@ -109,39 +108,6 @@ second element.</p>
 <dt><code class="xref py py-func docutils literal"><span class="pre">revrand.utils.unflatten()</span></code></dt>
 <dd>its inverse</dd>
 </dl>
-</div>
-<p class="rubric">Notes</p>
-<p>Equivalent to:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">arys</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">:</span>             <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span> <span class="n">ndarrays</span><span class="p">)),</span>
-     <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">ndarrays</span><span class="p">)))</span> <span class="k">if</span> <span class="n">returns_shapes</span>              <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span> <span class="n">ndarrays</span><span class="p">))</span>
-</pre></div>
-</div>
-<p>This implementation relies on the fact that scalars are treated as
-0-dimensional arrays. That is,</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="mf">4.6</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="go">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="go">()</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="go">array([ 4.6])</span>
-</pre></div>
-</div>
-<p>Note also that the following is also a 0-dimensional array</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">3.14</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<span class="go">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<span class="go">()</span>
-</pre></div>
-</div>
-<div class="admonition important">
-<p class="first admonition-title">Important</p>
-<p class="last">When 0-dimensional arrays of the latter form are flattened,
-<em>they  will be unflattened as a scalar</em>. (Because special cases
-aren&#8217;t special enough to break the rules.)</p>
 </div>
 <p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="mi">9</span>
@@ -159,12 +125,6 @@ aren&#8217;t special enough to break the rules.)</p>
 <span class="go">        1, 9, 4, 1]), [(), (5,), (2, 3), (2, 2, 3)])</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
-<span class="gp">... </span>
-<span class="go">(array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,</span>
-<span class="go">        5, 1, 9, 1]), [(), (5,), (2, 3), (2, 2, 3)])</span>
-</pre></div>
-</div>
 <p>Note that scalars and 0-dimensional arrays are treated differently
 from 1-dimensional singleton arrays.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="mf">3.14</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.71</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.61</span><span class="p">])])</span>
@@ -176,12 +136,6 @@ from 1-dimensional singleton arrays.</p>
 <span class="gp">... </span>
 <span class="go">array([9, 4, 7, 4, 5, 2, 7, 3, 1, 2, 6, 6, 6, 5, 5, 1, 6, 9, 3, 9,</span>
 <span class="go">       1, 9, 4, 1])</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="n">returns_shapes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="gp">... </span>
-<span class="go">array([9, 4, 7, 4, 5, 2, 7, 2, 3, 6, 1, 6, 6, 3, 1, 9, 5, 9, 6, 4,</span>
-<span class="go">       5, 1, 9, 1])</span>
 </pre></div>
 </div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">unflatten</span><span class="p">(</span><span class="o">*</span><span class="n">flatten</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">]))</span>
@@ -203,6 +157,11 @@ from 1-dimensional singleton arrays.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flatten</span><span class="p">([</span><span class="mf">3.14</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.71</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.61</span><span class="p">])]])</span>
+<span class="gp">... </span>
+<span class="go">(array([ 3.14,  2.71,  1.61]), [(), [(), (1,)]])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -213,12 +172,51 @@ from 1-dimensional singleton arrays.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../optimize.html">Optimization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.html">revrand.utils.base</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.utils.base.flatten</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.unflatten.html">revrand.utils.base.unflatten</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.couple.html">revrand.utils.base.couple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.decouple.html">revrand.utils.base.decouple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.nwise.html">revrand.utils.base.nwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.map_indices.html">revrand.utils.base.map_indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.atleast_list.html">revrand.utils.base.atleast_list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.append_or_extend.html">revrand.utils.base.append_or_extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_regression.html">revrand.utils.datasets.make_regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_polynomial.html">revrand.utils.datasets.make_polynomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.gen_gausprocess_se.html">revrand.utils.datasets.gen_gausprocess_se</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.fetch_gpml_usps_resampled_data.html">revrand.utils.datasets.fetch_gpml_usps_resampled_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.fetch_gpml_sarcos_data.html">revrand.utils.datasets.fetch_gpml_sarcos_data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="revrand.utils.base.html"
                         title="previous chapter">revrand.utils.base</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="revrand.utils.base.unflatten.html"
                         title="next chapter">revrand.utils.base.unflatten</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/revrand.utils.base.flatten.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -248,7 +246,7 @@ from 1-dimensional singleton arrays.</p>
         <li class="right" >
           <a href="revrand.utils.base.html" title="revrand.utils.base"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Validation Metrics &mdash; revrand 0.4.2 documentation</title>
+    <title>Validation Metrics &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
     <link rel="next" title="Optimization" href="optimize.html" />
     <link rel="prev" title="Bound and Parameter Types" href="btypes.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="btypes.html" title="Bound and Parameter Types"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -101,7 +101,7 @@ otherwise</p>
 <dl class="function">
 <dt id="revrand.metrics.mll">
 <code class="descclassname">revrand.metrics.</code><code class="descname">mll</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em>, <em>y_var</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.metrics.mll" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mean (negative) log likelihood under a Gaussian distribution.</p>
+<dd><p>Mean log loss under a Gaussian distribution.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -113,7 +113,7 @@ otherwise</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The mean negative log likelihood</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The mean negative log loss (negative log likelihood)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
@@ -135,7 +135,7 @@ otherwise</p>
 <dl class="function">
 <dt id="revrand.metrics.msll">
 <code class="descclassname">revrand.metrics.</code><code class="descname">msll</code><span class="sig-paren">(</span><em>y_true</em>, <em>y_pred</em>, <em>y_var</em>, <em>y_train</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.metrics.msll" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mean standardised (negative) log likelihood under a Gaussian distribution.</p>
+<dd><p>Mean standardised log loss under a Gaussian distribution.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -148,7 +148,7 @@ otherwise</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The negative mean standardised log likelihood</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The negative mean standardised log loss (negative log likelihood)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
@@ -206,12 +206,35 @@ otherwise</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="btypes.html"
                         title="previous chapter">Bound and Parameter Types</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="optimize.html"
                         title="next chapter">Optimization</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/metrics.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -241,7 +264,7 @@ otherwise</p>
         <li class="right" >
           <a href="btypes.html" title="Bound and Parameter Types"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

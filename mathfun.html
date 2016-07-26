@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Math Utilities &mdash; revrand 0.4.2 documentation</title>
+    <title>Math Utilities &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
-    <link rel="next" title="Scikit Learn Compatibility Interface" href="skl.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
+    <link rel="next" title="Demos" href="demo.html" />
     <link rel="prev" title="revrand.utils.datasets.fetch_gpml_sarcos_data" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -46,12 +46,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="skl.html" title="Scikit Learn Compatibility Interface"
+          <a href="demo.html" title="Demos"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -331,21 +331,39 @@ stable way (using the log-sum-exp trick).</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Math Utilities</a><ul>
-<li><a class="reference internal" href="#module-revrand.mathfun.linalg">Linear Algebra</a></li>
-<li><a class="reference internal" href="#module-revrand.mathfun.special">Special Functions</a></li>
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Math Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-revrand.mathfun.linalg">Linear Algebra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-revrand.mathfun.special">Special Functions</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html"
                         title="previous chapter">revrand.utils.datasets.fetch_gpml_sarcos_data</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="skl.html"
-                        title="next chapter">Scikit Learn Compatibility Interface</a></p>
+  <p class="topless"><a href="demo.html"
+                        title="next chapter">Demos</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/mathfun.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -370,12 +388,12 @@ stable way (using the log-sum-exp trick).</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="skl.html" title="Scikit Learn Compatibility Interface"
+          <a href="demo.html" title="Demos"
              >next</a> |</li>
         <li class="right" >
           <a href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html" title="revrand.utils.datasets.fetch_gpml_sarcos_data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

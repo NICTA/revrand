@@ -14,7 +14,9 @@ revrand.basis_functions.RandomCauchy
    .. autosummary::
    
       ~RandomCauchy.__init__
+      ~RandomCauchy.get_dim
       ~RandomCauchy.grad
+      ~RandomCauchy.transform
    
    
 

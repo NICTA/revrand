@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Likelihood Classes &mdash; revrand 0.4.2 documentation</title>
+    <title>Likelihood Classes &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
     <link rel="next" title="revrand.likelihoods.Bernoulli" href="generated/revrand.likelihoods.Bernoulli.html" />
     <link rel="prev" title="Generalised Linear Model" href="glm.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="glm.html" title="Generalised Linear Model"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -89,6 +89,11 @@
 <dd><p>Bernoulli likelihood class for (binary) classification tasks.</p>
 <p>A logistic transformation function is used to map the latent function from
 the GLM prior into a probability.</p>
+<div class="math">
+\[p(y_i | f_i) = \sigma(f_i) ^ {y_i} (1 - \sigma(f_i))^{1 - y_i}\]</div>
+<p>where <span class="math">\(y_i\)</span> is a target, <span class="math">\(f_i\)</span> the value of the latent function
+corresponding to the target, and <span class="math">\(\sigma(\cdot)\)</span> is the logistic
+sigmoid.</p>
 <dl class="method">
 <dt>
 <code class="descname">Ey</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span></dt>
@@ -100,7 +105,7 @@ the GLM prior into a probability.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[\mathbf{y}|\mathbf{f}]\)</span>.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
 </tr>
@@ -307,6 +312,13 @@ likelihood.</p>
 <dd><p>Binomial likelihood class.</p>
 <p>A logistic transformation function is used to map the latent function from
 the GLM prior into a probability.</p>
+<div class="math">
+\[p(y_i | f_i) = \genfrac(){0pt}{}{n}{y_i}
+    \sigma(f_i) ^ {y_i} (1 - \sigma(f_i))^{n - y_i}\]</div>
+<p>where <span class="math">\(y_i\)</span> is a target, <span class="math">\(f_i\)</span> the value of the latent function
+corresponding to the target, <span class="math">\(n\)</span> is the total possible count, and
+<span class="math">\(\sigma(\cdot)\)</span> is the logistic sigmoid. <span class="math">\(n\)</span> can also be
+applied per observation.</p>
 <dl class="method">
 <dt>
 <code class="descname">Ey</code><span class="sig-paren">(</span><em>f</em>, <em>n</em><span class="sig-paren">)</span></dt>
@@ -322,7 +334,7 @@ the GLM prior into a probability.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[\mathbf{y}|\mathbf{f}]\)</span>.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -473,6 +485,12 @@ likelihood.</p>
 <dd><p>A univariate Gaussian likelihood for general regression tasks.</p>
 <p>No transformation function is needed since this is (conditionally)
 conjugate to the GLM prior.</p>
+<div class="math">
+\[p(y_i | f_i) = \frac{1}{\sqrt{2 \pi \sigma^2}}
+    \exp\left(- \frac{(y_i - f_i)^2}{2 \sigma^2} \right)\]</div>
+<p>where <span class="math">\(y_i\)</span> is a target, <span class="math">\(f_i\)</span> the value of the latent function
+corresponding to the target and <span class="math">\(\sigma\)</span> is the observation noise
+(standard deviation).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -497,7 +515,7 @@ an optimiser to learn the variance parameter of this object.</td>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[\mathbf{y}|\mathbf{f}]\)</span>.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -706,6 +724,12 @@ likelihood.</p>
 <dd><p>A Poisson likelihood, useful for various Poisson process tasks.</p>
 <p>An exponential transformation function and a softplus transformation
 function have been implemented.</p>
+<div class="math">
+\[p(y_i | f_i) = \frac{g(f_i)^{y_i} e^{-g(f_i)}}{y_i!}\]</div>
+<p>where <span class="math">\(y_i\)</span> is a target, <span class="math">\(f_i\)</span> the value of the latent function
+corresponding to the target, and <span class="math">\(g(\cdot)\)</span> is the tranformation
+function, which can be either an exponential function, or a softplus
+function (<span class="math">\(\log(1 + \exp(f_i)\)</span>).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -726,7 +750,7 @@ or &#8216;softplus&#8217; for a softplut transformation function.</td>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[y|f]\)</span>.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; expected value of y, <span class="math">\(\mathbb{E}[\mathbf{y}|\mathbf{f}]\)</span>.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
 </tr>
@@ -872,12 +896,42 @@ likelihood.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Likelihood Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.likelihoods.Bernoulli.html">revrand.likelihoods.Bernoulli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.likelihoods.Binomial.html">revrand.likelihoods.Binomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.likelihoods.Gaussian.html">revrand.likelihoods.Gaussian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.likelihoods.Poisson.html">revrand.likelihoods.Poisson</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="glm.html"
                         title="previous chapter">Generalised Linear Model</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="generated/revrand.likelihoods.Bernoulli.html"
                         title="next chapter">revrand.likelihoods.Bernoulli</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/likelihoods.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -907,7 +961,7 @@ likelihood.</p>
         <li class="right" >
           <a href="glm.html" title="Generalised Linear Model"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

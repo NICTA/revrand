@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.4.2 documentation</title>
+    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="../index.html" />
     <link rel="up" title="Optimization" href="../optimize.html" />
     <link rel="next" title="revrand.optimize.sgd.AdaDelta" href="revrand.optimize.sgd.AdaDelta.html" />
     <link rel="prev" title="revrand.optimize.base.candidate_start_points_random" href="revrand.optimize.base.candidate_start_points_random.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
       </ul>
     </div>  
@@ -66,7 +66,7 @@
 <h1>revrand.optimize.sgd.sgd<a class="headerlink" href="#revrand-optimize-sgd-sgd" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="revrand.optimize.sgd.sgd">
-<code class="descclassname">revrand.optimize.sgd.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batch_size=10</em>, <em>maxiter=1000</em>, <em>updater=None</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.sgd" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.optimize.sgd.</code><code class="descname">sgd</code><span class="sig-paren">(</span><em>fun</em>, <em>x0</em>, <em>data</em>, <em>args=()</em>, <em>bounds=None</em>, <em>batch_size=10</em>, <em>maxiter=5000</em>, <em>updater=None</em>, <em>eval_obj=False</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.sgd.sgd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stochastic Gradient Descent.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -87,7 +87,7 @@ the bounds on that parameter.  Use None for one of min or max when
 there is no bound in that direction.</li>
 <li><strong>batch_size</strong> (<em>int, optional</em>) &#8211; The number of observations in an SGD batch.</li>
 <li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; Number of mini-batch iterations before optimization terminates.</li>
-<li><strong>updater</strong> (<em>SGDUpdater, optional</em>) &#8211; The type of gradient update to use, by default this is AdaDelta</li>
+<li><strong>updater</strong> (<em>SGDUpdater, optional</em>) &#8211; The type of gradient update to use, by default this is AdaDelta.</li>
 <li><strong>eval_obj</strong> (<em>bool, optional</em>) &#8211; This indicates whether or not <code class="code docutils literal"><span class="pre">fun</span></code> also evaluates and returns
 the objective function value. If this is true, <code class="code docutils literal"><span class="pre">fun</span></code> must return
 <code class="code docutils literal"><span class="pre">(obj,</span> <span class="pre">grad)</span></code> and then a list of objective function values is
@@ -133,12 +133,49 @@ True.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../optimize.html">Optimization</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.html">revrand.optimize.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.structured_minimizer.html">revrand.optimize.base.structured_minimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.structured_sgd.html">revrand.optimize.base.structured_sgd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.logtrick_minimizer.html">revrand.optimize.base.logtrick_minimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.logtrick_sgd.html">revrand.optimize.base.logtrick_sgd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.candidate_start_points_lattice.html">revrand.optimize.base.candidate_start_points_lattice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.candidate_start_points_random.html">revrand.optimize.base.candidate_start_points_random</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.optimize.sgd.sgd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.sgd.AdaDelta.html">revrand.optimize.sgd.AdaDelta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.sgd.AdaGrad.html">revrand.optimize.sgd.AdaGrad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.sgd.Momentum.html">revrand.optimize.sgd.Momentum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../optimize.html#candidate-starting-points-example">Candidate Starting Points Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="revrand.optimize.base.candidate_start_points_random.html"
                         title="previous chapter">revrand.optimize.base.candidate_start_points_random</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="revrand.optimize.sgd.AdaDelta.html"
                         title="next chapter">revrand.optimize.sgd.AdaDelta</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/revrand.optimize.sgd.sgd.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -168,7 +205,7 @@ True.</p>
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.4.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
       </ul>
     </div>

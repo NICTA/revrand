@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to revrand’s documentation! &mdash; revrand 0.4.2 documentation</title>
+    <title>Welcome to revrand’s documentation! &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="#" />
-    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="#" />
+    <link rel="next" title="Quickstart Guide" href="quickstart.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -45,9 +45,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="Installation"
+          <a href="quickstart.html" title="Quickstart Guide"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -61,11 +61,20 @@
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#bayesian-linear-regression-example">Bayesian Linear Regression Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#bayesian-generalised-linear-model-example">Bayesian Generalised Linear Model Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#large-scale-learning-with-stochastic-gradients">Large-scale Learning with Stochastic Gradients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#feature-composition-framework">Feature Composition Framework</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#references">References</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#dependencies">Dependencies</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.BiasBasis.html">revrand.basis_functions.BiasBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.LinearBasis.html">revrand.basis_functions.LinearBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.PolynomialBasis.html">revrand.basis_functions.PolynomialBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.RadialBasis.html">revrand.basis_functions.RadialBasis</a></li>
@@ -128,11 +137,10 @@
 <li class="toctree-l2"><a class="reference internal" href="mathfun.html#module-revrand.mathfun.special">Special Functions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="skl.html">Scikit Learn Compatibility Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="demo.html#regression">Regression</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demo.html#classification">Classification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demo.html#stochastic-gradient-descent">Stochastic Gradient Descent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demo.html#stochastic-gradients">Stochastic Gradients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demo.html#references">References</a></li>
 </ul>
 </li>
@@ -159,15 +167,33 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Welcome to revrand&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<h3><a href="#">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="installation.html"
-                        title="next chapter">Installation</a></p>
+  <p class="topless"><a href="quickstart.html"
+                        title="next chapter">Quickstart Guide</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -192,9 +218,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="Installation"
+          <a href="quickstart.html" title="Quickstart Guide"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

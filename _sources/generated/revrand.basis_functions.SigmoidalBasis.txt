@@ -14,7 +14,9 @@ revrand.basis_functions.SigmoidalBasis
    .. autosummary::
    
       ~SigmoidalBasis.__init__
+      ~SigmoidalBasis.get_dim
       ~SigmoidalBasis.grad
+      ~SigmoidalBasis.transform
    
    
 

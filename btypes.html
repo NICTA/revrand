@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Bound and Parameter Types &mdash; revrand 0.4.2 documentation</title>
+    <title>Bound and Parameter Types &mdash; revrand 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.4.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
     <link rel="next" title="Validation Metrics" href="metrics.html" />
     <link rel="prev" title="revrand.likelihoods.Poisson" href="generated/revrand.likelihoods.Poisson.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="generated/revrand.likelihoods.Poisson.html" title="revrand.likelihoods.Poisson"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,8 +66,8 @@
 <dl class="class">
 <dt id="revrand.btypes.Bound">
 <em class="property">class </em><code class="descclassname">revrand.btypes.</code><code class="descname">Bound</code><a class="headerlink" href="#revrand.btypes.Bound" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define bounds on a variable for the optimiser. This defaults to all
-real values allowed (i.e. no bounds).</p>
+<dd><p>Define bounds on a variable for the optimiser.</p>
+<p>This defaults to all real values allowed (i.e. no bounds).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -119,12 +119,12 @@ real values allowed (i.e. no bounds).</p>
 
 <dl class="class">
 <dt id="revrand.btypes.Parameter">
-<em class="property">class </em><code class="descclassname">revrand.btypes.</code><code class="descname">Parameter</code><span class="sig-paren">(</span><em>value</em>, <em>bounds=Bound(lower=None</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.Parameter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.btypes.</code><code class="descname">Parameter</code><span class="sig-paren">(</span><em>value=[]</em>, <em>bounds=Bound(lower=None</em>, <em>upper=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.Parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Parameter class that associates a value (scalar or ndarray) with a bound.</p>
 <dl class="attribute">
 <dt id="revrand.btypes.Parameter.value">
 <code class="descname">value</code><a class="headerlink" href="#revrand.btypes.Parameter.value" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>scalar or ndarray</em> &#8211; a value to associate with this parameter. This is typically used as an
+<dd><p><em>scalar or ndarray, optional</em> &#8211; a value to associate with this parameter. This is typically used as an
 initial value for an optimizer.</p>
 </dd></dl>
 
@@ -146,9 +146,9 @@ value</p>
 <dl class="class">
 <dt id="revrand.btypes.Positive">
 <em class="property">class </em><code class="descclassname">revrand.btypes.</code><code class="descname">Positive</code><a class="headerlink" href="#revrand.btypes.Positive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define a positive only bound for the optimiser. This may induce the
-&#8216;log trick&#8217; in the optimiser (when using an appropriate decorator), which
-will ignore the &#8216;smallest&#8217; value (but will stay above 0).</p>
+<dd><p>Define a positive only bound for the optimiser.</p>
+<p>This may induce the &#8216;log trick&#8217; in the optimiser (when using an appropriate
+decorator), which will ignore the &#8216;smallest&#8217; value (but will stay above 0).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -170,53 +170,61 @@ be positive.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.btypes.flatten_bounds">
-<code class="descclassname">revrand.btypes.</code><code class="descname">flatten_bounds</code><span class="sig-paren">(</span><em>parameters</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.flatten_bounds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return flattened bounds for all of the Parameters in a sequence</p>
+<dt id="revrand.btypes.hstack">
+<code class="descclassname">revrand.btypes.</code><code class="descname">hstack</code><span class="sig-paren">(</span><em>tup</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.hstack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Horizontally stack a sequence of value bounds pairs.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameters</strong> (<em>sequence or Parameter</em>) &#8211; A sequence of Parameter objects or a single Parameter object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tup</strong> (<em>sequence</em>) &#8211; a sequence of value, <code class="code docutils literal"><span class="pre">Bound</span></code> pairs</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of Bounds objects/tuples that is the length of the <em>total</em>
-number of elements in all of the Parameters values. This is a list
-even if parameters is a single parameter object</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>value</strong> (<em>ndarray</em>) &#8211; a horizontally concatenated array1d</li>
+<li><em>bounds</em> &#8211; a list of Bounds</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">Bound</span><span class="p">()),</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">2.</span><span class="p">,</span> <span class="n">Positive</span><span class="p">())]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flatten_bounds</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-<span class="go">[Bound(lower=None, upper=None), Bound(lower=None, upper=None), Positive(lower=1e-14, upper=None)]</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="function">
-<dt id="revrand.btypes.get_values">
-<code class="descclassname">revrand.btypes.</code><code class="descname">get_values</code><span class="sig-paren">(</span><em>parameters</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.get_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all of the values in a sequence of Parameter instances.</p>
+<dt id="revrand.btypes.ravel">
+<code class="descclassname">revrand.btypes.</code><code class="descname">ravel</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.ravel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flatten a <code class="code docutils literal"><span class="pre">Parameter</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameters</strong> (<em>sequence or Parameter</em>) &#8211; A sequence of Parameter objects or a single Parameter object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> (<a class="reference internal" href="#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a>) &#8211; A <code class="code docutils literal"><span class="pre">Parameter</span></code> object</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">returns a list of Parameter.value calls, even for a single parameter</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>flatvalue</strong> (<em>ndarray</em>) &#8211; a flattened array of shape <code class="code docutils literal"><span class="pre">(prod(parameter.shape),)</span></code></li>
+<li><strong>flatbounds</strong> (<em>list</em>) &#8211; a list of bound tuples of length <code class="code docutils literal"><span class="pre">prod(parameter.shape)</span></code></li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">Bound</span><span class="p">()),</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">2.</span><span class="p">,</span> <span class="n">Positive</span><span class="p">())]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_values</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-<span class="go">[array([ 1.,  1.]), 2.0]</span>
-</pre></div>
-</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="revrand.btypes.shape">
+<code class="descclassname">revrand.btypes.</code><code class="descname">shape</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the shape of a <code class="code docutils literal"><span class="pre">Parameter</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> (<a class="reference internal" href="#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a>) &#8211; <code class="code docutils literal"><span class="pre">Parameter</span></code> object to get the shape of</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">shape of the <code class="code docutils literal"><span class="pre">Parameter</span></code> object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -227,12 +235,35 @@ even if parameters is a single parameter object</td>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="generated/revrand.likelihoods.Poisson.html"
                         title="previous chapter">revrand.likelihoods.Poisson</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="metrics.html"
                         title="next chapter">Validation Metrics</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/btypes.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -262,7 +293,7 @@ even if parameters is a single parameter object</td>
         <li class="right" >
           <a href="generated/revrand.likelihoods.Poisson.html" title="revrand.likelihoods.Poisson"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.4.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

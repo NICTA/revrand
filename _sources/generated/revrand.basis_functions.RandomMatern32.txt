@@ -14,7 +14,9 @@ revrand.basis_functions.RandomMatern32
    .. autosummary::
    
       ~RandomMatern32.__init__
+      ~RandomMatern32.get_dim
       ~RandomMatern32.grad
+      ~RandomMatern32.transform
    
    
 
