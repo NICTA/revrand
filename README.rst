@@ -32,16 +32,12 @@ regression) and generalised linear models. A few features of this library are:
 Here is an example of approximating a Matern 3/2 kernel with some of our basis
 functions,
 
-.. .. image:: docs/matern32.png
-.. image:: https://github.com/NICTA/revrand/tree/master/docs/matern32.png
-   :target: https://github.com/NICTA/revrand/tree/master/docs/
+.. image:: docs/matern32.png
 
 And here is an example of running using our Bayesian GLM with a Poisson
 likelihood and integer observations,
 
-.. .. image:: docs/glm_demo.png
-.. image:: https://github.com/NICTA/revrand/tree/master/docs/glm_demo.png
-   :target: https://github.com/NICTA/revrand/tree/master/docs/
+.. image:: docs/glm_demo.png
 
 Have a look at some of the demo `notebooks <demos/>`_ for how we generated
 these plots, and more!
