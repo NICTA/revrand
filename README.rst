@@ -34,7 +34,12 @@ functions,
 
 .. image:: docs/matern32.png
 
-And here is an example of running using our Bayesian GLM with a Poisson
+here is an example of the algorithms in *revrand* approximating a Gaussian
+Process,
+
+.. image:: docs/glm_sgd_demo.png
+
+and here is an example of running using our Bayesian GLM with a Poisson
 likelihood and integer observations,
 
 .. image:: docs/glm_demo.png
