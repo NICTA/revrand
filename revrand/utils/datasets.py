@@ -146,11 +146,11 @@ def fetch_gpml_sarcos_data(transpose_data=True, data_home=None):
     train_data = loadmat(train_filename).get('sarcos_inv')
     test_data = loadmat(test_filename).get('sarcos_inv_test')
 
-    train_bunch = Bunch(data=train_data[:, :-1],
-                        targets=train_data[:, -1])
+    train_bunch = Bunch(data=train_data[:, :21],
+                        targets=train_data[:, 21])
 
-    test_bunch = Bunch(data=test_data[:, :-1],
-                       targets=test_data[:, -1])
+    test_bunch = Bunch(data=test_data[:, :21],
+                       targets=test_data[:, 21])
 
     return Bunch(train=train_bunch, test=test_bunch)
 
