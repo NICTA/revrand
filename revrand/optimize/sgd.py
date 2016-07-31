@@ -42,9 +42,14 @@ class SGDUpdater:
         x_new: ndarray
             the new value for x
         """
-
         x_new = x - self.eta * grad
         return x_new
+
+    def reset(self):
+        """
+        Reset the state of this updater for a new optimisation problem.
+        """
+        pass
 
 
 class AdaDelta(SGDUpdater):
@@ -88,7 +93,6 @@ class AdaDelta(SGDUpdater):
         x_new: ndarray
             the new value for x
         """
-
         self.Eg2 = self.rho * self.Eg2 + (1 - self.rho) * grad**2
         dx = - grad * np.sqrt(self.Edx2 + self.epsilon) \
             / np.sqrt(self.Eg2 + self.epsilon)
@@ -96,6 +100,12 @@ class AdaDelta(SGDUpdater):
 
         x_new = x + dx
         return x_new
+
+    def reset(self):
+        """
+        Reset the state of this updater for a new optimisation problem.
+        """
+        self.__init__(self.rho, self.epsilon)
 
 
 class AdaGrad(SGDUpdater):
@@ -138,10 +148,15 @@ class AdaGrad(SGDUpdater):
         x_new: ndarray
             the new value for x
         """
-
         self.g2_hist += grad**2
         x_new = x - self.eta * grad / (self.epsilon + np.sqrt(self.g2_hist))
         return x_new
+
+    def reset(self):
+        """
+        Reset the state of this updater for a new optimisation problem.
+        """
+        self.__init__(self.eta, self.epsilon)
 
 
 class Momentum(SGDUpdater):
@@ -184,11 +199,16 @@ class Momentum(SGDUpdater):
         x_new: ndarray
             the new value for x
         """
-
         self.dx = self.rho * self.dx - self.eta * grad
 
         x_new = x + self.dx
         return x_new
+
+    def reset(self):
+        """
+        Reset the state of this updater for a new optimisation problem.
+        """
+        self.__init__(self.rho, self.eta)
 
 
 class Adam(SGDUpdater):
@@ -234,7 +254,6 @@ class Adam(SGDUpdater):
         x_new: ndarray
             the new value for x
         """
-
         self.t += 1
 
         if self.m is None:
@@ -248,6 +267,12 @@ class Adam(SGDUpdater):
 
         x_new = x - self.alpha * mbar / (np.sqrt(vbar) + self.epsilon)
         return x_new
+
+    def reset(self):
+        """
+        Reset the state of this updater for a new optimisation problem.
+        """
+        self.__init__(self.alpha, self.beta1, self.beta2, self.epsilon)
 
 
 #
@@ -310,6 +335,9 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     if updater is None:
         updater = AdaDelta()
 
+    # Make sure we aren't using a recycled updater
+    updater.reset()
+
     N = _len_data(data)
     x = np.array(x0, copy=True, dtype=float)
     D = x.shape[0]
@@ -327,6 +355,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
         upper = np.array(upper)
 
     # Learning Records
+    obj = None
     objs = []
     norms = []
 

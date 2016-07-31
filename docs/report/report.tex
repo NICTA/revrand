@@ -281,7 +281,7 @@ the reader to~\cite{gershman2012}. The final objective function we optimise is,
     + \log \gausC{\pomean_k}{\mathbf{0}, \reg\ident{D}} \\
     + \frac{1}{2} \trace{\dpocov_k\hess{k}}
     - \log \brac{\sum^K_{j=1} \gausC{\pomean_k}{\pomean_j, \dpocov_k +
-            \dpocov_j}} - \log K. \label{eq:glmobj}
+            \dpocov_j}} + \log K. \label{eq:glmobj}
 \end{multline}
 While this is an approximation to Equation~\eqref{eq:elbo}, it retains the
 property that it easily factorises over the data ($n$), and so can be optimised
