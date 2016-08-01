@@ -155,7 +155,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         N, _ = X.shape
         D = self.basis.get_dim(X)
 
-        # Batch magnification factor
+        # Batch magnification factor, multiplying by K makes massive difference
+        #  to learning! Otherwise the approx variational objective
+        #  over-penalises
         self.B = K * N / self.batch_size
 
         # Pack data
