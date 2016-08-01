@@ -1,0 +1,22 @@
+revrand.optimize.sgd.Adam
+=========================
+
+.. currentmodule:: revrand.optimize.sgd
+
+.. autoclass:: Adam
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Adam.__init__
+   
+   
+
+   
+   
+   

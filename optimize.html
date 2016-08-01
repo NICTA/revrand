@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Optimization &mdash; revrand 0.5.0 documentation</title>
+    <title>Optimization &mdash; revrand 0.5.1 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.0',
+        VERSION:     '0.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.5.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.5.1 documentation" href="index.html" />
     <link rel="next" title="revrand.optimize.base" href="generated/revrand.optimize.base.html" />
     <link rel="prev" title="Validation Metrics" href="metrics.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="metrics.html" title="Validation Metrics"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -92,13 +92,16 @@
 <tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.sgd.sgd.html#revrand.optimize.sgd.sgd" title="revrand.optimize.sgd.sgd"><code class="xref py py-obj docutils literal"><span class="pre">sgd.sgd</span></code></a>(fun,&nbsp;x0,&nbsp;data[,&nbsp;args,&nbsp;bounds,&nbsp;...])</td>
 <td>Stochastic Gradient Descent.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.sgd.AdaDelta.html#revrand.optimize.sgd.AdaDelta" title="revrand.optimize.sgd.AdaDelta"><code class="xref py py-obj docutils literal"><span class="pre">sgd.AdaDelta</span></code></a>([rho,&nbsp;epsilon])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.sgd.Adam.html#revrand.optimize.sgd.Adam" title="revrand.optimize.sgd.Adam"><code class="xref py py-obj docutils literal"><span class="pre">sgd.Adam</span></code></a>([alpha,&nbsp;beta1,&nbsp;beta2,&nbsp;epsilon])</td>
+<td>Adam Algorithm</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.sgd.AdaDelta.html#revrand.optimize.sgd.AdaDelta" title="revrand.optimize.sgd.AdaDelta"><code class="xref py py-obj docutils literal"><span class="pre">sgd.AdaDelta</span></code></a>([rho,&nbsp;epsilon])</td>
 <td>AdaDelta Algorithm</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.sgd.AdaGrad.html#revrand.optimize.sgd.AdaGrad" title="revrand.optimize.sgd.AdaGrad"><code class="xref py py-obj docutils literal"><span class="pre">sgd.AdaGrad</span></code></a>([eta,&nbsp;epsilon])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.sgd.AdaGrad.html#revrand.optimize.sgd.AdaGrad" title="revrand.optimize.sgd.AdaGrad"><code class="xref py py-obj docutils literal"><span class="pre">sgd.AdaGrad</span></code></a>([eta,&nbsp;epsilon])</td>
 <td>AdaGrad Algorithm</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.optimize.sgd.Momentum.html#revrand.optimize.sgd.Momentum" title="revrand.optimize.sgd.Momentum"><code class="xref py py-obj docutils literal"><span class="pre">sgd.Momentum</span></code></a>([rho,&nbsp;eta])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.optimize.sgd.Momentum.html#revrand.optimize.sgd.Momentum" title="revrand.optimize.sgd.Momentum"><code class="xref py py-obj docutils literal"><span class="pre">sgd.Momentum</span></code></a>([rho,&nbsp;eta])</td>
 <td>Momentum Algorithm</td>
 </tr>
 </tbody>
@@ -215,6 +218,7 @@
         <div class="sphinxsidebarwrapper">
 <h3><a href="index.html">Table Of Contents</a></h3>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
@@ -231,6 +235,7 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_lattice.html">revrand.optimize.base.candidate_start_points_lattice</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_random.html">revrand.optimize.base.candidate_start_points_random</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.sgd.html">revrand.optimize.sgd.sgd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.Adam.html">revrand.optimize.sgd.Adam</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.AdaDelta.html">revrand.optimize.sgd.AdaDelta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.AdaGrad.html">revrand.optimize.sgd.AdaGrad</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.Momentum.html">revrand.optimize.sgd.Momentum</a></li>
@@ -285,7 +290,7 @@
         <li class="right" >
           <a href="metrics.html" title="Validation Metrics"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

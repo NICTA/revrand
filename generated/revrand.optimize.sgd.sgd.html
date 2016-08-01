@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.5.0 documentation</title>
+    <title>revrand.optimize.sgd.sgd &mdash; revrand 0.5.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.5.0',
+        VERSION:     '0.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.5.0 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.5.1 documentation" href="../index.html" />
     <link rel="up" title="Optimization" href="../optimize.html" />
-    <link rel="next" title="revrand.optimize.sgd.AdaDelta" href="revrand.optimize.sgd.AdaDelta.html" />
+    <link rel="next" title="revrand.optimize.sgd.Adam" href="revrand.optimize.sgd.Adam.html" />
     <link rel="prev" title="revrand.optimize.base.candidate_start_points_random" href="revrand.optimize.base.candidate_start_points_random.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,12 +47,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.optimize.sgd.AdaDelta.html" title="revrand.optimize.sgd.AdaDelta"
+          <a href="revrand.optimize.sgd.Adam.html" title="revrand.optimize.sgd.Adam"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
       </ul>
     </div>  
@@ -135,6 +135,7 @@ True.</p>
         <div class="sphinxsidebarwrapper">
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>
@@ -151,6 +152,7 @@ True.</p>
 <li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.candidate_start_points_lattice.html">revrand.optimize.base.candidate_start_points_lattice</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.optimize.base.candidate_start_points_random.html">revrand.optimize.base.candidate_start_points_random</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.optimize.sgd.sgd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.optimize.sgd.Adam.html">revrand.optimize.sgd.Adam</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.optimize.sgd.AdaDelta.html">revrand.optimize.sgd.AdaDelta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.optimize.sgd.AdaGrad.html">revrand.optimize.sgd.AdaGrad</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.optimize.sgd.Momentum.html">revrand.optimize.sgd.Momentum</a></li>
@@ -167,8 +169,8 @@ True.</p>
   <p class="topless"><a href="revrand.optimize.base.candidate_start_points_random.html"
                         title="previous chapter">revrand.optimize.base.candidate_start_points_random</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="revrand.optimize.sgd.AdaDelta.html"
-                        title="next chapter">revrand.optimize.sgd.AdaDelta</a></p>
+  <p class="topless"><a href="revrand.optimize.sgd.Adam.html"
+                        title="next chapter">revrand.optimize.sgd.Adam</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -200,12 +202,12 @@ True.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="revrand.optimize.sgd.AdaDelta.html" title="revrand.optimize.sgd.AdaDelta"
+          <a href="revrand.optimize.sgd.Adam.html" title="revrand.optimize.sgd.Adam"
              >next</a> |</li>
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_random.html" title="revrand.optimize.base.candidate_start_points_random"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
       </ul>
     </div>

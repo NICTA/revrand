@@ -15,6 +15,7 @@ Optimization
    base.candidate_start_points_random
 
    sgd.sgd
+   sgd.Adam
    sgd.AdaDelta
    sgd.AdaGrad
    sgd.Momentum
