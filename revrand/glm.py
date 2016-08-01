@@ -112,6 +112,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                  maxiter=3000,
                  tol=1e-8,
                  batch_size=10,
+                 batch_weight=10,
                  updater=None):
 
         self.like = likelihood
@@ -154,12 +155,27 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         N, _ = X.shape
         D = self.basis.get_dim(X)
 
-        # Batchsize and discount factor
-        self.B = N / self.batch_size
+        # Batch magnification factor
+        self.B = K * N / self.batch_size
+
+        # Pack data
+        likelihood_args = _reshape_likelihood_args(likelihood_args, N)
+        data = (X, y) + likelihood_args
 
         # Intialise weights and covariances
-        self.weights = np.random.randn(D, K) + np.random.randn(K)
+        log.info("Initialising weights by optimising MAP")
+        res = sgd(self._map,
+                  np.random.randn(D),
+                  data,
+                  maxiter=self.maxiter,
+                  updater=self.updater,
+                  batch_size=self.batch_size
+                  )
+
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, K))
+        self.weights = self.covariance * np.random.rand(D, K) \
+            + res.x[:, np.newaxis]
+        self.weights[:, 0] = res.x
 
         # Pack params
         params = [Parameter(self.weights, Bound()),
@@ -168,12 +184,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                   self.like.params,
                   self.basis.params]
 
-        # Pack data
-        likelihood_args = _reshape_likelihood_args(likelihood_args, N)
-        data = (X, y) + likelihood_args
-
+        log.info("Optimising parameters.")
         nsgd = structured_sgd(logtrick_sgd(sgd))
-
         self._create_cache()
         res = nsgd(self._l2,
                    params,
@@ -192,6 +204,10 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
          self.like_hypers,
          self.basis_hypers
          ) = res.x
+
+        # Store a summary of the optimisation
+        self.obj_trace = res.objs
+        self.grad_trace = res.norms
 
         log.info("Finished! Objective = {}, reg = {}, likelihood_hypers = {}, "
                  "basis_hypers = {}, message: {}."
@@ -228,7 +244,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         D, K = m.shape
 
         # Make sure hypers and args can be unpacked into callables
-        lpars_largs = tuple(chain(atleast_list(lpars), largs))
+        largs = tuple(chain(atleast_list(lpars), largs))
 
         # Basis function stuff
         Phi = self.basis.transform(X, *atleast_list(bpars))  # M x D
@@ -249,16 +265,16 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         for k in range(K):
 
             # Common likelihood calculations
-            ll += self.B * self.like.loglike(y, f[:, k], *lpars_largs).sum()
-            self.df[:, k] = self.B * self.like.df(y, f[:, k], *lpars_largs)
-            self.d2f[:, k] = self.B * self.like.d2f(y, f[:, k], *lpars_largs)
-            self.d3f[:, k] = self.B * self.like.d3f(y, f[:, k], *lpars_largs)
+            ll += self.B * self.like.loglike(y, f[:, k], *largs).sum()
+            self.df[:, k] = self.B * self.like.df(y, f[:, k], *largs)
+            self.d2f[:, k] = self.B * self.like.d2f(y, f[:, k], *largs)
+            self.d3f[:, k] = self.B * self.like.d3f(y, f[:, k], *largs)
             self.H[:, k] = self.d2f[:, k].dot(Phi2) - 1. / reg
 
             # Posterior mean and covariance gradients
             mkmj = m[:, k][:, np.newaxis] - m
             iCkCj = 1 / (C[:, k][:, np.newaxis] + C)
-            self.dC[:, k] = (-((mkmj * iCkCj)**2 - 2 * iCkCj).dot(pz[:, k])
+            self.dC[:, k] = (-((mkmj * iCkCj)**2 - iCkCj).dot(pz[:, k])
                              + self.H[:, k]) / (2 * K)
             self.dm[:, k] = (self.df[:, k].dot(Phi)
                              + 0.5 * C[:, k] * self.d3f[:, k].dot(Phi3)
@@ -266,7 +282,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                              - m[:, k] / reg) / K
 
             # Likelihood parameter gradients
-            ziplgrads = zip(*self.lgrads(y, f[:, k], *lpars_largs))
+            ziplgrads = zip(*self.lgrads(y, f[:, k], *largs))
             for l, (dp, dp2df) in enumerate(ziplgrads):
                 dlpars[l] -= self.B / K \
                     * (dp.sum() + 0.5 * (C[:, k] * dp2df.dot(Phi2)).sum())
@@ -298,6 +314,22 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                  .format(L2, reg, lpars, bpars))
 
         return -L2, [-self.dm, -self.dC, -dreg, dlpars, dbpars]
+
+    def _map(self, weights, X, y, *largs):
+        # MAP objective for initialising the weights
+
+        # Extract parameters from their initial values
+        bpars = atleast_list(self.basis.params.value)
+        largs = tuple(chain(atleast_list(self.like.params.value), largs))
+        reg = self.regulariser_init.value
+
+        # Gradient
+        Phi = self.basis.transform(X, *bpars)
+        f = Phi.dot(weights)
+        df = self.like.df(y, f, *largs)
+        dweights = self.B * df.dot(Phi) - weights / reg
+
+        return -dweights
 
     def predict(self, X, likelihood_args=(), nsamples=100):
         """

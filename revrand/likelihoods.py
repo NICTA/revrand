@@ -8,7 +8,7 @@ from scipy.stats import bernoulli, binom, poisson, norm
 from scipy.special import gammaln, expit
 
 from .btypes import Parameter, Positive
-from .mathfun.special import safesoftplus, softplus, LOGTINY
+from .mathfun.special import safesoftplus, softplus
 
 
 #
@@ -65,8 +65,7 @@ class Bernoulli():
             the log likelihood of each y given each f under this
             likelihood.
         """
-        ll = bernoulli.logpmf(y, expit(f))
-        ll[np.isinf(ll)] = LOGTINY
+        ll = y * f - softplus(f)
         return ll
 
     def Ey(self, f):
@@ -252,7 +251,6 @@ class Binomial(Bernoulli):
             likelihood.
         """
         ll = binom.logpmf(y, n=n, p=expit(f))
-        ll[np.isinf(ll)] = LOGTINY
         return ll
 
     def Ey(self, f, n):
