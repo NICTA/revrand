@@ -54,9 +54,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         Maximum number of iterations of stochastic gradients to run.
     batch_size: int, optional
         number of observations to use per SGD batch.
-    batch_weight: float, optional
-        extra weighting to give the importance of the likelihood terms of a
-        batch
     updater: SGDUpdater, optional
         The SGD learning rate updating algorithm to use, by default this is
         AdaDelta. See revrand.optimize.sgd for different options.
@@ -125,7 +122,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.maxiter = maxiter
         self.tol = tol
         self.batch_size = batch_size
-        self.batch_weight = batch_weight
         self.updater = updater
 
         # Make sure we get list output from likelihood parameter gradients
@@ -160,7 +156,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         D = self.basis.get_dim(X)
 
         # Batch magnification factor
-        self.B = self.batch_weight * N / self.batch_size
+        self.B = K * N / self.batch_size
 
         # Pack data
         likelihood_args = _reshape_likelihood_args(likelihood_args, N)
