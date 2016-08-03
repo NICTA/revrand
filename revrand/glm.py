@@ -48,8 +48,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     postcomp: int, optional
         Number of diagonal Gaussian components to use to approximate the
         posterior distribution.
-    tol: float, optional
-       Optimiser relative tolerance convergence criterion.
     maxiter: int, optional
         Maximum number of iterations of stochastic gradients to run.
     batch_size: int, optional
@@ -110,7 +108,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                  regulariser=Parameter(10., Positive()),
                  postcomp=10,
                  maxiter=3000,
-                 tol=1e-8,
                  batch_size=10,
                  batch_weight=10,
                  updater=None):
@@ -120,13 +117,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.regulariser_init = regulariser
         self.postcomp = postcomp
         self.maxiter = maxiter
-        self.tol = tol
         self.batch_size = batch_size
         self.updater = updater
-
-        # Make sure we get list output from likelihood parameter gradients
-        self.lgrads = couple(lambda *a: atleast_list(self.like.dp(*a)),
-                             lambda *a: atleast_list(self.like.dpd2f(*a)))
 
     def fit(self, X, y, likelihood_args=()):
         r"""
@@ -284,10 +276,11 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                              - m[:, k] / reg) / K
 
             # Likelihood parameter gradients
-            ziplgrads = zip(*self.lgrads(y, f[:, k], *largs))
-            for l, (dp, dp2df) in enumerate(ziplgrads):
+            dp = atleast_list(self.like.dp(y, f[:, k], *largs))
+            dpd2f = atleast_list(self.like.dpd2f(y, f[:, k], *largs))
+            for l, (dp_l, dp2df_l) in enumerate(zip(dp, dpd2f)):
                 dlpars[l] -= self.B / K \
-                    * (dp.sum() + 0.5 * (C[:, k] * dp2df.dot(Phi2)).sum())
+                    * (dp_l.sum() + 0.5 * (C[:, k] * dp2df_l.dot(Phi2)).sum())
 
         # Regulariser gradient
         dreg = 0.5 * (((m**2).sum() + C.sum()) / (reg**2 * K) - D / reg)
