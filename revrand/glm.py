@@ -147,10 +147,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         N, _ = X.shape
         D = self.basis.get_dim(X)
 
-        # Batch magnification factor, multiplying by K makes massive difference
-        #  to learning! Otherwise the approx variational objective
-        #  over-penalises
-        self.B = K * N / self.batch_size
+        # Batch magnification factor
+        # self.B = K * N / self.batch_size
+        self.B = N / self.batch_size
 
         # Pack data
         likelihood_args = _reshape_likelihood_args(likelihood_args, N)
@@ -247,9 +246,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         f = Phi.dot(m)  # M x K
 
         # Posterior responsability terms
-        logqkk = _qmatrix(m, C)
-        logqk = logsumexp(logqkk, axis=0)  # log term of Eq. 7 from [1]
-        pz = np.exp(logqkk - logqk)
+        logNkl = _qmatrix(m, C)
+        logzk = logsumexp(logNkl, axis=0)  # log term of Eq. 7 from [1]
 
         # Zero starts for sums over posterior mixtures
         ll = 0
@@ -265,14 +263,19 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             self.d3f[:, k] = self.B * self.like.d3f(y, f[:, k], *largs)
             self.H[:, k] = self.d2f[:, k].dot(Phi2) - 1. / reg
 
+            # Weight factors for each component in the gradients
+            Nkl_zk = np.exp(logNkl[:, k] - logzk[k])
+            Nkl_zl = np.exp(logNkl[:, k] - logzk)
+            alpha = (Nkl_zk + Nkl_zl)
+
             # Posterior mean and covariance gradients
             mkmj = m[:, k][:, np.newaxis] - m
             iCkCj = 1 / (C[:, k][:, np.newaxis] + C)
-            self.dC[:, k] = (-((mkmj * iCkCj)**2 - iCkCj).dot(pz[:, k])
+            self.dC[:, k] = ((iCkCj - (mkmj * iCkCj)**2).dot(alpha / K)
                              + self.H[:, k]) / (2 * K)
             self.dm[:, k] = (self.df[:, k].dot(Phi)
                              + 0.5 * C[:, k] * self.d3f[:, k].dot(Phi3)
-                             + (iCkCj * mkmj).dot(pz[:, k])
+                             + (iCkCj * mkmj).dot(alpha / K)
                              - m[:, k] / reg) / K
 
             # Likelihood parameter gradients
@@ -303,7 +306,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
               - 0.5 * D * K * np.log(2 * np.pi * reg)
               - 0.5 * (m**2).sum() / reg
               + 0.5 * (C * self.H).sum()
-              - logqk.sum() + np.log(K)) / K
+              - (logzk / K).sum()) / K
 
         log.info("L2 = {}, reg = {}, likelihood_hypers = {}, basis_hypers = {}"
                  .format(L2, reg, lpars, bpars))
