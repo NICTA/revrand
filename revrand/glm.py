@@ -224,9 +224,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # Basis function
         Phi = self.basis.transform(X, *atleast_list(bpars))  # M x D
 
-        # Posterior responsability terms
+        # Posterior entropy lower bound terms
         logNkl = _qmatrix(m, C)
-        logzk = logsumexp(logNkl, axis=0)  # log term of Eq. 7 from [1]
+        logzk = logsumexp(logNkl, axis=0) - np.log(K)
 
         # Preallocate variational parameter gradients
         dm = np.empty_like(m)
@@ -253,12 +253,12 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
             # Posterior mean and covariance gradients
             mkmj = m[:, k][:, np.newaxis] - m
-            iCkCj = 1 / (C[:, k][:, np.newaxis] + C)
+            iCkCj = 1. / (C[:, k][:, np.newaxis] + C)
 
-            dC[:, k] = (self.B * EdCk - 1. / reg
-                        + (iCkCj - (mkmj * iCkCj)**2).dot(alpha / K)) / (2 * K)
             dm[:, k] = (self.B * Edmk - m[:, k] / reg
                         + (iCkCj * mkmj).dot(alpha / K)) / K
+            dC[:, k] = (self.B * EdCk - 1. / reg
+                        + (iCkCj - (mkmj * iCkCj)**2).dot(alpha / K)) / (2 * K)
 
             # Likelihood parameter gradients
             for i, Edlpar in enumerate(Edlpars):
@@ -275,7 +275,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ELBO = (Ell * self.B
                 - 0.5 * D * K * np.log(2 * np.pi * reg)
                 - 0.5 * ((m**2).sum() + C.sum()) / reg
-                - (logzk).sum() + np.log(K)) / K
+                - logzk.sum()) / K
 
         log.info("ELBO = {}, reg = {}, like_hypers = {}, basis_hypers = {}"
                  .format(ELBO, reg, lpars, bpars))
