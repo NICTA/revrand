@@ -321,7 +321,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # MAP objective for initialising the weights
 
         # Extract parameters from their initial values
-        bpars = atleast_list(self.basis.params.value)
+        bpars = self.basis.get_init_params()
         largs = tuple(chain(atleast_list(self.like.params.value), largs))
         reg = self.regulariser_init.value
 
