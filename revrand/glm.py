@@ -1,7 +1,8 @@
 """Bayesian Generalised Linear Model implementation.
 
 Implementation of Bayesian GLMs using a mixture of Gaussians posterior
-approximation and auto-encoding variational Bayes inference. See [1]_ and [2]_.
+approximation and auto-encoding variational Bayes inference. See [1]_ for the
+posterior mixture idea, and [2]_ for the inference scheme.
 
 .. [1] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
        inference". arXiv preprint arXiv:1206.4665 (2012).
@@ -130,9 +131,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     def fit(self, X, y, likelihood_args=()):
         r"""
         Learn the parameters of a Bayesian generalised linear model (GLM).
-
-        The learning algorithm uses nonparametric variational inference [1]_,
-        and optionally stochastic gradients.
 
         Parameters
         ----------

@@ -14,7 +14,9 @@ Utilities
    base.nwise
    base.map_indices
    base.atleast_list
-   base.append_or_extend
+   base.issequence
+
+   rand.endless_permutations
 
    datasets.make_regression
    datasets.make_polynomial

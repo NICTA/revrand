@@ -15,9 +15,9 @@ from scipy.io import loadmat
 from scipy.spatial.distance import cdist
 from unipath import Path
 from io import BytesIO
+from sklearn.utils import check_random_state
 
 from .base import Bunch
-from ..utils import check_random_state
 
 
 def make_regression(func, n_samples=100, n_features=1, bias=0.0, noise=0.0,

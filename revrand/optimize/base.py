@@ -3,9 +3,10 @@ import numpy as np
 
 from itertools import repeat
 from six import wraps
+from sklearn.utils import check_random_state
 
 import revrand.btypes as bt
-from ..utils import flatten, unflatten, check_random_state
+from ..utils import flatten, unflatten
 
 
 # Constants

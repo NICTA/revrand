@@ -4,8 +4,8 @@ Reusable utility functions
 
 from .decorators import (vectorize_args, unvectorize_args, vectorize_result)
 from .base import (flatten, unflatten, couple, decouple, nwise, map_indices,
-                   append_or_extend, atleast_list, issequence)
-from .rand import check_random_state, endless_permutations
+                   atleast_list, issequence)
+from .rand import endless_permutations
 
 __all__ = [
     'vectorize_args',
@@ -17,9 +17,7 @@ __all__ = [
     'decouple',
     'nwise',
     'map_indices',
-    'append_or_extend',
     'atleast_list',
     'issequence',
-    'check_random_state',
     'endless_permutations'
 ]
