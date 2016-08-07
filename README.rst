@@ -22,10 +22,9 @@ regression) and generalised linear models. A few features of this library are:
   invariant covariance functions (e.g. square exponential) when used with
   linear models [1]_, [2]_, [3]_.
 - Non-Gaussian likelihoods with Bayesian generalised linear models using a
-  modified version of the nonparametric variational inference algorithm
-  presented in [4]_.
-- Large scale learning using stochastic gradient descent (Adam, AdaDelta and 
-  more).
+  mixture of Gaussians posterior approximation [4]_ and auto-encoding
+  variational Bayes for learning all parameters [5]_. 
+- Large scale learning using stochastic gradients (Adam, AdaDelta and more).
 - Scikit Learn compatibility, i.e. usable with 
   `pipelines <http://scikit-learn.org/stable/modules/pipeline.html>`_.
 
@@ -113,9 +112,13 @@ References
    expansions in loglinear time." Proceedings of the international conference
    on machine learning. 2013.
 .. [3] Rahimi, A., & Recht, B. "Random features for large-scale kernel
-   machines." Advances in neural information processing systems. 2007. 
+   machines". Advances in neural information processing systems. 2007. 
 .. [4] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
-   inference". arXiv preprint arXiv:1206.4665 (2012).
+   inference". Proceedings of the international conference on machine learning.
+   2012.
+.. [5] Kingma, D. P., & Welling, M. "Auto-encoding variational Bayes".
+   Proceedings of the 2nd International Conference on Learning Representations
+   (ICLR). 2014.
 
 
 Copyright & License

@@ -5,9 +5,11 @@ approximation and auto-encoding variational Bayes inference. See [1]_ for the
 posterior mixture idea, and [2]_ for the inference scheme.
 
 .. [1] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
-       inference". arXiv preprint arXiv:1206.4665 (2012).
-.. [2] Kingma, D. P., & Welling, M. "Auto-encoding variational Bayes."
-       arXiv preprint arXiv:1312.6114 (2013).
+   inference". Proceedings of the international conference on machine learning.
+   2012.
+.. [2] Kingma, D. P., & Welling, M. "Auto-encoding variational Bayes".
+   Proceedings of the 2nd International Conference on Learning Representations
+   (ICLR). 2014.
 """
 
 
@@ -64,8 +66,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     Notes
     -----
-    This approximates the posterior distribution over the weights with
-    a mixture of Gaussians:
+    This approximates the posterior distribution over the weights with a
+    mixture of Gaussians:
 
     .. math ::
 
@@ -86,14 +88,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     The main differences between this implementation and the GLM in [1]_ are:
         - We use diagonal mixtures, as opposed to isotropic.
-        - We do not cycle between optimising eq. 10 and 11 (objectives L1 and
-          L2) in the paper. We use the full objective L2 for everything,
-          including the posterior means, and we optimise all parameters
-          together.
-
-    Even though these changes make learning a little slower, and require third
-    derivatives of the likelihoods, we obtain better results and we can use SGD
-    straight-forwardly.
+        - We use auto encoding variational Bayes (AEVB) inference [2]_ with
+          stochastic gradients.
 
     This uses the python logging module for displaying learning status. To view
     these messages have something like,
