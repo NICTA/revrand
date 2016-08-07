@@ -57,7 +57,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         number of observations to use per SGD batch.
     updater: SGDUpdater, optional
         The SGD learning rate updating algorithm to use, by default this is
-        AdaDelta. See revrand.optimize.sgd for different options.
+        Adam. See revrand.optimize.sgd for different options.
     nsamples: int, optional
         Number of samples for sampling the expected likelihood and expected
         likelihood gradients

@@ -308,7 +308,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     maxiter: int, optional
         Number of mini-batch iterations before optimization terminates.
     updater: SGDUpdater, optional
-        The type of gradient update to use, by default this is AdaDelta.
+        The type of gradient update to use, by default this is Adam.
     eval_obj: bool, optional
         This indicates whether or not :code:`fun` also evaluates and returns
         the objective function value. If this is true, :code:`fun` must return
@@ -333,7 +333,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     """
 
     if updater is None:
-        updater = AdaDelta()
+        updater = Adam()
 
     # Make sure we aren't using a recycled updater
     updater.reset()

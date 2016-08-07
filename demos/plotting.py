@@ -26,7 +26,6 @@ def fancy_yyplot(y, Ey, lowers, uppers, varname):
 
 def yyplot(y, Ey, varname):
 
-    pl.figure()
     pl.plot(y, Ey, '.', color='#475F83', linewidth=2)
     maxy = max(y.max(), Ey.max())
     miny = min(y.min(), Ey.min())
@@ -38,4 +37,27 @@ def yyplot(y, Ey, varname):
     pl.title(title)
     pl.xlabel('True')
     pl.ylabel('Predicted')
+    pl.show()
+
+
+def SGDtrace(objs, grad_norms, fig):
+
+    maxiter = len(objs)
+    ax = fig.add_subplot(111)
+    pl.xlabel('Iteration')
+
+    pl.title('SGD convergence')
+    ax.plot(range(maxiter), grad_norms, 'r')
+    ax.set_ylabel('gradient norms', color='r')
+
+    for t in ax.get_yticklabels():
+        t.set_color('r')
+
+    ax2 = ax.twinx()
+    ax2.plot(range(maxiter), objs, 'b')
+    ax2.set_ylabel('Objective', color='b')
+
+    for t in ax2.get_yticklabels():
+        t.set_color('b')
+
     pl.show()
