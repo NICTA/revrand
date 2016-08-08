@@ -14,6 +14,7 @@ revrand.optimize.sgd.AdaGrad
    .. autosummary::
    
       ~AdaGrad.__init__
+      ~AdaGrad.reset
    
    
 

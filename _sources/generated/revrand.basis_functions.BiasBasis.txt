@@ -15,6 +15,7 @@ revrand.basis_functions.BiasBasis
    
       ~BiasBasis.__init__
       ~BiasBasis.get_dim
+      ~BiasBasis.get_init_params
       ~BiasBasis.grad
       ~BiasBasis.transform
    

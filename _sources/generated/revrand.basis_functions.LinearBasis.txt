@@ -15,6 +15,7 @@ revrand.basis_functions.LinearBasis
    
       ~LinearBasis.__init__
       ~LinearBasis.get_dim
+      ~LinearBasis.get_init_params
       ~LinearBasis.grad
       ~LinearBasis.transform
    

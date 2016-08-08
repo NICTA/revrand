@@ -15,6 +15,7 @@ revrand.basis_functions.FastFoodRBF
    
       ~FastFoodRBF.__init__
       ~FastFoodRBF.get_dim
+      ~FastFoodRBF.get_init_params
       ~FastFoodRBF.grad
       ~FastFoodRBF.transform
    

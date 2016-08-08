@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Utilities &mdash; revrand 0.5.1 documentation</title>
+    <title>Utilities &mdash; revrand 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.5.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.6.0 documentation" href="index.html" />
     <link rel="next" title="revrand.utils.base" href="generated/revrand.utils.base.html" />
     <link rel="prev" title="revrand.optimize.sgd.Momentum" href="generated/revrand.optimize.sgd.Momentum.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="generated/revrand.optimize.sgd.Momentum.html" title="revrand.optimize.sgd.Momentum"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -92,22 +92,25 @@
 <tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.base.atleast_list.html#revrand.utils.base.atleast_list" title="revrand.utils.base.atleast_list"><code class="xref py py-obj docutils literal"><span class="pre">base.atleast_list</span></code></a>(a)</td>
 <td>Promote an object to a list if not a list or generator.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.append_or_extend.html#revrand.utils.base.append_or_extend" title="revrand.utils.base.append_or_extend"><code class="xref py py-obj docutils literal"><span class="pre">base.append_or_extend</span></code></a>(mylist,&nbsp;*objs)</td>
-<td>Append an object to a list, or extend the list if the object is a list.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.base.issequence.html#revrand.utils.base.issequence" title="revrand.utils.base.issequence"><code class="xref py py-obj docutils literal"><span class="pre">base.issequence</span></code></a>(obj)</td>
+<td>Test if an object is an iterable generator, list or tuple.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.datasets.make_regression.html#revrand.utils.datasets.make_regression" title="revrand.utils.datasets.make_regression"><code class="xref py py-obj docutils literal"><span class="pre">datasets.make_regression</span></code></a>(func[,&nbsp;n_samples,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.rand.endless_permutations.html#revrand.utils.rand.endless_permutations" title="revrand.utils.rand.endless_permutations"><code class="xref py py-obj docutils literal"><span class="pre">rand.endless_permutations</span></code></a>(N[,&nbsp;random_state])</td>
+<td>Generate an endless sequence of random integers from permutations of the set [0, ..., N).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.datasets.make_regression.html#revrand.utils.datasets.make_regression" title="revrand.utils.datasets.make_regression"><code class="xref py py-obj docutils literal"><span class="pre">datasets.make_regression</span></code></a>(func[,&nbsp;n_samples,&nbsp;...])</td>
 <td>Make dataset for a regression problem.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.datasets.make_polynomial.html#revrand.utils.datasets.make_polynomial" title="revrand.utils.datasets.make_polynomial"><code class="xref py py-obj docutils literal"><span class="pre">datasets.make_polynomial</span></code></a>([degree,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.datasets.make_polynomial.html#revrand.utils.datasets.make_polynomial" title="revrand.utils.datasets.make_polynomial"><code class="xref py py-obj docutils literal"><span class="pre">datasets.make_polynomial</span></code></a>([degree,&nbsp;...])</td>
 <td>Generate a noisy polynomial for a regression problem</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.datasets.gen_gausprocess_se.html#revrand.utils.datasets.gen_gausprocess_se" title="revrand.utils.datasets.gen_gausprocess_se"><code class="xref py py-obj docutils literal"><span class="pre">datasets.gen_gausprocess_se</span></code></a>(ntrain,&nbsp;ntest[,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.datasets.gen_gausprocess_se.html#revrand.utils.datasets.gen_gausprocess_se" title="revrand.utils.datasets.gen_gausprocess_se"><code class="xref py py-obj docutils literal"><span class="pre">datasets.gen_gausprocess_se</span></code></a>(ntrain,&nbsp;ntest[,&nbsp;...])</td>
 <td>Generate a random (noisy) draw from a Gaussian Process with a RBF kernel.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_usps_resampled_data.html#revrand.utils.datasets.fetch_gpml_usps_resampled_data" title="revrand.utils.datasets.fetch_gpml_usps_resampled_data"><code class="xref py py-obj docutils literal"><span class="pre">datasets.fetch_gpml_usps_resampled_data</span></code></a>([...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_usps_resampled_data.html#revrand.utils.datasets.fetch_gpml_usps_resampled_data" title="revrand.utils.datasets.fetch_gpml_usps_resampled_data"><code class="xref py py-obj docutils literal"><span class="pre">datasets.fetch_gpml_usps_resampled_data</span></code></a>([...])</td>
 <td>Fetch the USPS handwritten digits dataset from the internet and parse</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html#revrand.utils.datasets.fetch_gpml_sarcos_data" title="revrand.utils.datasets.fetch_gpml_sarcos_data"><code class="xref py py-obj docutils literal"><span class="pre">datasets.fetch_gpml_sarcos_data</span></code></a>([...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html#revrand.utils.datasets.fetch_gpml_sarcos_data" title="revrand.utils.datasets.fetch_gpml_sarcos_data"><code class="xref py py-obj docutils literal"><span class="pre">datasets.fetch_gpml_sarcos_data</span></code></a>([...])</td>
 <td>Fetch the SARCOS dataset from the internet and parse appropriately into</td>
 </tr>
 </tbody>
@@ -140,7 +143,8 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.nwise.html">revrand.utils.base.nwise</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.map_indices.html">revrand.utils.base.map_indices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.atleast_list.html">revrand.utils.base.atleast_list</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.append_or_extend.html">revrand.utils.base.append_or_extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.issequence.html">revrand.utils.base.issequence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.rand.endless_permutations.html">revrand.utils.rand.endless_permutations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.make_regression.html">revrand.utils.datasets.make_regression</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.make_polynomial.html">revrand.utils.datasets.make_polynomial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.gen_gausprocess_se.html">revrand.utils.datasets.gen_gausprocess_se</a></li>
@@ -195,7 +199,7 @@
         <li class="right" >
           <a href="generated/revrand.optimize.sgd.Momentum.html" title="revrand.optimize.sgd.Momentum"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

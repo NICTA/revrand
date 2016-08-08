@@ -16,11 +16,8 @@ revrand.likelihoods.Bernoulli
       ~Bernoulli.Ey
       ~Bernoulli.__init__
       ~Bernoulli.cdf
-      ~Bernoulli.d2f
-      ~Bernoulli.d3f
       ~Bernoulli.df
       ~Bernoulli.dp
-      ~Bernoulli.dpd2f
       ~Bernoulli.loglike
    
    

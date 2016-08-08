@@ -15,6 +15,7 @@ revrand.basis_functions.PolynomialBasis
    
       ~PolynomialBasis.__init__
       ~PolynomialBasis.get_dim
+      ~PolynomialBasis.get_init_params
       ~PolynomialBasis.grad
       ~PolynomialBasis.transform
    

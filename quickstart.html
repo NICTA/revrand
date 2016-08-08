@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart Guide &mdash; revrand 0.5.1 documentation</title>
+    <title>Quickstart Guide &mdash; revrand 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.5.1 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.6.0 documentation" href="index.html" />
     <link rel="next" title="Installation" href="installation.html" />
     <link rel="prev" title="Welcome to revrand’s documentation!" href="index.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="index.html" title="Welcome to revrand’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -173,10 +173,10 @@ associated with the prediction.</p>
 <h2>Large-scale Learning with Stochastic Gradients<a class="headerlink" href="#large-scale-learning-with-stochastic-gradients" title="Permalink to this headline">¶</a></h2>
 <p>By default the GLM uses stochastic gradients to learn all of its
 parameters/hyperparameters and does not require any matrix inversion, and so it
-can be used to learn from large datasets with lots of features
-(slm.learn uses L-BFGS and requires a matrix inversion). We can also use
-the GLM to approximate and scale up regular Bayesian linear regression. For
-instance, if we modify the Bayesian linear regression example from before,</p>
+can be used to learn from large datasets with lots of features (slm.learn uses
+L-BFGS and requires a matrix inversion). We can also use the GLM to approximate
+and scale up regular Bayesian linear regression. For instance, if we modify the
+Bayesian linear regression example from before,</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">...</span>
 
 <span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">likelihoods</span>
@@ -283,7 +283,16 @@ machines.&#8221; Advances in neural information processing systems. 2007.</td></
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[4]</td><td>Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
-inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
+inference&#8221;. Proceedings of the international conference on machine learning.
+2012.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[5]</td><td>Kingma, D. P., &amp; Welling, M. &#8220;Auto-encoding variational Bayes&#8221;.
+Proceedings of the 2nd International Conference on Learning Representations
+(ICLR). 2014.</td></tr>
 </tbody>
 </table>
 </div>
@@ -361,7 +370,7 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
         <li class="right" >
           <a href="index.html" title="Welcome to revrand’s documentation!"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.5.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.base &mdash; revrand 0.5.1 documentation</title>
+    <title>revrand.utils.base &mdash; revrand 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.5.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.6.0 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
     <link rel="next" title="revrand.utils.base.flatten" href="revrand.utils.base.flatten.html" />
     <link rel="prev" title="Utilities" href="../utils.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../utils.html" title="Utilities"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -72,43 +72,40 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.append_or_extend.html#revrand.utils.base.append_or_extend" title="revrand.utils.base.append_or_extend"><code class="xref py py-obj docutils literal"><span class="pre">append_or_extend</span></code></a>(mylist,&nbsp;*objs)</td>
-<td>Append an object to a list, or extend the list if the object is a list.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.atleast_list.html#revrand.utils.base.atleast_list" title="revrand.utils.base.atleast_list"><code class="xref py py-obj docutils literal"><span class="pre">atleast_list</span></code></a>(a)</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.atleast_list.html#revrand.utils.base.atleast_list" title="revrand.utils.base.atleast_list"><code class="xref py py-obj docutils literal"><span class="pre">atleast_list</span></code></a>(a)</td>
 <td>Promote an object to a list if not a list or generator.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.couple.html#revrand.utils.base.couple" title="revrand.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">couple</span></code></a>(f,&nbsp;g)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.couple.html#revrand.utils.base.couple" title="revrand.utils.base.couple"><code class="xref py py-obj docutils literal"><span class="pre">couple</span></code></a>(f,&nbsp;g)</td>
 <td>Compose a function thate returns two arguments.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.decouple.html#revrand.utils.base.decouple" title="revrand.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">decouple</span></code></a>(fn)</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.decouple.html#revrand.utils.base.decouple" title="revrand.utils.base.decouple"><code class="xref py py-obj docutils literal"><span class="pre">decouple</span></code></a>(fn)</td>
 <td>Inverse operation of couple.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.flatten.html#revrand.utils.base.flatten" title="revrand.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code></a>(arys[,&nbsp;returns_shapes,&nbsp;hstack,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.flatten.html#revrand.utils.base.flatten" title="revrand.utils.base.flatten"><code class="xref py py-obj docutils literal"><span class="pre">flatten</span></code></a>(arys[,&nbsp;returns_shapes,&nbsp;hstack,&nbsp;...])</td>
 <td>Flatten a potentially recursive list of multidimensional objects.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">isgenerator</span></code>(object)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">isgenerator</span></code>(object)</td>
 <td>Return true if the object is a generator.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">issequence</span></code>(obj)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.issequence.html#revrand.utils.base.issequence" title="revrand.utils.base.issequence"><code class="xref py py-obj docutils literal"><span class="pre">issequence</span></code></a>(obj)</td>
 <td>Test if an object is an iterable generator, list or tuple.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.map_indices.html#revrand.utils.base.map_indices" title="revrand.utils.base.map_indices"><code class="xref py py-obj docutils literal"><span class="pre">map_indices</span></code></a>(fn,&nbsp;iterable,&nbsp;indices)</td>
+<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.map_indices.html#revrand.utils.base.map_indices" title="revrand.utils.base.map_indices"><code class="xref py py-obj docutils literal"><span class="pre">map_indices</span></code></a>(fn,&nbsp;iterable,&nbsp;indices)</td>
 <td>Map a function across indices of an iterable.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.nwise.html#revrand.utils.base.nwise" title="revrand.utils.base.nwise"><code class="xref py py-obj docutils literal"><span class="pre">nwise</span></code></a>(iterable,&nbsp;n)</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.nwise.html#revrand.utils.base.nwise" title="revrand.utils.base.nwise"><code class="xref py py-obj docutils literal"><span class="pre">nwise</span></code></a>(iterable,&nbsp;n)</td>
 <td>Sliding window iterator.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">scalar_reshape</span></code>(a,&nbsp;newshape[,&nbsp;order])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">scalar_reshape</span></code>(a,&nbsp;newshape[,&nbsp;order])</td>
 <td>Reshape, but also return scalars or empty lists.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">sumprod</span></code>(seq)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">sumprod</span></code>(seq)</td>
 <td>Product of tuple, or sum of products of lists of tuples.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">tee</span></code></td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">tee</span></code></td>
 <td>tee(iterable, n=2) &#8211;&gt; tuple of n independent iterators.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="revrand.utils.base.unflatten.html#revrand.utils.base.unflatten" title="revrand.utils.base.unflatten"><code class="xref py py-obj docutils literal"><span class="pre">unflatten</span></code></a>(ary,&nbsp;shapes[,&nbsp;reshape])</td>
+<tr class="row-even"><td><a class="reference internal" href="revrand.utils.base.unflatten.html#revrand.utils.base.unflatten" title="revrand.utils.base.unflatten"><code class="xref py py-obj docutils literal"><span class="pre">unflatten</span></code></a>(ary,&nbsp;shapes[,&nbsp;reshape])</td>
 <td>Inverse opertation of flatten.</td>
 </tr>
 </tbody>
@@ -165,7 +162,8 @@
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.nwise.html">revrand.utils.base.nwise</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.map_indices.html">revrand.utils.base.map_indices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.atleast_list.html">revrand.utils.base.atleast_list</a></li>
-<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.append_or_extend.html">revrand.utils.base.append_or_extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.issequence.html">revrand.utils.base.issequence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.rand.endless_permutations.html">revrand.utils.rand.endless_permutations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_regression.html">revrand.utils.datasets.make_regression</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_polynomial.html">revrand.utils.datasets.make_polynomial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.gen_gausprocess_se.html">revrand.utils.datasets.gen_gausprocess_se</a></li>
@@ -220,7 +218,7 @@
         <li class="right" >
           <a href="../utils.html" title="Utilities"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>

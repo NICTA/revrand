@@ -15,6 +15,7 @@ revrand.basis_functions.RandomMatern52
    
       ~RandomMatern52.__init__
       ~RandomMatern52.get_dim
+      ~RandomMatern52.get_init_params
       ~RandomMatern52.grad
       ~RandomMatern52.transform
    

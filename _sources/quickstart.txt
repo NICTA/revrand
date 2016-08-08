@@ -130,10 +130,10 @@ Large-scale Learning with Stochastic Gradients
 
 By default the GLM uses stochastic gradients to learn all of its
 parameters/hyperparameters and does not require any matrix inversion, and so it
-can be used to learn from large datasets with lots of features
-(slm.learn uses L-BFGS and requires a matrix inversion). We can also use
-the GLM to approximate and scale up regular Bayesian linear regression. For
-instance, if we modify the Bayesian linear regression example from before,
+can be used to learn from large datasets with lots of features (slm.learn uses
+L-BFGS and requires a matrix inversion). We can also use the GLM to approximate
+and scale up regular Bayesian linear regression. For instance, if we modify the
+Bayesian linear regression example from before,
 
 .. code:: python
 
@@ -236,4 +236,8 @@ References
 .. [3] Rahimi, A., & Recht, B. "Random features for large-scale kernel
    machines." Advances in neural information processing systems. 2007. 
 .. [4] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
-   inference". arXiv preprint arXiv:1206.4665 (2012).
+   inference". Proceedings of the international conference on machine learning.
+   2012.
+.. [5] Kingma, D. P., & Welling, M. "Auto-encoding variational Bayes".
+   Proceedings of the 2nd International Conference on Learning Representations
+   (ICLR). 2014.

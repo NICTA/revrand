@@ -15,6 +15,7 @@ revrand.basis_functions.FastFoodGM
    
       ~FastFoodGM.__init__
       ~FastFoodGM.get_dim
+      ~FastFoodGM.get_init_params
       ~FastFoodGM.grad
       ~FastFoodGM.transform
    

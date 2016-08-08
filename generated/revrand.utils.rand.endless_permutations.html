@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.utils.base.append_or_extend &mdash; revrand 0.5.1 documentation</title>
+    <title>revrand.utils.rand.endless_permutations &mdash; revrand 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,10 +24,10 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.5.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.6.0 documentation" href="../index.html" />
     <link rel="up" title="Utilities" href="../utils.html" />
     <link rel="next" title="revrand.utils.datasets.make_regression" href="revrand.utils.datasets.make_regression.html" />
-    <link rel="prev" title="revrand.utils.base.atleast_list" href="revrand.utils.base.atleast_list.html" />
+    <link rel="prev" title="revrand.utils.base.issequence" href="revrand.utils.base.issequence.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -50,9 +50,9 @@
           <a href="revrand.utils.datasets.make_regression.html" title="revrand.utils.datasets.make_regression"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="revrand.utils.base.atleast_list.html" title="revrand.utils.base.atleast_list"
+          <a href="revrand.utils.base.issequence.html" title="revrand.utils.base.issequence"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" accesskey="U">Utilities</a> &raquo;</li> 
       </ul>
     </div>  
@@ -62,27 +62,26 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="revrand-utils-base-append-or-extend">
-<h1>revrand.utils.base.append_or_extend<a class="headerlink" href="#revrand-utils-base-append-or-extend" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="revrand-utils-rand-endless-permutations">
+<h1>revrand.utils.rand.endless_permutations<a class="headerlink" href="#revrand-utils-rand-endless-permutations" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="revrand.utils.base.append_or_extend">
-<code class="descclassname">revrand.utils.base.</code><code class="descname">append_or_extend</code><span class="sig-paren">(</span><em>mylist</em>, <em>*objs</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.base.append_or_extend" title="Permalink to this definition">¶</a></dt>
-<dd><p>Append an object to a list, or extend the list if the object is a list.</p>
+<dt id="revrand.utils.rand.endless_permutations">
+<code class="descclassname">revrand.utils.rand.</code><code class="descname">endless_permutations</code><span class="sig-paren">(</span><em>N</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.utils.rand.endless_permutations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an endless sequence of random integers from permutations of the
+set [0, ..., N).</p>
+<p>If we call this N times, we will sweep through the entire set without
+replacement, on the (N+1)th call a new permutation will be created, etc.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>mylist</strong> (<em>list</em>) &#8211; list to extend</li>
-<li><strong>objs</strong> (<em>object(s)</em>) &#8211; object(s) to append to the list if not a list, else concatenate the
-lists</li>
+<li><strong>N</strong> (<em>int</em>) &#8211; the length of the set</li>
+<li><strong>random_state</strong> (<em>int or RandomState, optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the extended list.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first last"><em>int</em> &#8211; a random int from the set [0, ..., N)</p>
 </td>
 </tr>
 </tbody>
@@ -117,7 +116,8 @@ lists</li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.nwise.html">revrand.utils.base.nwise</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.map_indices.html">revrand.utils.base.map_indices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.atleast_list.html">revrand.utils.base.atleast_list</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.utils.base.append_or_extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.utils.base.issequence.html">revrand.utils.base.issequence</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.utils.rand.endless_permutations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_regression.html">revrand.utils.datasets.make_regression</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.make_polynomial.html">revrand.utils.datasets.make_polynomial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.utils.datasets.gen_gausprocess_se.html">revrand.utils.datasets.gen_gausprocess_se</a></li>
@@ -131,15 +131,15 @@ lists</li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="revrand.utils.base.atleast_list.html"
-                        title="previous chapter">revrand.utils.base.atleast_list</a></p>
+  <p class="topless"><a href="revrand.utils.base.issequence.html"
+                        title="previous chapter">revrand.utils.base.issequence</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="revrand.utils.datasets.make_regression.html"
                         title="next chapter">revrand.utils.datasets.make_regression</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/generated/revrand.utils.base.append_or_extend.txt"
+      <li><a href="../_sources/generated/revrand.utils.rand.endless_permutations.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -170,9 +170,9 @@ lists</li>
           <a href="revrand.utils.datasets.make_regression.html" title="revrand.utils.datasets.make_regression"
              >next</a> |</li>
         <li class="right" >
-          <a href="revrand.utils.base.atleast_list.html" title="revrand.utils.base.atleast_list"
+          <a href="revrand.utils.base.issequence.html" title="revrand.utils.base.issequence"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../utils.html" >Utilities</a> &raquo;</li> 
       </ul>
     </div>

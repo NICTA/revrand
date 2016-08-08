@@ -16,11 +16,8 @@ revrand.likelihoods.Poisson
       ~Poisson.Ey
       ~Poisson.__init__
       ~Poisson.cdf
-      ~Poisson.d2f
-      ~Poisson.d3f
       ~Poisson.df
       ~Poisson.dp
-      ~Poisson.dpd2f
       ~Poisson.loglike
    
    

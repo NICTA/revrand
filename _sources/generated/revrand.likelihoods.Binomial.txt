@@ -16,11 +16,8 @@ revrand.likelihoods.Binomial
       ~Binomial.Ey
       ~Binomial.__init__
       ~Binomial.cdf
-      ~Binomial.d2f
-      ~Binomial.d3f
       ~Binomial.df
       ~Binomial.dp
-      ~Binomial.dpd2f
       ~Binomial.loglike
    
    

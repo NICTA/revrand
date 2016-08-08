@@ -15,6 +15,7 @@ revrand.basis_functions.RandomMatern32
    
       ~RandomMatern32.__init__
       ~RandomMatern32.get_dim
+      ~RandomMatern32.get_init_params
       ~RandomMatern32.grad
       ~RandomMatern32.transform
    

@@ -16,11 +16,8 @@ revrand.likelihoods.Gaussian
       ~Gaussian.Ey
       ~Gaussian.__init__
       ~Gaussian.cdf
-      ~Gaussian.d2f
-      ~Gaussian.d3f
       ~Gaussian.df
       ~Gaussian.dp
-      ~Gaussian.dpd2f
       ~Gaussian.loglike
    
    

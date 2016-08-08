@@ -15,6 +15,7 @@ revrand.basis_functions.RandomCauchy
    
       ~RandomCauchy.__init__
       ~RandomCauchy.get_dim
+      ~RandomCauchy.get_init_params
       ~RandomCauchy.grad
       ~RandomCauchy.transform
    

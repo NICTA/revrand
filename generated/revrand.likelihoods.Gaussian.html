@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.likelihoods.Gaussian &mdash; revrand 0.5.1 documentation</title>
+    <title>revrand.likelihoods.Gaussian &mdash; revrand 0.6.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.5.1',
+        VERSION:     '0.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.5.1 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.6.0 documentation" href="../index.html" />
     <link rel="up" title="Likelihood Classes" href="../likelihoods.html" />
     <link rel="next" title="revrand.likelihoods.Poisson" href="revrand.likelihoods.Poisson.html" />
     <link rel="prev" title="revrand.likelihoods.Binomial" href="revrand.likelihoods.Binomial.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.likelihoods.Binomial.html" title="revrand.likelihoods.Binomial"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../likelihoods.html" accesskey="U">Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>  
@@ -106,22 +106,13 @@ an optimiser to learn the variance parameter of this object.</td>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code>(y,&nbsp;f,&nbsp;var)</td>
 <td>Cumulative density function of the likelihood.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">d2f</span></code>(y,&nbsp;f,&nbsp;var)</td>
-<td>Second derivative of Gaussian log likelihood w.r.t. f.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">d3f</span></code>(y,&nbsp;f,&nbsp;var)</td>
-<td>Third derivative of Gaussian log likelihood w.r.t. f.</td>
-</tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">df</span></code>(y,&nbsp;f,&nbsp;var)</td>
 <td>Derivative of Gaussian log likelihood w.r.t. f.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">dp</span></code>(y,&nbsp;f,&nbsp;var)</td>
 <td>Derivative of Gaussian log likelihood w.r.t.the variance <span class="math">\(\sigma^2\)</span>.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">dpd2f</span></code>(y,&nbsp;f,&nbsp;var)</td>
-<td>Partial derivative of Gaussian log likelihood, <span class="math">\(\partial h(f, \theta) / \partial \theta\)</span> where <span class="math">\(h(f, \theta) = \partial^2 \log p(y|f, \theta)/ \partial f^2\)</span>.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code>(y,&nbsp;f,&nbsp;var)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code>(y,&nbsp;f,&nbsp;var)</td>
 <td>Gaussian log likelihood.</td>
 </tr>
 </tbody>
@@ -213,7 +204,7 @@ an optimiser to learn the variance parameter of this object.</td>
         <li class="right" >
           <a href="revrand.likelihoods.Binomial.html" title="revrand.likelihoods.Binomial"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.5.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../likelihoods.html" >Likelihood Classes</a> &raquo;</li> 
       </ul>
     </div>

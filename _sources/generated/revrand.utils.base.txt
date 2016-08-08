@@ -9,7 +9,6 @@ revrand.utils.base
 
    .. autosummary::
    
-      append_or_extend
       atleast_list
       couple
       decouple
