@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA
 
 from revrand import StandardLinearModel, GeneralisedLinearModel
 from revrand.likelihoods import Gaussian, Binomial
-from revrand.basis_functions import LinearBasis, RandomRBF
+from revrand.basis_functions import LinearBasis, RandomRBF, RandomMatern52
 from revrand.metrics import smse
 
 
@@ -21,7 +21,9 @@ def test_slm(make_gaus_data):
 
     assert smse(y, Ey) < 0.1
 
-    basis = LinearBasis(onescol=False) + RandomRBF(nbases=10, Xdim=X.shape[1])
+    basis = LinearBasis(onescol=False) \
+        + RandomRBF(nbases=10, Xdim=X.shape[1]) \
+        + RandomMatern52(nbases=10, Xdim=X.shape[1])
 
     slm = StandardLinearModel(basis)
     slm.fit(X, y)
@@ -58,7 +60,9 @@ def test_glm_gaussian(make_gaus_data):
     assert smse(y, Ey) < 0.1
 
     # Test BasisCat
-    basis = LinearBasis(onescol=True) + RandomRBF(nbases=10, Xdim=X.shape[1])
+    basis = LinearBasis(onescol=True) \
+        + RandomRBF(nbases=20, Xdim=X.shape[1]) \
+        + RandomMatern52(nbases=20, Xdim=X.shape[1])
 
     glm = GeneralisedLinearModel(lhood, basis)
     glm.fit(X, y)
@@ -86,7 +90,9 @@ def test_glm_binomial(make_binom_data):
     X, y, p, n = make_binom_data
     f = p * n
 
-    basis = LinearBasis(onescol=True) + RandomRBF(nbases=20, Xdim=X.shape[1])
+    basis = LinearBasis(onescol=True) \
+        + RandomRBF(nbases=20, Xdim=X.shape[1]) \
+        + RandomMatern52(nbases=20, Xdim=X.shape[1])
     lhood = Binomial()
     largs = (n,)
 

@@ -105,6 +105,14 @@ constant term amongst the mini-batches in stochastic gradients,
     \func{g}{\param}{}\!|_{\param = \param_{k-1}}.
     \label{eq:wsg}
 \end{equation} 
+or, equivalently, boost the contribution of the mini-batch,
+\begin{equation}
+    \param_k := \param_{k-1} - \frac{N}{M} \lrate_k \sum_{\inss \in \minibatch}
+    \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}}
+    - \lrate_k \nabla_{\param} 
+    \func{g}{\param}{}\!|_{\param = \param_{k-1}}.
+    \label{eq:wsg2}
+\end{equation} 
 This is particularly relevant for variational inference where the evidence
 lower bound objective has a component independent of the data. For example, 
 lets consider the model,
@@ -162,7 +170,7 @@ regressor of the following form,
 \end{align}
 where $\feats_n := \func{\featsym}{\inss_n, \param}{}$ is a feature, or basis,
 function that $\featsym \real{d} \to \real{D}$. This is the same algorithm
-described in~\cite[Chapter 2]{Rasmussen2006}. We then:
+described in~\citet[Chapter 2]{Rasmussen2006}. We then:
 \begin{itemize}
     \item Optimise $\var, \reg$ and $\param$ w.r.t.\ log-marginal likelihood,
         \begin{equation}
@@ -247,55 +255,87 @@ $\probC{\weights}{\targ, \ins}$, and the log-marginal likelihood,
 $\prob{\targ}$, for hyperparameter learning are intractable since we may have a
 non-conjugate relationship between the likelihood and prior. Therefore we must
 resort to approximating the true posterior and the log-marginal likelihood.
-We use a modification of the nonparametric variational algorithm
-presented in~\cite{gershman2012} for approximating the posterior and log
-marginal likelihood. The posterior takes the form
+
+Firstly, we approximate the true posterior over weights with a mixture of $K$
+diagonal Gaussians,
 \begin{align}
     \probC{\weights}{\targ, \ins} &\approx \qrob{\weights}, \nonumber \\
-    &= \frac{1}{K} \prod^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k},
+    &= \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k},
 \end{align}
-i.e.\ a mixture of $K$ diagonal Gaussians, $\dpocov_k = \diag{[\dpocovs_{k,1},
-    \ldots, \dpocovs_{k, D}]\T}$. This is a very flexible form for the
-approximate posterior, and still admits a closed-form lower bound to the
-log-marginal likelihood. Furthermore this has the nice property that our
-algorithm no longer has a \bigo{D^3} cost associated with the number of
-features. \citet{gershman2012} make one more approximation based on local
-second order Taylor expansions of the joint,
-\begin{multline}
-    \expec{q}{\log \prob{\targ, \weights}} \approx
-    \frac{1}{K} \sum^K_{k=1} \sum^N_{n=1} 
-    \log \probC{\targs_n}{\activ{\feats_n\T \pomean_k}, \lparam} \\
-    + \log \gausC{\pomean_k}{\mathbf{0}, \reg\ident{D}}
-    + \frac{1}{2} \trace{\dpocov_k\hess{k}},
-\end{multline}
-to deal with non-conjugacy within their variational framework. Here $\hess{k} =
-\nabla^2_{\weights} \prob{\targs, \weights}\!|_{\weights =
-    \pomean_k}$\footnote{We only need the diagonals of this Hessian matrix.}.
-Unfortunately this approximation to the ELBO actually breaks the lower bound,
-but works well in practice. For more details on this inference scheme we direct
-the reader to~\cite{gershman2012}. The final objective function we optimise is,
-\begin{multline}
-    \elbo \approx
-    \frac{1}{K} \sum^K_{k=1} \sum^N_{n=1} 
-    \log \probC{\targs_n}{\activ{\feats_n\T \pomean_k}, \lparam}
-    + \log \gausC{\pomean_k}{\mathbf{0}, \reg\ident{D}} \\
-    + \frac{1}{2} \trace{\dpocov_k\hess{k}}
-    - \log \brac{\sum^K_{j=1} \gausC{\pomean_k}{\pomean_j, \dpocov_k +
-            \dpocov_j}} + \log K. \label{eq:glmobj}
-\end{multline}
-While this is an approximation to Equation~\eqref{eq:elbo}, it retains the
-property that it easily factorises over the data ($n$), and so can be optimised
-using stochastic gradients as described in \S\ref{sub:stochvar}.
+where $\dpocov_k = \diag{[\dpocovs_{k,1}, \ldots, \dpocovs_{k, D}]\T}$, which
+is inspired from similar approximations made in \citet{gershman2012,
+    nguyen2014automated}. This is a very flexible form for the approximate
+posterior, and has the nice property that our algorithm no longer has a
+\bigo{D^3} cost associated with the number of features.
 
-In \emph{revrand} we actually optimise Equation~\eqref{eq:glmobj} with respect
-to the hyperparameters, $\param, \lparam$ \emph{and} the parameters $\pomean_k,
-\dpocov_k~\forall k$ simultaneously. This is unlike the optimisation scheme 
-in~\cite{gershman2012}, since it requires \nth{3} derivatives of the
-likelihood in Equation~\eqref{eq:glmlike} w.r.t.\ $\weights$. However, we find
-that providing these derivatives is simple (for our model) compared to the more
-complex optimisation scheme presented in~\cite{gershman2012}, which is not as
-amenable to large datasets as stochastic gradients when hyperparameter 
-optimisation is involved.
+Then we approximate the log marginal likelihood using auto-encoding variational
+Bayes \citep{kingma2014auto}. The exact lower bound on log marginal likelihood
+is,
+\begin{equation}
+    \elbo = \sum^N_{n=1} 
+    \expec{q}{\log\probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}}
+    - \KL{\textstyle\frac{1}{K}\textstyle\sum_{k}
+            \gausC{\weights}{\pomean_k, \dpocov_k}}
+        {\gausC{\weights}{\mathbf{0}, \reg\ident{D}}}.
+    \label{eq:glmobj}
+\end{equation}
+This can be expanded,
+\begin{multline}
+    \elbo = \frac{1}{K} \sum^K_{k=1} \sum^N_{n=1} 
+    \expec{q_k}{\log\probC{\targs_n}
+        {\activ{\feats_n\T\weights}, \lparam}}
+    + \frac{1}{K} \sum^K_{k=1}
+        \expec{q_k}{\log\gausC{\weights}{\mathbf{0}, \reg\ident{D}}} \\
+    + \entropy{\textstyle\frac{1}{K}\textstyle\sum_{k}
+            \gausC{\weights}{\pomean_k, \dpocov_k}},
+    \label{eq:glmobj_exp}
+\end{multline}
+but unfortunately there are two intractable integrals here, the expected log
+likelihood, and the entropy of the Gaussian mixture. We can use the lower bound
+on the entropy term also used in \citet{gershman2012, nguyen2014automated},
+\begin{equation}
+    \entropy{\textstyle\frac{1}{K}\textstyle\sum_{k}
+        \gausC{\weights}{\pomean_k, \dpocov_k}} \geq
+    - \frac{1}{K} \sum_{k=1}^K \log \sum_{j=1}^K \frac{1}{K}
+    \gausC{\pomean_k}{\pomean_j, \dpocov_k + \dpocov_j}.
+\end{equation}
+We can then use the reparameterisation trick in auto-encoding variational Bayes
+to sample the expected log likelihood,
+\begin{equation}
+    \sum^N_{n=1} 
+    \expec{q_k}{\log\probC{\targs_n}
+        {\activ{\feats_n\T\weights}, \lparam}} \approx
+    \frac{1}{L} \sum^{L}_{l=1} \sum^N_{n=1} \log\probC{\targs_n}
+    {\activ{\feats_n\T\func{f}{\pomean_k, \dpocov_k, \resamp^{(l)}}{k}},
+        \lparam}
+\end{equation}
+where,
+\begin{equation}
+    \func{f}{\pomean_k, \dpocov_k, \resamp^{(l)}}{k} =
+    \pomean_k + \sqrt{\dpocov_k} \odot \resamp^{(l)},
+    \qquad \resamp^{(l)} \sim \gaus{\mathbf{0}, \ident{D}}.
+\end{equation}
+Here $\odot$ is the element-wise product. We can also use this trick to compute
+approximate derivatives, $\frac{\partial}{\partial \alpha}
+\expec{q(\alpha)}{\log \probC{\targs}{\alpha}} \approx \frac{1}{L} \sum^L_{l=1}
+\frac{\partial}{\partial\alpha} \log \probC{\targs}{\func{f}{\alpha,
+        \resamp^{(l)}}{}}$, which simplifies the implementation greatly! The
+final auto-encoding variational Bayes objective for our GLM is,
+\begin{multline}
+    \elbo \approx \frac{1}{K} \sum^K_{k=1} \Bigg[
+    \frac{1}{L} \sum^L_{l=1} \sum^N_{n=1} 
+    \log\probC{\targs_n} {\activ{\feats_n\T f_k^{(l)}}, \lparam}
+    + \log\gausC{\weights}{\mathbf{0}, \reg\ident{D}}
+    - \frac{1}{2\reg} \trace{\dpocov_k} \\
+    - \log \sum_{j=1}^K \frac{1}{K}
+    \gausC{\pomean_k}{\pomean_j, \dpocov_k + \dpocov_j}
+    \Bigg].
+    \label{eq:glmobj_exp}
+\end{multline}
+We can straight forwardly use this objective with in a stochastic gradients
+setting using with the tactic in Equations \eqref{eq:wsg} or \eqref{eq:wsg2}.
+
+TODO: Gradients in appendix?
 
 The most simple and accurate method for approximating the predictive
 distribution, $\probC{\targs\test}{\targ, \ins, \inss\test}$ is to Monte-Carlo

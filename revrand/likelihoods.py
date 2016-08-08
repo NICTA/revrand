@@ -65,6 +65,7 @@ class Bernoulli():
             the log likelihood of each y given each f under this
             likelihood.
         """
+        y, f = np.broadcast_arrays(y, f)
         ll = y * f - softplus(f)
         return ll
 
@@ -102,49 +103,8 @@ class Bernoulli():
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
+        y, f = np.broadcast_arrays(y, f)
         return y - expit(f)
-
-    def d2f(self, y, f):
-        r"""
-        Second derivative of Bernoulli log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-
-        Returns
-        -------
-        df: ndarray
-            the second derivative
-            :math:`\partial^2 \log p(y|f)/ \partial f^2`
-        """
-        sig = expit(f)
-        return (sig - 1) * sig
-
-    def d3f(self, y, f):
-        r"""
-        Third derivative of Bernoulli log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-
-        Returns
-        -------
-        df: ndarray
-            the third derivative
-            :math:`\partial^3 \log p(y|f)/ \partial f^3`
-        """
-        sig = expit(f)
-        return (2 * sig - 1) * (1 - sig) * sig
 
     def dp(self, y, f, *args):
         r"""
@@ -166,29 +126,6 @@ class Bernoulli():
             :math:`\partial \log p(y|f, \theta)/ \partial \theta` for
             each parameter. If there is only one parameter, this is not a
             list.
-        """
-        return []
-
-    def dpd2f(self, y, f, *args):
-        r"""
-        Partial derivative of Bernoulli log likelihood,
-        :math:`\partial h(f, \theta) / \partial \theta` where
-        :math:`h(f, \theta) = \partial^2 \log p(y|f, \theta)/ \partial f^2`.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-
-        Returns
-        -------
-        dpd2f: list or ndarray
-            the derivative of the likelihood Hessian w.r.t.\
-            :math:`\theta` for each parameter. If there is only one
-            parameter, this is not a list.
         """
         return []
 
@@ -292,52 +229,6 @@ class Binomial(Bernoulli):
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
         return y - expit(f) * n
-
-    def d2f(self, y, f, n):
-        r"""
-        Second derivative of Binomial log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-        n: ndarray
-            the total number of observations
-
-        Returns
-        -------
-        df: ndarray
-            the second derivative
-            :math:`\partial^2 \log p(y|f)/ \partial f^2`
-        """
-        sig = expit(f)
-        return (sig - 1) * sig * n
-
-    def d3f(self, y, f, n):
-        r"""
-        Third derivative of Binomial log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-        n: ndarray
-            the total number of observations
-
-        Returns
-        -------
-        df: ndarray
-            the third derivative
-            :math:`\partial^3 \log p(y|f)/ \partial f^3`
-        """
-        sig = expit(f)
-        return (2 * sig - 1) * (1 - sig) * sig * n
 
     def cdf(self, y, f, n):
         r"""
@@ -448,51 +339,8 @@ class Gaussian(Bernoulli):
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
+        y, f = np.broadcast_arrays(y, f)
         return (y - f) / var
-
-    def d2f(self, y, f, var):
-        r"""
-        Second derivative of Gaussian log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
-
-        Returns
-        -------
-        df: ndarray
-            the second derivative
-            :math:`\partial^2 \log p(y|f)/ \partial f^2`
-        """
-        return - np.ones_like(f) / var
-
-    def d3f(self, y, f, var):
-        r"""
-        Third derivative of Gaussian log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
-
-        Returns
-        -------
-        df: ndarray
-            the third derivative
-            :math:`\partial^3 \log p(y|f)/ \partial f^3`
-        """
-        return np.zeros_like(f)
 
     def dp(self, y, f, var):
         r"""
@@ -516,32 +364,9 @@ class Gaussian(Bernoulli):
             :math:`\partial \log p(y|f, \sigma^2)/ \partial \sigma^2`
             where :math:`sigma^2` is the variance.
         """
+        y, f = np.broadcast_arrays(y, f)
         ivar = 1. / var
         return 0.5 * (((y - f) * ivar)**2 - ivar)
-
-    def dpd2f(self, y, f, var):
-        r"""
-        Partial derivative of Gaussian log likelihood,
-        :math:`\partial h(f, \theta) / \partial \theta` where
-        :math:`h(f, \theta) = \partial^2 \log p(y|f, \theta)/ \partial f^2`.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
-
-        Returns
-        -------
-        dpd2f: ndarray
-            the derivative of the likelihood Hessian w.r.t.\ the variance
-            :math:`\sigma^2`.
-        """
-        return np.ones_like(f) / var**2
 
     def cdf(self, y, f, var):
         r"""
@@ -613,6 +438,7 @@ class Poisson(Bernoulli):
             the log likelihood of each y given each f under this
             likelihood.
         """
+        y, f = np.broadcast_arrays(y, f)
         if self.tranfcn == 'exp':
             g = np.exp(f)
             logg = f
@@ -655,64 +481,11 @@ class Poisson(Bernoulli):
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
+        y, f = np.broadcast_arrays(y, f)
         if self.tranfcn == 'exp':
             return y - np.exp(f)
         else:
             return expit(f) * (y / safesoftplus(f) - 1)
-
-    def d2f(self, y, f):
-        r"""
-        Second derivative of Poisson log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-
-        Returns
-        -------
-        df: ndarray
-            the second derivative
-            :math:`\partial^2 \log p(y|f)/ \partial f^2`
-        """
-        if self.tranfcn == 'exp':
-            return - np.exp(f)
-        else:
-            g = safesoftplus(f)
-            gp = expit(f)
-            g2p = gp * (1 - gp)
-            return (y - g) * g2p / g - y * (gp / g)**2
-
-    def d3f(self, y, f):
-        r"""
-        Third derivative of Poisson log likelihood w.r.t.\  f.
-
-        Parameters
-        ----------
-        y: ndarray
-            array of 0, 1 valued integers of targets
-        f: ndarray
-            latent function from the GLM prior (:math:`\mathbf{f} =
-            \boldsymbol\Phi \mathbf{w}`)
-
-        Returns
-        -------
-        df: ndarray
-            the third derivative
-            :math:`\partial^3 \log p(y|f)/ \partial f^3`
-        """
-        if self.tranfcn == 'exp':
-            return self.d2f(y, f)
-        else:
-            g = safesoftplus(f)
-            gp = expit(f)
-            g2p = gp * (1 - gp)
-            g3p = g2p * (1 - 2 * gp)
-            return g3p * (y - g) / g + 2 * y * (gp / g)**3 \
-                - 3 * y * gp * g3p / g**2
 
     def cdf(self, y, f):
         r"""

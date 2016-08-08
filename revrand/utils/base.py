@@ -38,28 +38,6 @@ class Bunch(dict):
         self.__dict__ = self
 
 
-def append_or_extend(mylist, *objs):
-    """
-    Append an object to a list, or extend the list if the object is a list.
-
-    Parameters
-    ----------
-    mylist: list
-        list to extend
-    objs: object(s)
-        object(s) to append to the list if not a list, else concatenate the
-        lists
-
-    Returns
-    -------
-    list
-        the extended list.
-    """
-    for obj in objs:
-        mylist.extend(obj if isinstance(obj, list) else [obj])
-    return mylist
-
-
 def issequence(obj):
     """
     Test if an object is an iterable generator, list or tuple.

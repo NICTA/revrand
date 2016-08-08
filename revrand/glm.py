@@ -1,10 +1,15 @@
 """Bayesian Generalised Linear Model implementation.
 
-Implementation of Bayesian GLMs with nonparametric variational inference [1]_,
-with a few modifications and tweaks.
+Implementation of Bayesian GLMs using a mixture of Gaussians posterior
+approximation and auto-encoding variational Bayes inference. See [1]_ for the
+posterior mixture idea, and [2]_ for the inference scheme.
 
 .. [1] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
-       inference". arXiv preprint arXiv:1206.4665 (2012).
+   inference". Proceedings of the international conference on machine learning.
+   2012.
+.. [2] Kingma, D. P., & Welling, M. "Auto-encoding variational Bayes".
+   Proceedings of the 2nd International Conference on Learning Representations
+   (ICLR). 2014.
 """
 
 
@@ -20,7 +25,7 @@ from scipy.optimize import brentq
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
 
-from .utils import couple, atleast_list
+from .utils import atleast_list
 from .mathfun.special import logsumexp
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, logtrick_sgd
@@ -54,12 +59,15 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         number of observations to use per SGD batch.
     updater: SGDUpdater, optional
         The SGD learning rate updating algorithm to use, by default this is
-        AdaDelta. See revrand.optimize.sgd for different options.
+        Adam. See revrand.optimize.sgd for different options.
+    nsamples: int, optional
+        Number of samples for sampling the expected likelihood and expected
+        likelihood gradients
 
     Notes
     -----
-    This approximates the posterior distribution over the weights with
-    a mixture of Gaussians:
+    This approximates the posterior distribution over the weights with a
+    mixture of Gaussians:
 
     .. math ::
 
@@ -80,14 +88,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     The main differences between this implementation and the GLM in [1]_ are:
         - We use diagonal mixtures, as opposed to isotropic.
-        - We do not cycle between optimising eq. 10 and 11 (objectives L1 and
-          L2) in the paper. We use the full objective L2 for everything,
-          including the posterior means, and we optimise all parameters
-          together.
-
-    Even though these changes make learning a little slower, and require third
-    derivatives of the likelihoods, we obtain better results and we can use SGD
-    straight-forwardly.
+        - We use auto encoding variational Bayes (AEVB) inference [2]_ with
+          stochastic gradients.
 
     This uses the python logging module for displaying learning status. To view
     these messages have something like,
@@ -110,22 +112,21 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                  maxiter=3000,
                  batch_size=10,
                  batch_weight=10,
-                 updater=None):
+                 updater=None,
+                 nsamples=50):
 
         self.like = likelihood
         self.basis = basis
         self.regulariser_init = regulariser
-        self.postcomp = postcomp
+        self.K = postcomp
         self.maxiter = maxiter
         self.batch_size = batch_size
         self.updater = updater
+        self.L = nsamples
 
     def fit(self, X, y, likelihood_args=()):
         r"""
         Learn the parameters of a Bayesian generalised linear model (GLM).
-
-        The learning algorithm uses nonparametric variational inference [1]_,
-        and optionally stochastic gradients.
 
         Parameters
         ----------
@@ -143,14 +144,11 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         X, y = check_X_y(X, y)
 
         # Shapes of things
-        K = self.postcomp
         N, _ = X.shape
         D = self.basis.get_dim(X)
 
-        # Batch magnification factor, multiplying by K makes massive difference
-        #  to learning! Otherwise the approx variational objective
-        #  over-penalises
-        self.B = K * N / self.batch_size
+        # Batch magnification factor
+        self.B = N / self.batch_size
 
         # Pack data
         likelihood_args = _reshape_likelihood_args(likelihood_args, N)
@@ -166,8 +164,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                   batch_size=self.batch_size
                   )
 
-        self.covariance = gamma.rvs(2, scale=0.5, size=(D, K))
-        self.weights = self.covariance * np.random.rand(D, K) \
+        self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
+        self.weights = np.sqrt(self.covariance) * np.random.rand(D, self.K) \
             + res.x[:, np.newaxis]
         self.weights[:, 0] = res.x
 
@@ -180,8 +178,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         log.info("Optimising parameters.")
         nsgd = structured_sgd(logtrick_sgd(sgd))
-        self._create_cache()
-        res = nsgd(self._l2,
+        res = nsgd(self._elbo,
                    params,
                    data,
                    maxiter=self.maxiter,
@@ -189,7 +186,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                    batch_size=self.batch_size,
                    eval_obj=True
                    )
-        self._delete_cache()
 
         # Unpack params
         (self.weights,
@@ -213,26 +209,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return self
 
-    def _create_cache(self):
-        # Caching arrays for faster computations
-
-        D, K = self.weights.shape
-
-        self.df = np.zeros((self.batch_size, K))
-        self.d2f = np.zeros((self.batch_size, K))
-        self.d3f = np.zeros((self.batch_size, K))
-
-        self.dm = np.zeros((D, K))
-        self.dC = np.zeros((D, K))
-        self.H = np.empty((D, K))
-
-    def _delete_cache(self):
-        # Delete the cached arrays
-
-        del self.df, self.d2f, self.d3f, self.dm, self.dC, self.H
-
-    def _l2(self, m, C, reg, lpars, bpars, X, y, *largs):
-        # Objective function Eq. 10 from [1], and gradients of ALL params
+    def _elbo(self, m, C, reg, lpars, bpars, X, y, *largs):
 
         # Shapes
         D, K = m.shape
@@ -240,75 +217,90 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # Make sure hypers and args can be unpacked into callables
         largs = tuple(chain(atleast_list(lpars), largs))
 
-        # Basis function stuff
+        # Basis function
         Phi = self.basis.transform(X, *atleast_list(bpars))  # M x D
-        Phi2 = Phi**2
-        Phi3 = Phi**3
-        f = Phi.dot(m)  # M x K
 
-        # Posterior responsability terms
-        logqkk = _qmatrix(m, C)
-        logqk = logsumexp(logqkk, axis=0)  # log term of Eq. 7 from [1]
-        pz = np.exp(logqkk - logqk)
+        # Posterior entropy lower bound terms
+        logNkl = _qmatrix(m, C)
+        logzk = logsumexp(logNkl, axis=0) - np.log(K)
+
+        # Preallocate variational parameter gradients
+        dm = np.empty_like(m)
+        dC = np.empty_like(C)
 
         # Zero starts for sums over posterior mixtures
-        ll = 0
         dlpars = [np.zeros_like(p) for p in atleast_list(lpars)]
+        EdPhi = np.zeros_like(Phi)
+        Ell = 0
 
         # Big loop though posterior mixtures for calculating stuff
         for k in range(K):
 
-            # Common likelihood calculations
-            ll += self.B * self.like.loglike(y, f[:, k], *largs).sum()
-            self.df[:, k] = self.B * self.like.df(y, f[:, k], *largs)
-            self.d2f[:, k] = self.B * self.like.d2f(y, f[:, k], *largs)
-            self.d3f[:, k] = self.B * self.like.d3f(y, f[:, k], *largs)
-            self.H[:, k] = self.d2f[:, k].dot(Phi2) - 1. / reg
+            # Sample expected likelihood and gradients
+            Ellk, Edmk, EdCk, EdPhik, Edlpars = \
+                self._reparam_k(m[:, k], C[:, k], y, Phi, largs)
+            Ell += Ellk
+            EdPhi += EdPhik / K
+
+            # Weight factors for each component in the gradients
+            Nkl_zk = np.exp(logNkl[:, k] - logzk[k])
+            Nkl_zl = np.exp(logNkl[:, k] - logzk)
+            alpha = (Nkl_zk + Nkl_zl)
 
             # Posterior mean and covariance gradients
             mkmj = m[:, k][:, np.newaxis] - m
-            iCkCj = 1 / (C[:, k][:, np.newaxis] + C)
-            self.dC[:, k] = (-((mkmj * iCkCj)**2 - iCkCj).dot(pz[:, k])
-                             + self.H[:, k]) / (2 * K)
-            self.dm[:, k] = (self.df[:, k].dot(Phi)
-                             + 0.5 * C[:, k] * self.d3f[:, k].dot(Phi3)
-                             + (iCkCj * mkmj).dot(pz[:, k])
-                             - m[:, k] / reg) / K
+            iCkCj = 1. / (C[:, k][:, np.newaxis] + C)
+
+            dm[:, k] = (self.B * Edmk - m[:, k] / reg
+                        + (iCkCj * mkmj).dot(alpha / K)) / K
+            dC[:, k] = (self.B * EdCk - 1. / reg
+                        + (iCkCj - (mkmj * iCkCj)**2).dot(alpha / K)) / (2 * K)
 
             # Likelihood parameter gradients
-            dp = atleast_list(self.like.dp(y, f[:, k], *largs))
-            dpd2f = atleast_list(self.like.dpd2f(y, f[:, k], *largs))
-            for l, (dp_l, dp2df_l) in enumerate(zip(dp, dpd2f)):
-                dlpars[l] -= self.B / K \
-                    * (dp_l.sum() + 0.5 * (C[:, k] * dp2df_l.dot(Phi2)).sum())
+            for i, Edlpar in enumerate(Edlpars):
+                dlpars[i] -= Edlpar / K
 
         # Regulariser gradient
         dreg = 0.5 * (((m**2).sum() + C.sum()) / (reg**2 * K) - D / reg)
 
         # Basis function parameter gradients
-        def dtheta(dPhi):
-            dt = 0
-            dPhiPhi = dPhi * Phi
-            for k in range(K):
-                dPhimk = dPhi.dot(m[:, k])
-                dPhiH = self.d2f[:, k].dot(dPhiPhi) + \
-                    0.5 * (self.d3f[:, k] * dPhimk).dot(Phi2)
-                dt -= (self.df[:, k].dot(dPhimk) + (C[:, k] * dPhiH).sum()) / K
-            return dt
-
+        dtheta = lambda dPhi: -(EdPhi * dPhi).sum()
         dbpars = apply_grad(dtheta, self.basis.grad(X, *atleast_list(bpars)))
 
-        # Objective, Eq. 10 in [1]
-        L2 = (ll
-              - 0.5 * D * K * np.log(2 * np.pi * reg)
-              - 0.5 * (m**2).sum() / reg
-              + 0.5 * (C * self.H).sum()
-              - logqk.sum() + np.log(K)) / K
+        # Approximate evidence lower bound
+        ELBO = (Ell * self.B
+                - 0.5 * D * K * np.log(2 * np.pi * reg)
+                - 0.5 * ((m**2).sum() + C.sum()) / reg
+                - logzk.sum()) / K
 
-        log.info("L2 = {}, reg = {}, likelihood_hypers = {}, basis_hypers = {}"
-                 .format(L2, reg, lpars, bpars))
+        log.info("ELBO = {}, reg = {}, like_hypers = {}, basis_hypers = {}"
+                 .format(ELBO, reg, lpars, bpars))
 
-        return -L2, [-self.dm, -self.dC, -dreg, dlpars, dbpars]
+        return -ELBO, [-dm, -dC, -dreg, dlpars, dbpars]
+
+    def _reparam_k(self, mk, Ck, y, Phi, largs):
+
+        D = len(mk)
+
+        # Sample the latent function and its derivative
+        Ske = np.sqrt(Ck) * np.random.randn(self.L, D)  # L x D
+        ws = mk + Ske  # L x D
+        fs = ws.dot(Phi.T)  # L x M
+        dfs = self.like.df(y, fs, *largs)  # L x M
+
+        # Expected ll and gradients
+        Ell = self.like.loglike(y, fs, *largs).sum() / self.L
+        Edws = dfs.dot(Phi)  # L x D, dweight samples
+        Edm = Edws.sum(axis=0) / self.L  # D
+        EdC = (Edws * Ske / Ck).sum(axis=0) / self.L  # D
+        EdPhi = dfs.T.dot(ws) / self.L  # M x D
+
+        # Structured likelihood parameter gradients
+        Edlpars = atleast_list(self.like.dp(y, fs, *largs))
+        for i, Edlpar in enumerate(Edlpars):
+            Edlpars[i] = Edlpar.sum() / self.L
+
+        return Ell, Edm, EdC, EdPhi, Edlpars
 
     def _map(self, weights, X, y, *largs):
         # MAP objective for initialising the weights
@@ -326,7 +318,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return -dweights
 
-    def predict(self, X, likelihood_args=(), nsamples=100):
+    def predict(self, X, likelihood_args=()):
         """
         Predict target values from Bayesian generalised linear regression.
 
@@ -338,9 +330,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
             N.
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
 
         Returns
         -------
@@ -348,11 +337,11 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
         """
-        Ey, _, _, _ = self.predict_moments(X, likelihood_args, nsamples)
+        Ey, _, _, _ = self.predict_moments(X, likelihood_args)
 
         return Ey
 
-    def predict_moments(self, X, likelihood_args=(), nsamples=100):
+    def predict_moments(self, X, likelihood_args=()):
         r"""
         Predictive moments, in particular mean and variance, of a Bayesian GLM.
 
@@ -394,9 +383,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
             N.
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
 
         Returns
         -------
@@ -412,8 +398,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         """
         # Get latent function samples
         N = X.shape[0]
-        ys = np.empty((N, nsamples))
-        fsamples = self._sample_func(X, nsamples)
+        ys = np.empty((N, self.L))
+        fsamples = self._sample_func(X)
 
         # Push samples though likelihood expected value
         Ey_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
@@ -422,13 +408,13 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Average transformed samples (MC integration)
         Ey = ys.mean(axis=1)
-        Vy = ((ys - Ey[:, np.newaxis])**2).sum(axis=1) / nsamples
+        Vy = ((ys - Ey[:, np.newaxis])**2).sum(axis=1) / self.L
         Ey_min = ys.min(axis=1)
         Ey_max = ys.max(axis=1)
 
         return Ey, Vy, Ey_min, Ey_max
 
-    def predict_logpdf(self, X, y, likelihood_args=(), nsamples=100):
+    def predict_logpdf(self, X, y, likelihood_args=()):
         r"""
         Predictive log-probability density function of a Bayesian GLM.
 
@@ -443,9 +429,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
             Ns.
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
 
         Returns
         -------
@@ -462,8 +445,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Get latent function samples
         N = X.shape[0]
-        ps = np.empty((N, nsamples))
-        fsamples = self._sample_func(X, nsamples)
+        ps = np.empty((N, self.L))
+        fsamples = self._sample_func(X)
 
         # Push samples though likelihood pdf
         ll_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
@@ -477,7 +460,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return logp, logp_min, logp_max
 
-    def predict_cdf(self, quantile, X, likelihood_args=(), nsamples=100):
+    def predict_cdf(self, quantile, X, likelihood_args=()):
         r"""
         Predictive cumulative density function of a Bayesian GLM.
 
@@ -510,8 +493,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         """
         # Get latent function samples
         N = X.shape[0]
-        ps = np.empty((N, nsamples))
-        fsamples = self._sample_func(X, nsamples)
+        ps = np.empty((N, self.L))
+        fsamples = self._sample_func(X)
 
         # Push samples though likelihood cdf
         cdf_arg = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
@@ -525,7 +508,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return p, p_min, p_max
 
-    def predict_interval(self, percentile, X, likelihood_args=(), nsamples=100,
+    def predict_interval(self, percentile, X, likelihood_args=(),
                          multiproc=True):
         """
         Predictive percentile interval (upper and lower quantiles).
@@ -540,9 +523,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
             Ns.
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
         multiproc: bool, optional
             Use multiprocessing to paralellise this prediction computation.
 
@@ -556,7 +536,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         N = X.shape[0]
 
         # Generate latent function samples per observation (n in N)
-        fsamples = self._sample_func(X, nsamples, genaxis=0)
+        fsamples = self._sample_func(X, genaxis=0)
 
         # Make sure likelihood_args is consistent with work
         if len(likelihood_args) > 0:
@@ -580,7 +560,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ql, qu = zip(*res)
         return np.array(ql), np.array(qu)
 
-    def _sample_func(self, X, nsamples=100, genaxis=1):
+    def _sample_func(self, X, genaxis=1):
         """
         Generate samples from the posterior latent function mixtures of the GLM
         for query inputs, Xs.
@@ -589,9 +569,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ----------
         X: ndarray
             (Ns, d) array query input dataset (Ns samples, D dimensions).
-        nsamples: int, optional
-            The number of samples to draw from the posterior in order to
-            approximate the predictive mean and variance.
         genaxis: int
             Axis to return samples from, i.e.
             - :code:`genaxis=1` will give you one sample at a time of f for ALL
@@ -614,8 +591,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         D, K = self.weights.shape
 
         # Generate weight samples from all mixture components
-        k = np.random.randint(0, K, size=(nsamples,))
-        w = self.weights[:, k] + np.random.randn(D, nsamples) \
+        k = np.random.randint(0, K, size=(self.L,))
+        w = self.weights[:, k] + np.random.randn(D, self.L) \
             * np.sqrt(self.covariance[:, k])
 
         # Do this here for *massive* speed improvements
@@ -699,15 +676,11 @@ def _dgausll(x, mean, dcov):
                     + ((x - mean)**2 / dcov).sum())
 
 
-def _qmatrix(m, C, k=None):
+def _qmatrix(m, C):
 
     K = m.shape[1]
-    if k is None:
-        logq = [[_dgausll(m[:, i], m[:, j], C[:, i] + C[:, j])
-                 for i in range(K)]
-                for j in range(K)]
-    else:
-        logq = [_dgausll(m[:, k], m[:, j], C[:, k] + C[:, j])
-                for j in range(K)]
+    logq = [[_dgausll(m[:, i], m[:, j], C[:, i] + C[:, j])
+             for i in range(K)]
+            for j in range(K)]
 
     return np.array(logq)
