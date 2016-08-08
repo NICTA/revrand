@@ -20,7 +20,7 @@ from scipy.stats import cauchy, chi, chi2, gamma
 
 from .btypes import Positive, Bound, Parameter
 from .mathfun.linalg import hadamard
-from .utils import append_or_extend, issequence, atleast_list
+from .utils import issequence, atleast_list
 
 
 #
@@ -265,9 +265,11 @@ class Basis(object):
         int:
             The dimensionality of the basis.
         """
-        args = [p.value for p in atleast_list(self.params) if p.value != []]
-        D = self.transform(X[[0]], *args).shape[1]
+        D = self.transform(X[[0]], *self.get_init_params()).shape[1]
         return D
+
+    def get_init_params(self):
+        return [p.value for p in atleast_list(self.params) if p.value != []]
 
     def _transform_popargs(self, X, *args):
 
@@ -1343,13 +1345,19 @@ class BasisCat(object):
 
         return np.sum((b.get_dim(X) for b in self.bases))
 
+    def get_init_params(self):
+
+        return [v for b in self.bases for v in b.get_init_params()]
+
     @property
     def params(self):
 
         paramlist = [b.params for b in self.bases if b.params.value != []]
-        params = append_or_extend([], *paramlist)
 
-        return params[0] if len(params) == 1 else params
+        if len(paramlist) == 0:
+            return Parameter()
+        else:
+            return paramlist
 
     def __add__(self, other):
 
