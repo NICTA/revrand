@@ -107,11 +107,10 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     def __init__(self,
                  likelihood,
                  basis,
-                 regulariser=Parameter(10., Positive()),
+                 regulariser=Parameter(1., Positive()),
                  postcomp=10,
                  maxiter=3000,
                  batch_size=10,
-                 batch_weight=10,
                  updater=None,
                  nsamples=50):
 
@@ -164,10 +163,10 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                   batch_size=self.batch_size
                   )
 
+        # Initialise each posterior component randomly around the MAP weights
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
         self.weights = np.sqrt(self.covariance) * np.random.rand(D, self.K) \
             + res.x[:, np.newaxis]
-        self.weights[:, 0] = res.x
 
         # Pack params
         params = [Parameter(self.weights, Bound()),
@@ -214,6 +213,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # Shapes
         D, K = m.shape
 
+        # Sample from standard norm for reparam trick (faster to do this once)
+        e = np.random.randn(self.L, D)
+
         # Make sure hypers and args can be unpacked into callables
         largs = tuple(chain(atleast_list(lpars), largs))
 
@@ -238,7 +240,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
             # Sample expected likelihood and gradients
             Ellk, Edmk, EdCk, EdPhik, Edlpars = \
-                self._reparam_k(m[:, k], C[:, k], y, Phi, largs)
+                self._reparam_k(e, m[:, k], C[:, k], y, Phi, largs)
             Ell += Ellk
             EdPhi += EdPhik / K
 
@@ -278,13 +280,11 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return -ELBO, [-dm, -dC, -dreg, dlpars, dbpars]
 
-    def _reparam_k(self, mk, Ck, y, Phi, largs):
-
-        D = len(mk)
+    def _reparam_k(self, e, mk, Ck, y, Phi, largs):
 
         # Sample the latent function and its derivative
-        Ske = np.sqrt(Ck) * np.random.randn(self.L, D)  # L x D
-        ws = mk + Ske  # L x D
+        Sk = np.sqrt(Ck)
+        ws = mk + Sk * e  # L x D
         fs = ws.dot(Phi.T)  # L x M
         dfs = self.like.df(y, fs, *largs)  # L x M
 
@@ -292,7 +292,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         Ell = self.like.loglike(y, fs, *largs).sum() / self.L
         Edws = dfs.dot(Phi)  # L x D, dweight samples
         Edm = Edws.sum(axis=0) / self.L  # D
-        EdC = (Edws * Ske / Ck).sum(axis=0) / self.L  # D
+        EdC = (Edws * e / Sk).sum(axis=0) / self.L  # D
         EdPhi = dfs.T.dot(ws) / self.L  # M x D
 
         # Structured likelihood parameter gradients

@@ -53,12 +53,12 @@ def test_bounded(make_quadratic):
                    method='L-BFGS-B')
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
 
-    res = sgd(qobj, w0, data, bounds=bounds, eval_obj=True, maxiter=4000)
+    res = sgd(qobj, w0, data, bounds=bounds, eval_obj=True)
     Ea_sgd, Eb_sgd, Ec_sgd = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs),
                        (Ea_sgd, Eb_sgd, Ec_sgd),
-                       atol=2e-2, rtol=0)
+                       atol=1e-1, rtol=0)
 
 
 def test_structured_params(make_quadratic):

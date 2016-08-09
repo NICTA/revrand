@@ -1357,7 +1357,7 @@ class BasisCat(object):
         if len(paramlist) == 0:
             return Parameter()
         else:
-            return paramlist
+            return paramlist if len(paramlist) > 1 else paramlist[0]
 
     def __add__(self, other):
 

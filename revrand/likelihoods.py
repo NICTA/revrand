@@ -65,6 +65,7 @@ class Bernoulli():
             the log likelihood of each y given each f under this
             likelihood.
         """
+        # way faster than calling bernoulli.logpmf
         y, f = np.broadcast_arrays(y, f)
         ll = y * f - softplus(f)
         return ll
@@ -228,6 +229,7 @@ class Binomial(Bernoulli):
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
+        y, f, n = np.broadcast_arrays(y, f, n)
         return y - expit(f) * n
 
     def cdf(self, y, f, n):
@@ -299,7 +301,10 @@ class Gaussian(Bernoulli):
             the log likelihood of each y given each f under this
             likelihood.
         """
-        return norm.logpdf(y, loc=f, scale=np.sqrt(var))
+        # way faster than calling norm.logpdf
+        y, f = np.broadcast_arrays(y, f)
+        ll = - 0.5 * (np.log(2 * np.pi * var) + (y - f)**2 / var)
+        return ll
 
     def Ey(self, f, var):
         r"""

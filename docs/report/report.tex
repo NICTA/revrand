@@ -101,7 +101,7 @@ constant term amongst the mini-batches in stochastic gradients,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \minibatch}
     \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}}
-    - \lrate_k \frac{M}{N} \nabla_{\param} 
+    - \frac{M}{N} \lrate_k \nabla_{\param} 
     \func{g}{\param}{}\!|_{\param = \param_{k-1}}.
     \label{eq:wsg}
 \end{equation} 
@@ -152,9 +152,10 @@ makes inference easier. This can be re-written as,
     \KL{\qrob{\param}}{\probC{\param}{\hyper}},
     \label{eq:elbo}
 \end{equation}
-which takes the form of Equation~\eqref{eq:objwconst}, and so we can weight the
-Kullback-Leibler term like the constant term, $\func{g}{\cdot}{}$, from
-Equation~\eqref{eq:wsg} if we use stochastic gradients optimisation.
+which takes the form of Equation~\eqref{eq:objwconst}, and so if we use
+stochastic gradients optimisation we can weight the Kullback-Leibler term like
+the constant term, $\func{g}{\cdot}{}$, from Equation~\eqref{eq:wsg}, or boost
+the expected log likelihood term like in Equation~\eqref{eq:wsg2}.
 Furthermore, if $\qrob{\param} = \probC{\param}{\hyper}$ then the lower bound
 is tight, and this will be equivalent to optimising log-marginal likelihood.
 

@@ -51,7 +51,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
     def __init__(self,
                  basis,
                  var=Parameter(1., Positive()),
-                 regulariser=Parameter(10., Positive()),
+                 regulariser=Parameter(1., Positive()),
                  tol=1e-8,
                  maxiter=1000
                  ):
