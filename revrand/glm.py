@@ -167,6 +167,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
         self.weights = np.sqrt(self.covariance) * np.random.rand(D, self.K) \
             + res.x[:, np.newaxis]
+        self.weights[:, 0] = res.x
 
         # Pack params
         params = [Parameter(self.weights, Bound()),
