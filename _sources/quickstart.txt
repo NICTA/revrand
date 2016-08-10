@@ -47,7 +47,7 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
     # Learn regression parameters and predict
     slm = StandardLinearModel(basis)
     slm.fit(X, y)
-    Eys, Vfs, Vys = slm.predict_moments(Xs)
+    Eys, Vys = slm.predict_moments(Xs)
 
     # Training/Truth
     pl.plot(X, y, 'k.', label='Training')
@@ -149,12 +149,12 @@ Bayesian linear regression example from before,
     # Learn regression parameters and predict
     glm = GeneralisedLinearModel(llhood, basis)
     glm.fit(X, y)
-    Ey_g, Vf_g, Eyn, Eyx = glm.predict_moments(Xtest)
+    Ey_g, Vf_g = glm.predict_moments(Xtest)
 
     ...
 
     # Plot GLM SGD Regressor
-    Vy_g = Vf_g + glm.like_hypers[0]
+    Vy_g = Vf_g + glm.like_hypers
     Sy_g = np.sqrt(Vy_g)
     pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
     pl.fill_between(Xs, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',
