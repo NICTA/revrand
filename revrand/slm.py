@@ -199,7 +199,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
         """
-        Ey, _, _ = self.predict_moments(X)
+        Ey, _ = self.predict_moments(X)
 
         return Ey
 
@@ -217,9 +217,6 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         Ey: ndarray
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
-        Vf: ndarray
-            The expected variance of f_star for the query inputs, X_star of
-            shape (N_star,).
         Vy: ndarray
             The expected variance of y_star for the query inputs, X_star of
             shape (N_star,).
@@ -232,4 +229,4 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         Ey = Phi.dot(self.weights)
         Vf = (Phi.dot(self.covariance) * Phi).sum(axis=1)
 
-        return Ey, Vf, Vf + self.var
+        return Ey, Vf + self.var

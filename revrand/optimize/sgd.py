@@ -228,7 +228,7 @@ class Adam(SGDUpdater):
         "jitter" term to ensure continued learning (should be small).
     """
 
-    def __init__(self, alpha=0.01, beta1=0.9, beta2=0.99, epsilon=1e-7):
+    def __init__(self, alpha=0.01, beta1=0.9, beta2=0.99, epsilon=1e-8):
 
         self.alpha = alpha
         self.beta1 = beta1

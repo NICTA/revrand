@@ -214,9 +214,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # Shapes
         D, K = m.shape
 
-        # Sample from standard norm for reparam trick (faster to do this once)
-        e = np.random.randn(self.L, D)
-
         # Make sure hypers and args can be unpacked into callables
         largs = tuple(chain(atleast_list(lpars), largs))
 
@@ -225,7 +222,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Posterior entropy lower bound terms
         logNkl = _qmatrix(m, C)
-        logzk = logsumexp(logNkl, axis=0) - np.log(K)
+        # logzk = logsumexp(logNkl, axis=0) - np.log(K)
+        logzk = logsumexp(logNkl, axis=0)
 
         # Preallocate variational parameter gradients
         dm = np.empty_like(m)
@@ -241,7 +239,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
             # Sample expected likelihood and gradients
             Ellk, Edmk, EdCk, EdPhik, Edlpars = \
-                self._reparam_k(e, m[:, k], C[:, k], y, Phi, largs)
+                self._reparam_k(m[:, k], C[:, k], y, Phi, largs)
             Ell += Ellk
             EdPhi += EdPhik / K
 
@@ -255,9 +253,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             iCkCj = 1. / (C[:, k][:, np.newaxis] + C)
 
             dm[:, k] = (self.B * Edmk - m[:, k] / reg
-                        + (iCkCj * mkmj).dot(alpha / K)) / K
+                        + (iCkCj * mkmj).dot(alpha)) / K
             dC[:, k] = (self.B * EdCk - 1. / reg
-                        + (iCkCj - (mkmj * iCkCj)**2).dot(alpha / K)) / (2 * K)
+                        + (iCkCj - (mkmj * iCkCj)**2).dot(alpha)) / (2 * K)
 
             # Likelihood parameter gradients
             for i, Edlpar in enumerate(Edlpars):
@@ -274,16 +272,17 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ELBO = (Ell * self.B
                 - 0.5 * D * K * np.log(2 * np.pi * reg)
                 - 0.5 * ((m**2).sum() + C.sum()) / reg
-                - logzk.sum()) / K
+                - logzk.sum() + np.log(K)) / K
 
         log.info("ELBO = {}, reg = {}, like_hypers = {}, basis_hypers = {}"
                  .format(ELBO, reg, lpars, bpars))
 
         return -ELBO, [-dm, -dC, -dreg, dlpars, dbpars]
 
-    def _reparam_k(self, e, mk, Ck, y, Phi, largs):
+    def _reparam_k(self, mk, Ck, y, Phi, largs):
 
         # Sample the latent function and its derivative
+        e = np.random.randn(self.L, len(mk))  # Slower per iteration, fast conv
         Sk = np.sqrt(Ck)
         ws = mk + Sk * e  # L x D
         fs = ws.dot(Phi.T)  # L x M
@@ -338,7 +337,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
         """
-        Ey, _, _, _ = self.predict_moments(X, likelihood_args)
+        Ey, _ = self.predict_moments(X, likelihood_args)
 
         return Ey
 
@@ -392,10 +391,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         Vy: ndarray
             The expected variance of ys (excluding likelihood noise terms) for
             the query inputs, Xs of shape (Ns,).
-        Ey_min: ndarray
-            The minimum sampled values of the predicted mean (same shape as Ey)
-        Ey_max: ndarray
-            The maximum sampled values of the predicted mean (same shape as Ey)
         """
         # Get latent function samples
         N = X.shape[0]
@@ -409,11 +404,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Average transformed samples (MC integration)
         Ey = ys.mean(axis=1)
-        Vy = ((ys - Ey[:, np.newaxis])**2).sum(axis=1) / self.L
-        Ey_min = ys.min(axis=1)
-        Ey_max = ys.max(axis=1)
+        Vy = ((ys - Ey[:, np.newaxis])**2).mean(axis=1)
 
-        return Ey, Vy, Ey_min, Ey_max
+        return Ey, Vy
 
     def predict_logpdf(self, X, y, likelihood_args=()):
         r"""

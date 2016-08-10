@@ -34,7 +34,7 @@ like = Gaussian()
 # Fit and predict the model
 glm = GeneralisedLinearModel(like, base, maxiter=4000)
 glm.fit(X[tr_ind], y[tr_ind])
-Ey, Vy, _, _ = glm.predict_moments(X[ts_ind])
+Ey, Vy = glm.predict_moments(X[ts_ind])
 
 # Score
 y_true = y[ts_ind]
