@@ -24,7 +24,7 @@ folds = 5
 # Make Basis and Likelihood
 N, D = X.shape
 lenscale = 10.
-nbases = 300
+nbases = 50
 lenARD = lenscale * np.ones(D)
 lenscale_init = Parameter(lenARD, Positive())
 base = LinearBasis(onescol=True) + RandomMatern32(Xdim=D, nbases=nbases,
@@ -32,7 +32,7 @@ base = LinearBasis(onescol=True) + RandomMatern32(Xdim=D, nbases=nbases,
 like = Gaussian()
 
 # Fit and predict the model
-glm = GeneralisedLinearModel(like, base, maxiter=4000)
+glm = GeneralisedLinearModel(like, base, maxiter=6000)
 glm.fit(X[tr_ind], y[tr_ind])
 Ey, Vy = glm.predict_moments(X[ts_ind])
 

@@ -375,7 +375,7 @@ def structured_sgd(sgd):
         if bool(eval_obj):
             new_fun = flatten_func_grad(new_fun)
         else:
-            new_fun = flatten(new_fun, returns_shapes=False)
+            new_fun = flatten_grad(new_fun)
 
         result = sgd(new_fun, array1d, data=data, bounds=fbounds,
                      eval_obj=eval_obj, **sgd_kwargs)
@@ -561,6 +561,39 @@ def logtrick_gen(bounds):
               if pos else b for b, pos in zip(bounds, ispos)]
 
     return logx, expx, gradx, bounds
+
+
+def flatten_grad(func):
+    """
+    Examples
+    --------
+    >>> def cost(w, lambda_):
+    ...     sq_norm = w.T.dot(w)
+    ...     return lambda_ * w, .5 * sq_norm
+    >>> grad = cost(np.array([.5, .1, -.2]), .25)
+
+    >>> len(grad)
+    2
+    >>> grad_w, grad_lambda = grad
+    >>> np.shape(grad_w)
+    (3,)
+    >>> np.shape(grad_lambda)
+    ()
+    >>> grad_w
+    array([ 0.125,  0.025, -0.05 ])
+    >>> np.isclose(grad_lambda, 0.15)
+    True
+
+    >>> cost_new = flatten_grad(cost)
+    >>> grad_new = cost_new(np.array([.5, .1, -.2]), .25)
+    >>> grad_new
+    array([ 0.125,  0.025, -0.05 ,  0.15 ])
+    """
+    @wraps(func)
+    def new_func(*args, **kwargs):
+        return flatten(func(*args, **kwargs), returns_shapes=False)
+
+    return new_func
 
 
 def flatten_func_grad(func):

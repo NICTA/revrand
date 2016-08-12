@@ -142,19 +142,59 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         """
         X, y = check_X_y(X, y)
 
-        # Shapes of things
-        N, _ = X.shape
-        D = self.basis.get_dim(X)
-
         # Batch magnification factor
-        self.B = N / self.batch_size
+        N, _ = X.shape
+        self.B = X.shape[0] / self.batch_size
 
         # Pack data
         likelihood_args = _reshape_likelihood_args(likelihood_args, N)
         data = (X, y) + likelihood_args
 
+        # Initialise the posterior means and covariances
+        log.info("Initialising weights by optimising MAP...")
+        self._initialise_posterior(data)
+
+        # Pack params
+        params = [Parameter(self.weights, Bound()),
+                  Parameter(self.covariance, Positive()),
+                  self.regulariser_init,
+                  self.like.params,
+                  self.basis.params]
+
+        log.info("Optimising parameters...")
+        self.iter = 0  # Keeping track of iterations for logging
+        nsgd = structured_sgd(logtrick_sgd(sgd))
+        res = nsgd(self._elbo,
+                   params,
+                   data,
+                   maxiter=self.maxiter,
+                   updater=self.updater,
+                   batch_size=self.batch_size,
+                   )
+        del self.iter
+
+        # Unpack params
+        (self.weights,
+         self.covariance,
+         self.regulariser,
+         self.like_hypers,
+         self.basis_hypers
+         ) = res.x
+
+        log.info("Finished! reg = {}, likelihood_hypers = {}, "
+                 "basis_hypers = {}, message: {}."
+                 .format(self.regulariser,
+                         self.like_hypers,
+                         self.basis_hypers,
+                         res.message))
+
+        return self
+
+    def _initialise_posterior(self, data):
+
+        D = self.basis.get_dim(data[0])
+
         # Intialise weights and covariances
-        log.info("Initialising weights by optimising MAP")
         res = sgd(self._map,
                   np.random.randn(D),
                   data,
@@ -167,49 +207,26 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
         self.weights = np.sqrt(self.covariance) * np.random.rand(D, self.K) \
             + res.x[:, np.newaxis]
-        self.weights[:, 0] = res.x
+        self.weights[:, 0] = res.x  # Make sure we include the MAP weights too
 
-        # Pack params
-        params = [Parameter(self.weights, Bound()),
-                  Parameter(self.covariance, Positive()),
-                  self.regulariser_init,
-                  self.like.params,
-                  self.basis.params]
+    def _map(self, weights, X, y, *largs):
+        # MAP objective for initialising the weights
 
-        log.info("Optimising parameters.")
-        nsgd = structured_sgd(logtrick_sgd(sgd))
-        res = nsgd(self._elbo,
-                   params,
-                   data,
-                   maxiter=self.maxiter,
-                   updater=self.updater,
-                   batch_size=self.batch_size,
-                   eval_obj=True
-                   )
+        # Extract parameters from their initial values
+        bpars = self.basis.get_init_params()
+        largs = tuple(chain(atleast_list(self.like.params.value), largs))
+        reg = self.regulariser_init.value
 
-        # Unpack params
-        (self.weights,
-         self.covariance,
-         self.regulariser,
-         self.like_hypers,
-         self.basis_hypers
-         ) = res.x
+        # Gradient
+        Phi = self.basis.transform(X, *bpars)
+        f = Phi.dot(weights)
+        df = self.like.df(y, f, *largs)
+        dweights = self.B * df.dot(Phi) - weights / reg
 
-        # Store a summary of the optimisation
-        self.obj_trace = res.objs
-        self.grad_trace = res.norms
-
-        log.info("Finished! Objective = {}, reg = {}, likelihood_hypers = {}, "
-                 "basis_hypers = {}, message: {}."
-                 .format(-res.fun,
-                         self.regulariser,
-                         self.like_hypers,
-                         self.basis_hypers,
-                         res.message))
-
-        return self
+        return -dweights
 
     def _elbo(self, m, C, reg, lpars, bpars, X, y, *largs):
+        # Full evidence lower bound objective with AEVB
 
         # Shapes
         D, K = m.shape
@@ -222,25 +239,26 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Posterior entropy lower bound terms
         logNkl = _qmatrix(m, C)
-        # logzk = logsumexp(logNkl, axis=0) - np.log(K)
         logzk = logsumexp(logNkl, axis=0)
 
-        # Preallocate variational parameter gradients
+        # Preallocate variational parameter gradients and ELL
         dm = np.empty_like(m)
         dC = np.empty_like(C)
+        Ell = np.empty(K, dtype=float)
 
         # Zero starts for sums over posterior mixtures
         dlpars = [np.zeros_like(p) for p in atleast_list(lpars)]
         EdPhi = np.zeros_like(Phi)
-        Ell = 0
+
+        # Log status, only do this occasionally to save cpu
+        dolog = bool((self.iter % 100 == 0) or (self.iter == self.maxiter - 1))
 
         # Big loop though posterior mixtures for calculating stuff
         for k in range(K):
 
             # Sample expected likelihood and gradients
-            Ellk, Edmk, EdCk, EdPhik, Edlpars = \
-                self._reparam_k(m[:, k], C[:, k], y, Phi, largs)
-            Ell += Ellk
+            Edmk, EdCk, EdPhik, Edlpars, Ell[k] = \
+                self._reparam_k(m[:, k], C[:, k], y, Phi, largs, dolog)
             EdPhi += EdPhik / K
 
             # Weight factors for each component in the gradients
@@ -268,18 +286,24 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         dtheta = lambda dPhi: -(EdPhi * dPhi).sum()
         dbpars = apply_grad(dtheta, self.basis.grad(X, *atleast_list(bpars)))
 
-        # Approximate evidence lower bound
-        ELBO = (Ell * self.B
-                - 0.5 * D * K * np.log(2 * np.pi * reg)
-                - 0.5 * ((m**2).sum() + C.sum()) / reg
-                - logzk.sum() + np.log(K)) / K
+        if dolog:
 
-        log.info("ELBO = {}, reg = {}, like_hypers = {}, basis_hypers = {}"
-                 .format(ELBO, reg, lpars, bpars))
+            # Approximate evidence lower bound
+            ELBO = (Ell.sum() * self.B
+                    - 0.5 * D * K * np.log(2 * np.pi * reg)
+                    - 0.5 * ((m**2).sum() + C.sum()) / reg
+                    - logzk.sum() + np.log(K)) / K
 
-        return -ELBO, [-dm, -dC, -dreg, dlpars, dbpars]
+            log.info("Iter {}: ELBO = {}, reg = {}, like_hypers = {}, "
+                     "basis_hypers = {}"
+                     .format(self.iter, ELBO, reg, lpars, bpars))
 
-    def _reparam_k(self, mk, Ck, y, Phi, largs):
+        self.iter += 1
+
+        return -dm, -dC, -dreg, dlpars, dbpars
+
+    def _reparam_k(self, mk, Ck, y, Phi, largs, calc_like=False):
+        # AEVB's reparameterisation trick
 
         # Sample the latent function and its derivative
         e = np.random.randn(self.L, len(mk))  # Slower per iteration, fast conv
@@ -288,8 +312,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         fs = ws.dot(Phi.T)  # L x M
         dfs = self.like.df(y, fs, *largs)  # L x M
 
-        # Expected ll and gradients
-        Ell = self.like.loglike(y, fs, *largs).sum() / self.L
+        # Expected gradients
         Edws = dfs.dot(Phi)  # L x D, dweight samples
         Edm = Edws.sum(axis=0) / self.L  # D
         EdC = (Edws * e / Sk).sum(axis=0) / self.L  # D
@@ -300,23 +323,12 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         for i, Edlpar in enumerate(Edlpars):
             Edlpars[i] = Edlpar.sum() / self.L
 
-        return Ell, Edm, EdC, EdPhi, Edlpars
+        # Expected ll, don't calculate if we don't need
+        Ell = -np.inf
+        if calc_like:
+            Ell = self.like.loglike(y, fs, *largs).sum() / self.L
 
-    def _map(self, weights, X, y, *largs):
-        # MAP objective for initialising the weights
-
-        # Extract parameters from their initial values
-        bpars = self.basis.get_init_params()
-        largs = tuple(chain(atleast_list(self.like.params.value), largs))
-        reg = self.regulariser_init.value
-
-        # Gradient
-        Phi = self.basis.transform(X, *bpars)
-        f = Phi.dot(weights)
-        df = self.like.df(y, f, *largs)
-        dweights = self.B * df.dot(Phi) - weights / reg
-
-        return -dweights
+        return Edm, EdC, EdPhi, Edlpars, Ell
 
     def predict(self, X, likelihood_args=()):
         """
