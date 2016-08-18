@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalised Linear Model &mdash; revrand 0.6.2 documentation</title>
+    <title>Generalised Linear Model &mdash; revrand 0.6.3 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.2',
+        VERSION:     '0.6.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.6.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.6.3 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
     <link rel="prev" title="Standard Linear Model" href="slm.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="slm.html" title="Standard Linear Model"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -84,7 +84,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 </table>
 <dl class="class">
 <dt id="revrand.glm.GeneralisedLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bayesian Generalised linear model (GLM).</p>
 <p>This provides a scikit learn compatible interface for the glm module.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -103,6 +103,7 @@ posterior distribution.</li>
 Adam. See revrand.optimize.sgd for different options.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the expected likelihood and expected
 likelihood gradients</li>
+<li><strong>random_state</strong> (<em>int or RandomState, optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -406,7 +407,7 @@ the query inputs, Xs of shape (Ns,).</li>
         <li class="right" >
           <a href="slm.html" title="Standard Linear Model"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.2 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
