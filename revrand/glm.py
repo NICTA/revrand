@@ -126,7 +126,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.batch_size = batch_size
         self.updater = updater
         self.L = nsamples
-        self.random = check_random_state(random_state)
+        self.randstate = random_state
 
     def fit(self, X, y, likelihood_args=()):
         r"""
@@ -146,6 +146,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             N.
         """
         X, y = check_X_y(X, y)
+        self.__random = check_random_state(self.randstate)  # consist for fit
 
         # Batch magnification factor
         N, _ = X.shape
@@ -167,7 +168,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                   self.basis.params]
 
         log.info("Optimising parameters...")
-        self.iter = 0  # Keeping track of iterations for logging
+        self.__it = 0  # Keeping track of iterations for logging
         nsgd = structured_sgd(logtrick_sgd(sgd))
         res = nsgd(self._elbo,
                    params,
@@ -175,8 +176,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                    maxiter=self.maxiter,
                    updater=self.updater,
                    batch_size=self.batch_size,
+                   random_state=self.randstate
                    )
-        del self.iter
+        del self.__it, self.__random  # clean up
 
         # Unpack params
         (self.weights,
@@ -201,17 +203,18 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Intialise weights and covariances
         res = sgd(self._map,
-                  self.random.randn(D),
+                  self.__random.randn(D),
                   data,
                   maxiter=self.maxiter,
                   updater=self.updater,
-                  batch_size=self.batch_size
+                  batch_size=self.batch_size,
+                  random_state=self.randstate
                   )
 
         # Initialise each posterior component randomly around the MAP weights
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
-        self.weights = np.sqrt(self.covariance) * self.random.rand(D, self.K) \
-            + res.x[:, np.newaxis]
+        self.weights = res.x[:, np.newaxis] + \
+            np.sqrt(self.covariance) * self.__random.rand(D, self.K)
         self.weights[:, 0] = res.x  # Make sure we include the MAP weights too
 
     def _map(self, weights, X, y, *largs):
@@ -256,7 +259,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         EdPhi = np.zeros_like(Phi)
 
         # Log status, only do this occasionally to save cpu
-        dolog = bool((self.iter % 100 == 0) or (self.iter == self.maxiter - 1))
+        dolog = bool((self.__it % 100 == 0) or (self.__it == self.maxiter - 1))
 
         # Big loop though posterior mixtures for calculating stuff
         for k in range(K):
@@ -301,9 +304,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
             log.info("Iter {}: ELBO = {}, reg = {}, like_hypers = {}, "
                      "basis_hypers = {}"
-                     .format(self.iter, ELBO, reg, lpars, bpars))
+                     .format(self.__it, ELBO, reg, lpars, bpars))
 
-        self.iter += 1
+        self.__it += 1
 
         return -dm, -dC, -dreg, dlpars, dbpars
 
@@ -311,7 +314,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # AEVB's reparameterisation trick
 
         # Sample the latent function and its derivative
-        e = self.random.randn(self.L, len(mk))  # Slower per iter, fast conv
+        e = self.__random.randn(self.L, len(mk))  # Slower per iter, fast conv
         Sk = np.sqrt(Ck)
         ws = mk + Sk * e  # L x D
         fs = ws.dot(Phi.T)  # L x M
@@ -600,10 +603,11 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                                'like_hypers', 'regulariser'])
         X = check_array(X)
         D, K = self.weights.shape
+        random = check_random_state(self.randstate)  # consistent for each pred
 
         # Generate weight samples from all mixture components
-        k = self.random.randint(0, K, size=(self.L,))
-        w = self.weights[:, k] + self.random.randn(D, self.L) \
+        k = random.randint(0, K, size=(self.L,))
+        w = self.weights[:, k] + random.randn(D, self.L) \
             * np.sqrt(self.covariance[:, k])
 
         # Do this here for *massive* speed improvements
