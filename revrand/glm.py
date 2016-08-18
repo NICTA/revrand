@@ -24,6 +24,7 @@ from scipy.stats.distributions import gamma
 from scipy.optimize import brentq
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
+from sklearn.utils import check_random_state
 
 from .utils import atleast_list
 from .mathfun.special import logsumexp
@@ -63,6 +64,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     nsamples: int, optional
         Number of samples for sampling the expected likelihood and expected
         likelihood gradients
+    random_state: int or RandomState, optional
+        random seed
 
     Notes
     -----
@@ -112,7 +115,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                  maxiter=3000,
                  batch_size=10,
                  updater=None,
-                 nsamples=50):
+                 nsamples=50,
+                 random_state=None):
 
         self.like = likelihood
         self.basis = basis
@@ -122,6 +126,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.batch_size = batch_size
         self.updater = updater
         self.L = nsamples
+        self.random = check_random_state(random_state)
 
     def fit(self, X, y, likelihood_args=()):
         r"""
@@ -196,7 +201,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Intialise weights and covariances
         res = sgd(self._map,
-                  np.random.randn(D),
+                  self.random.randn(D),
                   data,
                   maxiter=self.maxiter,
                   updater=self.updater,
@@ -205,7 +210,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Initialise each posterior component randomly around the MAP weights
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
-        self.weights = np.sqrt(self.covariance) * np.random.rand(D, self.K) \
+        self.weights = np.sqrt(self.covariance) * self.random.rand(D, self.K) \
             + res.x[:, np.newaxis]
         self.weights[:, 0] = res.x  # Make sure we include the MAP weights too
 
@@ -306,7 +311,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # AEVB's reparameterisation trick
 
         # Sample the latent function and its derivative
-        e = np.random.randn(self.L, len(mk))  # Slower per iteration, fast conv
+        e = self.random.randn(self.L, len(mk))  # Slower per iter, fast conv
         Sk = np.sqrt(Ck)
         ws = mk + Sk * e  # L x D
         fs = ws.dot(Phi.T)  # L x M
@@ -597,8 +602,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         D, K = self.weights.shape
 
         # Generate weight samples from all mixture components
-        k = np.random.randint(0, K, size=(self.L,))
-        w = self.weights[:, k] + np.random.randn(D, self.L) \
+        k = self.random.randint(0, K, size=(self.L,))
+        w = self.weights[:, k] + self.random.randn(D, self.L) \
             * np.sqrt(self.covariance[:, k])
 
         # Do this here for *massive* speed improvements

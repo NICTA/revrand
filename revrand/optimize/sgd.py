@@ -280,7 +280,7 @@ class Adam(SGDUpdater):
 #
 
 def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
-        updater=None, eval_obj=False):
+        updater=None, eval_obj=False, random_state=None):
     """
     Stochastic Gradient Descent.
 
@@ -314,6 +314,8 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
         the objective function value. If this is true, :code:`fun` must return
         :code:`(obj, grad)` and then a list of objective function values is
         also returned.
+    random_state: int or RandomState, optional
+        random seed
 
     Returns
     -------
@@ -359,7 +361,7 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     objs = []
     norms = []
 
-    for ind in sgd_iter(maxiter, N, batch_size):
+    for ind in sgd_iter(maxiter, N, batch_size, random_state):
 
         if not eval_obj:
             grad = fun(x, *chain(_split_data(data, ind), args))

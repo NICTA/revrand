@@ -9,6 +9,9 @@ from revrand.basis_functions import LinearBasis, RandomRBF, RandomMatern52
 from revrand.metrics import smse
 
 
+randstate = 100
+
+
 def test_slm(make_gaus_data):
 
     X, y, w = make_gaus_data
@@ -54,7 +57,7 @@ def test_glm_gaussian(make_gaus_data):
     lhood = Gaussian()
 
     # simple SGD
-    glm = GeneralisedLinearModel(lhood, basis)
+    glm = GeneralisedLinearModel(lhood, basis, random_state=randstate)
     glm.fit(X, y)
     Ey = glm.predict(X)
     assert smse(y, Ey) < 0.1
@@ -64,7 +67,7 @@ def test_glm_gaussian(make_gaus_data):
         + RandomRBF(nbases=20, Xdim=X.shape[1]) \
         + RandomMatern52(nbases=20, Xdim=X.shape[1])
 
-    glm = GeneralisedLinearModel(lhood, basis)
+    glm = GeneralisedLinearModel(lhood, basis, random_state=randstate)
     glm.fit(X, y)
     Ey = glm.predict(X)
     assert smse(y, Ey) < 0.1
@@ -97,7 +100,7 @@ def test_glm_binomial(make_binom_data):
     largs = (n,)
 
     # SGD
-    glm = GeneralisedLinearModel(lhood, basis)
+    glm = GeneralisedLinearModel(lhood, basis, random_state=randstate)
     glm.fit(X, y, likelihood_args=largs)
     Ey = glm.predict(X, likelihood_args=largs)
 
@@ -116,7 +119,8 @@ def test_pipeline_glm(make_gaus_data):
 
     X, y, w = make_gaus_data
 
-    glm = GeneralisedLinearModel(Gaussian(), LinearBasis(onescol=True))
+    glm = GeneralisedLinearModel(Gaussian(), LinearBasis(onescol=True),
+                                 random_state=randstate)
     estimators = [('PCA', PCA()),
                   ('SLM', glm)
                   ]
