@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalised Linear Model &mdash; revrand 0.6.3 documentation</title>
+    <title>Generalised Linear Model &mdash; revrand 0.6.4 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.3',
+        VERSION:     '0.6.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.6.3 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.6.4 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
     <link rel="prev" title="Standard Linear Model" href="slm.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -51,7 +51,7 @@
         <li class="right" >
           <a href="slm.html" title="Standard Linear Model"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -164,7 +164,7 @@ N.</li>
 
 <dl class="method">
 <dt id="revrand.glm.GeneralisedLinearModel.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict target values from Bayesian generalised linear regression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -172,6 +172,8 @@ N.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the expected target values from the
+predictive distribution.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
 N.</li>
@@ -191,7 +193,7 @@ N.</li>
 
 <dl class="method">
 <dt id="revrand.glm.GeneralisedLinearModel.predict_cdf">
-<code class="descname">predict_cdf</code><span class="sig-paren">(</span><em>quantile</em>, <em>X</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_cdf" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict_cdf</code><span class="sig-paren">(</span><em>quantile</em>, <em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_cdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive cumulative density function of a Bayesian GLM.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -201,10 +203,11 @@ N.</li>
 <li><strong>quantile</strong> (<em>float</em>) &#8211; The predictive probability, <span class="math">\(p(y^* \leq \text{quantile} |
 \mathbf{x}^*, \mathbf{X}, y)\)</span>.</li>
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the predictive CDF.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
 Ns.</li>
-<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; The number of samples to draw from the posterior in order to
+<li><strong>nsamples</strong> &#8211; The number of samples to draw from the posterior in order to
 approximate the predictive mean and variance.</li>
 </ul>
 </td>
@@ -226,7 +229,7 @@ as p)</li>
 
 <dl class="method">
 <dt id="revrand.glm.GeneralisedLinearModel.predict_interval">
-<code class="descname">predict_interval</code><span class="sig-paren">(</span><em>percentile</em>, <em>X</em>, <em>likelihood_args=()</em>, <em>multiproc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_interval" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict_interval</code><span class="sig-paren">(</span><em>percentile</em>, <em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em>, <em>multiproc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_interval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive percentile interval (upper and lower quantiles).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -235,6 +238,7 @@ as p)</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>percentile</strong> (<em>float</em>) &#8211; The percentile confidence interval (e.g. 95%) to return.</li>
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the predictive percentiles.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
 Ns.</li>
@@ -255,7 +259,7 @@ Ns.</li>
 
 <dl class="method">
 <dt id="revrand.glm.GeneralisedLinearModel.predict_logpdf">
-<code class="descname">predict_logpdf</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_logpdf" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict_logpdf</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_logpdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive log-probability density function of a Bayesian GLM.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -265,6 +269,7 @@ Ns.</li>
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
 <li><strong>y</strong> (<em>float or ndarray</em>) &#8211; The test observations of shape (Ns,) to evaluate under,
 <span class="math">\(\log p(y^* |\mathbf{x}^*, \mathbf{X}, y)\)</span>.</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the log predictive distribution.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
 Ns.</li>
@@ -287,7 +292,7 @@ shape as p)</li>
 
 <dl class="method">
 <dt id="revrand.glm.GeneralisedLinearModel.predict_moments">
-<code class="descname">predict_moments</code><span class="sig-paren">(</span><em>X</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_moments" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict_moments</code><span class="sig-paren">(</span><em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_moments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive moments, in particular mean and variance, of a Bayesian GLM.</p>
 <p>This function uses Monte-Carlo sampling to evaluate the predictive mean
 and variance of a Bayesian GLM. The exact expressions evaluated are,</p>
@@ -320,6 +325,8 @@ the variance in this instance may not be so useful.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the expected moments from the
+predictive distribution.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
 N.</li>
@@ -407,7 +414,7 @@ the query inputs, Xs of shape (Ns,).</li>
         <li class="right" >
           <a href="slm.html" title="Standard Linear Model"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">revrand 0.6.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
