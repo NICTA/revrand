@@ -338,7 +338,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return Edm, EdC, EdPhi, Edlpars, Ell
 
-    def predict(self, X, likelihood_args=()):
+    def predict(self, X, nsamples=200, likelihood_args=()):
         """
         Predict target values from Bayesian generalised linear regression.
 
@@ -346,6 +346,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ----------
         X: ndarray
             (Ns,d) array query input dataset (Ns samples, d dimensions).
+        nsamples: int, optional
+            Number of samples for sampling the expected target values from the
+            predictive distribution.
         likelihood_args: sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
@@ -357,11 +360,11 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
         """
-        Ey, _ = self.predict_moments(X, likelihood_args)
+        Ey, _ = self.predict_moments(X, nsamples, likelihood_args)
 
         return Ey
 
-    def predict_moments(self, X, likelihood_args=()):
+    def predict_moments(self, X, nsamples=200, likelihood_args=()):
         r"""
         Predictive moments, in particular mean and variance, of a Bayesian GLM.
 
@@ -399,6 +402,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ----------
         X: ndarray
             (N,d) array query input dataset (Ns samples, D dimensions).
+        nsamples: int, optional
+            Number of samples for sampling the expected moments from the
+            predictive distribution.
         likelihood_args: sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
@@ -414,8 +420,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         """
         # Get latent function samples
         N = X.shape[0]
-        ys = np.empty((N, self.L))
-        fsamples = self._sample_func(X)
+        ys = np.empty((N, nsamples))
+        fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood expected value
         Ey_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
@@ -428,7 +434,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return Ey, Vy
 
-    def predict_logpdf(self, X, y, likelihood_args=()):
+    def predict_logpdf(self, X, y, nsamples=200, likelihood_args=()):
         r"""
         Predictive log-probability density function of a Bayesian GLM.
 
@@ -439,6 +445,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         y: float or ndarray
             The test observations of shape (Ns,) to evaluate under,
             :math:`\log p(y^* |\mathbf{x}^*, \mathbf{X}, y)`.
+        nsamples: int, optional
+            Number of samples for sampling the log predictive distribution.
         likelihood_args: sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
@@ -459,8 +467,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Get latent function samples
         N = X.shape[0]
-        ps = np.empty((N, self.L))
-        fsamples = self._sample_func(X)
+        ps = np.empty((N, nsamples))
+        fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood pdf
         ll_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
@@ -474,7 +482,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return logp, logp_min, logp_max
 
-    def predict_cdf(self, quantile, X, likelihood_args=()):
+    def predict_cdf(self, quantile, X, nsamples=200, likelihood_args=()):
         r"""
         Predictive cumulative density function of a Bayesian GLM.
 
@@ -485,6 +493,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             \mathbf{x}^*, \mathbf{X}, y)`.
         X: ndarray
             (Ns,d) array query input dataset (Ns samples, D dimensions).
+        nsamples: int, optional
+            Number of samples for sampling the predictive CDF.
         likelihood_args: sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
@@ -507,8 +517,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         """
         # Get latent function samples
         N = X.shape[0]
-        ps = np.empty((N, self.L))
-        fsamples = self._sample_func(X)
+        ps = np.empty((N, nsamples))
+        fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood cdf
         cdf_arg = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
@@ -522,7 +532,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return p, p_min, p_max
 
-    def predict_interval(self, percentile, X, likelihood_args=(),
+    def predict_interval(self, percentile, X, nsamples=200, likelihood_args=(),
                          multiproc=True):
         """
         Predictive percentile interval (upper and lower quantiles).
@@ -533,6 +543,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             The percentile confidence interval (e.g. 95%) to return.
         X: ndarray
             (Ns,d) array query input dataset (Ns samples, D dimensions).
+        nsamples: int, optional
+            Number of samples for sampling the predictive percentiles.
         likelihood_args: sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
@@ -550,7 +562,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         N = X.shape[0]
 
         # Generate latent function samples per observation (n in N)
-        fsamples = self._sample_func(X, genaxis=0)
+        fsamples = self._sample_func(X, nsamples, genaxis=0)
 
         # Make sure likelihood_args is consistent with work
         if len(likelihood_args) > 0:
@@ -574,7 +586,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ql, qu = zip(*res)
         return np.array(ql), np.array(qu)
 
-    def _sample_func(self, X, genaxis=1):
+    def _sample_func(self, X, nsamples, genaxis=1):
         """
         Generate samples from the posterior latent function mixtures of the GLM
         for query inputs, Xs.
@@ -583,6 +595,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         ----------
         X: ndarray
             (Ns, d) array query input dataset (Ns samples, D dimensions).
+        nsamples: int
+            Number of samples for sampling the latent function.
         genaxis: int
             Axis to return samples from, i.e.
             - :code:`genaxis=1` will give you one sample at a time of f for ALL
@@ -606,8 +620,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         random = check_random_state(self.randstate)  # consistent for each pred
 
         # Generate weight samples from all mixture components
-        k = random.randint(0, K, size=(self.L,))
-        w = self.weights[:, k] + random.randn(D, self.L) \
+        k = random.randint(0, K, size=(nsamples,))
+        w = self.weights[:, k] + random.randn(D, nsamples) \
             * np.sqrt(self.covariance[:, k])
 
         # Do this here for *massive* speed improvements
