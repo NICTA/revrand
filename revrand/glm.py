@@ -31,10 +31,12 @@ from .mathfun.special import logsumexp
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, logtrick_sgd
 from .btypes import Bound, Positive, Parameter
+from .logging import get_mlog
 
 
 # Set up logging
 log = logging.getLogger(__name__)
+mlog = get_mlog()
 
 
 class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
@@ -195,6 +197,13 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                          self.basis_hypers,
                          res.message))
 
+        mlog.log_progress({
+            'reg': self.regulariser,
+            'likelihood_hypers': self.like_hypers,
+            'basis_hypers': self.basis_hypers,
+            'message': res.message
+        })
+
         return self
 
     def _initialise_posterior(self, data):
@@ -305,6 +314,13 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             log.info("Iter {}: ELBO = {}, reg = {}, like_hypers = {}, "
                      "basis_hypers = {}"
                      .format(self.__it, ELBO, reg, lpars, bpars))
+
+            mlog.log_progress({
+                'ELBO': ELBO,
+                'reg': reg,
+                'like_hypers': lpars,
+                'basis_hypers': bpars
+            })
 
         self.__it += 1
 

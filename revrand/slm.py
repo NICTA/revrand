@@ -25,10 +25,11 @@ from .mathfun.linalg import solve_posdef
 from .optimize import structured_minimizer, logtrick_minimizer
 from .btypes import Parameter, Positive
 from .basis_functions import apply_grad
+from .logging import get_mlog
 
 # Set up logging
 log = logging.getLogger(__name__)
-
+mlog = get_mlog()
 
 class StandardLinearModel(BaseEstimator, RegressorMixin):
     """
@@ -125,6 +126,14 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                          res.message)
                  )
 
+        mlog.log_progress({
+            'ELBO': res['fun'],
+            'var': self.var,
+            'reg': self.regulariser,
+            'hypers': self.hypers,
+            'message': res.message
+        })
+
         return self
 
     def _elbo(self, X, y, var, reg, hypers):
@@ -168,6 +177,13 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                  .format(ELBO, var, reg, hypers))
+
+        mlog.log_progress({
+            'ELBO': ELBO,
+            'var': var,
+            'reg': reg,
+            'bparams': hypers
+        })
 
         # Grad var
         dvar = 0.5 * (-N + (sqErr + TrPhiPhiC) / var) / var
