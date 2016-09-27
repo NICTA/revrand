@@ -9,20 +9,18 @@ from revrand.btypes import Bound, Positive, Parameter
 from revrand.utils import flatten
 
 
-randstate = 100
+def test_unbounded(make_quadratic, make_random, make_randstate):
 
-
-def test_unbounded(make_quadratic):
-
+    random = make_random
     a, b, c, data, _ = make_quadratic
-    w0 = np.random.randn(3)
+    w0 = random.randn(3)
 
     assert_opt = lambda Ea, Eb, Ec: \
         np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
     for updater in [SGDUpdater, AdaDelta, AdaGrad, Momentum, Adam]:
         res = sgd(qobj, w0, data, eval_obj=True, updater=updater(),
-                  random_state=randstate)
+                  random_state=make_randstate)
         assert_opt(*res['x'])
 
     res = minimize(qobj, w0, args=(data,), jac=True, method='L-BFGS-B')
@@ -35,30 +33,33 @@ def test_unbounded(make_quadratic):
     assert_opt(*res['x'])
 
 
-def test_sgd_seqdata(make_quadratic):
+def test_sgd_seqdata(make_quadratic, make_random, make_randstate):
 
+    random = make_random
     a, b, c, data, _ = make_quadratic
     y, x = data[:, 0], data[:, 1]
-    w0 = np.random.randn(3)
+    w0 = random.randn(3)
 
     assert_opt = lambda Ea, Eb, Ec: \
         np.allclose((a, b, c), (Ea, Eb, Ec), atol=1e-3, rtol=0)
 
-    res = sgd(q_seq, w0, data=(x, y), eval_obj=True, random_state=randstate)
+    res = sgd(q_seq, w0, data=(x, y), eval_obj=True,
+              random_state=make_randstate)
     assert_opt(*res['x'])
 
 
-def test_bounded(make_quadratic):
+def test_bounded(make_quadratic, make_random, make_randstate):
 
+    random = make_random
     a, b, c, data, bounds = make_quadratic
-    w0 = np.concatenate((np.random.randn(2), [1.5]))
+    w0 = np.concatenate((random.randn(2), [1.5]))
 
     res = minimize(qobj, w0, args=(data,), jac=True, bounds=bounds,
                    method='L-BFGS-B')
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
 
     res = sgd(qobj, w0, data, bounds=bounds, eval_obj=True,
-              random_state=randstate)
+              random_state=make_randstate)
     Ea_sgd, Eb_sgd, Ec_sgd = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs),
@@ -66,11 +67,12 @@ def test_bounded(make_quadratic):
                        atol=1e-2, rtol=0)
 
 
-def test_structured_params(make_quadratic):
+def test_structured_params(make_quadratic, make_random, make_randstate):
 
+    random = make_random
     a, b, c, data, _ = make_quadratic
-    w0 = [Parameter(np.random.randn(2), Bound()),
-          Parameter(np.random.randn(1), Bound())
+    w0 = [Parameter(random.randn(2), Bound()),
+          Parameter(random.randn(1), Bound())
           ]
 
     qobj_struc = lambda w12, w3, data: q_struc(w12, w3, data, qobj)
@@ -82,7 +84,8 @@ def test_structured_params(make_quadratic):
     assert_opt(*res.x)
 
     nsgd = structured_sgd(sgd)
-    res = nsgd(qobj_struc, w0, data, eval_obj=True, random_state=randstate)
+    res = nsgd(qobj_struc, w0, data, eval_obj=True,
+               random_state=make_randstate)
     assert_opt(*res.x)
 
     qf_struc = lambda w12, w3, data: q_struc(w12, w3, data, qfun)
@@ -91,10 +94,11 @@ def test_structured_params(make_quadratic):
     assert_opt(*res.x)
 
 
-def test_log_params(make_quadratic):
+def test_log_params(make_quadratic, make_random, make_randstate):
 
+    random = make_random
     a, b, c, data, _ = make_quadratic
-    w0 = np.abs(np.random.randn(3))
+    w0 = np.abs(random.randn(3))
     bounds = [Positive(), Bound(), Positive()]
 
     assert_opt = lambda Ea, Eb, Ec: \
@@ -107,7 +111,7 @@ def test_log_params(make_quadratic):
 
     nsgd = logtrick_sgd(sgd)
     res = nsgd(qobj, w0, data, eval_obj=True, bounds=bounds,
-               random_state=randstate)
+               random_state=make_randstate)
     assert_opt(*res.x)
 
     nmin = logtrick_minimizer(minimize)
@@ -116,12 +120,13 @@ def test_log_params(make_quadratic):
     assert_opt(*res.x)
 
 
-def test_logstruc_params(make_quadratic):
+def test_logstruc_params(make_quadratic, make_random, make_randstate):
 
+    random = make_random
     a, b, c, data, _ = make_quadratic
 
-    w0 = [Parameter(np.random.randn(2), Positive()),
-          Parameter(np.random.randn(1), Bound())
+    w0 = [Parameter(random.randn(2), Positive()),
+          Parameter(random.randn(1), Bound())
           ]
 
     qobj_struc = lambda w12, w3, data: q_struc(w12, w3, data, qobj)
@@ -133,7 +138,8 @@ def test_logstruc_params(make_quadratic):
     assert_opt(*res.x)
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
-    res = nsgd(qobj_struc, w0, data, eval_obj=True, random_state=randstate)
+    res = nsgd(qobj_struc, w0, data, eval_obj=True,
+               random_state=make_randstate)
     assert_opt(*res.x)
 
     qf_struc = lambda w12, w3, data: q_struc(w12, w3, data, qfun)
