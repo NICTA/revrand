@@ -11,7 +11,7 @@ from revrand.utils import issequence
 
 def test_simple_concat(make_gaus_data):
 
-    X, _, _ = make_gaus_data
+    X, _, _, _ = make_gaus_data
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False) + bs.LinearBasis(onescol=False)
@@ -34,7 +34,7 @@ def test_simple_concat(make_gaus_data):
 
 def test_grad_concat(make_gaus_data):
 
-    X, _, _ = make_gaus_data
+    X, _, _, _ = make_gaus_data
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False) + bs.LinearBasis(onescol=False)
@@ -59,7 +59,7 @@ def test_grad_concat(make_gaus_data):
 
 def test_apply_grad(make_gaus_data):
 
-    X, _, _ = make_gaus_data
+    X, _, _, _ = make_gaus_data
     N, d = X.shape
 
     y = np.random.randn(N)
@@ -96,7 +96,7 @@ def test_apply_grad(make_gaus_data):
 
 def test_bases(make_gaus_data):
 
-    X, _, _ = make_gaus_data
+    X, _, _, _ = make_gaus_data
     N, d = X.shape
     nC = 10
 
@@ -169,7 +169,7 @@ def test_bases(make_gaus_data):
 
 def test_slicing(make_gaus_data):
 
-    X, _, _ = make_gaus_data
+    X, _, _, _ = make_gaus_data
     N, d = X.shape
 
     base = bs.LinearBasis(onescol=False, apply_ind=[0]) \
