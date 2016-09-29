@@ -10,15 +10,16 @@ from ..utils import flatten, unflatten
 
 
 # Constants
-minpos = 1e-100
-logminpos = np.log(minpos)
+MINPOS = 1e-100  # Min for log trick warped data
+MAXPOS = np.sqrt(np.finfo(float).max)  # Max for log trick warped data
+LOGMINPOS = np.log(MINPOS)
+EXPMAX = np.log(MAXPOS)
 
 
 def candidate_start_points_random(bounds, n_candidates=1000,
                                   random_state=None):
-    """
-    Randomly generate candidate starting points uniformly within a
-    hyperrectangle.
+    r"""
+    Randomly generate starting points uniformly within a hyperrectangle.
 
     Parameters
     ----------
@@ -86,9 +87,8 @@ def candidate_start_points_random(bounds, n_candidates=1000,
 
 
 def candidate_start_points_lattice(bounds, nums=3):
-    """
-    Generate candidate starting points on a uniform grid within a
-    hyperrectangle.
+    r"""
+    Generate starting points on a uniform grid within a hyperrectangle.
 
     Parameters
     ----------
@@ -163,7 +163,6 @@ def candidate_start_points_lattice(bounds, nums=3):
     ...                                nums=2).shape
     (3, 8)
     """
-
     if isinstance(nums, int):
         nums = repeat(nums)
 
@@ -175,6 +174,15 @@ def candidate_start_points_lattice(bounds, nums=3):
 def minimize_bounded_start(candidates_func=candidate_start_points_random,
                            *candidates_func_args, **candidates_func_kwargs):
     """
+    Decorator for selecting the best optimiser starting point.
+
+    The starting point lies within a hyperrectangle, and all points are tested
+    in :code:`candidates_func`.
+
+    See Also
+    --------
+    candidate_start_points_random, candidate_start_points_lattice
+
     Examples
     --------
     >>> from scipy.optimize import minimize as sp_min, rosen, rosen_der
@@ -233,7 +241,6 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     >>> candidates[:, rosen(candidates).argmin()]
     array([ 0.875,  0.75 ])
     """
-
     def minimize_bounded_start_dec(minimize_func):
 
         @wraps(minimize_func)
@@ -255,8 +262,7 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
 
 def structured_minimizer(minimizer):
     """
-    Allow an optimizer to accept a list of Parameter types to optimize, rather
-    than just a flattened array.
+    Allow an optimizer to accept a list of Parameter types to optimize.
 
     Examples
     --------
@@ -284,7 +290,6 @@ def structured_minimizer(minimizer):
     >>> res = new_min(cost, (w_0, lambda_0), method='L-BFGS-B', jac=True)
     >>> res_w, res_lambda = res.x
     """
-
     @wraps(minimizer)
     def new_minimizer(fun, parameters, jac=True, **minimizer_kwargs):
 
@@ -318,8 +323,7 @@ def structured_minimizer(minimizer):
 
 def structured_sgd(sgd):
     """
-    Allow stochastic gradients to accept a list of Parameter types to optimize,
-    rather than just a flattened array.
+    Allow stochastic gradients to accept a list of Parameter types to optimize.
 
     Examples
     --------
@@ -511,7 +515,6 @@ def logtrick_sgd(sgd):
     This decorator only works on unstructured optimizers. However, it can be
     use with structured_minimizer, so long as it is the inner wrapper.
     """
-
     @wraps(sgd)
     def new_sgd(fun, x0, data, bounds=None, eval_obj=False, **sgd_kwargs):
 
@@ -543,28 +546,37 @@ def logtrick_sgd(sgd):
 #
 
 def logtrick_gen(bounds):
-
+    """Generate warping functions and new bounds for the log trick."""
     # Test which parameters we can apply the log trick too
-    ispos = [(type(b) is bt.Positive) for b in bounds]
+    ispos = [isinstance(b, bt.Positive) for b in bounds]
 
     # Functions that implement the log trick
-    logx = lambda x: np.array([np.log(xi) if pos else xi
-                               for xi, pos in zip(x, ispos)])
-    expx = lambda x: np.array([np.exp(xi) if pos else xi
-                               for xi, pos in zip(x, ispos)])
-    gradx = lambda g, logx: np.array([gi * np.exp(lxi) if pos else gi
-                                      for lxi, gi, pos in zip(logx, g, ispos)])
+    def logx(x):
+        xwarp = [np.log(xi) if pos else xi for xi, pos in zip(x, ispos)]
+        return np.array(xwarp)
 
-    # Redefine bounds as appropriate for new ranges
-    bounds = [bt.Bound(lower=logminpos, upper=np.log(b.upper)
-                       if b.upper is not None else None)
-              if pos else b for b, pos in zip(bounds, ispos)]
+    def expx(xwarp):
+        x = [np.exp(xi) if pos else xi for xi, pos in zip(xwarp, ispos)]
+        return np.array(x)
+
+    def gradx(grad, xwarp):
+        gradwarp = [gi * np.exp(lxi) if pos else gi
+                    for lxi, gi, pos in zip(xwarp, grad, ispos)]
+        return np.array(gradwarp)
+
+    # Redefine bounds as appropriate for new ranges for numerical stability
+    for i, (b, pos) in enumerate(zip(bounds, ispos)):
+        if pos:
+            upper = EXPMAX if b.upper is None else np.log(b.upper)
+            bounds[i] = bt.Bound(lower=LOGMINPOS, upper=upper)
 
     return logx, expx, gradx, bounds
 
 
 def flatten_grad(func):
     """
+    Decorator to flatten structured gradients.
+
     Examples
     --------
     >>> def cost(w, lambda_):
@@ -598,6 +610,8 @@ def flatten_grad(func):
 
 def flatten_func_grad(func):
     """
+    Decorator to flatten structured gradients and return objective.
+
     Examples
     --------
     >>> def cost(w, lambda_):
@@ -637,6 +651,8 @@ def flatten_func_grad(func):
 
 def flatten_args(shapes):
     """
+    Decorator to flatten structured arguments to a function.
+
     Examples
     --------
     >>> @flatten_args([(5,), ()])
