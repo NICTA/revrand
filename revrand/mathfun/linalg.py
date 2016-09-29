@@ -28,7 +28,7 @@ from scipy.linalg import cholesky, cho_solve, svd, LinAlgError
 
 
 # Numerical constants / thresholds
-cholthresh = 1e-5
+CHOLTHRESH = 1e-5
 
 
 def cho_log_det(L):
@@ -106,12 +106,11 @@ def solve_posdef(A, b):
     logdet: float
         The log-determinant of :math:`A`
     """
-
     # Try cholesky for speed
     try:
         lower = False
         L = cholesky(A, lower=lower)
-        if any(L.diagonal() < cholthresh):
+        if any(L.diagonal() < CHOLTHRESH):
             raise LinAlgError("Unstable cholesky factor detected")
         X = cho_solve((L, lower), b)
         logdet = cho_log_det(L)
@@ -128,11 +127,11 @@ def solve_posdef(A, b):
 
 def svd_solve(U, s, V, b, s_tol=1e-15):
     """
-    Solve the system :math:`A X = b` for :math:`X` where :math:`A` is a
-    positive semi-definite matrix using the singular value decomposition.
+    Solve the system :math:`A X = b` for :math:`X`.
 
-    This truncates the SVD so only dimensions corresponding to non-negative and
-    sufficiently large singular values are used.
+    Here :math:`A` is a positive semi-definite matrix using the singular value
+    decomposition. This truncates the SVD so only dimensions corresponding to
+    non-negative and sufficiently large singular values are used.
 
     Parameters
     ----------
@@ -158,7 +157,6 @@ def svd_solve(U, s, V, b, s_tol=1e-15):
     okind: ndarray
         The indices of :code:`s` that are kept in the factorisation
     """
-
     # Test shapes for efficient computations
     n = U.shape[0]
     assert(b.shape[0] == n)
@@ -182,7 +180,8 @@ def svd_solve(U, s, V, b, s_tol=1e-15):
 
 
 def hadamard(Y, ordering=True):
-    """ *Very fast* Hadamard transform for single vector at a time
+    """
+    *Very fast* Hadamard transform for single vector at a time.
 
     Parameters
     ----------
