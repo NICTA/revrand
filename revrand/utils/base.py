@@ -84,7 +84,7 @@ def atleast_list(a):
 
 
 def couple(f, g):
-    """
+    r"""
     Compose a function thate returns two arguments.
 
     Given a pair of functions that take the same arguments, return a
@@ -140,7 +140,7 @@ def decouple(fn):
 
 
 def nwise(iterable, n):
-    """
+    r"""
     Sliding window iterator.
 
     Iterator that acts like a sliding window of size `n`; slides over
@@ -482,7 +482,7 @@ def sumprod(seq):
 
 
 def map_indices(fn, iterable, indices):
-    """
+    r"""
     Map a function across indices of an iterable.
 
     Notes
