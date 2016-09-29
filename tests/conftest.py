@@ -2,6 +2,36 @@ import pytest
 import numpy as np
 from scipy.stats import binom
 
+from sklearn.utils import check_random_state
+
+
+# Test constants
+RANDSTATE = 100
+RANDOM = check_random_state(RANDSTATE)
+NTRAIN = 400
+NTEST = 200
+NTOT = NTEST + NTRAIN
+
+
+def split_data(X, y):
+
+    trind = RANDOM.choice(NTOT, NTRAIN, replace=False)
+    tsind = np.zeros(NTOT, dtype=bool)
+    tsind[trind] = True
+    tsind = np.where(~tsind)[0]
+
+    return X[trind], y[trind], X[tsind], y[tsind]
+
+
+@pytest.fixture
+def make_randstate():
+    return RANDSTATE
+
+
+@pytest.fixture
+def make_random():
+    return RANDOM
+
 
 @pytest.fixture
 def make_quadratic():
@@ -21,23 +51,34 @@ def make_quadratic():
     return a, b, c, data, bounds
 
 
+# @pytest.fixture
+# def make_gaus_data():
+
+#     w = np.array([1., 2.])
+#     x = np.linspace(-50, 50, NTOT)
+#     X = np.hstack((np.ones((NTOT, 1)), x[:, np.newaxis]))
+#     y = X.dot(w) + RANDOM.randn(NTOT) / 1000
+
+#     return split_data(X, y)
+
+
 @pytest.fixture
 def make_gaus_data():
 
-    w = np.array([1., 2.])
-    x = np.atleast_2d(np.arange(-50, 50)).T
-    X = np.hstack((np.ones((100, 1)), x))
-    y = X.dot(w) + np.random.randn(100) / 1000
+    x = np.linspace(-2, 2, NTOT)
+    y = 3 + 2 * x
+    X = np.hstack((np.ones((NTOT, 1)), x[:, np.newaxis]))
 
-    return X, y, w
+    return split_data(X, y)
 
 
 @pytest.fixture
 def make_binom_data():
 
-    X = np.atleast_2d(np.arange(-50, 50)).T
+    x = np.linspace(-50, 50, NTOT)
+    X = np.atleast_2d(x).T
 
-    p = 0.5 * (np.sin(X.flatten() / 5.) + 1)
+    p = 0.5 * (np.sin(x / 5.) + 1)
     n = 1000
     y = binom.rvs(p=p, n=n)
 
@@ -48,7 +89,7 @@ def make_binom_data():
 def make_cov():
 
     # Posdef
-    X = np.random.randn(100, 5)
+    X = RANDOM.randn(100, 5)
     S = np.cov(X.T)
     iS = np.linalg.pinv(S)
 
