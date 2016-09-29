@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.optimize.base.candidate_start_points_random &mdash; revrand 0.6.4 documentation</title>
+    <title>revrand.optimize.base.candidate_start_points_random &mdash; revrand 0.6.5 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.6.4',
+        VERSION:     '0.6.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.6.4 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.6.5 documentation" href="../index.html" />
     <link rel="up" title="Optimization" href="../optimize.html" />
     <link rel="next" title="revrand.optimize.sgd.sgd" href="revrand.optimize.sgd.sgd.html" />
     <link rel="prev" title="revrand.optimize.base.candidate_start_points_lattice" href="revrand.optimize.base.candidate_start_points_lattice.html" />
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_lattice.html" title="revrand.optimize.base.candidate_start_points_lattice"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.4 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.5 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" accesskey="U">Optimization</a> &raquo;</li> 
       </ul>
     </div>  
@@ -67,8 +67,7 @@
 <dl class="function">
 <dt id="revrand.optimize.base.candidate_start_points_random">
 <code class="descclassname">revrand.optimize.base.</code><code class="descname">candidate_start_points_random</code><span class="sig-paren">(</span><em>bounds</em>, <em>n_candidates=1000</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.optimize.base.candidate_start_points_random" title="Permalink to this definition">¶</a></dt>
-<dd><p>Randomly generate candidate starting points uniformly within a
-hyperrectangle.</p>
+<dd><p>Randomly generate starting points uniformly within a hyperrectangle.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -89,7 +88,8 @@ hyperrectangle.</p>
 </table>
 <p class="rubric">Notes</p>
 <p>Roughly equivalent to:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">100</span><span class="p">:</span>             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_candidates</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">lambda</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">100</span><span class="p">:</span> \
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_candidates</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
 </pre></div>
 </div>
 <p class="rubric">Examples</p>
@@ -218,7 +218,7 @@ hyperrectangle.</p>
         <li class="right" >
           <a href="revrand.optimize.base.candidate_start_points_lattice.html" title="revrand.optimize.base.candidate_start_points_lattice"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.4 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">revrand 0.6.5 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../optimize.html" >Optimization</a> &raquo;</li> 
       </ul>
     </div>

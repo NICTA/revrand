@@ -15,6 +15,7 @@ revrand.optimize.base
       flatten
       flatten_args
       flatten_func_grad
+      flatten_grad
       logtrick_gen
       logtrick_minimizer
       logtrick_sgd
