@@ -548,21 +548,27 @@ def logtrick_sgd(sgd):
 def logtrick_gen(bounds):
     """Generate warping functions and new bounds for the log trick."""
     # Test which parameters we can apply the log trick too
-    ispos = [isinstance(b, bt.Positive) for b in bounds]
+    ispos = np.array([isinstance(b, bt.Positive) for b in bounds], dtype=bool)
+    nispos = ~ispos
 
     # Functions that implement the log trick
     def logx(x):
-        xwarp = [np.log(xi) if pos else xi for xi, pos in zip(x, ispos)]
-        return np.array(xwarp)
+        xwarp = np.empty_like(x)
+        xwarp[ispos] = np.log(x[ispos])
+        xwarp[nispos] = x[nispos]
+        return xwarp
 
     def expx(xwarp):
-        x = [np.exp(xi) if pos else xi for xi, pos in zip(xwarp, ispos)]
-        return np.array(x)
+        x = np.empty_like(xwarp)
+        x[ispos] = np.exp(xwarp[ispos])
+        x[nispos] = xwarp[nispos]
+        return x
 
     def gradx(grad, xwarp):
-        gradwarp = [gi * np.exp(lxi) if pos else gi
-                    for lxi, gi, pos in zip(xwarp, grad, ispos)]
-        return np.array(gradwarp)
+        gwarp = np.empty_like(grad)
+        gwarp[ispos] = grad[ispos] * np.exp(xwarp[ispos])
+        gwarp[nispos] = grad[nispos]
+        return gwarp
 
     # Redefine bounds as appropriate for new ranges for numerical stability
     for i, (b, pos) in enumerate(zip(bounds, ispos)):
