@@ -42,7 +42,7 @@ setup(
         'numpy >= 1.8.2',
         'six >= 1.9.0',
         'decorator >= 4.0.6',
-        'scikit-learn >= 0.16.0'
+        'scikit-learn >= 0.18.0'
     ],
     extras_require={
         'demos': [
@@ -53,7 +53,7 @@ setup(
     },
     license="Apache Software License 2.0",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Operating System :: POSIX",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
