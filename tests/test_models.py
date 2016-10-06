@@ -70,14 +70,14 @@ def test_glm_gaussian(make_gaus_data, make_randstate):
     assert smse(ys, Ey) < 0.1
 
     # Test upper quantile estimates
-    py, _, _ = glm.predict_cdf(1e5, Xs)
+    py, _, _ = glm.predict_cdf(Xs, 1e5)
     assert np.allclose(py, 1.)
 
     # Test log probability
     lpy, _, _ = glm.predict_logpdf(Xs, Ey)
     assert np.all(lpy > -100)
 
-    EyQn, EyQx = glm.predict_interval(0.9, Xs)
+    EyQn, EyQx = glm.predict_interval(Xs, 0.9)
     assert all(Ey <= EyQx)
     assert all(Ey >= EyQn)
 
@@ -105,10 +105,10 @@ def test_glm_binomial(make_binom_data, make_randstate):
     assert smse(f, Ey) < 1
 
     # Test upper quantile estimates
-    py, _, _ = glm.predict_cdf(1e5, X, likelihood_args=largs)
+    py, _, _ = glm.predict_cdf(X, 1e5, likelihood_args=largs)
     assert np.allclose(py, 1.)
 
-    EyQn, EyQx = glm.predict_interval(0.9, X, likelihood_args=largs)
+    EyQn, EyQx = glm.predict_interval(X, 0.9, likelihood_args=largs)
     assert all(Ey <= EyQx)
     assert all(Ey >= EyQn)
 

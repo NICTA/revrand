@@ -482,17 +482,17 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return logp, logp_min, logp_max
 
-    def predict_cdf(self, quantile, X, nsamples=200, likelihood_args=()):
+    def predict_cdf(self, X, quantile, nsamples=200, likelihood_args=()):
         r"""
         Predictive cumulative density function of a Bayesian GLM.
 
         Parameters
         ----------
+        X: ndarray
+            (Ns,d) array query input dataset (Ns samples, D dimensions).
         quantile: float
             The predictive probability, :math:`p(y^* \leq \text{quantile} |
             \mathbf{x}^*, \mathbf{X}, y)`.
-        X: ndarray
-            (Ns,d) array query input dataset (Ns samples, D dimensions).
         nsamples: int, optional
             Number of samples for sampling the predictive CDF.
         likelihood_args: sequence, optional
@@ -532,17 +532,17 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         return p, p_min, p_max
 
-    def predict_interval(self, percentile, X, nsamples=200, likelihood_args=(),
+    def predict_interval(self, X, percentile, nsamples=200, likelihood_args=(),
                          multiproc=True):
         """
         Predictive percentile interval (upper and lower quantiles).
 
         Parameters
         ----------
-        percentile: float
-            The percentile confidence interval (e.g. 95%) to return.
         X: ndarray
             (Ns,d) array query input dataset (Ns samples, D dimensions).
+        percentile: float
+            The percentile confidence interval (e.g. 95%) to return.
         nsamples: int, optional
             Number of samples for sampling the predictive percentiles.
         likelihood_args: sequence, optional
