@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.FastFoodGM &mdash; revrand 0.6.6 documentation</title>
+    <title>revrand.basis_functions.FastFoodGM &mdash; revrand 0.7.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.6.6',
+        VERSION:     '0.7.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.6.6 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.7.0 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
     <link rel="next" title="revrand.basis_functions.spectralmixture" href="revrand.basis_functions.spectralmixture.html" />
     <link rel="prev" title="revrand.basis_functions.FastFoodRBF" href="revrand.basis_functions.FastFoodRBF.html" />
@@ -44,7 +44,7 @@
 <h1>revrand.basis_functions.FastFoodGM<a class="headerlink" href="#revrand-basis-functions-fastfoodgm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="revrand.basis_functions.FastFoodGM">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodGM</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodGM</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM" title="Permalink to this definition">¶</a></dt>
 <dd><p>A mixture component from a Gaussian spectral mixture kernel approximation.</p>
 <p>This implements a GM basis component from &#8220;A la Carte - Learning Fast
 Kernels&#8221;. This essentially learns the form of a kernel function, and so has
@@ -66,6 +66,7 @@ to all means.</li>
 initialise the length scales for optimization. This will always
 initialise ARD length scales, if a scalr bound is given, it is applied
 to all length scales.</li>
+<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -73,7 +74,7 @@ to all length scales.</li>
 </table>
 <dl class="method">
 <dt id="revrand.basis_functions.FastFoodGM.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

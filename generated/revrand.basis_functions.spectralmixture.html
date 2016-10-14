@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.spectralmixture &mdash; revrand 0.6.6 documentation</title>
+    <title>revrand.basis_functions.spectralmixture &mdash; revrand 0.7.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.6.6',
+        VERSION:     '0.7.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.6.6 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.7.0 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
     <link rel="next" title="Standard Linear Model" href="../slm.html" />
     <link rel="prev" title="revrand.basis_functions.FastFoodGM" href="revrand.basis_functions.FastFoodGM.html" />
@@ -44,7 +44,7 @@
 <h1>revrand.basis_functions.spectralmixture<a class="headerlink" href="#revrand-basis-functions-spectralmixture" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="revrand.basis_functions.spectralmixture">
-<code class="descclassname">revrand.basis_functions.</code><code class="descname">spectralmixture</code><span class="sig-paren">(</span><em>Xdim</em>, <em>apply_ind=None</em>, <em>bases_per_component=50</em>, <em>ncomponents=5</em>, <em>means_init=None</em>, <em>lenscales_init=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.spectralmixture" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">revrand.basis_functions.</code><code class="descname">spectralmixture</code><span class="sig-paren">(</span><em>Xdim</em>, <em>apply_ind=None</em>, <em>bases_per_component=50</em>, <em>ncomponents=5</em>, <em>means_init=None</em>, <em>lenscales_init=None</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.spectralmixture" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a Gaussian spectral mixture basis.</p>
 <p>This is a helper function for easily creating a Gaussian spectral mixture
 basis from multiple FasFoodGM mixture components. This implements the full
@@ -68,6 +68,7 @@ constructor values.</li>
 <li><strong>lenscale_init</strong> (<em>list of Parameter, optional</em>) &#8211; A list of <code class="code docutils literal"><span class="pre">Parameter</span></code>, <code class="code docutils literal"><span class="pre">len(lenscales_init)</span> <span class="pre">==</span>
 <span class="pre">ncomponents</span></code>, to pass to each of the <code class="code docutils literal"><span class="pre">FastFoodGM</span></code>&#8216;s
 <code class="code docutils literal"><span class="pre">lenscale_init</span></code> constructor values.</li>
+<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
