@@ -64,7 +64,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
     nsamples: int, optional
         Number of samples for sampling the expected likelihood and expected
         likelihood gradients
-    random_state: int or RandomState, optional
+    random_state: None, int or RandomState, optional
         random seed
 
     Notes
@@ -126,7 +126,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.batch_size = batch_size
         self.updater = updater
         self.L = nsamples
-        self.randstate = random_state
+        self._random = check_random_state(random_state)
 
     def fit(self, X, y, likelihood_args=()):
         r"""
@@ -146,7 +146,6 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             N.
         """
         X, y = check_X_y(X, y)
-        self.__random = check_random_state(self.randstate)  # consist for fit
 
         # Batch magnification factor
         N, _ = X.shape
@@ -176,9 +175,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                    maxiter=self.maxiter,
                    updater=self.updater,
                    batch_size=self.batch_size,
-                   random_state=self.randstate
+                   random_state=self._random
                    )
-        del self.__it, self.__random  # clean up
+        del self.__it
 
         # Unpack params
         (self.weights,
@@ -203,18 +202,18 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Intialise weights and covariances
         res = sgd(self._map,
-                  self.__random.randn(D),
+                  self._random.randn(D),
                   data,
                   maxiter=self.maxiter,
                   updater=self.updater,
                   batch_size=self.batch_size,
-                  random_state=self.randstate
+                  random_state=self._random
                   )
 
         # Initialise each posterior component randomly around the MAP weights
         self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
         self.weights = res.x[:, np.newaxis] + \
-            np.sqrt(self.covariance) * self.__random.rand(D, self.K)
+            np.sqrt(self.covariance) * self._random.rand(D, self.K)
         self.weights[:, 0] = res.x  # Make sure we include the MAP weights too
 
     def _map(self, weights, X, y, *largs):
@@ -314,7 +313,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # AEVB's reparameterisation trick
 
         # Sample the latent function and its derivative
-        e = self.__random.randn(self.L, len(mk))  # Slower per iter, fast conv
+        e = self._random.randn(self.L, len(mk))  # Slower per iter, fast conv
         Sk = np.sqrt(Ck)
         ws = mk + Sk * e  # L x D
         fs = ws.dot(Phi.T)  # L x M
@@ -617,11 +616,10 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                                'like_hypers', 'regulariser'])
         X = check_array(X)
         D, K = self.weights.shape
-        random = check_random_state(self.randstate)  # consistent for each pred
 
         # Generate weight samples from all mixture components
-        k = random.randint(0, K, size=(nsamples,))
-        w = self.weights[:, k] + random.randn(D, nsamples) \
+        k = self._random.randint(0, K, size=(nsamples,))
+        w = self.weights[:, k] + self._random.randn(D, nsamples) \
             * np.sqrt(self.covariance[:, k])
 
         # Do this here for *massive* speed improvements

@@ -16,7 +16,7 @@ from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
 from scipy.special import expit
 from scipy.spatial.distance import cdist
-from scipy.stats import cauchy, chi, chi2, gamma
+from sklearn.utils import check_random_state
 
 from .btypes import Positive, Bound, Parameter
 from .mathfun.linalg import hadamard
@@ -684,13 +684,21 @@ class RandomRBF(RadialBasis):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    random_state: None, int or RandomState, optional
+        random seed
     """
 
     @slice_init
-    def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
+    def __init__(self,
+                 nbases,
+                 Xdim,
+                 lenscale_init=Parameter(1., Positive()),
+                 random_state=None
+                 ):
 
         self.d = Xdim
         self.n = nbases
+        self._random = check_random_state(random_state)
         self.W = self._weightsamples()
         self._init_lenscale(lenscale_init)
 
@@ -758,7 +766,8 @@ class RandomRBF(RadialBasis):
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
     def _weightsamples(self):
-        return np.random.randn(self.d, self.n)
+        weights = self._random.randn(self.d, self.n)
+        return weights
 
 
 class RandomLaplace(RandomRBF):
@@ -788,10 +797,13 @@ class RandomLaplace(RandomRBF):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    random_state: None, int or RandomState, optional
+        random seed
     """
 
     def _weightsamples(self):
-        return cauchy.rvs(size=(self.d, self.n))
+        weights = self._random.standard_cauchy(size=(self.d, self.n))
+        return weights
 
 
 class RandomCauchy(RandomRBF):
@@ -821,6 +833,8 @@ class RandomCauchy(RandomRBF):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    random_state: None, int or RandomState, optional
+        random seed
     """
 
     def _weightsamples(self):
@@ -832,8 +846,8 @@ class RandomCauchy(RandomRBF):
         # See "Multivariate Generalized Laplace Distributions and Related
         # Random Fields":
         #   http://www.math.chalmers.se/Math/Research/Preprints/2010/47.pdf
-        X = np.random.randn(self.d, self.n)
-        Z = gamma.rvs(1., size=(1, self.n))
+        X = self._random.randn(self.d, self.n)
+        Z = self._random.standard_gamma(1., size=(1, self.n))
         return X * np.sqrt(2 * Z)
 
 
@@ -866,6 +880,8 @@ class RandomMatern32(RandomRBF):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    random_state: None, int or RandomState, optional
+        random seed
     """
 
     def _weightsamples(self):
@@ -883,8 +899,8 @@ class RandomMatern32(RandomRBF):
         # from wikipedia, x = y * np.sqrt(df / u) where y ~ norm(0, I),
         # u ~ chi2(df), then x ~ mvt(0, I, df)
         df = 2 * (p + 0.5)
-        y = np.random.randn(self.d, self.n)
-        u = chi2.rvs(df, size=(self.n,))
+        y = self._random.randn(self.d, self.n)
+        u = self._random.chisquare(df, size=(self.n,))
         return y * np.sqrt(df / u)
 
 
@@ -919,6 +935,8 @@ class RandomMatern52(RandomMatern32):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    random_state: None, int or RandomState, optional
+        random seed
     """
 
     def _weightsamples(self):
@@ -952,11 +970,19 @@ class FastFoodRBF(RandomRBF):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    random_state: None, int or RandomState, optional
+        random seed
     """
 
     @slice_init
-    def __init__(self, nbases, Xdim, lenscale_init=Parameter(1., Positive())):
+    def __init__(self,
+                 nbases,
+                 Xdim,
+                 lenscale_init=Parameter(1., Positive()),
+                 random_state=None
+                 ):
 
+        self._random = check_random_state(random_state)
         self._init_dims(nbases, Xdim)
         self._init_lenscale(lenscale_init)
         self._init_matrices()
@@ -1039,14 +1065,14 @@ class FastFoodRBF(RandomRBF):
 
         # Draw consistent samples from the covariance matrix
         shape = (self.k, self.d2)
-        self.B = np.random.randint(2, size=shape) * 2 - 1  # uniform [-1,1]
-        self.G = np.random.randn(*shape)  # mean 0 std 1
-        self.PI = np.array([np.random.permutation(self.d2)
+        self.B = self._random.randint(2, size=shape) * 2 - 1  # uniform [-1,1]
+        self.G = self._random.randn(*shape)  # mean 0 std 1
+        self.PI = np.array([self._random.permutation(self.d2)
                             for _ in range(self.k)])
         self.S = self._weightsamples()
 
     def _weightsamples(self):
-        s = chi.rvs(self.d2, size=self.G.shape)
+        s = np.sqrt(self._random.chisquare(self.d2, size=self.G.shape))
         return self.d2 * s / norm(self.G, axis=1)[:, np.newaxis]
 
     def _makeVX(self, X):
@@ -1093,12 +1119,20 @@ class FastFoodGM(FastFoodRBF):
         initialise the length scales for optimization. This will always
         initialise ARD length scales, if a scalr bound is given, it is applied
         to all length scales.
+    random_state: None, int or RandomState, optional
+        random seed
     """
 
     @slice_init
-    def __init__(self, nbases, Xdim, mean_init=Parameter(0., Bound()),
-                 lenscale_init=Parameter(1., Positive())):
+    def __init__(self,
+                 nbases,
+                 Xdim,
+                 mean_init=Parameter(0., Bound()),
+                 lenscale_init=Parameter(1., Positive()),
+                 random_state=None
+                 ):
 
+        self._random = check_random_state(random_state)
         self._init_dims(nbases, Xdim)
         self.params = [self._init_param(mean_init),
                        self._init_param(lenscale_init)]
@@ -1211,8 +1245,14 @@ class FastFoodGM(FastFoodRBF):
 # Helper Functions
 #
 
-def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
-                    ncomponents=5, means_init=None, lenscales_init=None):
+def spectralmixture(Xdim,
+                    apply_ind=None,
+                    bases_per_component=50,
+                    ncomponents=5,
+                    means_init=None,
+                    lenscales_init=None,
+                    random_state=None
+                    ):
     """
     Make a Gaussian spectral mixture basis.
 
@@ -1242,19 +1282,23 @@ def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
         A list of :code:`Parameter`, :code:`len(lenscales_init) ==
         ncomponents`, to pass to each of the :code:`FastFoodGM`'s
         :code:`lenscale_init` constructor values.
+    random_state: None, int or RandomState, optional
+        random seed
 
     Returns
     -------
     GausSpecMix: BasisCat
         A concatenation of :code:`FastFoodGM` bases to make the full mixture.
     """
+    random = check_random_state(random_state)
+
     if means_init is None:
         # Random values with random offset
         if Xdim > 1:
-            means_init = [Parameter(np.random.randn(Xdim) + np.random.randn(1),
+            means_init = [Parameter(random.randn(Xdim) + random.randn(1),
                                     Bound()) for _ in range(ncomponents)]
         else:
-            means_init = [Parameter(np.random.randn(), Bound())
+            means_init = [Parameter(random.randn(), Bound())
                           for _ in range(ncomponents)]
     elif len(means_init) != ncomponents:
         raise ValueError("Number of mean Parameters has to be equal to "
@@ -1263,16 +1307,20 @@ def spectralmixture(Xdim, apply_ind=None, bases_per_component=50,
     if lenscales_init is None:
         # Expected value of 1, with not too much deviation about that value
         size = None if Xdim == 1 else (Xdim,)
-        lenscales_init = [Parameter(gamma.rvs(3, scale=1. / 3, size=size),
-                                    Positive()) for _ in range(ncomponents)]
+        lenscales_init = [
+            Parameter(random.standard_gamma(3, scale=1. / 3, size=size),
+                      Positive())
+            for _ in range(ncomponents)
+        ]
     elif len(lenscales_init) != ncomponents:
         raise ValueError("Number of length scale Parameters has to be equal "
                          "to ncomponents!")
 
     # Initialise all of the bases
     mixtures = [FastFoodGM(Xdim=Xdim, nbases=bases_per_component, mean_init=m,
-                           lenscale_init=l, apply_ind=apply_ind)
-                for m, l in zip(means_init, lenscales_init)]
+                           lenscale_init=l, apply_ind=apply_ind,
+                           random_state=random_state + i)
+                for i, (m, l) in enumerate(zip(means_init, lenscales_init))]
 
     # Concatenate and return
     return BasisCat(mixtures)
