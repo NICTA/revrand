@@ -154,7 +154,7 @@ Bayesian linear regression example from before,
     ...
 
     # Plot GLM SGD Regressor
-    Vy_g = Vf_g + glm.like_hypers
+    Vy_g = Vf_g + glm.like_hypers_
     Sy_g = np.sqrt(Vy_g)
     pl.plot(Xpl_s, Ey_g, 'm-', label='GLM')
     pl.fill_between(Xs, Ey_g - 2 * Sy_g, Ey_g + 2 * Sy_g, facecolor='none',

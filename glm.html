@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalised Linear Model &mdash; revrand 0.7.0 documentation</title>
+    <title>Generalised Linear Model &mdash; revrand 0.7.1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.0',
+        VERSION:     '0.7.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.7.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.7.1 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
     <link rel="prev" title="Standard Linear Model" href="slm.html" />
    
@@ -63,7 +63,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 </table>
 <dl class="class">
 <dt id="revrand.glm.GeneralisedLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>postcomp=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>K=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bayesian Generalised linear model (GLM).</p>
 <p>This provides a scikit learn compatible interface for the glm module.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -74,7 +74,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
 <li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
-<li><strong>postcomp</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
+<li><strong>K</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
 posterior distribution.</li>
 <li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; Maximum number of iterations of stochastic gradients to run.</li>
 <li><strong>batch_size</strong> (<em>int, optional</em>) &#8211; number of observations to use per SGD batch.</li>
