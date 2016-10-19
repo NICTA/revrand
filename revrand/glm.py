@@ -51,7 +51,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         A basis object, see the basis_functions module.
     regulariser: Parameter, optional
         weight regulariser (variance) initial value.
-    postcomp: int, optional
+    K: int, optional
         Number of diagonal Gaussian components to use to approximate the
         posterior distribution.
     maxiter: int, optional
@@ -111,22 +111,23 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                  likelihood,
                  basis,
                  regulariser=Parameter(1., Positive()),
-                 postcomp=10,
+                 K=10,
                  maxiter=3000,
                  batch_size=10,
                  updater=None,
                  nsamples=50,
                  random_state=None):
 
-        self.like = likelihood
+        self.likelihood = likelihood
         self.basis = basis
-        self.regulariser_init = regulariser
-        self.K = postcomp
+        self.regulariser = regulariser
+        self.K = K
         self.maxiter = maxiter
         self.batch_size = batch_size
         self.updater = updater
-        self.L = nsamples
-        self._random = check_random_state(random_state)
+        self.nsamples = nsamples
+        self.random_state = random_state
+        self.random_ = check_random_state(random_state)
 
     def fit(self, X, y, likelihood_args=()):
         r"""
@@ -149,7 +150,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Batch magnification factor
         N, _ = X.shape
-        self.B = X.shape[0] / self.batch_size
+        self.B_ = X.shape[0] / self.batch_size
 
         # Pack data
         likelihood_args = _reshape_likelihood_args(likelihood_args, N)
@@ -160,10 +161,10 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self._initialise_posterior(data)
 
         # Pack params
-        params = [Parameter(self.weights, Bound()),
-                  Parameter(self.covariance, Positive()),
-                  self.regulariser_init,
-                  self.like.params,
+        params = [Parameter(self.weights_, Bound()),
+                  Parameter(self.covariance_, Positive()),
+                  self.regulariser,
+                  self.likelihood.params,
                   self.basis.params]
 
         log.info("Optimising parameters...")
@@ -175,23 +176,23 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                    maxiter=self.maxiter,
                    updater=self.updater,
                    batch_size=self.batch_size,
-                   random_state=self._random
+                   random_state=self.random_
                    )
         del self.__it
 
         # Unpack params
-        (self.weights,
-         self.covariance,
-         self.regulariser,
-         self.like_hypers,
-         self.basis_hypers
+        (self.weights_,
+         self.covariance_,
+         self.regulariser_,
+         self.like_hypers_,
+         self.basis_hypers_
          ) = res.x
 
         log.info("Finished! reg = {}, likelihood_hypers = {}, "
                  "basis_hypers = {}, message: {}."
-                 .format(self.regulariser,
-                         self.like_hypers,
-                         self.basis_hypers,
+                 .format(self.regulariser_,
+                         self.like_hypers_,
+                         self.basis_hypers_,
                          res.message))
 
         return self
@@ -202,34 +203,32 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
         # Intialise weights and covariances
         res = sgd(self._map,
-                  self._random.randn(D),
+                  self.random_.randn(D),
                   data,
                   maxiter=self.maxiter,
                   updater=self.updater,
                   batch_size=self.batch_size,
-                  random_state=self._random
+                  random_state=self.random_
                   )
 
         # Initialise each posterior component randomly around the MAP weights
-        self.covariance = gamma.rvs(2, scale=0.5, size=(D, self.K))
-        self.weights = res.x[:, np.newaxis] + \
-            np.sqrt(self.covariance) * self._random.rand(D, self.K)
-        self.weights[:, 0] = res.x  # Make sure we include the MAP weights too
+        self.covariance_ = gamma.rvs(2, scale=0.5, size=(D, self.K))
+        self.weights_ = res.x[:, np.newaxis] + \
+            np.sqrt(self.covariance_) * self.random_.rand(D, self.K)
+        self.weights_[:, 0] = res.x  # Make sure we include the MAP weights too
 
     def _map(self, weights, X, y, *largs):
         # MAP objective for initialising the weights
 
         # Extract parameters from their initial values
         bpars = self.basis.get_init_params()
-        largs = tuple(chain(atleast_list(self.like.params.value), largs))
-        reg = self.regulariser_init.value
+        largs = tuple(chain(atleast_list(self.likelihood.params.value), largs))
 
         # Gradient
         Phi = self.basis.transform(X, *bpars)
         f = Phi.dot(weights)
-        df = self.like.df(y, f, *largs)
-        dweights = self.B * df.dot(Phi) - weights / reg
-
+        df = self.likelihood.df(y, f, *largs)
+        dweights = self.B_ * df.dot(Phi) - weights / self.regulariser.value
         return -dweights
 
     def _elbo(self, m, C, reg, lpars, bpars, X, y, *largs):
@@ -277,9 +276,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             mkmj = m[:, k][:, np.newaxis] - m
             iCkCj = 1. / (C[:, k][:, np.newaxis] + C)
 
-            dm[:, k] = (self.B * Edmk - m[:, k] / reg
+            dm[:, k] = (self.B_ * Edmk - m[:, k] / reg
                         + (iCkCj * mkmj).dot(alpha)) / K
-            dC[:, k] = (self.B * EdCk - 1. / reg
+            dC[:, k] = (self.B_ * EdCk - 1. / reg
                         + (iCkCj - (mkmj * iCkCj)**2).dot(alpha)) / (2 * K)
 
             # Likelihood parameter gradients
@@ -296,7 +295,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         if dolog:
 
             # Approximate evidence lower bound
-            ELBO = (Ell.sum() * self.B
+            ELBO = (Ell.sum() * self.B_
                     - 0.5 * D * K * np.log(2 * np.pi * reg)
                     - 0.5 * ((m**2).sum() + C.sum()) / reg
                     - logzk.sum() + np.log(K)) / K
@@ -313,27 +312,27 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         # AEVB's reparameterisation trick
 
         # Sample the latent function and its derivative
-        e = self._random.randn(self.L, len(mk))  # Slower per iter, fast conv
+        e = self.random_.randn(self.nsamples, len(mk))
         Sk = np.sqrt(Ck)
         ws = mk + Sk * e  # L x D
         fs = ws.dot(Phi.T)  # L x M
-        dfs = self.like.df(y, fs, *largs)  # L x M
+        dfs = self.likelihood.df(y, fs, *largs)  # L x M
 
         # Expected gradients
         Edws = dfs.dot(Phi)  # L x D, dweight samples
-        Edm = Edws.sum(axis=0) / self.L  # D
-        EdC = (Edws * e / Sk).sum(axis=0) / self.L  # D
-        EdPhi = dfs.T.dot(ws) / self.L  # M x D
+        Edm = Edws.sum(axis=0) / self.nsamples  # D
+        EdC = (Edws * e / Sk).sum(axis=0) / self.nsamples  # D
+        EdPhi = dfs.T.dot(ws) / self.nsamples  # M x D
 
         # Structured likelihood parameter gradients
-        Edlpars = atleast_list(self.like.dp(y, fs, *largs))
+        Edlpars = atleast_list(self.likelihood.dp(y, fs, *largs))
         for i, Edlpar in enumerate(Edlpars):
-            Edlpars[i] = Edlpar.sum() / self.L
+            Edlpars[i] = Edlpar.sum() / self.nsamples
 
         # Expected ll, don't calculate if we don't need
         Ell = -np.inf
         if calc_like:
-            Ell = self.like.loglike(y, fs, *largs).sum() / self.L
+            Ell = self.likelihood.loglike(y, fs, *largs).sum() / self.nsamples
 
         return Edm, EdC, EdPhi, Edlpars, Ell
 
@@ -423,9 +422,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood expected value
-        Ey_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
+        Eyargs = tuple(chain(atleast_list(self.like_hypers_), likelihood_args))
         for i, f in enumerate(fsamples):
-            ys[:, i] = self.like.Ey(f, *Ey_args)
+            ys[:, i] = self.likelihood.Ey(f, *Eyargs)
 
         # Average transformed samples (MC integration)
         Ey = ys.mean(axis=1)
@@ -470,9 +469,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood pdf
-        ll_args = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
+        llargs = tuple(chain(atleast_list(self.like_hypers_), likelihood_args))
         for i, f in enumerate(fsamples):
-            ps[:, i] = self.like.loglike(y, f, *ll_args)
+            ps[:, i] = self.likelihood.loglike(y, f, *llargs)
 
         # Average transformed samples (MC integration)
         logp = ps.mean(axis=1)
@@ -520,9 +519,9 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         fsamples = self._sample_func(X, nsamples)
 
         # Push samples though likelihood cdf
-        cdf_arg = tuple(chain(atleast_list(self.like_hypers), likelihood_args))
+        cdfarg = tuple(chain(atleast_list(self.like_hypers_), likelihood_args))
         for i, f in enumerate(fsamples):
-            ps[:, i] = self.like.cdf(quantile, f, *cdf_arg)
+            ps[:, i] = self.likelihood.cdf(quantile, f, *cdfarg)
 
         # Average transformed samples (MC integration)
         p = ps.mean(axis=1)
@@ -568,8 +567,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             likelihood_args = _reshape_likelihood_args(likelihood_args, N)
 
         # Now create work for distrbuted workers
-        like_hypers = atleast_list(self.like_hypers)
-        work = ((f[0], self.like, like_hypers, f[1:], percentile)
+        like_hypers = atleast_list(self.like_hypers_)
+        work = ((f[0], self.likelihood, like_hypers, f[1:], percentile)
                 for f in zip(fsamples, *likelihood_args))
 
         # Distribute sampling and rootfinding
@@ -612,18 +611,18 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             (nsamples,) if :code:`genaxis=0`, with each call being a all
             samples for an observation, n in Ns.
         """
-        check_is_fitted(self, ['weights', 'covariance', 'basis_hypers',
-                               'like_hypers', 'regulariser'])
+        check_is_fitted(self, ['weights_', 'covariance_', 'basis_hypers_',
+                               'like_hypers_', 'regulariser_'])
         X = check_array(X)
-        D, K = self.weights.shape
+        D, K = self.weights_.shape
 
         # Generate weight samples from all mixture components
-        k = self._random.randint(0, K, size=(nsamples,))
-        w = self.weights[:, k] + self._random.randn(D, nsamples) \
-            * np.sqrt(self.covariance[:, k])
+        k = self.random_.randint(0, K, size=(nsamples,))
+        w = self.weights_[:, k] + self.random_.randn(D, nsamples) \
+            * np.sqrt(self.covariance_[:, k])
 
         # Do this here for *massive* speed improvements
-        Phi = self.basis.transform(X, *atleast_list(self.basis_hypers))
+        Phi = self.basis.transform(X, *atleast_list(self.basis_hypers_))
 
         # Now generate latent functions samples either colwise or rowwise
         if genaxis == 1:

@@ -57,8 +57,8 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                  ):
 
         self.basis = basis
-        self.var_init = var
-        self.regulariser_init = regulariser
+        self.var = var
+        self.regulariser = regulariser
         self.tol = tol
         self.maxiter = maxiter
 
@@ -98,10 +98,10 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         """
         X, y = check_X_y(X, y)
 
-        self.obj = -np.inf
+        self.obj_ = -np.inf
 
         # Make list of parameters and decorate optimiser to undestand this
-        params = [self.var_init, self.regulariser_init, self.basis.params]
+        params = [self.var, self.regulariser, self.basis.params]
         nmin = structured_minimizer(logtrick_minimizer(minimize))
 
         # Close over objective and learn parameters
@@ -114,14 +114,14 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                    )
 
         # Upack learned parameters and report
-        self.var, self.regulariser, self.hypers = res.x
+        self.var_, self.regulariser_, self.hypers_ = res.x
 
         log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, "
                  "message = {}."
                  .format(-res['fun'],
-                         self.var,
-                         self.regulariser,
-                         self.hypers,
+                         self.var_,
+                         self.regulariser_,
+                         self.hypers_,
                          res.message)
                  )
 
@@ -161,10 +161,10 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         # anyway, so we'll keep them.
 
         # Cache optimal parameters so we don't have to recompute them later
-        if ELBO > self.obj:
-            self.weights = m
-            self.covariance = C
-            self.obj = ELBO
+        if ELBO > self.obj_:
+            self.weights_ = m
+            self.covariance_ = C
+            self.obj_ = ELBO
 
         log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
                  .format(ELBO, var, reg, hypers))
@@ -221,12 +221,12 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             The expected variance of y_star for the query inputs, X_star of
             shape (N_star,).
         """
-        check_is_fitted(self, ['var', 'regulariser', 'weights', 'covariance',
-                               'hypers'])
+        check_is_fitted(self, ['var_', 'regulariser_', 'weights_',
+                               'covariance_', 'hypers_'])
         X = check_array(X)
 
-        Phi = self.basis.transform(X, *atleast_list(self.hypers))
-        Ey = Phi.dot(self.weights)
-        Vf = (Phi.dot(self.covariance) * Phi).sum(axis=1)
+        Phi = self.basis.transform(X, *atleast_list(self.hypers_))
+        Ey = Phi.dot(self.weights_)
+        Vf = (Phi.dot(self.covariance_) * Phi).sum(axis=1)
 
-        return Ey, Vf + self.var
+        return Ey, Vf + self.var_

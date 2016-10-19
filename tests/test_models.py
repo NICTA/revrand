@@ -2,6 +2,7 @@ import numpy as np
 
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
+from sklearn.base import clone
 
 from revrand import StandardLinearModel, GeneralisedLinearModel
 from revrand.likelihoods import Gaussian, Binomial
@@ -127,3 +128,49 @@ def test_pipeline_glm(make_gaus_data, make_randstate):
     pipe.fit(X, y)
     Ey = pipe.predict(Xs)
     assert smse(ys, Ey) < 0.1
+
+
+def test_sklearn_clone(make_gaus_data):
+
+    X, y, Xs, ys = make_gaus_data
+
+    basis = LinearBasis(onescol=True)
+    slm = StandardLinearModel(basis=basis)
+    glm = GeneralisedLinearModel(likelihood=Gaussian(), basis=basis,
+                                 maxiter=100)
+
+    slm_clone = clone(slm)
+    glm_clone = clone(glm)
+
+    slm_clone.fit(X, y)
+    glm_clone.fit(X, y)
+
+    # scalar values
+    glm_keys = [
+        'K',
+        'batch_size',
+        'maxiter',
+        'nsamples',
+        'random_state',
+        'updater'
+    ]
+
+    for k in glm_keys:
+        assert glm.get_params()[k] == glm_clone.get_params()[k]
+
+    # Manually test likelihood and regulariser objects
+    assert glm_clone.likelihood.params.value == glm.likelihood.params.value
+    assert glm_clone.regulariser.value == glm.regulariser.value
+
+    # scalar values
+    slm_keys = [
+        'maxiter',
+        'tol'
+    ]
+
+    for k in slm_keys:
+        assert slm.get_params()[k] == slm_clone.get_params()[k]
+
+    # Manually test variance and regulariser objects
+    assert slm_clone.var.value == slm.var.value
+    assert slm_clone.regulariser.value == slm.regulariser.value
