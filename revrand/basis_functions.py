@@ -1400,7 +1400,7 @@ class BasisCat(object):
     @property
     def params(self):
 
-        paramlist = [b.params for b in self.bases if b.params.value]
+        paramlist = [b.params for b in self.bases if np.any(b.params.value)]
 
         if len(paramlist) == 0:
             return Parameter()

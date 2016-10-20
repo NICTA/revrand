@@ -32,6 +32,36 @@ def test_simple_concat(make_gaus_data):
     assert P.shape == (N, (D + d) * 2 + N)
 
 
+def test_concat_params():
+
+    d = 10
+    D = 20
+
+    base = bs.LinearBasis(onescol=True) + bs.RandomMatern52(
+        nbases=D,
+        Xdim=d,
+        lenscale_init=Parameter(1., Positive())
+    )
+
+    assert np.isscalar(base.params.value)
+
+    base = bs.LinearBasis(onescol=True) + bs.RandomMatern52(
+        nbases=D,
+        Xdim=d,
+        lenscale_init=Parameter(np.ones(d), Positive())
+    )
+
+    assert len(base.params.value) == d
+
+    base += bs.RandomMatern52(
+        nbases=D,
+        Xdim=d,
+        lenscale_init=Parameter(1., Positive())
+    )
+
+    assert len(base.params) == 2
+
+
 def test_grad_concat(make_gaus_data):
 
     X, _, _, _ = make_gaus_data
