@@ -1,11 +1,40 @@
 """Bound types and bounded parameter types."""
 
-import numpy as np
 from collections import namedtuple
 from itertools import chain
 
+import numpy as np
+from scipy.stats import norm, gamma
+from sklearn.utils import check_random_state
 
-class Bound(namedtuple('Bound', ['lower', 'upper'])):
+
+class _BoundMixin(object):
+
+    def check(self, value):
+
+        # Ignor NULL types
+        if not np.any(value):
+            return True
+
+        if self.lower:
+            if np.any(value < self.lower):
+                return False
+
+        if self.upper:
+            if np.any(value > self.upper):
+                return False
+
+        return True
+
+    def clip(self, value):
+
+        if not self.lower and not self.upper:
+            return value
+
+        return np.clip(value, self.lower, self.upper)
+
+
+class Bound(namedtuple('Bound', ['lower', 'upper']), _BoundMixin):
     """
     Define bounds on a variable for the optimiser.
 
@@ -17,6 +46,9 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
         The lower bound.
     upper : float
         The upper bound.
+    dist : scipy.stats.distibution, optional
+        a distibution object that specifies how to sample values from this
+        bound
 
     Attributes
     ----------
@@ -24,6 +56,9 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
         The lower bound.
     upper : float
         The upper bound.
+    dist : scipy.stats.distibution, optional
+        a distibution object that specifies how to sample values from this
+        bound
 
     Examples
     --------
@@ -59,12 +94,13 @@ class Bound(namedtuple('Bound', ['lower', 'upper'])):
 
     def __getnewargs__(self):
         """Required for pickling."""
-        return (self.lower, self.upper)
-
-    # TODO: Transformation details for optimiser (logistic/identity)
+        return (self.lower, self.upper, self.dist)
 
 
-class Positive(namedtuple('Positive', ['lower', 'upper'])):
+class Positive(
+        namedtuple('Positive', ['lower', 'upper']),
+        _BoundMixin
+):
     """
     Define a positive only bound for the optimiser.
 
@@ -76,6 +112,9 @@ class Positive(namedtuple('Positive', ['lower', 'upper'])):
     upper : float
         The largest value allowed for the optimiser to evaluate (if not using
         the log trick).
+    dist : scipy.stats.distibution, optional
+        a distibution object that specifies how to sample values from this
+        bound
 
     Examples
     --------
@@ -96,11 +135,11 @@ class Positive(namedtuple('Positive', ['lower', 'upper'])):
                 raise ValueError('Upper bound must be greater than {}'
                                  .format(lower))
 
-        return super(Positive, cls).__new__(cls, lower=lower, upper=upper)
+        return super(Positive, cls).__new__(cls, lower, upper)
 
     def __getnewargs__(self):
         """Required for pickling."""
-        return (self.upper,)
+        return (self.upper)
 
 
 class Parameter(object):
@@ -116,14 +155,32 @@ class Parameter(object):
         a Bound tuple that describes the valid range for all of the elements in
         value
     shape: tuple
-        the shape of value, returning (1,) if value is scalar
+        the shape of value
     """
 
-    def __init__(self, value=[], bounds=Bound()):
+    def __init__(self, value=[], bounds=Bound(), shape=()):
+
+        if not bounds.check(value):
+            raise ValueError("Value not within bounds!")
 
         self.value = value
-        self.shape = np.shape(value)
+        self.shape = shape if hasattr(value, 'rvs') else np.shape(value)
         self.bounds = bounds
+
+    def rvs(self, random_state=None):
+
+        # No sampling distibution
+        if not hasattr(self.value, 'rvs'):
+            return self.value
+
+        # Unconstrained samples
+        rs = check_random_state(random_state)
+        samples = self.value.rvs(size=self.shape, random_state=rs)
+
+        # Bound the samples
+        samples = self.bounds.clip(samples)
+
+        return samples
 
 
 def ravel(parameter):

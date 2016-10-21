@@ -260,6 +260,39 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     return minimize_bounded_start_dec
 
 
+def rand_starts_structured_minimizer(minimizer):
+    
+    @wraps(minimizer)
+    def new_minimizer(fun, parameters, jac=True, n_starts=100,
+                      random_state=None, **minimizer_kwargs):
+
+        # TODO: Make this more functional
+        # TODO: MAke this deal with optional gradient returns??
+        best_params = [p.value for p in parameters]
+        best_obj, _ = fun(*best_params)
+
+        # Test randomly drawn parameters
+        for _ in range(n_starts):
+
+            params = [p.rvs(random_state) for p in parameters]
+            obj, _ = fun(*params)
+
+            if obj < best_obj:
+                best_params = params
+                best_obj = obj
+
+        # Update parameters with best initial values
+        for i, p in enumerate(best_params):
+            parameters[i].value = p
+
+        smin = structured_minimizer(minimizer)
+        result = smin(fun, parameters, jac, **minimizer_kwargs)
+
+        return result
+
+    return new_minimizer
+
+
 def structured_minimizer(minimizer):
     """
     Allow an optimizer to accept a list of Parameter types to optimize.

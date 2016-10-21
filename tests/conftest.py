@@ -23,9 +23,9 @@ def split_data(X, y):
     return X[trind], y[trind], X[tsind], y[tsind]
 
 
-@pytest.fixture
-def make_randstate():
-    return RANDSTATE
+# @pytest.fixture
+# def make_randstate():
+#     return RANDSTATE
 
 
 @pytest.fixture
