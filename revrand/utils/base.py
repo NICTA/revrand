@@ -481,6 +481,18 @@ def sumprod(seq):
         return np.sum((sumprod(s) for s in seq), dtype=int)
 
 
+def map_recursive(fn, iterable, output_type=None):
+
+    def applyormap(it):
+        if issequence(it):
+            return map_recursive(fn, it, output_type)
+        else:
+            return fn(it)
+
+    applied = map(applyormap, iterable)
+    return output_type(applied) if output_type else applied
+
+
 def map_indices(fn, iterable, indices):
     r"""
     Map a function across indices of an iterable.

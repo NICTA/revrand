@@ -4,17 +4,12 @@ from collections import namedtuple
 from itertools import chain
 
 import numpy as np
-from scipy.stats import norm, gamma
 from sklearn.utils import check_random_state
 
 
 class _BoundMixin(object):
 
     def check(self, value):
-
-        # Ignor NULL types
-        if not np.any(value):
-            return True
 
         if self.lower:
             if np.any(value < self.lower):
@@ -94,13 +89,10 @@ class Bound(namedtuple('Bound', ['lower', 'upper']), _BoundMixin):
 
     def __getnewargs__(self):
         """Required for pickling."""
-        return (self.lower, self.upper, self.dist)
+        return (self.lower, self.upper)
 
 
-class Positive(
-        namedtuple('Positive', ['lower', 'upper']),
-        _BoundMixin
-):
+class Positive(namedtuple('Positive', ['lower', 'upper']), _BoundMixin):
     """
     Define a positive only bound for the optimiser.
 
@@ -139,7 +131,7 @@ class Positive(
 
     def __getnewargs__(self):
         """Required for pickling."""
-        return (self.upper)
+        return (self.upper,)
 
 
 class Parameter(object):
@@ -160,17 +152,20 @@ class Parameter(object):
 
     def __init__(self, value=[], bounds=Bound(), shape=()):
 
-        if not bounds.check(value):
-            raise ValueError("Value not within bounds!")
+        self.valueisdist = hasattr(value, 'rvs')
+
+        if np.any(value) and not self.valueisdist:
+            if not bounds.check(value):
+                raise ValueError("Value not within bounds!")
 
         self.value = value
-        self.shape = shape if hasattr(value, 'rvs') else np.shape(value)
+        self.shape = shape if self.valueisdist else np.shape(value)
         self.bounds = bounds
 
     def rvs(self, random_state=None):
 
         # No sampling distibution
-        if not hasattr(self.value, 'rvs'):
+        if not self.valueisdist:
             return self.value
 
         # Unconstrained samples
@@ -183,7 +178,7 @@ class Parameter(object):
         return samples
 
 
-def ravel(parameter):
+def ravel(parameter, random_state=None):
     """
     Flatten a :code:`Parameter`.
 
@@ -199,7 +194,7 @@ def ravel(parameter):
     flatbounds: list
         a list of bound tuples of length :code:`prod(parameter.shape)`
     """
-    flatvalue = np.ravel(parameter.value)
+    flatvalue = np.ravel(parameter.rvs(random_state=random_state))
     flatbounds = [parameter.bounds
                   for _ in range(np.prod(parameter.shape, dtype=int))]
 

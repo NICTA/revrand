@@ -1,12 +1,13 @@
 """Optimize Base Decorators."""
 import numpy as np
 
-from itertools import repeat
+from functools import partial
+from itertools import chain, repeat
 from six import wraps
 from sklearn.utils import check_random_state
 
 import revrand.btypes as bt
-from ..utils import flatten, unflatten
+from ..utils import flatten, unflatten, map_recursive
 
 
 # Constants
@@ -260,37 +261,31 @@ def minimize_bounded_start(candidates_func=candidate_start_points_random,
     return minimize_bounded_start_dec
 
 
-def rand_starts_structured_minimizer(minimizer):
-    
-    @wraps(minimizer)
-    def new_minimizer(fun, parameters, jac=True, n_starts=100,
-                      random_state=None, **minimizer_kwargs):
+def _random_starts(fun, parameters, jac, args, n_starts, random_state):
 
-        # TODO: Make this more functional
-        # TODO: MAke this deal with optional gradient returns??
-        best_params = [p.value for p in parameters]
-        best_obj, _ = fun(*best_params)
+    if n_starts < 1:
+        raise ValueError("n_starts has to be greater than or equal to 1")
 
-        # Test randomly drawn parameters
-        for _ in range(n_starts):
+    # Deal with gradient returns from objective function
+    if jac is True:
+        call_fun = lambda *fargs: fun(*fargs)[0]
 
-            params = [p.rvs(random_state) for p in parameters]
-            obj, _ = fun(*params)
+    # No gradient returns or jac is callable
+    else:
+        call_fun = fun
 
-            if obj < best_obj:
-                best_params = params
-                best_obj = obj
+    # Randomly draw parameters and evaluate function
+    def fun_eval():
+        params = map_recursive(lambda p: p.rvs(random_state), parameters,
+                               output_type=list)
+        obj = call_fun(*chain(params, args))
+        return obj, params
 
-        # Update parameters with best initial values
-        for i, p in enumerate(best_params):
-            parameters[i].value = p
+    # Test randomly drawn parameters
+    sample_gen = (fun_eval() for _ in range(n_starts))
+    obj, params = min(sample_gen, key=lambda t: t[0])
 
-        smin = structured_minimizer(minimizer)
-        result = smin(fun, parameters, jac, **minimizer_kwargs)
-
-        return result
-
-    return new_minimizer
+    return flatten(params, returns_shapes=False)
 
 
 def structured_minimizer(minimizer):
@@ -324,15 +319,17 @@ def structured_minimizer(minimizer):
     >>> res_w, res_lambda = res.x
     """
     @wraps(minimizer)
-    def new_minimizer(fun, parameters, jac=True, **minimizer_kwargs):
+    def new_minimizer(fun, parameters, jac=True, args=(), n_starts=0,
+                      random_state=None, **minimizer_kwargs):
 
-        (array1d, fbounds), shapes = flatten(parameters,
-                                             hstack=bt.hstack,
-                                             shape=bt.shape,
-                                             ravel=bt.ravel
-                                             )
+        (array1d, fbounds), shapes = flatten(
+            parameters,
+            hstack=bt.hstack,
+            shape=bt.shape,
+            ravel=partial(bt.ravel, random_state=random_state)
+        )
+
         flatten_args_dec = flatten_args(shapes)
-
         new_fun = flatten_args_dec(fun)
 
         if callable(jac):
@@ -342,8 +339,19 @@ def structured_minimizer(minimizer):
             if bool(jac):
                 new_fun = flatten_func_grad(new_fun)
 
-        result = minimizer(new_fun, array1d, jac=new_jac, bounds=fbounds,
-                           **minimizer_kwargs)
+        # Find best random starting candidate if we are doing random starts
+        if n_starts > 0:
+            array1d = _random_starts(
+                fun=fun,
+                parameters=parameters,
+                jac=jac,
+                args=args,
+                n_starts=n_starts,
+                random_state=random_state
+            )
+
+        result = minimizer(new_fun, array1d, jac=new_jac, args=args,
+                           bounds=fbounds, **minimizer_kwargs)
         result['x'] = tuple(unflatten(result['x'], shapes))
 
         if bool(jac):

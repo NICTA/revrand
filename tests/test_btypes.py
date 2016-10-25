@@ -3,8 +3,10 @@
 from __future__ import division
 
 import numpy as np
+from scipy.stats import gamma
 
 from revrand import Bound, Positive, Parameter
+from revrand.btypes import any_random_parameters
 
 
 def test_bound():
@@ -29,16 +31,27 @@ def test_positive():
 
 def test_parameter():
 
+    # Test "Null" parameter
+    p = Parameter()
+    assert p.shape == (0,)
+    assert p.rvs() == []
+
+    # Test values
     v = 1.
     p = Parameter(v, Positive())
     assert p.value == v
     assert p.bounds.lower > 0
     assert p.bounds.upper is None
-    # assert np.shape(p.rvs()) == np.shape(v)
+    assert p.rvs() == v
 
-    # v = np.ones(10)
-    # p = Parameter(v, Bound())
-    # assert np.shape(p.rvs()) == np.shape(v)
+    # Test distributions
+    p = Parameter(gamma(1), Positive())
+    assert np.shape(p.rvs()) == ()
 
-    # p = Parameter(v, Positive())
-    # assert all(p.rvs() > 0)
+    p = Parameter(gamma(1), Positive(), shape=(2,))
+    assert np.shape(p.rvs()) == (2,)
+    assert Positive().check(p.rvs())
+
+    p = Parameter(gamma(1), Bound(1, 2), shape=(10, 5))
+    assert np.shape(p.rvs()) == (10, 5)
+    assert Bound(1, 2).check(p.rvs())

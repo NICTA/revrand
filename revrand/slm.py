@@ -16,9 +16,11 @@ import logging
 from functools import partial
 
 import numpy as np
+from scipy.stats import gamma
 from scipy.optimize import minimize
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
+from sklearn.utils import check_random_state
 
 from .utils import atleast_list
 from .mathfun.linalg import solve_posdef
@@ -50,10 +52,12 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
     def __init__(self,
                  basis,
-                 var=Parameter(1., Positive()),
-                 regulariser=Parameter(1., Positive()),
+                 var=Parameter(gamma(1.), Positive()),
+                 regulariser=Parameter(gamma(1.), Positive()),
                  tol=1e-8,
-                 maxiter=1000
+                 maxiter=1000,
+                 n_starts=100,
+                 random_state=None
                  ):
 
         self.basis = basis
@@ -61,6 +65,9 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         self.regulariser = regulariser
         self.tol = tol
         self.maxiter = maxiter
+        self.n_starts = n_starts
+        self.random_state = random_state
+        self.random_ = check_random_state(random_state)
 
     def fit(self, X, y):
         """
@@ -109,8 +116,11 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         res = nmin(elbo,
                    params,
                    method='L-BFGS-B',
-                   jac=True, tol=self.tol,
-                   options={'maxiter': self.maxiter, 'maxcor': 100}
+                   jac=True,
+                   tol=self.tol,
+                   options={'maxiter': self.maxiter, 'maxcor': 100},
+                   random_state=self.random_,
+                   n_starts=self.n_starts
                    )
 
         # Upack learned parameters and report

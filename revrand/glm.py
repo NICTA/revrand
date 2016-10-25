@@ -116,7 +116,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
                  batch_size=10,
                  updater=None,
                  nsamples=50,
-                 random_state=None):
+                 random_state=None
+                 ):
 
         self.likelihood = likelihood
         self.basis = basis
@@ -126,7 +127,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         self.batch_size = batch_size
         self.updater = updater
         self.nsamples = nsamples
-        self.random_state = random_state
+        self.random_state = random_state  # For clone compatibility
         self.random_ = check_random_state(random_state)
 
     def fit(self, X, y, likelihood_args=()):
