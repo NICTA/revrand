@@ -296,6 +296,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         if dolog:
 
             # Approximate evidence lower bound
+            # FIXME!!! NEED THIS ALWAYS FOR RANDOM RESTARTS!
             ELBO = (Ell.sum() * self.B_
                     - 0.5 * D * K * np.log(2 * np.pi * reg)
                     - 0.5 * ((m**2).sum() + C.sum()) / reg

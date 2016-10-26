@@ -5,13 +5,10 @@ and also supports custom optimization methods.
 """
 
 from .sgd import sgd, AdaDelta, AdaGrad, Momentum, Adam, SGDUpdater
-from .base import (minimize_bounded_start,
-                   structured_minimizer,
+from .base import (structured_minimizer,
                    structured_sgd,
                    logtrick_minimizer,
-                   logtrick_sgd,
-                   candidate_start_points_lattice,
-                   candidate_start_points_random)
+                   logtrick_sgd)
 
 __all__ = [
     'sgd',
@@ -20,11 +17,8 @@ __all__ = [
     'Momentum',
     'Adam',
     'SGDUpdater',
-    'minimize_bounded_start',
     'structured_minimizer',
     'structured_sgd',
     'logtrick_minimizer',
-    'logtrick_sgd',
-    'candidate_start_points_lattice',
-    'candidate_start_points_random',
+    'logtrick_sgd'
 ]

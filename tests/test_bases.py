@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 from operator import add
 from functools import reduce
+from scipy.stats import gamma
 
 import revrand.basis_functions as bs
 from revrand.btypes import Parameter, Positive, Bound
@@ -79,7 +80,8 @@ def test_grad_concat(make_gaus_data):
 
     D = 200
     base += bs.RandomRBF(nbases=D, Xdim=d,
-                         lenscale_init=Parameter(np.ones(d), Positive()))
+                         lenscale_init=Parameter(gamma(1), Positive(),
+                                                 shape=(d,)))
     G = base.grad(X, 1., np.ones(d))
     dims = [(N, N + (D + d) * 2), (N, N + (D + d) * 2, d)]
 

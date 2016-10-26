@@ -14,6 +14,7 @@ import numpy as np
 from six import wraps
 from decorator import decorator  # Preserves function signature (pyth2 compat)
 from scipy.linalg import norm
+from scipy.stats import gamma, norm as norm_dist
 from scipy.special import expit
 from scipy.spatial.distance import cdist
 from sklearn.utils import check_random_state
@@ -269,7 +270,7 @@ class Basis(object):
         return D
 
     def get_init_params(self):
-        return [p.value for p in atleast_list(self.params) if p.value != []]
+        return [p.value for p in atleast_list(self.params) if p.has_value]
 
     def _transform_popargs(self, X, *args):
 
@@ -487,7 +488,11 @@ class RadialBasis(Basis):
     """
 
     @slice_init
-    def __init__(self, centres, lenscale_init=Parameter(1., Positive())):
+    def __init__(
+            self,
+            centres,
+            lenscale_init=Parameter(gamma(1.), Positive())
+    ):
 
         self.M, self.d = centres.shape
         self.C = centres
@@ -553,7 +558,7 @@ class RadialBasis(Basis):
     def _init_lenscale(self, lenscale_init):
 
         if (lenscale_init.shape != (self.d,)) \
-                and not np.isscalar(lenscale_init.value):
+                and (lenscale_init.shape != ()):
             raise ValueError("Parameter dimension doesn't agree with X"
                              " dimensions!")
 
@@ -570,11 +575,11 @@ class RadialBasis(Basis):
 
         sparam = self.params if paramind is None else self.params[paramind]
 
-        if (np.isscalar(sparam.value) and len(param) == 1) \
+        if (sparam.shape == () and len(param) == 1) \
                 or np.shape(param) == sparam.shape:
             return param
         else:
-            raise ValueError("Dimensions of basis parameter is inconsistent!")
+            raise ValueError("Dimension of basis parameter is inconsistent!")
 
 
 class SigmoidalBasis(RadialBasis):
@@ -692,7 +697,7 @@ class RandomRBF(RadialBasis):
     def __init__(self,
                  nbases,
                  Xdim,
-                 lenscale_init=Parameter(1., Positive()),
+                 lenscale_init=Parameter(gamma(1.), Positive()),
                  random_state=None
                  ):
 
@@ -978,7 +983,7 @@ class FastFoodRBF(RandomRBF):
     def __init__(self,
                  nbases,
                  Xdim,
-                 lenscale_init=Parameter(1., Positive()),
+                 lenscale_init=Parameter(gamma(1.), Positive()),
                  random_state=None
                  ):
 
@@ -1127,8 +1132,8 @@ class FastFoodGM(FastFoodRBF):
     def __init__(self,
                  nbases,
                  Xdim,
-                 mean_init=Parameter(0., Bound()),
-                 lenscale_init=Parameter(1., Positive()),
+                 mean_init=Parameter(norm_dist(), Bound()),
+                 lenscale_init=Parameter(gamma(1.), Positive()),
                  random_state=None
                  ):
 
@@ -1235,7 +1240,9 @@ class FastFoodGM(FastFoodRBF):
         if param.shape == (self.d,):
             return param
         elif param.shape in ((), (1,)):
-            return (Parameter(np.ones(self.d) * param.value, param.bounds))
+            param.shape = (self.d,)
+            param.value = np.ones(self.d) * param.value
+            return param
         else:
             raise ValueError("Parameter dimension doesn't agree with X"
                              " dimensions!")
@@ -1400,7 +1407,7 @@ class BasisCat(object):
     @property
     def params(self):
 
-        paramlist = [b.params for b in self.bases if np.any(b.params.value)]
+        paramlist = [b.params for b in self.bases if b.params.has_value]
 
         if len(paramlist) == 0:
             return Parameter()

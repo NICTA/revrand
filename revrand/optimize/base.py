@@ -1,13 +1,17 @@
 """Optimize Base Decorators."""
-import numpy as np
-
+import logging
 from functools import partial
-from itertools import chain, repeat
+from itertools import chain
 from six import wraps
-from sklearn.utils import check_random_state
+
+import numpy as np
 
 import revrand.btypes as bt
 from ..utils import flatten, unflatten, map_recursive
+from .sgd import gen_subset
+
+# Set up logging
+log = logging.getLogger(__name__)
 
 
 # Constants
@@ -15,277 +19,7 @@ MINPOS = 1e-100  # Min for log trick warped data
 MAXPOS = np.sqrt(np.finfo(float).max)  # Max for log trick warped data
 LOGMINPOS = np.log(MINPOS)
 EXPMAX = np.log(MAXPOS)
-
-
-def candidate_start_points_random(bounds, n_candidates=1000,
-                                  random_state=None):
-    r"""
-    Randomly generate starting points uniformly within a hyperrectangle.
-
-    Parameters
-    ----------
-    bounds : list of tuples (pairs)
-        List of one or more bound pairs
-
-    n_candidates : int
-        Number of candidate starting points to generate
-
-    Returns
-    -------
-    ndarray
-        Array of shape (len(bounds), n_candidates)
-
-    Notes
-    -----
-    Roughly equivalent to::
-
-        lambda bounds, n_candidates=100: \
-            np.random.uniform(*zip(*bounds), size=(n_candidates,len(bounds))).T
-
-    Examples
-    --------
-    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.)],
-    ...     n_candidates=5, random_state=1)
-    array([[-7.28935697, -9.99925656, -9.04608671, -8.78930863, -7.42101142],
-           [ 1.16097348, -0.09300228, -0.72298422,  0.03668218,  0.6164502 ]])
-
-    >>> candidate_start_points = candidate_start_points_random(
-    ...     [(-10., -3.5), (-1., 2.)], random_state=1)
-
-    >>> candidate_start_points.shape
-    (2, 1000)
-
-    >>> np.all(-10 <= candidate_start_points[0])
-    True
-    >>> np.all(candidate_start_points[0] < -3.5)
-    True
-
-    >>> np.all(-1. < candidate_start_points[1])
-    True
-    >>> np.all(candidate_start_points[1] <= 2.)
-    True
-
-    Uniformly sample from line segment:
-
-    >>> candidate_start_points_random([(-1., 2.)], n_candidates=5,
-    ...                               random_state=1)
-    array([[ 0.25106601,  1.16097348, -0.99965688, -0.09300228, -0.55973233]])
-
-    Uniformly sample from hyperrectangle:
-
-    >>> candidate_start_points_random([(-10., -3.5), (-1., 2.), (5., 7.),
-    ... (2.71, 3.14)], n_candidates=5, random_state=1)
-    array([[-7.28935697, -9.04608671, -7.42101142, -8.67106038, -7.28751878],
-           [ 1.16097348, -0.72298422,  0.6164502 ,  1.63435231,  0.67606949],
-           [ 5.00022875,  5.37252042,  5.83838903,  5.05477519,  5.28077388],
-           [ 2.84000301,  2.85859111,  3.00464439,  2.99830103,  2.79518364]])
-    """
-    generator = check_random_state(random_state)
-
-    low, high = zip(*bounds)
-    n_dims = len(bounds)
-    return generator.uniform(low, high, (n_candidates, n_dims)).transpose()
-
-
-def candidate_start_points_lattice(bounds, nums=3):
-    r"""
-    Generate starting points on a uniform grid within a hyperrectangle.
-
-    Parameters
-    ----------
-    bounds : list of tuples (pairs)
-        List of one or more bound pairs
-
-    nums : int (optional)
-        number of grid points per dimension
-
-    Returns
-    -------
-    ndarray
-        Array of shape (len(bounds), prod(nums))
-
-    Examples
-    --------
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3])
-    array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
-             0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
-           [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
-             0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)],
-    ...                                nums=[5, 3]).shape
-    (2, 15)
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
-    ...                                nums=[5, 10, 9]) # doctest: +ELLIPSIS
-    array([[-1.   , -1.   , -1.   , ...,  1.5  ,  1.5  ,  1.5  ],
-           [-1.5  , -1.5  , -1.5  , ...,  3.   ,  3.   ,  3.   ],
-           [ 0.   ,  0.625,  1.25 , ...,  3.75 ,  4.375,  5.   ]])
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
-    ...                             nums=[5, 10, 9]).shape
-    (3, 450)
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
-    ...                                nums=[5, 10, 9, 3]) # doctest: +ELLIPSIS
-    array([[-1. , -1. , -1. , ...,  1.5,  1.5,  1.5],
-           [-1.5, -1.5, -1.5, ...,  3. ,  3. ,  3. ],
-           [ 0. ,  0. ,  0. , ...,  5. ,  5. ,  5. ],
-           [ 1. ,  3. ,  5. , ...,  1. ,  3. ,  5. ]])
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5), (1, 5)],
-    ...                             nums=[5, 10, 9, 3]).shape
-    (4, 1350)
-
-    Third ``num`` is ignored
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=[5, 3, 9])
-    array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
-             0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
-           [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
-             0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
-
-    Third bound is ignored
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
-    ...                                nums=[5, 3])
-    array([[-1.   , -0.375,  0.25 ,  0.875,  1.5  , -1.   , -0.375,  0.25 ,
-             0.875,  1.5  , -1.   , -0.375,  0.25 ,  0.875,  1.5  ],
-           [-1.5  , -1.5  , -1.5  , -1.5  , -1.5  ,  0.75 ,  0.75 ,  0.75 ,
-             0.75 ,  0.75 ,  3.   ,  3.   ,  3.   ,  3.   ,  3.   ]])
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)]).shape
-    (2, 9)
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3)], nums=9).shape
-    (2, 81)
-
-    >>> candidate_start_points_lattice([(-1, 1.5), (-1.5, 3), (0, 5)],
-    ...                                nums=2).shape
-    (3, 8)
-    """
-    if isinstance(nums, int):
-        nums = repeat(nums)
-
-    linspaces = [np.linspace(start, end, num) for (start, end), num
-                 in zip(bounds, nums)]
-    return np.vstack(a.flatten() for a in np.meshgrid(*linspaces))
-
-
-def minimize_bounded_start(candidates_func=candidate_start_points_random,
-                           *candidates_func_args, **candidates_func_kwargs):
-    """
-    Decorator for selecting the best optimiser starting point.
-
-    The starting point lies within a hyperrectangle, and all points are tested
-    in :code:`candidates_func`.
-
-    See Also
-    --------
-    candidate_start_points_random, candidate_start_points_lattice
-
-    Examples
-    --------
-    >>> from scipy.optimize import minimize as sp_min, rosen, rosen_der
-
-    >>> @minimize_bounded_start(n_candidates=250, random_state=1)
-    ... def my_min(fun, x0, *args, **kwargs):
-    ...     return sp_min(fun, x0, *args, **kwargs)
-
-    >>> rect = [(-1, 1.5), (-.5, 1.5)]
-
-    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
-    >>> np.allclose(res.x, np.array([ 1.,  1.]))
-    True
-
-    >>> np.isclose(res.fun, 0)
-    True
-
-    >>> res.start.round(2)
-    array([ 1.17,  1.4 ])
-
-    There are several other ways to use this decorator:
-
-    >>> @minimize_bounded_start()
-    ... def my_min(fun, x0, *args, **kwargs):
-    ...     return sp_min(fun, x0, *args, **kwargs)
-    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
-
-    >>> minimize_bounded_start_dec = minimize_bounded_start(n_candidates=250)
-
-    >>> @minimize_bounded_start_dec
-    ... def my_min(fun, x0, *args, **kwargs):
-    ...     return sp_min(fun, x0, *args, **kwargs)
-    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
-
-    >>> my_min = minimize_bounded_start_dec(sp_min)
-    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
-
-    >>> @minimize_bounded_start(candidate_start_points_lattice, nums=[5, 9])
-    ... def my_min(fun, x0, *args, **kwargs):
-    ...     return sp_min(fun, x0, *args, **kwargs)
-    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
-    >>> res.start
-    array([ 0.875,  0.75 ])
-
-    >>> minimize_bounded_start_dec = minimize_bounded_start(
-    ...     candidate_start_points_lattice, nums=[5, 9])
-
-    >>> my_min = minimize_bounded_start_dec(sp_min)
-    >>> res = my_min(rosen, rect, method='L-BFGS-B', jac=rosen_der)
-    >>> res.start
-    array([ 0.875,  0.75 ])
-
-    Just to confirm this is the correct starting point:
-
-    >>> candidates = candidate_start_points_lattice(rect, nums=[5, 9])
-    >>> candidates[:, rosen(candidates).argmin()]
-    array([ 0.875,  0.75 ])
-    """
-    def minimize_bounded_start_dec(minimize_func):
-
-        @wraps(minimize_func)
-        def _minimize_bounded_start(fun, x0_bounds, *args, **kwargs):
-            candidate_start_points = candidates_func(x0_bounds,
-                                                     *candidates_func_args,
-                                                     **candidates_func_kwargs)
-            candidate_start_values = fun(candidate_start_points)
-            min_start_point_ind = np.argmin(candidate_start_values)
-            min_start_point = candidate_start_points[:, min_start_point_ind]
-            res = minimize_func(fun, min_start_point, *args, **kwargs)
-            res.start = min_start_point
-            return res
-
-        return _minimize_bounded_start
-
-    return minimize_bounded_start_dec
-
-
-def _random_starts(fun, parameters, jac, args, n_starts, random_state):
-
-    if n_starts < 1:
-        raise ValueError("n_starts has to be greater than or equal to 1")
-
-    # Deal with gradient returns from objective function
-    if jac is True:
-        call_fun = lambda *fargs: fun(*fargs)[0]
-
-    # No gradient returns or jac is callable
-    else:
-        call_fun = fun
-
-    # Randomly draw parameters and evaluate function
-    def fun_eval():
-        params = map_recursive(lambda p: p.rvs(random_state), parameters,
-                               output_type=list)
-        obj = call_fun(*chain(params, args))
-        return obj, params
-
-    # Test randomly drawn parameters
-    sample_gen = (fun_eval() for _ in range(n_starts))
-    obj, params = min(sample_gen, key=lambda t: t[0])
-
-    return flatten(params, returns_shapes=False)
+NSET = 1000  # For random sampling dataset SGD parameter sampling
 
 
 def structured_minimizer(minimizer):
@@ -329,19 +63,9 @@ def structured_minimizer(minimizer):
             ravel=partial(bt.ravel, random_state=random_state)
         )
 
-        flatten_args_dec = flatten_args(shapes)
-        new_fun = flatten_args_dec(fun)
-
-        if callable(jac):
-            new_jac = flatten_args_dec(jac)
-        else:
-            new_jac = jac
-            if bool(jac):
-                new_fun = flatten_func_grad(new_fun)
-
         # Find best random starting candidate if we are doing random starts
         if n_starts > 0:
-            array1d = _random_starts(
+            array1d = __random_starts(
                 fun=fun,
                 parameters=parameters,
                 jac=jac,
@@ -349,6 +73,18 @@ def structured_minimizer(minimizer):
                 n_starts=n_starts,
                 random_state=random_state
             )
+
+        # Wrap function calls to work with wrapped minimizer
+        flatten_args_dec = flatten_args(shapes)
+        new_fun = flatten_args_dec(fun)
+
+        # Wrap gradient calls to work with wrapped minimizer
+        if callable(jac):
+            new_jac = flatten_args_dec(jac)
+        else:
+            new_jac = jac
+            if bool(jac):
+                new_fun = flatten_func_grad(new_fun)
 
         result = minimizer(new_fun, array1d, jac=new_jac, args=args,
                            bounds=fbounds, **minimizer_kwargs)
@@ -406,7 +142,8 @@ def structured_sgd(sgd):
     >>> res_w, res_lambda = res.x
     """
     @wraps(sgd)
-    def new_sgd(fun, parameters, data, eval_obj=False, **sgd_kwargs):
+    def new_sgd(fun, parameters, data, eval_obj=False, args=(), n_starts=100,
+                random_state=None, **sgd_kwargs):
 
         (array1d, fbounds), shapes = flatten(parameters,
                                              hstack=bt.hstack,
@@ -417,13 +154,25 @@ def structured_sgd(sgd):
         flatten_args_dec = flatten_args(shapes)
         new_fun = flatten_args_dec(fun)
 
+        # Find best random starting candidate if we are doing random starts
+        if eval_obj and n_starts > 0:
+            array1d = __random_starts(
+                fun=fun,
+                parameters=parameters,
+                jac=True,
+                args=tuple(chain(gen_subset(data, NSET, random_state), args)),
+                n_starts=n_starts,
+                random_state=random_state
+            )
+
         if bool(eval_obj):
             new_fun = flatten_func_grad(new_fun)
         else:
             new_fun = flatten_grad(new_fun)
 
-        result = sgd(new_fun, array1d, data=data, bounds=fbounds,
-                     eval_obj=eval_obj, **sgd_kwargs)
+        result = sgd(new_fun, array1d, data=data, bounds=fbounds, args=args,
+                     eval_obj=eval_obj, random_state=random_state,
+                     **sgd_kwargs)
 
         result['x'] = tuple(unflatten(result['x'], shapes))
         return result
@@ -743,3 +492,38 @@ def flatten_args(shapes):
         return new_func
 
     return flatten_args_dec
+
+
+#
+# Private module functions
+#
+
+def __random_starts(fun, parameters, jac, args, n_starts, random_state):
+
+    if n_starts < 1:
+        raise ValueError("n_starts has to be greater than or equal to 1")
+
+    log.info("Evaluating random starts...")
+
+    # Deal with gradient returns from objective function
+    if jac is True:
+        call_fun = lambda *fargs: fun(*fargs)[0]
+
+    # No gradient returns or jac is callable
+    else:
+        call_fun = fun
+
+    # Randomly draw parameters and evaluate function
+    def fun_eval():
+        params = map_recursive(lambda p: p.rvs(random_state), parameters,
+                               output_type=list)
+        obj = call_fun(*chain(params, args))
+        return obj, params
+
+    # Test randomly drawn parameters
+    sample_gen = (fun_eval() for _ in range(n_starts))
+    obj, params = min(sample_gen, key=lambda t: t[0])
+
+    log.info("Best start found with objective = {}".format(obj))
+
+    return flatten(params, returns_shapes=False)

@@ -4,6 +4,7 @@ from itertools import chain
 
 import numpy as np
 from scipy.optimize import OptimizeResult
+from sklearn.utils import check_random_state
 
 from ..utils import issequence, endless_permutations
 
@@ -457,6 +458,27 @@ def normalize_bound(bound):
         max_ = float('inf')
 
     return min_, max_
+
+
+def gen_subset(data, subset_size, random_state=None):
+    """
+
+    Parameters
+    ----------
+
+    data : ndarray
+        a numpy array or sequence of data to input into :code:`fun`. This will
+        be split along the first axis (axis=0), and then input into
+        :code:`fun`.
+    subset_size : int
+        TODO
+    """
+
+    # Randomly subset data
+    N = _len_data(data)
+    random = check_random_state(random_state)
+    sub_ind = random.choice(N, size=min(subset_size, N), replace=False)
+    return _split_data(data, sub_ind)
 
 
 #

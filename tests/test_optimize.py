@@ -2,11 +2,10 @@ from __future__ import division
 
 import numpy as np
 from scipy.optimize import minimize
-from scipy.stats import gamma, norm
+from scipy.stats import gamma
 
 from revrand.optimize import sgd, structured_minimizer, logtrick_minimizer, \
-    rand_starts_minimizer, structured_sgd, logtrick_sgd, AdaDelta, Momentum, \
-    AdaGrad, Adam, SGDUpdater
+    structured_sgd, logtrick_sgd, AdaDelta, Momentum, AdaGrad, Adam, SGDUpdater
 from revrand.btypes import Bound, Positive, Parameter
 from revrand.utils import flatten
 
@@ -61,12 +60,12 @@ def test_bounded(make_quadratic, make_random):
     Ea_bfgs, Eb_bfgs, Ec_bfgs = res['x']
 
     res = sgd(qobj, w0, data, bounds=bounds, eval_obj=True,
-              random_state=make_random)
+              random_state=random)
     Ea_sgd, Eb_sgd, Ec_sgd = res['x']
 
     assert np.allclose((Ea_bfgs, Eb_bfgs, Ec_bfgs),
                        (Ea_sgd, Eb_sgd, Ec_sgd),
-                       atol=1e-2, rtol=0)
+                       atol=5e-2, rtol=0)
 
 
 def test_structured_params(make_quadratic, make_random):
@@ -166,6 +165,10 @@ def test_rand_start(make_quadratic, make_random):
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(qobj_struc, w0, args=(data,), jac=True, method='L-BFGS-B',
                random_state=random, n_starts=100)
+    assert_opt(*res.x)
+
+    nsgd = structured_sgd(logtrick_sgd(sgd))
+    res = nsgd(qobj_struc, w0, data, eval_obj=True, random_state=random)
     assert_opt(*res.x)
 
 

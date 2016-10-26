@@ -6,7 +6,6 @@ import numpy as np
 from scipy.stats import gamma
 
 from revrand import Bound, Positive, Parameter
-from revrand.btypes import any_random_parameters
 
 
 def test_bound():
@@ -35,6 +34,8 @@ def test_parameter():
     p = Parameter()
     assert p.shape == (0,)
     assert p.rvs() == []
+    assert p.has_value is False
+    assert p.is_random is False
 
     # Test values
     v = 1.
@@ -43,10 +44,14 @@ def test_parameter():
     assert p.bounds.lower > 0
     assert p.bounds.upper is None
     assert p.rvs() == v
+    assert p.has_value is True
+    assert p.is_random is False
 
     # Test distributions
     p = Parameter(gamma(1), Positive())
     assert np.shape(p.rvs()) == ()
+    assert p.has_value is True
+    assert p.is_random is True
 
     p = Parameter(gamma(1), Positive(), shape=(2,))
     assert np.shape(p.rvs()) == (2,)

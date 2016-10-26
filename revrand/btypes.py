@@ -152,30 +152,43 @@ class Parameter(object):
 
     def __init__(self, value=[], bounds=Bound(), shape=()):
 
-        self.valueisdist = hasattr(value, 'rvs')
-
-        if np.any(value) and not self.valueisdist:
-            if not bounds.check(value):
+        if not hasattr(value, 'rvs'):
+            if np.any(value) and not bounds.check(value):
                 raise ValueError("Value not within bounds!")
 
-        self.value = value
-        self.shape = shape if self.valueisdist else np.shape(value)
+            self.value = value
+            self.dist = None
+            self.shape = np.shape(value)
+        else:
+            self.dist = value
+            self.shape = shape
+            mean = bounds.clip(self.dist.mean())
+            self.value = mean if shape == () else mean * np.ones(shape)
+
         self.bounds = bounds
 
     def rvs(self, random_state=None):
 
         # No sampling distibution
-        if not self.valueisdist:
+        if self.dist is None:
             return self.value
 
         # Unconstrained samples
         rs = check_random_state(random_state)
-        samples = self.value.rvs(size=self.shape, random_state=rs)
+        samples = self.dist.rvs(size=self.shape, random_state=rs)
 
         # Bound the samples
         samples = self.bounds.clip(samples)
 
         return samples
+
+    @property
+    def has_value(self):
+        return self.shape != (0,)
+
+    @property
+    def is_random(self):
+        return self.dist is not None
 
 
 def ravel(parameter, random_state=None):
