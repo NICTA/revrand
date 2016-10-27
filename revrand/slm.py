@@ -38,16 +38,22 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
     Parameters
     ----------
-    basis: Basis
+    basis : Basis
         A basis object, see the basis_functions module.
-    var: Parameter, optional
+    var : Parameter, optional
         observation variance initial value.
-    regulariser: Parameter, optional
+    regulariser : Parameter, optional
         weight regulariser (variance) initial value.
-    tol: float, optional
+    tol : float, optional
         optimiser function tolerance convergence criterion.
-    maxiter: int, optional
+    maxiter : int, optional
         maximum number of iterations for the optimiser.
+    nstarts : int, optional
+        if there are any parameters with distributions as initial values, this
+        determines how many random candidate starts shoulds be evaluated before
+        commencing optimisation at the best candidate.
+    random_state : None, int or RandomState, optional
+        random seed (mainly for random starts)
     """
 
     def __init__(self,
@@ -56,7 +62,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                  regulariser=Parameter(gamma(1.), Positive()),
                  tol=1e-8,
                  maxiter=1000,
-                 n_starts=100,
+                 nstarts=100,
                  random_state=None
                  ):
 
@@ -65,7 +71,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         self.regulariser = regulariser
         self.tol = tol
         self.maxiter = maxiter
-        self.n_starts = n_starts
+        self.nstarts = nstarts
         self.random_state = random_state
         self.random_ = check_random_state(random_state)
 
@@ -75,9 +81,9 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-        X: ndarray
+        X : ndarray
             (N, d) array input dataset (N samples, d dimensions).
-        y: ndarray
+        y : ndarray
             (N,) array targets (N samples)
 
         Returns
@@ -120,7 +126,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                    tol=self.tol,
                    options={'maxiter': self.maxiter, 'maxcor': 100},
                    random_state=self.random_,
-                   n_starts=self.n_starts
+                   nstarts=self.nstarts
                    )
 
         # Upack learned parameters and report
@@ -200,12 +206,12 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-        X: ndarray
+        X : ndarray
             (Ns,d) array query input dataset (Ns samples, d dimensions).
 
         Returns
         -------
-        Ey: ndarray
+        Ey : ndarray
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
         """
@@ -219,15 +225,15 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-        X: ndarray
+        X : ndarray
             (Ns,d) array query input dataset (Ns samples, d dimensions).
 
         Returns
         -------
-        Ey: ndarray
+        Ey : ndarray
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
-        Vy: ndarray
+        Vy : ndarray
             The expected variance of y_star for the query inputs, X_star of
             shape (N_star,).
         """

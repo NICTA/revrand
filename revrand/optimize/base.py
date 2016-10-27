@@ -8,7 +8,7 @@ import numpy as np
 
 import revrand.btypes as bt
 from ..utils import flatten, unflatten, map_recursive
-from .sgd import gen_subset
+from .sgd import gen_batch
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -19,12 +19,34 @@ MINPOS = 1e-100  # Min for log trick warped data
 MAXPOS = np.sqrt(np.finfo(float).max)  # Max for log trick warped data
 LOGMINPOS = np.log(MINPOS)
 EXPMAX = np.log(MAXPOS)
-NSET = 1000  # For random sampling dataset SGD parameter sampling
 
 
 def structured_minimizer(minimizer):
-    """
-    Allow an optimizer to accept a list of Parameter types to optimize.
+    r"""
+    Allow an optimizer to accept nested sequences of Parameters to optimize.
+
+    This decorator can intepret the :code:`Parameter` objects in `btypes.py`,
+    and can accept nested sequences of *any* structure of these objects to
+    optimise!
+
+    It can also optionally evaluate *random starts* (i.e. random starting
+    candidates) if the parameter objects have been initialised with
+    distributions. For this, two additional parameters are exposed in the
+    :code:`minimizer` interface.
+
+    Parameters
+    ----------
+    fun : callable
+        objective function that takes in arbitrary ndarrays, floats or nested
+        sequences of these.
+    parameters : (nested) sequences of Parameter objects
+        Initial guess of the parameters of the objective function
+    nstarts : int, optional
+        The number random starting candidates for optimisation to evaluate.
+        This will only happen for :code:`nstarts > 0` and if at least one
+        :code:`Parameter` object is random.
+    random_state : None, int or RandomState, optional
+        random seed
 
     Examples
     --------
@@ -44,16 +66,26 @@ def structured_minimizer(minimizer):
 
     >>> new_min = structured_minimizer(sp_min)
 
-    Initial values
+    Constant Initial values
 
     >>> w_0 = Parameter(np.array([.5, .1, .2]), Bound())
     >>> lambda_0 = Parameter(.25, Bound())
 
     >>> res = new_min(cost, (w_0, lambda_0), method='L-BFGS-B', jac=True)
     >>> res_w, res_lambda = res.x
+
+    Random Initial values
+
+    >>> from scipy.stats import norm, gamma
+    >>> w_0 = Parameter(norm(), Bound(), shape=(3,))
+    >>> lambda_0 = Parameter(gamma(a=1), Bound())
+
+    >>> res = new_min(cost, (w_0, lambda_0), method='L-BFGS-B', jac=True,
+    ...               nstarts=100, random_state=None)
+    >>> res_w, res_lambda = res.x
     """
     @wraps(minimizer)
-    def new_minimizer(fun, parameters, jac=True, args=(), n_starts=0,
+    def new_minimizer(fun, parameters, jac=True, args=(), nstarts=0,
                       random_state=None, **minimizer_kwargs):
 
         (array1d, fbounds), shapes = flatten(
@@ -64,13 +96,13 @@ def structured_minimizer(minimizer):
         )
 
         # Find best random starting candidate if we are doing random starts
-        if n_starts > 0:
-            array1d = __random_starts(
+        if nstarts > 0:
+            array1d = _random_starts(
                 fun=fun,
                 parameters=parameters,
                 jac=jac,
                 args=args,
-                n_starts=n_starts,
+                nstarts=nstarts,
                 random_state=random_state
             )
 
@@ -99,8 +131,29 @@ def structured_minimizer(minimizer):
 
 
 def structured_sgd(sgd):
-    """
-    Allow stochastic gradients to accept a list of Parameter types to optimize.
+    r"""
+    Allow an SGD to accept nested sequences of Parameters to optimize.
+
+    This decorator can intepret the :code:`Parameter` objects in `btypes.py`,
+    and can accept nested sequences of *any* structure of these objects to
+    optimise!
+
+    It can also optionally evaluate *random starts* (i.e. random starting
+    candidates) if the parameter objects have been initialised with
+    distributions. For this, an additional parameter is exposed in the
+    :code:`minimizer` interface.
+
+    Parameters
+    ----------
+    fun : callable
+        objective function that takes in arbitrary ndarrays, floats or nested
+        sequences of these.
+    parameters : (nested) sequences of Parameter objects
+        Initial guess of the parameters of the objective function
+    nstarts : int, optional
+        The number random starting candidates for optimisation to evaluate.
+        This will only happen for :code:`nstarts > 0` and if at least one
+        :code:`Parameter` object is random.
 
     Examples
     --------
@@ -132,7 +185,7 @@ def structured_sgd(sgd):
     >>> X = np.array([np.ones(100), np.linspace(1, 100, 100)]).T
     >>> data = np.hstack((y[:, np.newaxis], X))
 
-    Initial values
+    Constant Initial values
 
     >>> w_0 = Parameter(np.array([1., 1.]), Bound())
     >>> lambda_0 = Parameter(.25, Bound())
@@ -140,10 +193,27 @@ def structured_sgd(sgd):
     >>> res = new_sgd(cost, [w_0, lambda_0], data, batch_size=10,
     ...               eval_obj=True)
     >>> res_w, res_lambda = res.x
+
+    Random Initial values
+
+    >>> from scipy.stats import norm, gamma
+    >>> w_0 = Parameter(norm(), Bound(), shape=(2,))
+    >>> lambda_0 = Parameter(gamma(1.), Bound())
+
+    >>> res = new_sgd(cost, [w_0, lambda_0], data, batch_size=10,
+    ...               eval_obj=True, nstarts=100)
+    >>> res_w, res_lambda = res.x
     """
     @wraps(sgd)
-    def new_sgd(fun, parameters, data, eval_obj=False, args=(), n_starts=100,
-                random_state=None, **sgd_kwargs):
+    def new_sgd(fun,
+                parameters,
+                data,
+                eval_obj=False,
+                batch_size=10,
+                args=(),
+                random_state=None,
+                nstarts=100,
+                **sgd_kwargs):
 
         (array1d, fbounds), shapes = flatten(parameters,
                                              hstack=bt.hstack,
@@ -155,13 +225,15 @@ def structured_sgd(sgd):
         new_fun = flatten_args_dec(fun)
 
         # Find best random starting candidate if we are doing random starts
-        if eval_obj and n_starts > 0:
-            array1d = __random_starts(
+        if eval_obj and nstarts > 0:
+            data_gen = gen_batch(data, batch_size, random_state=random_state)
+            array1d = _random_starts(
                 fun=fun,
                 parameters=parameters,
                 jac=True,
-                args=tuple(chain(gen_subset(data, NSET, random_state), args)),
-                n_starts=n_starts,
+                args=args,
+                data_gen=data_gen,
+                nstarts=nstarts,
                 random_state=random_state
             )
 
@@ -181,7 +253,7 @@ def structured_sgd(sgd):
 
 
 def logtrick_minimizer(minimizer):
-    """
+    r"""
     Log-Trick decorator for optimizers.
 
     This decorator implements the "log trick" for optimizing positive bounded
@@ -193,14 +265,14 @@ def logtrick_minimizer(minimizer):
     >>> from scipy.optimize import minimize as sp_min
     >>> from ..btypes import Bound, Positive
 
-    This is a simple cost function where we need to enforce particular
-    variabled are positive-only bounded.
+    Here is an example where we may want to enforce a particular parameter or
+    parameters to be strictly greater than zero,
 
     >>> def cost(w, lambda_):
     ...     sq_norm = w.T.dot(w)
     ...     return .5 * lambda_ * sq_norm, lambda_ * w
 
-    Lets enforce that the `w` are positive,
+    Now let's enforce that the `w` are positive,
 
     >>> bounds = [Positive(), Positive(), Positive()]
     >>> new_min = logtrick_minimizer(sp_min)
@@ -227,7 +299,7 @@ def logtrick_minimizer(minimizer):
             return minimizer(fun, x0, jac=jac, bounds=bounds,
                              **minimizer_kwargs)
 
-        logx, expx, gradx, bounds = logtrick_gen(bounds)
+        logx, expx, gradx, bounds = _logtrick_gen(bounds)
 
         # Intercept gradient
         if callable(jac):
@@ -255,7 +327,7 @@ def logtrick_minimizer(minimizer):
 
 
 def logtrick_sgd(sgd):
-    """
+    r"""
     Log-Trick decorator for stochastic gradients.
 
     This decorator implements the "log trick" for optimizing positive bounded
@@ -267,8 +339,8 @@ def logtrick_sgd(sgd):
     >>> from ..optimize import sgd
     >>> from ..btypes import Bound, Positive
 
-    This is a simple cost function where we need to enforce particular
-    variabled are positive-only bounded.
+    Here is an example where we may want to enforce a particular parameter or
+    parameters to be strictly greater than zero,
 
     >>> def cost(w, data, lambda_):
     ...     N = len(data)
@@ -279,7 +351,7 @@ def logtrick_sgd(sgd):
     ...     gradw = - 2 * X.T.dot(y - y_est) / N + 2 * lambda_ * w
     ...     return obj, gradw
 
-    Lets enforce that the `w` are positive,
+    Now let's enforce that the `w` are positive,
 
     >>> bounds = [Positive(), Positive()]
     >>> new_sgd = logtrick_sgd(sgd)
@@ -312,7 +384,7 @@ def logtrick_sgd(sgd):
             return sgd(fun, x0, data, bounds=bounds, eval_obj=eval_obj,
                        **sgd_kwargs)
 
-        logx, expx, gradx, bounds = logtrick_gen(bounds)
+        logx, expx, gradx, bounds = _logtrick_gen(bounds)
 
         if bool(eval_obj):
             def new_fun(x, *fargs, **fkwargs):
@@ -335,42 +407,9 @@ def logtrick_sgd(sgd):
 # Helper functions
 #
 
-def logtrick_gen(bounds):
-    """Generate warping functions and new bounds for the log trick."""
-    # Test which parameters we can apply the log trick too
-    ispos = np.array([isinstance(b, bt.Positive) for b in bounds], dtype=bool)
-    nispos = ~ispos
-
-    # Functions that implement the log trick
-    def logx(x):
-        xwarp = np.empty_like(x)
-        xwarp[ispos] = np.log(x[ispos])
-        xwarp[nispos] = x[nispos]
-        return xwarp
-
-    def expx(xwarp):
-        x = np.empty_like(xwarp)
-        x[ispos] = np.exp(xwarp[ispos])
-        x[nispos] = xwarp[nispos]
-        return x
-
-    def gradx(grad, xwarp):
-        gwarp = np.empty_like(grad)
-        gwarp[ispos] = grad[ispos] * np.exp(xwarp[ispos])
-        gwarp[nispos] = grad[nispos]
-        return gwarp
-
-    # Redefine bounds as appropriate for new ranges for numerical stability
-    for i, (b, pos) in enumerate(zip(bounds, ispos)):
-        if pos:
-            upper = EXPMAX if b.upper is None else np.log(b.upper)
-            bounds[i] = bt.Bound(lower=LOGMINPOS, upper=upper)
-
-    return logx, expx, gradx, bounds
-
 
 def flatten_grad(func):
-    """
+    r"""
     Decorator to flatten structured gradients.
 
     Examples
@@ -405,7 +444,7 @@ def flatten_grad(func):
 
 
 def flatten_func_grad(func):
-    """
+    r"""
     Decorator to flatten structured gradients and return objective.
 
     Examples
@@ -446,7 +485,7 @@ def flatten_func_grad(func):
 
 
 def flatten_args(shapes):
-    """
+    r"""
     Decorator to flatten structured arguments to a function.
 
     Examples
@@ -498,32 +537,80 @@ def flatten_args(shapes):
 # Private module functions
 #
 
-def __random_starts(fun, parameters, jac, args, n_starts, random_state):
+def _random_starts(fun,
+                   parameters,
+                   jac,
+                   args,
+                   nstarts,
+                   random_state,
+                   data_gen=None):
+    """Generate and evaluate random starts for Parameter objects."""
+    if nstarts < 1:
+        raise ValueError("nstarts has to be greater than or equal to 1")
 
-    if n_starts < 1:
-        raise ValueError("n_starts has to be greater than or equal to 1")
+    # Check to see if there are any random parameter types
+    anyrand = any(flatten(map_recursive(lambda p: p.is_random, parameters),
+                  returns_shapes=False))
+
+    if not anyrand:
+        log.info("No random parameters, not doing any random starts")
+        params = map_recursive(lambda p: p.value, parameters, output_type=list)
+        return params
 
     log.info("Evaluating random starts...")
 
     # Deal with gradient returns from objective function
     if jac is True:
         call_fun = lambda *fargs: fun(*fargs)[0]
-
-    # No gradient returns or jac is callable
-    else:
+    else:  # No gradient returns or jac is callable
         call_fun = fun
 
     # Randomly draw parameters and evaluate function
     def fun_eval():
+        batch = next(data_gen) if data_gen else ()
         params = map_recursive(lambda p: p.rvs(random_state), parameters,
                                output_type=list)
-        obj = call_fun(*chain(params, args))
+        obj = call_fun(*chain(params, batch, args))
         return obj, params
 
     # Test randomly drawn parameters
-    sample_gen = (fun_eval() for _ in range(n_starts))
+    sample_gen = (fun_eval() for _ in range(nstarts))
     obj, params = min(sample_gen, key=lambda t: t[0])
 
     log.info("Best start found with objective = {}".format(obj))
 
     return flatten(params, returns_shapes=False)
+
+
+def _logtrick_gen(bounds):
+    """Generate warping functions and new bounds for the log trick."""
+    # Test which parameters we can apply the log trick too
+    ispos = np.array([isinstance(b, bt.Positive) for b in bounds], dtype=bool)
+    nispos = ~ispos
+
+    # Functions that implement the log trick
+    def logx(x):
+        xwarp = np.empty_like(x)
+        xwarp[ispos] = np.log(x[ispos])
+        xwarp[nispos] = x[nispos]
+        return xwarp
+
+    def expx(xwarp):
+        x = np.empty_like(xwarp)
+        x[ispos] = np.exp(xwarp[ispos])
+        x[nispos] = xwarp[nispos]
+        return x
+
+    def gradx(grad, xwarp):
+        gwarp = np.empty_like(grad)
+        gwarp[ispos] = grad[ispos] * np.exp(xwarp[ispos])
+        gwarp[nispos] = grad[nispos]
+        return gwarp
+
+    # Redefine bounds as appropriate for new ranges for numerical stability
+    for i, (b, pos) in enumerate(zip(bounds, ispos)):
+        if pos:
+            upper = EXPMAX if b.upper is None else np.log(b.upper)
+            bounds[i] = bt.Bound(lower=LOGMINPOS, upper=upper)
+
+    return logx, expx, gradx, bounds

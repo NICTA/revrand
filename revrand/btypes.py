@@ -8,9 +8,34 @@ from sklearn.utils import check_random_state
 
 
 class _BoundMixin(object):
+    """Methods for the bound objects."""
 
     def check(self, value):
+        """
+        Check a value falls within a bound.
 
+        Parameters
+        ----------
+        value : scalar or ndarray
+            value to test
+
+        Returns
+        -------
+        bool:
+            If all values fall within bounds
+
+        Example
+        -------
+        >>> bnd = Bound(1, 2)
+        >>> bnd.check(1.5)
+        True
+        >>> bnd.check(3)
+        False
+        >>> bnd.check(np.ones(10))
+        True
+        >>> bnd.check(np.array([1, 3, 1.5]))
+        False
+        """
         if self.lower:
             if np.any(value < self.lower):
                 return False
@@ -22,7 +47,33 @@ class _BoundMixin(object):
         return True
 
     def clip(self, value):
+        """
+        Clip a value to a bound.
 
+        Parameters
+        ----------
+        value : scalar or ndarray
+            value to clip
+
+        Returns
+        -------
+        scalar or ndarray :
+            of the same shape as value, bit with each element clipped to fall
+            within the specified bounds
+
+        Example
+        -------
+        >>> bnd = Bound(1, 2)
+        >>> bnd.clip(1.5)
+        1.5
+        >>> bnd.clip(3)
+        2
+        >>> bnd.clip(np.array([1, 3, 1.5]))
+        array([ 1. ,  2. ,  1.5])
+        >>> bnd = Bound(None, None)
+        >>> bnd.clip(np.array([1, 3, 1.5]))
+        array([ 1. ,  3. ,  1.5])
+        """
         if not self.lower and not self.upper:
             return value
 
@@ -41,9 +92,6 @@ class Bound(namedtuple('Bound', ['lower', 'upper']), _BoundMixin):
         The lower bound.
     upper : float
         The upper bound.
-    dist : scipy.stats.distibution, optional
-        a distibution object that specifies how to sample values from this
-        bound
 
     Attributes
     ----------
@@ -51,9 +99,6 @@ class Bound(namedtuple('Bound', ['lower', 'upper']), _BoundMixin):
         The lower bound.
     upper : float
         The upper bound.
-    dist : scipy.stats.distibution, optional
-        a distibution object that specifies how to sample values from this
-        bound
 
     Examples
     --------
@@ -104,9 +149,6 @@ class Positive(namedtuple('Positive', ['lower', 'upper']), _BoundMixin):
     upper : float
         The largest value allowed for the optimiser to evaluate (if not using
         the log trick).
-    dist : scipy.stats.distibution, optional
-        a distibution object that specifies how to sample values from this
-        bound
 
     Examples
     --------

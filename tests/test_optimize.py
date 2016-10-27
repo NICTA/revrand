@@ -164,11 +164,12 @@ def test_rand_start(make_quadratic, make_random):
 
     nmin = structured_minimizer(logtrick_minimizer(minimize))
     res = nmin(qobj_struc, w0, args=(data,), jac=True, method='L-BFGS-B',
-               random_state=random, n_starts=100)
+               random_state=random, nstarts=100)
     assert_opt(*res.x)
 
     nsgd = structured_sgd(logtrick_sgd(sgd))
-    res = nsgd(qobj_struc, w0, data, eval_obj=True, random_state=random)
+    res = nsgd(qobj_struc, w0, data, eval_obj=True, nstarts=100,
+               random_state=random)
     assert_opt(*res.x)
 
 
