@@ -1,14 +1,13 @@
 """
 The :mod:`revrand.optimize` module provides a standardized interface to
-popular optimization libraries and tools, such as NLopt and ``scipy.optimize``,
-and also supports custom optimization methods.
+``scipy.optimize``, and also supports custom optimization methods.
 """
 
 from .sgd import sgd, AdaDelta, AdaGrad, Momentum, Adam, SGDUpdater
-from .base import (structured_minimizer,
-                   structured_sgd,
-                   logtrick_minimizer,
-                   logtrick_sgd)
+from .decorators import (structured_minimizer,
+                         structured_sgd,
+                         logtrick_minimizer,
+                         logtrick_sgd)
 
 __all__ = [
     'sgd',

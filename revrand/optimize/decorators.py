@@ -1,4 +1,4 @@
-"""Optimize Base Decorators."""
+"""Optimizer Decorators."""
 import logging
 from functools import partial
 from itertools import chain
@@ -501,6 +501,7 @@ def flatten_args(shapes):
     True
 
     Some other curious applications
+
     >>> from operator import mul
     >>> flatten_args_dec = flatten_args([(), (3,)])
     >>> func = flatten_args_dec(mul)

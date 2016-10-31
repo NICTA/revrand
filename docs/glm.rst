@@ -1,4 +1,6 @@
-Generalised Linear Model
+.. _glm:
+
+Generalized Linear Model
 ========================
 
 .. automodule:: revrand.glm

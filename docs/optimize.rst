@@ -1,19 +1,23 @@
+.. _optimize:
+
 Optimization
 ============
 
+This module contains several stochastic gradient optimizers and decorators for
+enhancing the functionality of these optimizers as well as the
+`scipy.optimize.minimize
+<https://docs.scipy.org/doc/scipy/reference/optimize.html>`_ optimizers.
+
 .. currentmodule:: revrand.optimize
 
-.. autosummary::
-   :toctree: generated/
 
-   base
-   base.structured_minimizer
-   base.structured_sgd
-   base.logtrick_minimizer
-   base.logtrick_sgd
+Optimizer Decorators
+--------------------
+.. automodule:: revrand.optimize.decorators
+   :members:
 
-   sgd.sgd
-   sgd.Adam
-   sgd.AdaDelta
-   sgd.AdaGrad
-   sgd.Momentum
+
+Stochastic Gradients
+--------------------
+.. automodule:: revrand.optimize.sgd
+   :members:

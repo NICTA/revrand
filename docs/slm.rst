@@ -1,3 +1,5 @@
+.. _slm:
+
 Standard Linear Model
 =====================
 

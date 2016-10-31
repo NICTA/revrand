@@ -9,25 +9,28 @@ revrand
     :target: https://codecov.io/github/NICTA/revrand?branch=master
 
 ------------------------------------------------------------------------------
-A library of scalable Bayesian generalised linear models with *fancy* features
+A library of scalable Bayesian generalized linear models with *fancy* features
 ------------------------------------------------------------------------------
 
 This library implements various Bayesian linear models (Bayesian linear
-regression) and generalised linear models. A few features of this library are:
+regression) and generalized linear models. A few features of this library are:
 
 - A fancy basis functions/feature composition framework for combining basis
-  functions like radial basis function, sigmoidal basis functions, polynomial
+  functions like radial basis functions, sigmoidal basis functions, polynomial
   basis functions etc.
-- Basis functions that can be used to approximate Gaussian processes with shift
-  invariant covariance functions (e.g. square exponential) when used with
-  linear models [1]_, [2]_, [3]_.
-- Non-Gaussian likelihoods with Bayesian generalised linear models (GLMs). We
+- Random Basis functions that can be used to approximate Gaussian processes
+  with shift invariant covariance functions (e.g. square exponential) when used
+  with linear models [1]_, [2]_, [3]_.
+- Non-Gaussian likelihoods with Bayesian generalized linear models (GLMs). We
   infer all of the parameters in the GLMs using auto-encoding variational
   Bayes [4]_, and we approximate the posterior over the weights with a mixture
   of Gaussians, like [5]_.
 - Large scale learning using stochastic gradients (Adam, AdaDelta and more).
 - Scikit Learn compatibility, i.e. usable with 
   `pipelines <http://scikit-learn.org/stable/modules/pipeline.html>`_.
+- A host of decorators for
+  `scipy.optimize.minimize <https://docs.scipy.org/doc/scipy/reference/optimize.html>`_ 
+  and stochastic gradients that enhance the functionality of these optimisers.
 
 Here is an example of approximating a Matern 3/2 kernel with some of our basis
 functions,

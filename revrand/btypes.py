@@ -178,18 +178,82 @@ class Positive(namedtuple('Positive', ['lower', 'upper']), _BoundMixin):
 
 class Parameter(object):
     """
-    A Parameter class that associates a value (scalar or ndarray) with a bound.
+    A Parameter class that associates a value with a bound.
 
     Attributes
     ----------
-    value: scalar or ndarray, optional
-        a value to associate with this parameter. This is typically used as an
-        initial value for an optimizer.
-    bound: Bound
+    value : scalar, ndarray, scipy.stats, optional
+        a value or distribution to associate with this parameter. This is
+        typically used as an initial value for an optimizer, and if a random
+        starts optimiser is used (eg. revrand.optimize.structured_minimizer) it
+        can draw randomly from the distribution.
+    bound : Bound, optional
         a Bound tuple that describes the valid range for all of the elements in
         value
-    shape: tuple
-        the shape of value
+    shape : tuple, optional
+        the shape of value, this is ignored if value is not a scipy.stats
+        distribution (i.e. it is automatically determined).
+
+    Note
+    ----
+    - If ``value`` is initialised as a distribution from ``scipy.stats``, then
+      ``self.value`` is actually the mean of the distribution.
+    - If you want to set value to a ``scipy.stats`` distribution, and also
+      associate it with a ``shape`` (i.e. you want an ``ndarray`` random
+      variable), then also set the ``shape`` parameters to the desired
+      dimensions.
+
+    Examples
+    --------
+    Null
+
+    >>> p = Parameter()
+    >>> p.value
+    []
+    >>> p.has_value
+    False
+
+    Scalar
+
+    >>> p = Parameter(1.2, Bound(1, 2))
+    >>> p.shape
+    ()
+    >>> p.value
+    1.2
+    >>> p.rvs()
+    1.2
+    >>> p.is_random
+    False
+
+    ndarray
+
+    >>> p = Parameter(np.ones(3), Positive())
+    >>> p.shape
+    (3,)
+    >>> p.value
+    array([ 1.,  1.,  1.])
+    >>> p.rvs()
+    array([ 1.,  1.,  1.])
+
+    ``scipy.stats`` scalar
+
+    >>> from scipy.stats import gamma
+    >>> p = Parameter(gamma(a=1, scale=1), Positive())
+    >>> p.value == gamma(a=1, scale=1).mean()
+    True
+    >>> np.isscalar(p.rvs())
+    True
+    >>> p.is_random
+    True
+
+    ``scipy.stats`` ndarray
+
+    >>> from scipy.stats import gamma
+    >>> p = Parameter(gamma(a=1, scale=1), Positive(), shape=(3,))
+    >>> all(p.value == np.ones(3) * gamma(a=1, scale=1).mean())
+    True
+    >>> p.rvs().shape == (3,)
+    True
     """
 
     def __init__(self, value=[], bounds=Bound(), shape=()):
@@ -210,7 +274,23 @@ class Parameter(object):
         self.bounds = bounds
 
     def rvs(self, random_state=None):
+        r"""
+        Draw a random value from this Parameter's distribution.
 
+        If ``value`` was not initialised with a ``scipy.stats`` object, then
+        the scalar/ndarray value is returned.
+
+        Parameters
+        ----------
+        random_state : None, int or RandomState, optional
+            random seed
+
+        Returns
+        -------
+        ndarray :
+            of size ``self.shape``, a random draw from the distribution, or
+            ``self.value`` if not initialised with a ``scipy.stats`` object.
+        """
         # No sampling distibution
         if self.dist is None:
             return self.value
@@ -226,28 +306,30 @@ class Parameter(object):
 
     @property
     def has_value(self):
+        """Test if this Parameter has a value, or is "null"."""
         return self.shape != (0,)
 
     @property
     def is_random(self):
+        """Test if this Parameter was initialised with a distribution."""
         return self.dist is not None
 
 
 def ravel(parameter, random_state=None):
     """
-    Flatten a :code:`Parameter`.
+    Flatten a ``Parameter``.
 
     Parameters
     ----------
     parameter: Parameter
-        A :code:`Parameter` object
+        A ``Parameter`` object
 
     Returns
     -------
     flatvalue: ndarray
-        a flattened array of shape :code:`(prod(parameter.shape),)`
+        a flattened array of shape ``(prod(parameter.shape),)``
     flatbounds: list
-        a list of bound tuples of length :code:`prod(parameter.shape)`
+        a list of bound tuples of length ``prod(parameter.shape)``
     """
     flatvalue = np.ravel(parameter.rvs(random_state=random_state))
     flatbounds = [parameter.bounds
@@ -263,7 +345,7 @@ def hstack(tup):
     Parameters
     ----------
     tup: sequence
-        a sequence of value, :code:`Bound` pairs
+        a sequence of value, ``Bound`` pairs
 
     Returns
     -------
@@ -281,16 +363,16 @@ def hstack(tup):
 
 def shape(parameter):
     """
-    Get the shape of a :code:`Parameter`.
+    Get the shape of a ``Parameter``.
 
     Parameters
     ----------
     parameter: Parameter
-        :code:`Parameter` object to get the shape of
+        ``Parameter`` object to get the shape of
 
     Returns
     -------
     tuple:
-        shape of the :code:`Parameter` object
+        shape of the ``Parameter`` object
     """
     return parameter.shape

@@ -270,6 +270,7 @@ class Basis(object):
         return D
 
     def get_init_params(self):
+        """Get a list of the initial parameters if they have a value."""
         return [p.value for p in atleast_list(self.params) if p.has_value]
 
     def _transform_popargs(self, X, *args):

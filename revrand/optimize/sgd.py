@@ -278,16 +278,16 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     Parameters
     ----------
     fun : callable
-        the function to evaluate, this must have the signature :code:`[obj,]
-        grad = fun(x, data, ...)`, where the :code:`eval_obj` argument tells
-        :code:`sgd` if an objective function value is going to be returned by
-        :code:`fun`.
+        the function to *minimize*, this must have the signature ``[obj,]``
+        grad = fun(x, data, ...)`, where the ``eval_obj`` argument tells
+        ``sgd`` if an objective function value is going to be returned by
+        ``fun``.
     x0 : ndarray
         a sequence/1D array of initial values for the parameters to learn.
     data : ndarray
-        a numpy array or sequence of data to input into :code:`fun`. This will
+        a numpy array or sequence of data to input into ``fun``. This will
         be split along the first axis (axis=0), and then input into
-        :code:`fun`.
+        ``fun``.
     args : sequence, optional
         an optional sequence of arguments to give to fun.
     bounds : sequence, optional
@@ -301,9 +301,9 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
     updater : SGDUpdater, optional
         The type of gradient update to use, by default this is Adam.
     eval_obj : bool, optional
-        This indicates whether or not :code:`fun` also evaluates and returns
-        the objective function value. If this is true, :code:`fun` must return
-        :code:`(obj, grad)` and then a list of objective function values is
+        This indicates whether or not ``fun`` also evaluates and returns
+        the objective function value. If this is true, ``fun`` must return
+        ``(obj, grad)`` and then a list of objective function values is
         also returned.
     random_state : int or RandomState, optional
         random seed
@@ -318,10 +318,10 @@ def sgd(fun, x0, data, args=(), bounds=None, batch_size=10, maxiter=5000,
         message : str
             the convergence condition ('maxiter reached' or error)
         objs : list
-            the list of objective function evaluations if :code:`eval_obj`
+            the list of objective function evaluations if ``eval_obj``
             is True.
         fun : float
-            the final objective function evaluation if :code:`eval_obj` is
+            the final objective function evaluation if ``eval_obj`` is
             True.
     """
     if updater is None:
@@ -410,7 +410,7 @@ def gen_batch(data, batch_size, maxiter=np.inf, random_state=None):
     Yields
     ------
     ndarray or sequence :
-        with each array length :code:`batch_size`, i.e. a subset of data.
+        with each array length ``batch_size``, i.e. a subset of data.
     """
     perms = endless_permutations(_len_data(data), random_state)
 
@@ -423,7 +423,7 @@ def gen_batch(data, batch_size, maxiter=np.inf, random_state=None):
 
 def normalize_bound(bound):
     """
-    Replace :code:`None` with + or - inf in bound tuples.
+    Replace ``None`` with + or - inf in bound tuples.
 
     Examples
     --------

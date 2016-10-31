@@ -1,3 +1,5 @@
+.. _basis_functions:
+
 Basis Functions
 ===============
 

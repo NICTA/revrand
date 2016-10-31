@@ -1,4 +1,4 @@
-"""Bayesian Generalised Linear Model implementation.
+"""Bayesian Generalized Linear Model implementation.
 
 Implementation of Bayesian GLMs using a mixture of Gaussians posterior
 approximation and auto-encoding variational Bayes inference. See [1]_ for the
@@ -40,9 +40,9 @@ WGTRND = norm()  # Sampling distribution over mixture weights
 COVRND = gamma(a=2, scale=0.5)  # Sampling distribution over mixture covariance
 
 
-class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
+class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
     r"""
-    Bayesian Generalised linear model (GLM).
+    Bayesian Generalized linear model (GLM).
 
     This provides a scikit learn compatible interface for the glm module.
 
@@ -140,17 +140,17 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     def fit(self, X, y, likelihood_args=()):
         r"""
-        Learn the parameters of a Bayesian generalised linear model (GLM).
+        Learn the parameters of a Bayesian generalized linear model (GLM).
 
         Parameters
         ----------
-        X: ndarray
+        X : ndarray
             (N, d) array input dataset (N samples, d dimensions).
-        y: ndarray
+        y : ndarray
             (N,) array targets (N samples)
-        likelihood: Object
+        likelihood : Object
             A likelihood object, see the likelihoods module.
-        likelihood_args: sequence, optional
+        likelihood_args : sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
             N.
@@ -316,7 +316,7 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
 
     def predict(self, X, nsamples=200, likelihood_args=()):
         """
-        Predict target values from Bayesian generalised linear regression.
+        Predict target values from Bayesian generalized linear regression.
 
         Parameters
         ----------
@@ -361,17 +361,17 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         where :math:`\mathbb{E}[y^* | \mathbf{w}, \phi(\mathbf{x}^*)]` is the
         the expected value of :math:`y^*` from  the likelihood, and
         :math:`p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi)` is the posterior
-        distribution over weights (from :code:`learn`). Here are few concrete
+        distribution over weights (from ``learn``). Here are few concrete
         examples of how we can use these values,
 
         - Gaussian likelihood: these are just the predicted mean and variance,
-          see :code:`revrand.regression.predict`
+          see ``revrand.regression.predict``
         - Bernoulli likelihood: The expected value is the probability,
           :math:`p(y^* = 1)`, i.e. the probability of class one. The variance
           may not be so useful.
         - Poisson likelihood: The expected value is similar conceptually to the
           Gaussian case, and is also a *continuous* value. The median (50%
-          quantile) from :code:`predict_interval` is a discrete value. Again,
+          quantile) from ``predict_interval`` is a discrete value. Again,
           the variance in this instance may not be so useful.
 
         Parameters
@@ -575,18 +575,18 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
             Number of samples for sampling the latent function.
         genaxis : int
             Axis to return samples from, i.e.
-            - :code:`genaxis=1` will give you one sample at a time of f for ALL
+            - ``genaxis=1`` will give you one sample at a time of f for ALL
                 observations (so it will iterate over nsamples).
-            - :code:`genaxis=0` will give you all samples of f for ONE
+            - ``genaxis=0`` will give you all samples of f for ONE
                 observation at a time (so it will iterate through Xs, row by
                 row)
 
         Yields
         ------
         fsamples : ndarray
-            of shape (Ns,) if :code:`genaxis=1` with each call being a sample
+            of shape (Ns,) if ``genaxis=1`` with each call being a sample
             from the mixture of latent functions over all Ns. Or of shape
-            (nsamples,) if :code:`genaxis=0`, with each call being a all
+            (nsamples,) if ``genaxis=0``, with each call being a all
             samples for an observation, n in Ns.
         """
         check_is_fitted(self, ['weights_', 'covariance_', 'basis_hypers_',
@@ -613,8 +613,8 @@ class GeneralisedLinearModel(BaseEstimator, RegressorMixin):
         return fs
 
 
-# For US spelling
-class GeneralizedLinearModel(GeneralisedLinearModel):
+# For GB/AU spelling
+class GeneralisedLinearModel(GeneralizedLinearModel):
 
     pass
 
