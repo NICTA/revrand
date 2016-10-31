@@ -16,9 +16,11 @@ import logging
 from functools import partial
 
 import numpy as np
+from scipy.stats import gamma
 from scipy.optimize import minimize
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
+from sklearn.utils import check_random_state
 
 from .utils import atleast_list
 from .mathfun.linalg import solve_posdef
@@ -36,24 +38,32 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
     Parameters
     ----------
-    basis: Basis
+    basis : Basis
         A basis object, see the basis_functions module.
-    var: Parameter, optional
+    var : Parameter, optional
         observation variance initial value.
-    regulariser: Parameter, optional
+    regulariser : Parameter, optional
         weight regulariser (variance) initial value.
-    tol: float, optional
+    tol : float, optional
         optimiser function tolerance convergence criterion.
-    maxiter: int, optional
+    maxiter : int, optional
         maximum number of iterations for the optimiser.
+    nstarts : int, optional
+        if there are any parameters with distributions as initial values, this
+        determines how many random candidate starts shoulds be evaluated before
+        commencing optimisation at the best candidate.
+    random_state : None, int or RandomState, optional
+        random seed (mainly for random starts)
     """
 
     def __init__(self,
                  basis,
-                 var=Parameter(1., Positive()),
-                 regulariser=Parameter(1., Positive()),
+                 var=Parameter(gamma(1.), Positive()),
+                 regulariser=Parameter(gamma(1.), Positive()),
                  tol=1e-8,
-                 maxiter=1000
+                 maxiter=1000,
+                 nstarts=100,
+                 random_state=None
                  ):
 
         self.basis = basis
@@ -61,6 +71,9 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         self.regulariser = regulariser
         self.tol = tol
         self.maxiter = maxiter
+        self.nstarts = nstarts
+        self.random_state = random_state
+        self.random_ = check_random_state(random_state)
 
     def fit(self, X, y):
         """
@@ -68,9 +81,9 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-        X: ndarray
+        X : ndarray
             (N, d) array input dataset (N samples, d dimensions).
-        y: ndarray
+        y : ndarray
             (N,) array targets (N samples)
 
         Returns
@@ -109,8 +122,11 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         res = nmin(elbo,
                    params,
                    method='L-BFGS-B',
-                   jac=True, tol=self.tol,
-                   options={'maxiter': self.maxiter, 'maxcor': 100}
+                   jac=True,
+                   tol=self.tol,
+                   options={'maxiter': self.maxiter, 'maxcor': 100},
+                   random_state=self.random_,
+                   nstarts=self.nstarts
                    )
 
         # Upack learned parameters and report
@@ -190,12 +206,12 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-        X: ndarray
+        X : ndarray
             (Ns,d) array query input dataset (Ns samples, d dimensions).
 
         Returns
         -------
-        Ey: ndarray
+        Ey : ndarray
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
         """
@@ -209,15 +225,15 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-        X: ndarray
+        X : ndarray
             (Ns,d) array query input dataset (Ns samples, d dimensions).
 
         Returns
         -------
-        Ey: ndarray
+        Ey : ndarray
             The expected value of y_star for the query inputs, X_star of shape
             (N_star,).
-        Vy: ndarray
+        Vy : ndarray
             The expected variance of y_star for the query inputs, X_star of
             shape (N_star,).
         """

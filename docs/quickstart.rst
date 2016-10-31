@@ -13,8 +13,7 @@ or install with ``pip``:
 
    $ pip install git+https://github.com/nicta/revrand.git
 
-Refer to `docs/installation.rst <docs/installation.rst>`_ for advanced 
-installation instructions.
+Refer to :ref:`installation` for advanced installation instructions.
 
 Have a look at some of the demo
 `notebooks <https://github.com/NICTA/revrand/tree/master/demos>`_.
@@ -23,9 +22,16 @@ Have a look at some of the demo
 Bayesian Linear Regression Example
 ----------------------------------
 
-Here is a very quick example of how to use Bayesian linear regression with
-optimisation of the likelihood noise, regulariser and basis function
-parameters. Assuming we already have training noisy targets ``y``, inputs 
+Here is a very quick example of how to use Bayesian linear regression
+(:ref:`slm`) with optimisation of the likelihood noise, regulariser and basis
+function parameters. The default behaviour of the algorithms in revrand is to
+randomly sample and evaluate these hyperparameters before starting optimization
+from the best random candidates. This is because the objective functions may be
+non-convex with respect to these parameters, and in this way revrand can
+achieve some robustness to bad initialisations. See :ref:`btypes` and
+:ref:`optimize` for more information on how to use these random initializers.
+
+Assuming we already have training noisy targets ``y``, inputs 
 ``X``, and some query inputs ``Xs`` (as well as the true noiseless function
 ``f``):
 
@@ -33,18 +39,21 @@ parameters. Assuming we already have training noisy targets ``y``, inputs
 
     import matplotlib.pyplot as pl
     import numpy as np
-    from revrand import StandardLinearModel
+    from scipy.stats import gamma
+
+    from revrand import StandardLinearModel, Parameter, Positive
     from revrand.basis_functions import LinearBasis, RandomRBF
-    from revrand.btypes import Parameter, Positive
 
     ...
     
     # Concatenate a linear basis and a Random radial basis (GP approx)
-    init_lenscale = Parameter(1.0, Positive())  # init val and bounds 
+    init_lenscale = Parameter(gamma(1), Positive())  # Random starts sampling
     basis = LinearBasis(onescol=True) \
         + RandomRBF(nbases=300, Xdim=X.shape[1], init_lenscale)
 
-    # Learn regression parameters and predict
+    # Learn regression parameters and predict (by default, this will evaluate
+    #  100 random values for the length scale, variance and regulariser before
+    #  starting optimisation from the best candidates)
     slm = StandardLinearModel(basis)
     slm.fit(X, y)
     Eys, Vys = slm.predict_moments(Xs)
@@ -72,33 +81,36 @@ This script will output something like the following,
 .. image:: blr_demo.png
 
 
-Bayesian Generalised Linear Model Example
+Bayesian Generalized Linear Model Example
 -----------------------------------------
 
 This example is very similar to that above, but now let's assume our targets
 ``y`` are drawn from a Poisson likelihood, or observation, distribution which
 is a function of the inputs, ``X``. The task here is to predict the mean of the
 Poisson distribution for query inputs ``Xs``, as well as the uncertainty
-associated with the prediction.
+associated with the prediction. For this we need to use a generalized linear
+model (GLM, :ref:`glm`):
 
 .. code:: python
 
     import matplotlib.pyplot as pl
     import numpy as np
-    from revrand import GeneralisedLinearModel
+    from scipy.stats import gamma
+
+    from revrand import GeneralizedLinearModel
     from revrand.basis_functions import RandomRBF
 
     ...
     
     # Random radial basis (GP approx)
-    init_lenscale = Parameter(1.0, Positive())  # init val and bounds 
+    init_lenscale = Parameter(gamma(1), Positive())  # Random starts sampling
     basis = RandomRBF(nbases=100, Xdim=X.shape[1], init_lenscale)
 
     # Set up the likelihood of the GLM
     llhood = likelihoods.Poisson(tranfcn='exp')  # log link
 
     # Learn regression parameters and predict
-    glm = GeneralisedLinearModel(llhood, basis)
+    glm = GeneralizedLinearModel(llhood, basis)
     glm.fit(X, y)
     Eys = glm.predict(Xs)
     y95n, y95x = glm.predict_interval(0.95, Xs)
@@ -130,10 +142,10 @@ Large-scale Learning with Stochastic Gradients
 
 By default the GLM uses stochastic gradients to learn all of its
 parameters/hyperparameters and does not require any matrix inversion, and so it
-can be used to learn from large datasets with lots of features (slm.learn uses
-L-BFGS and requires a matrix inversion). We can also use the GLM to approximate
-and scale up regular Bayesian linear regression. For instance, if we modify the
-Bayesian linear regression example from before,
+can be used to learn from large datasets with lots of features (``slm.learn``
+uses L-BFGS and requires a matrix inversion). We can also use the GLM to
+approximate and scale up regular Bayesian linear regression. For instance, if
+we modify the Bayesian linear regression example from before,
 
 .. code:: python
 
@@ -144,10 +156,10 @@ Bayesian linear regression example from before,
     ...
 
     # Set up the likelihood of the GLM
-    llhood = likelihoods.Gaussian(var_init=Parameter(1., Positive()))
+    llhood = likelihoods.Gaussian(var_init=Parameter(gamma(1.), Positive()))
 
     # Learn regression parameters and predict
-    glm = GeneralisedLinearModel(llhood, basis)
+    glm = GeneralizedLinearModel(llhood, basis)
     glm.fit(X, y)
     Ey_g, Vf_g = glm.predict_moments(Xtest)
 
@@ -177,8 +189,8 @@ Feature Composition Framework
 -----------------------------
 
 We have implemented an easy to use and extensible feature-building framework
-within revrand. You have already seen the basics demonstrated in the above
-examples, i.e. concatenation of basis functions,
+within revrand (:ref:`basis_functions`). You have already seen the basics
+demonstrated in the above examples, i.e. concatenation of basis functions,
 
 .. code:: python
 

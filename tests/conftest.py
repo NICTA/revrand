@@ -6,7 +6,7 @@ from sklearn.utils import check_random_state
 
 
 # Test constants
-RANDSTATE = 100
+RANDSTATE = 99
 RANDOM = check_random_state(RANDSTATE)
 NTRAIN = 400
 NTEST = 200
@@ -21,11 +21,6 @@ def split_data(X, y):
     tsind = np.where(~tsind)[0]
 
     return X[trind], y[trind], X[tsind], y[tsind]
-
-
-@pytest.fixture
-def make_randstate():
-    return RANDSTATE
 
 
 @pytest.fixture

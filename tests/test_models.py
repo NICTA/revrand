@@ -4,7 +4,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.base import clone
 
-from revrand import StandardLinearModel, GeneralisedLinearModel
+from revrand import StandardLinearModel, GeneralizedLinearModel
 from revrand.likelihoods import Gaussian, Binomial
 from revrand.basis_functions import LinearBasis, RandomRBF, RandomMatern52
 from revrand.metrics import smse
@@ -47,7 +47,7 @@ def test_pipeline_slm(make_gaus_data):
     assert smse(ys, Ey) < 0.1
 
 
-def test_glm_gaussian(make_gaus_data, make_randstate):
+def test_glm_gaussian(make_gaus_data, make_random):
 
     X, y, Xs, ys = make_gaus_data
 
@@ -55,7 +55,7 @@ def test_glm_gaussian(make_gaus_data, make_randstate):
     lhood = Gaussian()
 
     # simple SGD
-    glm = GeneralisedLinearModel(lhood, basis, random_state=make_randstate)
+    glm = GeneralizedLinearModel(lhood, basis, random_state=make_random)
     glm.fit(X, y)
     Ey = glm.predict(Xs)
     assert smse(ys, Ey) < 0.1
@@ -65,7 +65,7 @@ def test_glm_gaussian(make_gaus_data, make_randstate):
         + RandomRBF(nbases=20, Xdim=X.shape[1]) \
         + RandomMatern52(nbases=20, Xdim=X.shape[1])
 
-    glm = GeneralisedLinearModel(lhood, basis, random_state=make_randstate)
+    glm = GeneralizedLinearModel(lhood, basis, random_state=make_random)
     glm.fit(X, y)
     Ey = glm.predict(Xs)
     assert smse(ys, Ey) < 0.1
@@ -83,7 +83,7 @@ def test_glm_gaussian(make_gaus_data, make_randstate):
     assert all(Ey >= EyQn)
 
 
-def test_glm_binomial(make_binom_data, make_randstate):
+def test_glm_binomial(make_binom_data, make_random):
     # This is more to test the logic than to test if the model can overfit,
     # hence more relaxed SMSE. This is because this is a harder problem than
     # the previous case. We also haven't split training ans test sets, since we
@@ -99,7 +99,7 @@ def test_glm_binomial(make_binom_data, make_randstate):
     largs = (n,)
 
     # SGD
-    glm = GeneralisedLinearModel(lhood, basis, random_state=make_randstate)
+    glm = GeneralizedLinearModel(lhood, basis, random_state=make_random)
     glm.fit(X, y, likelihood_args=largs)
     Ey = glm.predict(X, likelihood_args=largs)
 
@@ -114,12 +114,12 @@ def test_glm_binomial(make_binom_data, make_randstate):
     assert all(Ey >= EyQn)
 
 
-def test_pipeline_glm(make_gaus_data, make_randstate):
+def test_pipeline_glm(make_gaus_data, make_random):
 
     X, y, Xs, ys = make_gaus_data
 
-    glm = GeneralisedLinearModel(Gaussian(), LinearBasis(onescol=True),
-                                 random_state=make_randstate)
+    glm = GeneralizedLinearModel(Gaussian(), LinearBasis(onescol=True),
+                                 random_state=make_random)
     estimators = [('PCA', PCA()),
                   ('SLM', glm)
                   ]
@@ -136,7 +136,7 @@ def test_sklearn_clone(make_gaus_data):
 
     basis = LinearBasis(onescol=True)
     slm = StandardLinearModel(basis=basis)
-    glm = GeneralisedLinearModel(likelihood=Gaussian(), basis=basis,
+    glm = GeneralizedLinearModel(likelihood=Gaussian(), basis=basis,
                                  maxiter=100)
 
     slm_clone = clone(slm)

@@ -44,12 +44,12 @@ def issequence(obj):
 
     Parameters
     ----------
-    obj: object
+    obj : object
         object to test
 
     Returns
     -------
-    bool:
+    bool :
         True if :code:`obj` is a tuple, list or generator only.
 
     Examples
@@ -269,17 +269,17 @@ def flatten(arys, returns_shapes=True, hstack=np.hstack, ravel=np.ravel,
 
     Parameters
     ----------
-    arys: list of objects
+    arys : list of objects
         One or more input arrays of possibly heterogenous shapes and
         sizes.
-    returns_shapes: bool, optional
+    returns_shapes : bool, optional
         Default is `True`. If `True`, the tuple `(flattened, shapes)` is
         returned, otherwise only `flattened` is returned.
-    hstack: callable, optional
+    hstack : callable, optional
         a function that implements horizontal stacking
-    ravel: callable, optional
+    ravel : callable, optional
         a function that flattens the object
-    shape: callable, optional
+    shape : callable, optional
         a function that returns the shape of the object
 
     Returns
@@ -451,11 +451,11 @@ def sumprod(seq):
 
     Parameters
     ----------
-    seq: tuple or list
+    seq : tuple or list
 
     Returns
     -------
-    int:
+    int :
         the product of input tuples, or the sum of products of lists of tuples,
         recursively.
 
@@ -479,6 +479,49 @@ def sumprod(seq):
         return np.prod(seq, dtype=int)
     else:
         return np.sum((sumprod(s) for s in seq), dtype=int)
+
+
+def map_recursive(fn, iterable, output_type=None):
+    """
+    Apply a function of a potentially nested list of lists.
+
+    Parameters
+    ----------
+    fn : callable
+        The function to apply to each element (and sub elements) in iterable
+    iterable : iterable
+        An iterable, sequence, sequence of sequences etc. :code:`fn` will be
+        applied to each element in each list.
+    output_type : callable, optional
+        if None, a map with sub-maps in the same structure as :code:`iterable`
+        will be returned, otherwise the callable will be applied to each
+        sequence (i.e. :code:`list` will return lists of lists etc).
+
+    Returns
+    -------
+    map or iterable type :
+        if :code:`output_type` is None, a map with sub-maps in the same
+        structure as :code:`iterable` will be returned, otherwise the callable
+        will be applied to each sequence (i.e. :code:`list` will return lists
+        of lists etc).
+
+    Examples
+    --------
+    >>> seq = [1, 2, [3, 4, [5, 6]], 7]
+    >>> map_recursive(lambda x: x > 4, seq, output_type=list)
+    [False, False, [False, False, [True, True]], True]
+
+    >>> map_recursive(lambda x: 2 * x, seq, output_type=tuple)
+    (2, 4, (6, 8, (10, 12)), 14)
+    """
+    def applyormap(it):
+        if issequence(it):
+            return map_recursive(fn, it, output_type)
+        else:
+            return fn(it)
+
+    applied = map(applyormap, iterable)
+    return output_type(applied) if output_type else applied
 
 
 def map_indices(fn, iterable, indices):

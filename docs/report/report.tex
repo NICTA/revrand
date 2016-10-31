@@ -50,7 +50,7 @@
 \begin{abstract}
     This is a technical report on the \emph{revrand} software library. This
     library implements various Bayesian linear models (Bayesian linear
-    regression), approximate Gaussian processes and generalised linear models.
+    regression), approximate Gaussian processes and generalized linear models.
     These algorithms have been implemented such that they can be used for
     large-scale inference by using stochastic gradients. All of the algorithms
     in \emph{revrand} use a unified feature composition framework that allows
@@ -237,9 +237,9 @@ presented in the next section circumvents this issue, and is more suited to
 really large $N$ and $D$ problems.
 
 
-\subsection{Bayesian Generalised Linear Models}
+\subsection{Bayesian Generalized Linear Models}
 
-The algorithm of primary interest in \emph{revrand} is the Bayesian generalised
+The algorithm of primary interest in \emph{revrand} is the Bayesian generalized
 linear model. The general form of the model implemented by this algorithm is,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
@@ -403,7 +403,7 @@ the following for $\cdfAlph$,
 TODO: re-write the following:
 
 In \emph{revrand} we approximate Gaussian Processes with our standard and
-generalised linear models by using random feature functions such as those of
+generalized linear models by using random feature functions such as those of
 \citeauthor{rahimi2007} \citeyearpar{rahimi2007,rahimi2008}. They use Bochner's
 theorem regarding the relationship between a kernel and the Fourier transform
 of a non-negative measure that (via Wiener-Khintchine's theorem) establishes

@@ -4,7 +4,7 @@ from __future__ import division
 
 import numpy as np
 
-from scipy.stats import bernoulli, binom, poisson, norm
+from scipy.stats import bernoulli, binom, poisson, norm, gamma
 from scipy.special import gammaln, expit
 
 from .btypes import Parameter, Positive
@@ -277,7 +277,7 @@ class Gaussian(Bernoulli):
         an optimiser to learn the variance parameter of this object.
     """
 
-    def __init__(self, var_init=Parameter(1., Positive())):
+    def __init__(self, var_init=Parameter(gamma(.1, scale=1), Positive())):
 
         self.params = var_init
 
