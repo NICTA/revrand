@@ -1,3 +1,5 @@
+.. _btypes:
+
 Bound and Parameter Types
 =========================
 

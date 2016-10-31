@@ -1,6 +1,0 @@
-revrand.utils.base.flatten
-==========================
-
-.. currentmodule:: revrand.utils.base
-
-.. autofunction:: flatten

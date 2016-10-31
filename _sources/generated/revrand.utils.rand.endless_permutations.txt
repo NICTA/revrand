@@ -1,6 +1,0 @@
-revrand.utils.rand.endless_permutations
-=======================================
-
-.. currentmodule:: revrand.utils.rand
-
-.. autofunction:: endless_permutations

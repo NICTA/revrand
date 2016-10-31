@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to revrand’s documentation! &mdash; revrand 0.7.2 documentation</title>
+    <title>Welcome to revrand’s documentation &mdash; revrand 0.9.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.9.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.7.2 documentation" href="#" />
+    <link rel="top" title="revrand 0.9.0 documentation" href="#" />
     <link rel="next" title="Quickstart Guide" href="quickstart.html" />
    
   
@@ -39,13 +39,13 @@
           <div class="body" role="main">
             
   <div class="section" id="welcome-to-revrand-s-documentation">
-<h1>Welcome to revrand&#8217;s documentation!<a class="headerlink" href="#welcome-to-revrand-s-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>Welcome to revrand&#8217;s documentation<a class="headerlink" href="#welcome-to-revrand-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#bayesian-linear-regression-example">Bayesian Linear Regression Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#bayesian-generalised-linear-model-example">Bayesian Generalised Linear Model Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#bayesian-generalized-linear-model-example">Bayesian Generalized Linear Model Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#large-scale-learning-with-stochastic-gradients">Large-scale Learning with Stochastic Gradients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#feature-composition-framework">Feature Composition Framework</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#references">References</a></li>
@@ -72,7 +72,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalized Linear Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.likelihoods.Bernoulli.html">revrand.likelihoods.Bernoulli</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.likelihoods.Binomial.html">revrand.likelihoods.Binomial</a></li>
@@ -83,37 +83,15 @@
 <li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimize.html">Optimization</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.html">revrand.optimize.base</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.structured_minimizer.html">revrand.optimize.base.structured_minimizer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.structured_sgd.html">revrand.optimize.base.structured_sgd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.logtrick_minimizer.html">revrand.optimize.base.logtrick_minimizer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.logtrick_sgd.html">revrand.optimize.base.logtrick_sgd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_lattice.html">revrand.optimize.base.candidate_start_points_lattice</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.base.candidate_start_points_random.html">revrand.optimize.base.candidate_start_points_random</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.sgd.html">revrand.optimize.sgd.sgd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.Adam.html">revrand.optimize.sgd.Adam</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.AdaDelta.html">revrand.optimize.sgd.AdaDelta</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.AdaGrad.html">revrand.optimize.sgd.AdaGrad</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.optimize.sgd.Momentum.html">revrand.optimize.sgd.Momentum</a></li>
-<li class="toctree-l2"><a class="reference internal" href="optimize.html#candidate-starting-points-example">Candidate Starting Points Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimize.html#module-revrand.optimize.decorators">Optimizer Decorators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimize.html#module-revrand.optimize.sgd">Stochastic Gradients</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.html">revrand.utils.base</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.flatten.html">revrand.utils.base.flatten</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.unflatten.html">revrand.utils.base.unflatten</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.couple.html">revrand.utils.base.couple</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.decouple.html">revrand.utils.base.decouple</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.nwise.html">revrand.utils.base.nwise</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.map_indices.html">revrand.utils.base.map_indices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.atleast_list.html">revrand.utils.base.atleast_list</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.base.issequence.html">revrand.utils.base.issequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.rand.endless_permutations.html">revrand.utils.rand.endless_permutations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.make_regression.html">revrand.utils.datasets.make_regression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.make_polynomial.html">revrand.utils.datasets.make_polynomial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.gen_gausprocess_se.html">revrand.utils.datasets.gen_gausprocess_se</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_usps_resampled_data.html">revrand.utils.datasets.fetch_gpml_usps_resampled_data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/revrand.utils.datasets.fetch_gpml_sarcos_data.html">revrand.utils.datasets.fetch_gpml_sarcos_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-revrand.utils.base">General Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-revrand.utils.datasets">Dataset Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-revrand.utils.decorators">Decorators Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-revrand.utils.rand">Random Generators</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mathfun.html">Math Utilities</a><ul>
@@ -195,7 +173,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalized Linear Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>

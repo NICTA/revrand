@@ -1,6 +1,0 @@
-revrand.utils.base.map_indices
-==============================
-
-.. currentmodule:: revrand.utils.base
-
-.. autofunction:: map_indices

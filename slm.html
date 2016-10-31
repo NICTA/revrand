@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Standard Linear Model &mdash; revrand 0.7.2 documentation</title>
+    <title>Standard Linear Model &mdash; revrand 0.9.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.9.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.7.2 documentation" href="index.html" />
-    <link rel="next" title="Generalised Linear Model" href="glm.html" />
+    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
+    <link rel="next" title="Generalized Linear Model" href="glm.html" />
     <link rel="prev" title="revrand.basis_functions.spectralmixture" href="generated/revrand.basis_functions.spectralmixture.html" />
    
   
@@ -40,7 +40,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-revrand.slm">
-<span id="standard-linear-model"></span><h1>Standard Linear Model<a class="headerlink" href="#module-revrand.slm" title="Permalink to this headline">¶</a></h1>
+<span id="standard-linear-model"></span><span id="slm"></span><h1>Standard Linear Model<a class="headerlink" href="#module-revrand.slm" title="Permalink to this headline">¶</a></h1>
 <p>The standard Bayesian linear regression model.</p>
 <p>By using the appropriate bases, this will also yield a simple implementation of
 the &#8220;A la Carte&#8221; GP <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
@@ -55,7 +55,7 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </table>
 <dl class="class">
 <dt id="revrand.slm.StandardLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.slm.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-08</em>, <em>maxiter=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.slm.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-08</em>, <em>maxiter=1000</em>, <em>nstarts=100</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bayesian Standard linear model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -67,6 +67,10 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 <li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
 <li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
+<li><strong>nstarts</strong> (<em>int, optional</em>) &#8211; if there are any parameters with distributions as initial values, this
+determines how many random candidate starts shoulds be evaluated before
+commencing optimisation at the best candidate.</li>
+<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed (mainly for random starts)</li>
 </ul>
 </td>
 </tr>
@@ -205,7 +209,7 @@ shape (N_star,).</li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Standard Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalized Linear Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
@@ -221,7 +225,7 @@ shape (N_star,).</li>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="generated/revrand.basis_functions.spectralmixture.html" title="previous chapter">revrand.basis_functions.spectralmixture</a></li>
-      <li>Next: <a href="glm.html" title="next chapter">Generalised Linear Model</a></li>
+      <li>Next: <a href="glm.html" title="next chapter">Generalized Linear Model</a></li>
   </ul></li>
 </ul>
 </div>

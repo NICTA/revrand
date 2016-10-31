@@ -1,6 +1,0 @@
-revrand.utils.base.issequence
-=============================
-
-.. currentmodule:: revrand.utils.base
-
-.. autofunction:: issequence

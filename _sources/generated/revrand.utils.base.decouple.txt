@@ -1,6 +1,0 @@
-revrand.utils.base.decouple
-===========================
-
-.. currentmodule:: revrand.utils.base
-
-.. autofunction:: decouple

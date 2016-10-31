@@ -1,6 +1,0 @@
-revrand.utils.datasets.gen_gausprocess_se
-=========================================
-
-.. currentmodule:: revrand.utils.datasets
-
-.. autofunction:: gen_gausprocess_se

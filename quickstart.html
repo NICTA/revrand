@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart Guide &mdash; revrand 0.7.2 documentation</title>
+    <title>Quickstart Guide &mdash; revrand 0.9.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.9.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.7.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
     <link rel="next" title="Installation" href="installation.html" />
-    <link rel="prev" title="Welcome to revrand’s documentation!" href="index.html" />
+    <link rel="prev" title="Welcome to revrand’s documentation" href="index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -49,31 +49,39 @@
 <div class="code console highlight-default"><div class="highlight"><pre><span></span>$ pip install git+https://github.com/nicta/revrand.git
 </pre></div>
 </div>
-<p>Refer to <a class="reference external" href="docs/installation.rst">docs/installation.rst</a> for advanced
-installation instructions.</p>
+<p>Refer to <a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a> for advanced installation instructions.</p>
 <p>Have a look at some of the demo
 <a class="reference external" href="https://github.com/NICTA/revrand/tree/master/demos">notebooks</a>.</p>
 <div class="section" id="bayesian-linear-regression-example">
 <h2>Bayesian Linear Regression Example<a class="headerlink" href="#bayesian-linear-regression-example" title="Permalink to this headline">¶</a></h2>
-<p>Here is a very quick example of how to use Bayesian linear regression with
-optimisation of the likelihood noise, regulariser and basis function
-parameters. Assuming we already have training noisy targets <code class="docutils literal"><span class="pre">y</span></code>, inputs
+<p>Here is a very quick example of how to use Bayesian linear regression
+(<a class="reference internal" href="slm.html#slm"><span class="std std-ref">Standard Linear Model</span></a>) with optimisation of the likelihood noise, regulariser and basis
+function parameters. The default behaviour of the algorithms in revrand is to
+randomly sample and evaluate these hyperparameters before starting optimization
+from the best random candidates. This is because the objective functions may be
+non-convex with respect to these parameters, and in this way revrand can
+achieve some robustness to bad initialisations. See <a class="reference internal" href="btypes.html#btypes"><span class="std std-ref">Bound and Parameter Types</span></a> and
+<a class="reference internal" href="optimize.html#optimize"><span class="std std-ref">Optimization</span></a> for more information on how to use these random initializers.</p>
+<p>Assuming we already have training noisy targets <code class="docutils literal"><span class="pre">y</span></code>, inputs
 <code class="docutils literal"><span class="pre">X</span></code>, and some query inputs <code class="docutils literal"><span class="pre">Xs</span></code> (as well as the true noiseless function
 <code class="docutils literal"><span class="pre">f</span></code>):</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">pl</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">StandardLinearModel</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gamma</span>
+
+<span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">StandardLinearModel</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Positive</span>
 <span class="kn">from</span> <span class="nn">revrand.basis_functions</span> <span class="k">import</span> <span class="n">LinearBasis</span><span class="p">,</span> <span class="n">RandomRBF</span>
-<span class="kn">from</span> <span class="nn">revrand.btypes</span> <span class="k">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Positive</span>
 
 <span class="o">...</span>
 
 <span class="c1"># Concatenate a linear basis and a Random radial basis (GP approx)</span>
-<span class="n">init_lenscale</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Positive</span><span class="p">())</span>  <span class="c1"># init val and bounds</span>
+<span class="n">init_lenscale</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Positive</span><span class="p">())</span>  <span class="c1"># Random starts sampling</span>
 <span class="n">basis</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> \
     <span class="o">+</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">nbases</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">Xdim</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">init_lenscale</span><span class="p">)</span>
 
-<span class="c1"># Learn regression parameters and predict</span>
+<span class="c1"># Learn regression parameters and predict (by default, this will evaluate</span>
+<span class="c1">#  100 random values for the length scale, variance and regulariser before</span>
+<span class="c1">#  starting optimisation from the best candidates)</span>
 <span class="n">slm</span> <span class="o">=</span> <span class="n">StandardLinearModel</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
 <span class="n">slm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">Eys</span><span class="p">,</span> <span class="n">Vys</span> <span class="o">=</span> <span class="n">slm</span><span class="o">.</span><span class="n">predict_moments</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span>
@@ -100,29 +108,32 @@ parameters. Assuming we already have training noisy targets <code class="docutil
 <p>This script will output something like the following,</p>
 <img alt="_images/blr_demo.png" src="_images/blr_demo.png" />
 </div>
-<div class="section" id="bayesian-generalised-linear-model-example">
-<h2>Bayesian Generalised Linear Model Example<a class="headerlink" href="#bayesian-generalised-linear-model-example" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="bayesian-generalized-linear-model-example">
+<h2>Bayesian Generalized Linear Model Example<a class="headerlink" href="#bayesian-generalized-linear-model-example" title="Permalink to this headline">¶</a></h2>
 <p>This example is very similar to that above, but now let&#8217;s assume our targets
 <code class="docutils literal"><span class="pre">y</span></code> are drawn from a Poisson likelihood, or observation, distribution which
 is a function of the inputs, <code class="docutils literal"><span class="pre">X</span></code>. The task here is to predict the mean of the
 Poisson distribution for query inputs <code class="docutils literal"><span class="pre">Xs</span></code>, as well as the uncertainty
-associated with the prediction.</p>
+associated with the prediction. For this we need to use a generalized linear
+model (GLM, <a class="reference internal" href="glm.html#glm"><span class="std std-ref">Generalized Linear Model</span></a>):</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">pl</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">GeneralisedLinearModel</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gamma</span>
+
+<span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">GeneralizedLinearModel</span>
 <span class="kn">from</span> <span class="nn">revrand.basis_functions</span> <span class="k">import</span> <span class="n">RandomRBF</span>
 
 <span class="o">...</span>
 
 <span class="c1"># Random radial basis (GP approx)</span>
-<span class="n">init_lenscale</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Positive</span><span class="p">())</span>  <span class="c1"># init val and bounds</span>
+<span class="n">init_lenscale</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Positive</span><span class="p">())</span>  <span class="c1"># Random starts sampling</span>
 <span class="n">basis</span> <span class="o">=</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">nbases</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">Xdim</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">init_lenscale</span><span class="p">)</span>
 
 <span class="c1"># Set up the likelihood of the GLM</span>
 <span class="n">llhood</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="o">.</span><span class="n">Poisson</span><span class="p">(</span><span class="n">tranfcn</span><span class="o">=</span><span class="s1">&#39;exp&#39;</span><span class="p">)</span>  <span class="c1"># log link</span>
 
 <span class="c1"># Learn regression parameters and predict</span>
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GeneralisedLinearModel</span><span class="p">(</span><span class="n">llhood</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GeneralizedLinearModel</span><span class="p">(</span><span class="n">llhood</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">Eys</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span>
 <span class="n">y95n</span><span class="p">,</span> <span class="n">y95x</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict_interval</span><span class="p">(</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">Xs</span><span class="p">)</span>
@@ -152,10 +163,10 @@ associated with the prediction.</p>
 <h2>Large-scale Learning with Stochastic Gradients<a class="headerlink" href="#large-scale-learning-with-stochastic-gradients" title="Permalink to this headline">¶</a></h2>
 <p>By default the GLM uses stochastic gradients to learn all of its
 parameters/hyperparameters and does not require any matrix inversion, and so it
-can be used to learn from large datasets with lots of features (slm.learn uses
-L-BFGS and requires a matrix inversion). We can also use the GLM to approximate
-and scale up regular Bayesian linear regression. For instance, if we modify the
-Bayesian linear regression example from before,</p>
+can be used to learn from large datasets with lots of features (<code class="docutils literal"><span class="pre">slm.learn</span></code>
+uses L-BFGS and requires a matrix inversion). We can also use the GLM to
+approximate and scale up regular Bayesian linear regression. For instance, if
+we modify the Bayesian linear regression example from before,</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">...</span>
 
 <span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">likelihoods</span>
@@ -163,10 +174,10 @@ Bayesian linear regression example from before,</p>
 <span class="o">...</span>
 
 <span class="c1"># Set up the likelihood of the GLM</span>
-<span class="n">llhood</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">var_init</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">Positive</span><span class="p">()))</span>
+<span class="n">llhood</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">var_init</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span> <span class="n">Positive</span><span class="p">()))</span>
 
 <span class="c1"># Learn regression parameters and predict</span>
-<span class="n">glm</span> <span class="o">=</span> <span class="n">GeneralisedLinearModel</span><span class="p">(</span><span class="n">llhood</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
+<span class="n">glm</span> <span class="o">=</span> <span class="n">GeneralizedLinearModel</span><span class="p">(</span><span class="n">llhood</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
 <span class="n">glm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">Ey_g</span><span class="p">,</span> <span class="n">Vf_g</span> <span class="o">=</span> <span class="n">glm</span><span class="o">.</span><span class="n">predict_moments</span><span class="p">(</span><span class="n">Xtest</span><span class="p">)</span>
 
@@ -193,8 +204,8 @@ posterior distributions when non-Gaussian likelihoods are required.</p>
 <div class="section" id="feature-composition-framework">
 <h2>Feature Composition Framework<a class="headerlink" href="#feature-composition-framework" title="Permalink to this headline">¶</a></h2>
 <p>We have implemented an easy to use and extensible feature-building framework
-within revrand. You have already seen the basics demonstrated in the above
-examples, i.e. concatenation of basis functions,</p>
+within revrand (<a class="reference internal" href="basis_funcs.html#basis-functions"><span class="std std-ref">Basis Functions</span></a>). You have already seen the basics
+demonstrated in the above examples, i.e. concatenation of basis functions,</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">N</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">Xdim</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">nbases</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -325,7 +336,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#bayesian-linear-regression-example">Bayesian Linear Regression Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bayesian-generalised-linear-model-example">Bayesian Generalised Linear Model Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bayesian-generalized-linear-model-example">Bayesian Generalized Linear Model Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#large-scale-learning-with-stochastic-gradients">Large-scale Learning with Stochastic Gradients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#feature-composition-framework">Feature Composition Framework</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
@@ -334,7 +345,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalised Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glm.html">Generalized Linear Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
@@ -349,7 +360,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Welcome to revrand&#8217;s documentation!</a></li>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to revrand&#8217;s documentation</a></li>
       <li>Next: <a href="installation.html" title="next chapter">Installation</a></li>
   </ul></li>
 </ul>

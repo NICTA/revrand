@@ -1,6 +1,0 @@
-revrand.utils.base.couple
-=========================
-
-.. currentmodule:: revrand.utils.base
-
-.. autofunction:: couple

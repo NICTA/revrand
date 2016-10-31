@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalised Linear Model &mdash; revrand 0.7.2 documentation</title>
+    <title>Generalized Linear Model &mdash; revrand 0.9.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.2',
+        VERSION:     '0.9.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.7.2 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
     <link rel="prev" title="Standard Linear Model" href="slm.html" />
    
@@ -40,8 +40,8 @@
           <div class="body" role="main">
             
   <div class="section" id="module-revrand.glm">
-<span id="generalised-linear-model"></span><h1>Generalised Linear Model<a class="headerlink" href="#module-revrand.glm" title="Permalink to this headline">¶</a></h1>
-<p>Bayesian Generalised Linear Model implementation.</p>
+<span id="generalized-linear-model"></span><span id="glm"></span><h1>Generalized Linear Model<a class="headerlink" href="#module-revrand.glm" title="Permalink to this headline">¶</a></h1>
+<p>Bayesian Generalized Linear Model implementation.</p>
 <p>Implementation of Bayesian GLMs using a mixture of Gaussians posterior
 approximation and auto-encoding variational Bayes inference. See <a class="footnote-reference" href="#id3" id="id1">[1]</a> for the
 posterior mixture idea, and <a class="footnote-reference" href="#id4" id="id2">[2]</a> for the inference scheme.</p>
@@ -62,9 +62,9 @@ Proceedings of the 2nd International Conference on Learning Representations
 </tbody>
 </table>
 <dl class="class">
-<dt id="revrand.glm.GeneralisedLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralisedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>K=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bayesian Generalised linear model (GLM).</p>
+<dt id="revrand.glm.GeneralizedLinearModel">
+<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralizedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>K=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em>, <em>nstarts=500</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bayesian Generalized linear model (GLM).</p>
 <p>This provides a scikit learn compatible interface for the glm module.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -73,7 +73,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
 <li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
-<li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
+<li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value/distribution.</li>
 <li><strong>K</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
 posterior distribution.</li>
 <li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; Maximum number of iterations of stochastic gradients to run.</li>
@@ -82,6 +82,9 @@ posterior distribution.</li>
 Adam. See revrand.optimize.sgd for different options.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the expected likelihood and expected
 likelihood gradients</li>
+<li><strong>nstarts</strong> (<em>int, optional</em>) &#8211; if there are any parameters with distributions as initial values, this
+determines how many random candidate starts shoulds be evaluated before
+commencing optimisation at the best candidate.</li>
 <li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
 </ul>
 </td>
@@ -120,9 +123,9 @@ these messages have something like,</p>
 </div>
 <p>in your calling code.</p>
 <dl class="method">
-<dt id="revrand.glm.GeneralisedLinearModel.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Learn the parameters of a Bayesian generalised linear model (GLM).</p>
+<dt id="revrand.glm.GeneralizedLinearModel.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learn the parameters of a Bayesian generalized linear model (GLM).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -142,9 +145,9 @@ N.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.glm.GeneralisedLinearModel.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Predict target values from Bayesian generalised linear regression.</p>
+<dt id="revrand.glm.GeneralizedLinearModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict target values from Bayesian generalized linear regression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -171,8 +174,8 @@ N.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.glm.GeneralisedLinearModel.predict_cdf">
-<code class="descname">predict_cdf</code><span class="sig-paren">(</span><em>X</em>, <em>quantile</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_cdf" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.glm.GeneralizedLinearModel.predict_cdf">
+<code class="descname">predict_cdf</code><span class="sig-paren">(</span><em>X</em>, <em>quantile</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel.predict_cdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive cumulative density function of a Bayesian GLM.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -207,8 +210,8 @@ as p)</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.glm.GeneralisedLinearModel.predict_interval">
-<code class="descname">predict_interval</code><span class="sig-paren">(</span><em>X</em>, <em>percentile</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em>, <em>multiproc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_interval" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.glm.GeneralizedLinearModel.predict_interval">
+<code class="descname">predict_interval</code><span class="sig-paren">(</span><em>X</em>, <em>percentile</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em>, <em>multiproc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel.predict_interval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive percentile interval (upper and lower quantiles).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -237,8 +240,8 @@ Ns.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.glm.GeneralisedLinearModel.predict_logpdf">
-<code class="descname">predict_logpdf</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_logpdf" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.glm.GeneralizedLinearModel.predict_logpdf">
+<code class="descname">predict_logpdf</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel.predict_logpdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive log-probability density function of a Bayesian GLM.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -270,8 +273,8 @@ shape as p)</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="revrand.glm.GeneralisedLinearModel.predict_moments">
-<code class="descname">predict_moments</code><span class="sig-paren">(</span><em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralisedLinearModel.predict_moments" title="Permalink to this definition">¶</a></dt>
+<dt id="revrand.glm.GeneralizedLinearModel.predict_moments">
+<code class="descname">predict_moments</code><span class="sig-paren">(</span><em>X</em>, <em>nsamples=200</em>, <em>likelihood_args=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel.predict_moments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predictive moments, in particular mean and variance, of a Bayesian GLM.</p>
 <p>This function uses Monte-Carlo sampling to evaluate the predictive mean
 and variance of a Bayesian GLM. The exact expressions evaluated are,</p>
@@ -285,17 +288,17 @@ and variance of a Bayesian GLM. The exact expressions evaluated are,</p>
 <p>where <span class="math">\(\mathbb{E}[y^* | \mathbf{w}, \phi(\mathbf{x}^*)]\)</span> is the
 the expected value of <span class="math">\(y^*\)</span> from  the likelihood, and
 <span class="math">\(p(\mathbf{w} | \mathbf{y}, \boldsymbol\Phi)\)</span> is the posterior
-distribution over weights (from <code class="code docutils literal"><span class="pre">learn</span></code>). Here are few concrete
+distribution over weights (from <code class="docutils literal"><span class="pre">learn</span></code>). Here are few concrete
 examples of how we can use these values,</p>
 <ul class="simple">
 <li>Gaussian likelihood: these are just the predicted mean and variance,
-see <code class="code docutils literal"><span class="pre">revrand.regression.predict</span></code></li>
+see <code class="docutils literal"><span class="pre">revrand.regression.predict</span></code></li>
 <li>Bernoulli likelihood: The expected value is the probability,
 <span class="math">\(p(y^* = 1)\)</span>, i.e. the probability of class one. The variance
 may not be so useful.</li>
 <li>Poisson likelihood: The expected value is similar conceptually to the
 Gaussian case, and is also a <em>continuous</em> value. The median (50%
-quantile) from <code class="code docutils literal"><span class="pre">predict_interval</span></code> is a discrete value. Again,
+quantile) from <code class="docutils literal"><span class="pre">predict_interval</span></code> is a discrete value. Again,
 the variance in this instance may not be so useful.</li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
@@ -378,7 +381,7 @@ the query inputs, Xs of shape (Ns,).</li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_funcs.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slm.html">Standard Linear Model</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Generalised Linear Model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Generalized Linear Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="likelihoods.html">Likelihood Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="btypes.html">Bound and Parameter Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Validation Metrics</a></li>
