@@ -290,6 +290,11 @@ class Parameter(object):
         ndarray :
             of size ``self.shape``, a random draw from the distribution, or
             ``self.value`` if not initialised with a ``scipy.stats`` object.
+
+        Note
+        ----
+        Random draws are *clipped* to the bounds, and so it is up to the user
+        to input a sensible sampling distribution!
         """
         # No sampling distibution
         if self.dist is None:
