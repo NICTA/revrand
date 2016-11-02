@@ -39,8 +39,8 @@ def make_quadratic():
 
     bounds = [(None, None), (None, None), (1.1, None)]
 
-    x = np.linspace(-1, 1, N)
-    y = a * x**2 + b * x + c
+    x = np.linspace(-1., 1., N)
+    y = a * x**2 + b * x + c + RANDOM.randn(N) * 1e-4
     data = np.vstack((y, x)).T
 
     return a, b, c, data, bounds
@@ -60,8 +60,8 @@ def make_quadratic():
 @pytest.fixture
 def make_gaus_data():
 
-    x = np.linspace(-2, 2, NTOT)
-    y = 3 + 2 * x
+    x = np.linspace(-5, 5, NTOT)
+    y = 3 + 2 * x + RANDOM.randn(NTOT) * 1e-4
     X = np.hstack((np.ones((NTOT, 1)), x[:, np.newaxis]))
 
     return split_data(X, y)

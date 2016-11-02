@@ -23,7 +23,7 @@ class SGDUpdater:
         The learning rate applied to every gradient step.
     """
 
-    def __init__(self, eta=1.):
+    def __init__(self, eta=0.1):
 
         self.eta = eta
 
