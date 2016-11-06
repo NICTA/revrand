@@ -160,7 +160,7 @@ Furthermore, if $\qrob{\param} = \probC{\param}{\hyper}$ then the lower bound
 is tight, and this will be equivalent to optimising log-marginal likelihood.
 
 
-\subsection{Bayesian Linear Regression}
+\subsection{Bayesian Linear Regression -- \texttt{StandardLinearModel}}
 
 The first machine learning algorithm in revrand is a simple Bayesian linear
 regressor of the following form,
@@ -230,14 +230,15 @@ More specifically,
         &+ \frac{D}{2} \brac{\log \reg - 1}.
 \end{align*}
 We have not implemented a stochastic gradient version of this algorithm since
-it still requires a determinant involving a $D \times D$ matrix, and so is
-\bigo{D^3} in complexity, per iteration. This is true even if we optimise the
-posterior covariance directly (or a triangular parameterisation). The GLM
-presented in the next section circumvents this issue, and is more suited to
-really large $N$ and $D$ problems.
+it still requires a matrix solve of a $D \times D$ matrix, and so is \bigo{D^3}
+in complexity, per iteration. This is true even if we optimise the posterior
+covariance directly (or a triangular parameterisation). The GLM presented in
+the next section circumvents this issue, and is more suited to really large $N$
+and $D$ problems.
 
 
-\subsection{Bayesian Generalized Linear Models}
+\subsection{Bayesian Generalized Linear Models --
+    \texttt{GeneralizedLinearModel}}
 
 The algorithm of primary interest in \emph{revrand} is the Bayesian generalized
 linear model. The general form of the model implemented by this algorithm is,
@@ -326,17 +327,15 @@ final auto-encoding variational Bayes objective for our GLM is,
     \elbo \approx \frac{1}{K} \sum^K_{k=1} \Bigg[
     \frac{1}{L} \sum^L_{l=1} \sum^N_{n=1} 
     \log\probC{\targs_n} {\activ{\feats_n\T f_k^{(l)}}, \lparam}
-    + \log\gausC{\weights}{\mathbf{0}, \reg\ident{D}}
+    + \log\gausC{\pomean_k}{\mathbf{0}, \reg\ident{D}}
     - \frac{1}{2\reg} \trace{\dpocov_k} \\
     - \log \sum_{j=1}^K \frac{1}{K}
     \gausC{\pomean_k}{\pomean_j, \dpocov_k + \dpocov_j}
     \Bigg].
     \label{eq:glmobj_exp}
 \end{multline}
-We can straight forwardly use this objective with in a stochastic gradients
+We can straight forwardly use this objective within a stochastic gradients
 setting using with the tactic in Equations \eqref{eq:wsg} or \eqref{eq:wsg2}.
-
-TODO: Gradients in appendix?
 
 The most simple and accurate method for approximating the predictive
 distribution, $\probC{\targs\test}{\targ, \ins, \inss\test}$ is to Monte-Carlo
@@ -391,24 +390,13 @@ the following for $\cdfAlph$,
 
 \subsection{Large Scale Gaussian Process Approximation}
 
-% TODO: Show kernel approximations (from notebook)
-% TODO: Some mention of these work with the SLM and GLM.
-
-% Highlight how we can use proper optimisation to learn kernel parameters
-% \emph{without} weight re-sampling (unlike what they say in ``The Mondrian
-% Kernel'' paper). I.e. extend what Edwin wrote in the E/UKS paper in section 3 to
-% show how we learn length-scales (this should be obvious from the A la Carte
-% paper though).
-
-TODO: re-write the following:
-
-In \emph{revrand} we approximate Gaussian Processes with our standard and
-generalized linear models by using random feature functions such as those of
-\citeauthor{rahimi2007} \citeyearpar{rahimi2007,rahimi2008}. They use Bochner's
-theorem regarding the relationship between a kernel and the Fourier transform
-of a non-negative measure that (via Wiener-Khintchine's theorem) establishes
-the duality of the covariance function of a stationary process and its spectral
-density,
+In \emph{revrand} we approximate Gaussian Processes \citep{Rasmussen2006} with
+our standard and generalized linear models by using random feature functions
+such as those of \citeauthor{rahimi2007} \citeyearpar{rahimi2007,rahimi2008}
+and \cite{le2013fastfood}. They use Bochner's theorem regarding the
+relationship between a kernel and the Fourier transform of a non-negative
+measure (e.g.~a probability measure) that establishes the duality of the
+covariance function of a stationary process and its spectral density,
 \begin{align}
 	\kernl(\tfourier) &= \int \specfourier(\ffourier) 
     e^{i \ffourier\T  \tfourier} d \ffourier,  \\
@@ -416,9 +404,11 @@ density,
     e^{- i \ffourier\T \tfourier}  d \tfourier.
 	\label{eq:fourier}
 \end{align}
-\citeauthor{rahimi2007}'s  main insight \citeyearpar{rahimi2007} is that we can
-approximate the kernel by constructing `suitable' random features and Monte 
-Carlo averaging over samples from $\specfourier(\ffourier)$,
+where $\kernl(\cdot)$ is a kernel function, and $\specfourier(\cdot)$ its
+spectral density. \citeauthor{rahimi2007}'s  main insight
+\citeyearpar{rahimi2007} is that we can approximate the kernel by constructing
+`suitable' random features and Monte Carlo averaging over samples from
+$\specfourier(\ffourier)$ for \emph{shift invariant} kernels,
 \begin{equation}
     \kernl(\inss - \inssprime) = \kernl(\tfourier) 
     \approx \frac{1}{D} \sum_{i=1}^{D} \singlefeatfunc{\inss}{i}\T\!
@@ -426,32 +416,113 @@ Carlo averaging over samples from $\specfourier(\ffourier)$,
 	\label{eq:mcapprox}
 \end{equation}
 $\singlefeatfunc{\inss}{i}$ corresponds to the $i$th sample from the feature
-map. An example of a feature vector construction in the above approximation is,
+map. An example of a radial basis kernel feature vector construction using the 
+above approximation is,
 \begin{align}
 	\nonumber
     \sbrac{\singlefeatfunc{\inss}{i}, \singlefeatfunc{\inss}{D+i}}&= 
     \frac{1}{\sqrt{D}} \sbrac{\cos(\ffourier_i^T \inss), 
     \sin(\ffourier_i^T \inss)}, \qquad \\
     \text{with}~\ffourier_i & \sim 
-    \gausC{\ffourier_i}{\mathbf{0}, \varfeat \ident{d}},
+    \gausC{\ffourier_i}{\mathbf{0}, \lenscale\inv \ident{d}},
 \end{align}
 for $i=1, \ldots, D$,  which in fact is a mapping into a $2 D$-dimensional
-feature space.  \citet{rahimi2007} used the above feature map to approximate
-the commonly used (isotropic) squared exponential kernel, and showed that such
-an approximation converges in expectation to the true kernel.  
+feature space. See Table~\ref{tab:randommappings} for some of the random kernel
+approximations we use in \emph{revrand}.
 
-TODO: table of kernels and sampling distributions currently in revrand
-(Laplace, Cauchy, RBF, Matern5/2, Matern3/2 etc)
+\begin{table}[htb]
 
-TODO: FastFood
+    \centering
 
-TODO: A la Carte spectral mixtures
+    \caption{Kernels and the corresponding Fourier weight ($\ffourier_i$)
+        sampling distributions for the \citet{rahimi2007}-style random bases in
+        \emph{revrand}. Here GAL refers to a multivariate Laplace
+        distribution~\cite{kozubowski2013multivariate}.}
+
+    \begin{tabular}{r|c c}
+        \textbf{Kernel} & $\kernl\!\brac{\inss - \inssprime}$
+        & $\specfourier(\ffourier)$ \\
+        \hline
+        RBF &
+        $\exp\brac{-\frac{\lnorm{}{\inss - \inssprime}^2}{2\lenscale^2}}$ &
+            $\ffourier_i \sim \gaus{\mathbf{0}, \lenscale\inv\ident{d}}$, \\
+        Laplace & $\exp\brac{-\frac{\lnorm{}{\inss-\inssprime}}{\lenscale}}$ &
+            $\ffourier_i \sim \prod_d \text{Cauchy}\!\brac{\lenscale\inv}$ \\
+        Cauchy &
+            $\frac{1}{1+\brac{\lnorm{}{\inss-\inssprime}/\lenscale}^2}$ & 
+            $\ffourier_i \sim \text{GAL}\brac{1, \mathbf{0},
+                \lenscale\inv\ident{d}}$ \\
+        Matern $3/2$ & 
+            $\brac{1 + \frac{\sqrt{3}\lnorm{}{\inss-\inssprime}}{\lenscale}}
+            \exp\brac{-\frac{\sqrt{3}\lnorm{}{\inss-\inssprime}}{\lenscale}}$ & 
+            $\ffourier_i \sim 
+            \text{t}_{\nu=3}\!\brac{\mathbf{0}, \lenscale\inv\ident{d}}$ \\
+        Matern $5/2$ &
+            $\brac{1 + \frac{\sqrt{5}\lnorm{}{\inss-\inssprime}}{\lenscale} + 
+                \frac{5\lnorm{}{\inss - \inssprime}^2}{3\lenscale^2}}
+            \exp\brac{-\frac{\sqrt{5}\lnorm{}{\inss-\inssprime}}{\lenscale}}$ & 
+            $\ffourier_i \sim 
+            \text{t}_{\nu=5}\!\brac{\mathbf{0}, \lenscale\inv\ident{d}}$ \\
+        \hline
+    \end{tabular}
+
+    \label{tab:randommappings}
+
+\end{table}
+
+All of the kernel functions in Table \ref{tab:randommappings} have length scale
+hyperparameters, and in \emph{revrand} these can be isotropic or anisotropic
+length scales that are learned alongside the other hyperparameters. We have
+also implemented a few other variants of these random basis functions, namely
+the Fastfood \citep{le2013fastfood} and A la Carte \citep{yang2014} basis
+functions that improve scalabilty and representational flexibility
+respectively. We refer the reader to our demo notebooks for further discussion
+and experiments comparing these approximate basis functions and the kernels
+they approximate.
+
+TODO: a few figures of the approximate kernels?
 
 \section{Experiments}
 
-TODO: for now see the notebooks.
+\subsection{Boston Housing Regression}
 
-% \printbibliography%
+\begin{table}[htb]
+
+    \centering
+    \begin{tabular}{r|c c}
+        \textbf{Algorithm} & \textbf{R-square} & \textbf{MSLL} \\
+        \hline
+        \emph{SLM} & 0.8524 (0.0885) & -1.0492 (0.2400) \\
+        \emph{GLM} & 0.8340 (0.0491) & -0.8763 (0.1242) \\
+        GP & \textbf{0.9064 (0.0134)} & \textbf{-1.1821 (0.1633)} \\
+        RF & 0.8467 (0.0709) & N/A \\ 
+        SVR & 0.6295 (0.0863) & N/A \\
+        \hline
+    \end{tabular}
+
+\end{table}
+
+\subsection{Handwritten Digits Classification}
+
+\begin{table}[htb]
+
+    \centering
+    \begin{tabular}{r|c c}
+        \textbf{Algorithm} & \textbf{Log-loss} & \textbf{Error (\%)} \\
+        \hline
+        \emph{GLM} & 0.1138 & \textbf{2.07} \\
+        Logistic & 0.1734 & 3.62 \\
+        SVC & \textbf{0.1003} & 6.99 \\
+        GPC &  0.1405 & 2.59 \\
+        RF & 0.1368 & 2.72 \\
+        \hline
+    \end{tabular}
+
+\end{table}
+
+\subsection{SARCOS Regression}
+
+
 \bibliography{report}
 
 \end{document}

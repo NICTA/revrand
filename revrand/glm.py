@@ -230,7 +230,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         EdPhi = np.zeros_like(Phi)
 
         # Log status, only do this occasionally to save cpu
-        dolog = bool((self.__it % 100 == 0) or (self.__it == self.maxiter - 1))
+        dolog = bool((self.__it % 500 == 0) or (self.__it == self.maxiter - 1))
 
         # Only calculate ELBO when sampling parameters (__it < 0) or logging
         calc_ll = dolog or (self.__it < 0)

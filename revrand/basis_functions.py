@@ -65,7 +65,6 @@ else:
 
 
 # For basis function slicing
-
 def slice_init(func):
     """
     Decorator for adding partial application functionality to a basis object.
@@ -320,7 +319,7 @@ class BiasBasis(Basis):
 
     .. math::
 
-        \phi(\mathbf{X}) = \mathbf{1} * \text{const}
+        \phi(\mathbf{X}) = \mathbf{1} \times \text{const}
 
     Parameters
     ----------
@@ -867,9 +866,9 @@ class RandomMatern32(RandomRBF):
     .. math::
 
         \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
-            \left(1 + \sqrt{3} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
+            \left(1 + \frac{\sqrt{3} \| \mathbf{x} - \mathbf{x}' \|}{l} \right)
             \exp
-            \left(- \sqrt{3} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
+            \left(- \frac{\sqrt{3} \| \mathbf{x} - \mathbf{x}' \|}{l} \right)
 
     with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
@@ -920,11 +919,10 @@ class RandomMatern52(RandomMatern32):
     .. math::
 
         \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
-            \left(1 + \sqrt{5} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l}
-                + \frac{5 \| \mathbf{x} - \mathbf{x}' \|^2}{3l^2}
-            \right)
+            \left(1 + \frac{\sqrt{5} \| \mathbf{x} - \mathbf{x}' \|}{l}
+                + \frac{5 \| \mathbf{x} - \mathbf{x}' \|^2}{3l^2} \right)
             \exp
-            \left(- \sqrt{5} \frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
+            \left(- \frac{\sqrt{5} \| \mathbf{x} - \mathbf{x}' \|}{l} \right)
 
     with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
 
