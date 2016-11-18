@@ -459,7 +459,44 @@ class PolynomialBasis(Basis):
         return Phi
 
 
-class RadialBasis(Basis):
+class _LengthScaleBasis(Basis):
+
+    def _init_lenscale(self, lenscale_init):
+
+        if (lenscale_init.shape != (self.d,)) \
+                and (lenscale_init.shape != ()):
+            raise ValueError("Parameter dimension doesn't agree with X"
+                             " dimensions!")
+
+        self.params = lenscale_init
+
+    def _check_dim(self, Xdim, in_param, paramind=None):
+
+        if Xdim != self.d:
+            raise ValueError("Dimensions of data inconsistent!")
+
+        # Get the right internal parameter for comparison
+        sparam = self.params if paramind is None else self.params[paramind]
+
+        # If param was not input, get intitial value
+        if in_param is None:
+            in_param = sparam.value
+
+        # Check input parameter is within bounds
+        sparam.bounds.check(in_param)
+
+        # Promote dimension of parameter
+        if np.isscalar(in_param):
+            in_param = np.array([in_param])
+
+        if (sparam.shape == () and len(in_param) == 1) \
+                or np.shape(in_param) == sparam.shape:
+            return in_param
+        else:
+            raise ValueError("Dimension of input parameter is inconsistent!")
+
+
+class RadialBasis(_LengthScaleBasis):
     r"""
     Radial basis class.
 
@@ -499,7 +536,7 @@ class RadialBasis(Basis):
         self._init_lenscale(lenscale_init)
 
     @slice_transform
-    def transform(self, X, lenscale):
+    def transform(self, X, lenscale=None):
         """
         Apply the RBF to X.
 
@@ -508,9 +545,10 @@ class RadialBasis(Basis):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: scalar or ndarray
+        lenscale: scalar or ndarray, optional
             scalar or array of shape (d,) length scales (one for each dimension
-            of X).
+            of X). If not input, this uses the value of the initial length
+            scale.
 
         Returns
         -------
@@ -518,13 +556,13 @@ class RadialBasis(Basis):
             of shape (N, D) where D is number of RBF centres.
         """
         N, d = X.shape
-        lenscale = self._checkdim(d, lenscale)
+        lenscale = self._check_dim(d, lenscale)
 
         den = (2 * lenscale**2)
         return np.exp(- cdist(X / den, self.C / den, 'sqeuclidean'))
 
     @slice_transform
-    def grad(self, X, lenscale):
+    def grad(self, X, lenscale=None):
         r"""
         Get the gradients of this basis w.r.t.\ the length scale.
 
@@ -533,9 +571,10 @@ class RadialBasis(Basis):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: scalar or ndarray
+        lenscale: scalar or ndarray, optional
             scalar or array of shape (d,) length scales (one for each dimension
-            of X).
+            of X). If not input, this uses the value of the initial length
+            scale.
 
         Returns
         -------
@@ -544,7 +583,7 @@ class RadialBasis(Basis):
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
         N, d = X.shape
-        lenscale = self._checkdim(d, lenscale)
+        lenscale = self._check_dim(d, lenscale)
 
         Phi = self.transform(X, lenscale)
         dPhi = []
@@ -554,32 +593,6 @@ class RadialBasis(Basis):
             dPhi.append(Phi * ldist)
 
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
-
-    def _init_lenscale(self, lenscale_init):
-
-        if (lenscale_init.shape != (self.d,)) \
-                and (lenscale_init.shape != ()):
-            raise ValueError("Parameter dimension doesn't agree with X"
-                             " dimensions!")
-
-        self.params = lenscale_init
-
-    def _checkdim(self, Xdim, param, paramind=None):
-
-        if Xdim != self.d:
-            raise ValueError("Dimensions of data inconsistent!")
-
-        # Promote dimension of parameter
-        if np.isscalar(param):
-            param = np.array([param])
-
-        sparam = self.params if paramind is None else self.params[paramind]
-
-        if (sparam.shape == () and len(param) == 1) \
-                or np.shape(param) == sparam.shape:
-            return param
-        else:
-            raise ValueError("Dimension of basis parameter is inconsistent!")
 
 
 class SigmoidalBasis(RadialBasis):
@@ -609,7 +622,7 @@ class SigmoidalBasis(RadialBasis):
     """
 
     @slice_transform
-    def transform(self, X, lenscale):
+    def transform(self, X, lenscale=None):
         r"""
         Apply the sigmoid basis function to X.
 
@@ -619,7 +632,8 @@ class SigmoidalBasis(RadialBasis):
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
         lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
+            the length scale (scalar) of the RBFs to apply to X. If not input,
+            this uses the value of the initial length scale.
 
         Returns
         -------
@@ -627,12 +641,12 @@ class SigmoidalBasis(RadialBasis):
             of shape (N, D) where D is number of centres.
         """
         N, d = X.shape
-        lenscale = self._checkdim(d, lenscale)
+        lenscale = self._check_dim(d, lenscale)
 
         return expit(cdist(X / lenscale, self.C / lenscale, 'euclidean'))
 
     @slice_transform
-    def grad(self, X, lenscale):
+    def grad(self, X, lenscale=None):
         r"""
         Get the gradients of this basis w.r.t.\  the length scale.
 
@@ -641,8 +655,9 @@ class SigmoidalBasis(RadialBasis):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: float
-            the length scale (scalar) of the RBFs to apply to X.
+        lenscale: float, optional
+            the length scale (scalar) of the RBFs to apply to X. If not input,
+            this uses the value of the initial length scale.
 
         Returns
         -------
@@ -651,7 +666,7 @@ class SigmoidalBasis(RadialBasis):
             :math:`\partial \Phi(\mathbf{X}) / \partial l`
         """
         N, d = X.shape
-        lenscale = self._checkdim(d, lenscale)
+        lenscale = self._check_dim(d, lenscale)
 
         Phi = self.transform(X, lenscale)
         dPhi = []
@@ -662,7 +677,90 @@ class SigmoidalBasis(RadialBasis):
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
 
-class RandomRBF(RadialBasis):
+class _RandomKernelBasis(_LengthScaleBasis):
+    """Base class for the random kernel approximation bases."""
+
+    @slice_init
+    def __init__(self,
+                 nbases,
+                 Xdim,
+                 lenscale_init=Parameter(gamma(1.), Positive()),
+                 random_state=None
+                 ):
+
+        self.d = Xdim
+        self.n = nbases
+        self._random = check_random_state(random_state)
+        self.W = self._weightsamples()
+        self._init_lenscale(lenscale_init)
+
+    @slice_transform
+    def transform(self, X, lenscale=None):
+        """
+        Apply the random basis to X.
+
+        Parameters
+        ----------
+        X: ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+        lenscale: scalar or ndarray, optional
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X). If not input, this uses the value of the initial length
+            scale.
+
+        Returns
+        -------
+        ndarray:
+            of shape (N, 2*nbases) where nbases is number of random bases to
+            use, given in the constructor.
+        """
+        N, D = X.shape
+        lenscale = self._check_dim(D, lenscale)[:, np.newaxis]
+
+        WX = np.dot(X, self.W / lenscale)
+
+        return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
+
+    @slice_transform
+    def grad(self, X, lenscale=None):
+        r"""
+        Get the gradients of this basis w.r.t.\ the length scales.
+
+        Parameters
+        ----------
+        X: ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+        lenscale: scalar or ndarray, optional
+            scalar or array of shape (d,) length scales (one for each dimension
+            of X). If not input, this uses the value of the initial length
+            scale.
+
+        Returns
+        -------
+        ndarray:
+            of shape (N, 2*nbases[, d]) where d is number of lenscales (if not
+            ARD, i.e. scalar lenscale, this is just a 2D array). This is
+            :math:`\partial \Phi(\mathbf{X}) / \partial \mathbf{l}`
+        """
+        N, D = X.shape
+        lenscale = self._check_dim(D, lenscale)[:, np.newaxis]
+
+        WX = np.dot(X, self.W / lenscale)
+        sinWX = - np.sin(WX)
+        cosWX = np.cos(WX)
+
+        dPhi = []
+        for i, l in enumerate(lenscale):
+            dWX = np.outer(X[:, i], - self.W[i, :] / l**2)
+            dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX)) /
+                        np.sqrt(self.n))
+
+        return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
+
+
+class RandomRBF(_RandomKernelBasis):
     r"""
     Random RBF Basis -- Approximates an RBF kernel function.
 
@@ -674,7 +772,7 @@ class RandomRBF(RadialBasis):
         \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
             \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|^2}{2 l^2} \right)
 
-    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^d` for ARD).
 
     Parameters
     ----------
@@ -693,89 +791,12 @@ class RandomRBF(RadialBasis):
         random seed
     """
 
-    @slice_init
-    def __init__(self,
-                 nbases,
-                 Xdim,
-                 lenscale_init=Parameter(gamma(1.), Positive()),
-                 random_state=None
-                 ):
-
-        self.d = Xdim
-        self.n = nbases
-        self._random = check_random_state(random_state)
-        self.W = self._weightsamples()
-        self._init_lenscale(lenscale_init)
-
-    @slice_transform
-    def transform(self, X, lenscale):
-        """
-        Apply the random RBF to X.
-
-        Parameters
-        ----------
-        X: ndarray
-            (N, d) array of observations where N is the number of samples, and
-            d is the dimensionality of X.
-        lenscale: scalar or ndarray
-            scalar or array of shape (d,) length scales (one for each dimension
-            of X).
-
-        Returns
-        -------
-        ndarray:
-            of shape (N, 2*nbases) where nbases is number of random bases to
-            use, given in the constructor.
-        """
-        N, D = X.shape
-        lenscale = self._checkdim(D, lenscale)[:, np.newaxis]
-
-        WX = np.dot(X, self.W / lenscale)
-
-        return np.hstack((np.cos(WX), np.sin(WX))) / np.sqrt(self.n)
-
-    @slice_transform
-    def grad(self, X, lenscale):
-        r"""
-        Get the gradients of this basis w.r.t.\ the length scales.
-
-        Parameters
-        ----------
-        X: ndarray
-            (N, d) array of observations where N is the number of samples, and
-            d is the dimensionality of X.
-        lenscale: scalar or ndarray
-            scalar or array of shape (d,) length scales (one for each dimension
-            of X).
-
-        Returns
-        -------
-        ndarray:
-            of shape (N, 2*nbases[, d]) where d is number of lenscales (if not
-            ARD, i.e. scalar lenscale, this is just a 2D array). This is
-            :math:`\partial \Phi(\mathbf{X}) / \partial \mathbf{l}`
-        """
-        N, D = X.shape
-        lenscale = self._checkdim(D, lenscale)[:, np.newaxis]
-
-        WX = np.dot(X, self.W / lenscale)
-        sinWX = - np.sin(WX)
-        cosWX = np.cos(WX)
-
-        dPhi = []
-        for i, l in enumerate(lenscale):
-            dWX = np.outer(X[:, i], - self.W[i, :] / l**2)
-            dPhi.append(np.hstack((dWX * sinWX, dWX * cosWX)) /
-                        np.sqrt(self.n))
-
-        return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
-
     def _weightsamples(self):
         weights = self._random.randn(self.d, self.n)
         return weights
 
 
-class RandomLaplace(RandomRBF):
+class RandomLaplace(_RandomKernelBasis):
     r"""
     Random Laplace Basis -- Approximates a Laplace kernel function.
 
@@ -787,7 +808,7 @@ class RandomLaplace(RandomRBF):
         \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
             \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)
 
-    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^d` for ARD).
 
     Parameters
     ----------
@@ -811,7 +832,7 @@ class RandomLaplace(RandomRBF):
         return weights
 
 
-class RandomCauchy(RandomRBF):
+class RandomCauchy(_RandomKernelBasis):
     r"""
     Random Cauchy Basis -- Approximates a Cauchy kernel function.
 
@@ -823,7 +844,7 @@ class RandomCauchy(RandomRBF):
         \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
             \frac{1}{1 + (\| \mathbf{x} - \mathbf{x}' \| / l)^2}
 
-    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^d` for ARD).
 
     Parameters
     ----------
@@ -856,7 +877,27 @@ class RandomCauchy(RandomRBF):
         return X * np.sqrt(2 * Z)
 
 
-class RandomMatern32(RandomRBF):
+class _RandomMatern(_RandomKernelBasis):
+    """Base slass for random Matern kernel basis approximations."""
+
+    def _maternweight(self, p):
+
+        # p is the matern number (v = p + .5) and the two is a transformation
+        # of variables between Rasmussen 2006 p84 and the CF of a Multivariate
+        # Student t (see wikipedia). Also see "A Note on the Characteristic
+        # Function of Multivariate t Distribution":
+        #   http://ocean.kisti.re.kr/downfile/volume/kss/GCGHC8/2014/v21n1/
+        #   GCGHC8_2014_v21n1_81.pdf
+        # To sample from a m.v. t we use the formula
+        # from wikipedia, x = y * np.sqrt(df / u) where y ~ norm(0, I),
+        # u ~ chi2(df), then x ~ mvt(0, I, df)
+        df = 2 * (p + 0.5)
+        y = self._random.randn(self.d, self.n)
+        u = self._random.chisquare(df, size=(self.n,))
+        return y * np.sqrt(df / u)
+
+
+class RandomMatern32(_RandomMatern):
     r"""
     Random Matern 3/2 Basis -- Approximates a Matern 3/2 kernel function.
 
@@ -870,7 +911,7 @@ class RandomMatern32(RandomRBF):
             \exp
             \left(- \frac{\sqrt{3} \| \mathbf{x} - \mathbf{x}' \|}{l} \right)
 
-    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^d` for ARD).
 
     Parameters
     ----------
@@ -892,24 +933,8 @@ class RandomMatern32(RandomRBF):
     def _weightsamples(self):
         return self._maternweight(p=1)
 
-    def _maternweight(self, p):
 
-        # p is the matern number (v = p + .5) and the two is a transformation
-        # of variables between Rasmussen 2006 p84 and the CF of a Multivariate
-        # Student t (see wikipedia). Also see "A Note on the Characteristic
-        # Function of Multivariate t Distribution":
-        #   http://ocean.kisti.re.kr/downfile/volume/kss/GCGHC8/2014/v21n1/
-        #   GCGHC8_2014_v21n1_81.pdf
-        # To sample from a m.v. t we use the formula
-        # from wikipedia, x = y * np.sqrt(df / u) where y ~ norm(0, I),
-        # u ~ chi2(df), then x ~ mvt(0, I, df)
-        df = 2 * (p + 0.5)
-        y = self._random.randn(self.d, self.n)
-        u = self._random.chisquare(df, size=(self.n,))
-        return y * np.sqrt(df / u)
-
-
-class RandomMatern52(RandomMatern32):
+class RandomMatern52(_RandomMatern):
     r"""
     Random Matern 5/2 Basis -- Approximates a Matern 5/2 kernel function.
 
@@ -924,7 +949,7 @@ class RandomMatern52(RandomMatern32):
             \exp
             \left(- \frac{\sqrt{5} \| \mathbf{x} - \mathbf{x}' \|}{l} \right)
 
-    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^d` for ARD).
 
     Parameters
     ----------
@@ -947,7 +972,7 @@ class RandomMatern52(RandomMatern32):
         return self._maternweight(p=2)
 
 
-class FastFoodRBF(RandomRBF):
+class FastFoodRBF(_LengthScaleBasis):
     r"""
     Fast Food radial basis function.
 
@@ -959,7 +984,7 @@ class FastFoodRBF(RandomRBF):
         \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
             \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|^2}{2 l^2} \right)
 
-    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^D` for ARD).
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^d` for ARD).
 
     Parameters
     ----------
@@ -992,7 +1017,7 @@ class FastFoodRBF(RandomRBF):
         self._init_matrices()
 
     @slice_transform
-    def transform(self, X, lenscale):
+    def transform(self, X, lenscale=None):
         """
         Apply the Fast Food RBF basis to X.
 
@@ -1001,9 +1026,11 @@ class FastFoodRBF(RandomRBF):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        lenscale: scalar or ndarray
+        lenscale: scalar or ndarray, optional
             scalar or array of shape (d,) length scales (one for each dimension
-            of X).
+            of X).If not input, this uses the value of the initial length
+            scale.
+
 
         Returns
         -------
@@ -1011,27 +1038,29 @@ class FastFoodRBF(RandomRBF):
             of shape (N, 2*nbases) where nbases is number of random bases to
             use, given in the constructor (to nearest larger two power).
         """
-        lenscale = self._checkdim(X.shape[1], lenscale)
+        lenscale = self._check_dim(X.shape[1], lenscale)
 
         VX = self._makeVX(X / lenscale)
         Phi = np.hstack((np.cos(VX), np.sin(VX))) / np.sqrt(self.n)
         return Phi
 
     @slice_transform
-    def grad(self, X, lenscale):
+    def grad(self, X, lenscale=None):
         r"""
         Get the gradients of this basis w.r.t.\ the length scale.
 
-        parameters
+        Parameters
         ----------
         x: ndarray
             (n, d) array of observations where n is the number of samples, and
             d is the dimensionality of x.
         lenscale: scalar or ndarray
             scalar or array of shape (d,) length scales (one for each dimension
-            of x).
+            of x).If not input, this uses the value of the initial length
+            scale.
 
-        returns
+
+        Returns
         -------
         ndarray:
             shape (n, 2*nbases) where nbases is number of random rbf bases,
@@ -1039,7 +1068,7 @@ class FastFoodRBF(RandomRBF):
             :math:`\partial \phi(\mathbf{x}) / \partial l`
         """
         d = X.shape[1]
-        lenscale = self._checkdim(d, lenscale)
+        lenscale = self._check_dim(d, lenscale)
 
         VX = self._makeVX(X / lenscale)
         sinVX = - np.sin(VX)
@@ -1143,7 +1172,7 @@ class FastFoodGM(FastFoodRBF):
         self._init_matrices()
 
     @slice_transform
-    def transform(self, X, mean, lenscale):
+    def transform(self, X, mean=None, lenscale=None):
         """
         Apply the spectral mixture component basis to X.
 
@@ -1152,10 +1181,12 @@ class FastFoodGM(FastFoodRBF):
         X: ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
-        mean: ndarray
+        mean: ndarray, optional
             array of shape (d,) frequency means (one for each dimension of X).
-        lenscale: ndarray
-            array of shape (d,) length scales (one for each dimension of X).
+            If not input, this uses the value of the initial mean.
+        lenscale: ndarray, optional
+            array of shape (d,) length scales (one for each dimension of X). If
+            not input, this uses the value of the initial length scale.
 
         Returns
         -------
@@ -1163,8 +1194,8 @@ class FastFoodGM(FastFoodRBF):
             of shape (N, 4*nbases) where nbases is number of random bases to
             use, given in the constructor (to nearest larger two power).
         """
-        mean = self._checkdim(X.shape[1], mean, paramind=0)
-        lenscale = self._checkdim(X.shape[1], lenscale, paramind=1)
+        mean = self._check_dim(X.shape[1], mean, paramind=0)
+        lenscale = self._check_dim(X.shape[1], lenscale, paramind=1)
 
         VX = self._makeVX(X / lenscale)
         mX = X.dot(mean)[:, np.newaxis]
@@ -1175,21 +1206,23 @@ class FastFoodGM(FastFoodRBF):
         return Phi
 
     @slice_transform
-    def grad(self, X, mean, lenscale):
+    def grad(self, X, mean=None, lenscale=None):
         r"""
         Get the gradients of this basis w.r.t.\ the mean and length scales.
 
-        parameters
+        Parameters
         ----------
         x: ndarray
             (n, d) array of observations where n is the number of samples, and
             d is the dimensionality of x.
-        mean: ndarray
+        mean: ndarray, optional
             array of shape (d,) frequency means (one for each dimension of X).
-        lenscale: ndarray
-            array of shape (d,) length scales (one for each dimension of X).
+            If not input, this uses the value of the initial mean.
+        lenscale: ndarray, optional
+            array of shape (d,) length scales (one for each dimension of X). If
+            not input, this uses the value of the initial length scale.
 
-        returns
+        Returns
         -------
         ndarray:
             shape (n, 4*nbases) where nbases is number of random rbf bases,
@@ -1201,8 +1234,8 @@ class FastFoodGM(FastFoodRBF):
             :math:`\partial \phi(\mathbf{x}) / \partial l`
         """
         d = X.shape[1]
-        mean = self._checkdim(d, mean, paramind=0)
-        lenscale = self._checkdim(d, lenscale, paramind=1)
+        mean = self._check_dim(d, mean, paramind=0)
+        lenscale = self._check_dim(d, lenscale, paramind=1)
 
         VX = self._makeVX(X / lenscale)
         mX = X.dot(mean)[:, np.newaxis]

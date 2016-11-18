@@ -167,16 +167,18 @@ regressor of the following form,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
     \gausC{\targs_n}{\feats_n\T\weights, \var}, \\
-    \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \reg\ident{D}},
+    \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \Reg},
 \end{align}
 where $\feats_n := \func{\featsym}{\inss_n, \param}{}$ is a feature, or basis,
-function that $\featsym \real{d} \to \real{D}$. This is the same algorithm
-described in~\citet[Chapter 2]{Rasmussen2006}. We then:
+function that maps $\featsym : \real{d} \to \real{D}$, and $\Reg \in
+\real{D\times D}$ is a diagonal matrix (i.e.~it could be $\reg\ident{D}$) that
+has the effect of regularising the magnitude of the weights. This is the same
+algorithm described in~\citet[Chapter 2]{Rasmussen2006}. We then:
 \begin{itemize}
-    \item Optimise $\var, \reg$ and $\param$ w.r.t.\ log-marginal likelihood,
+    \item Optimise $\var, \Reg$ and $\param$ w.r.t.\ log-marginal likelihood,
         \begin{equation}
-            \log \probC{\targ}{\var, \reg, \param} =
-            \log \gausC{\targ}{\mathbf{0}, \var\ident{N} + \reg \feat\T\feat},
+            \log \probC{\targ}{\var, \Reg, \param} =
+            \log \gausC{\targ}{\mathbf{0}, \var\ident{N} + \feat\T\Reg\feat},
         \end{equation}
         where $\feat \in \real{N \times D}$ is the concatenation of all the
         features, $\feats_n$. Note this results in the covariance of the
@@ -185,7 +187,7 @@ described in~\citet[Chapter 2]{Rasmussen2006}. We then:
     \item Solve analytically for the posterior over weights, $\weights | \targ
         \sim \gaus{\pomean, \pocov}$ given the above hyperparameters, where,
         \begin{align*}
-            \pocov &= \sbrac{\reg \ident{D} + \frac{1}{\var}
+            \pocov &= \sbrac{\Reg\inv + \frac{1}{\var}
                 \feat\T \feat}\inv, \\
             \pomean &= \frac{1}{\var} \pocov \feat\T \targ.
         \end{align*}
@@ -215,19 +217,18 @@ The ELBO for this model is,
     \elbo = \sum^N_{n=1} 
     \expec{q}{\log\gausC{\targs_n}{\feats_n\T\weights, \var}}
     - \KL{\gausC{\weights}{\pomean, \pocov}}
-        {\gausC{\weights}{\mathbf{0}, \reg\ident{D}}}.
+        {\gausC{\weights}{\mathbf{0}, \Reg}}.
     \label{eq:slmobj}
 \end{equation}
 More specifically,
 \begin{align*}
-    \expec{q}{\log\gausC{\targs_n}{\feats_n\T\weights, \var}} =&
+    \expec{q}{\log\gausC{\targs_n}{\feats_n\T\weights, \var}} &=
     \log \gausC{\targs_n}{\feats_n\T\pomean, \var}
     - \frac{1}{2 \var} \trace{\feats_n\T\feats_n\pocov}, \\
     \KL{\gausC{\weights}{\pomean, \pocov}}
-        {\gausC{\weights}{\mathbf{0}, \reg\ident{D}}} =&
-        \frac{1}{2 \reg} \sbrac{\trace{\pocov} + \pomean\T\pomean} 
-        - \frac{1}{2} \log\deter{\pocov} \\
-        &+ \frac{D}{2} \brac{\log \reg - 1}.
+        {\gausC{\weights}{\mathbf{0}, \Reg}} &=
+        \frac{1}{2} \sbrac{\trace{\Reg\inv\pocov} + \pomean\T\Reg\inv\pomean 
+        -  \log\deter{\pocov} + \log\deter{\Reg} - D}
 \end{align*}
 We have not implemented a stochastic gradient version of this algorithm since
 it still requires a matrix solve of a $D \times D$ matrix, and so is \bigo{D^3}
@@ -246,7 +247,7 @@ linear model. The general form of the model implemented by this algorithm is,
     \text{Likelihood:} \quad &\prod^N_{n=1} 
         \probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}, 
         \label{eq:glmlike} \\
-    \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \reg\ident{D}},
+    \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \Reg},
 \end{align}
 for an arbitrary univariate likelihood, $\prob{\cdot}$, with an appropriate
 transformation (inverse link) function, $\activ{\cdot}$, and parameter(s),
@@ -278,7 +279,7 @@ is,
     \expec{q}{\log\probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}}
     - \KL{\textstyle\frac{1}{K}\textstyle\sum_{k}
             \gausC{\weights}{\pomean_k, \dpocov_k}}
-        {\gausC{\weights}{\mathbf{0}, \reg\ident{D}}}.
+        {\gausC{\weights}{\mathbf{0}, \Reg}}.
     \label{eq:glmobj}
 \end{equation}
 This can be expanded,
@@ -287,7 +288,7 @@ This can be expanded,
     \expec{q_k}{\log\probC{\targs_n}
         {\activ{\feats_n\T\weights}, \lparam}}
     + \frac{1}{K} \sum^K_{k=1}
-        \expec{q_k}{\log\gausC{\weights}{\mathbf{0}, \reg\ident{D}}} \\
+        \expec{q_k}{\log\gausC{\weights}{\mathbf{0}, \Reg}} \\
     + \entropy{\textstyle\frac{1}{K}\textstyle\sum_{k}
             \gausC{\weights}{\pomean_k, \dpocov_k}},
     \label{eq:glmobj_exp}
@@ -327,8 +328,8 @@ final auto-encoding variational Bayes objective for our GLM is,
     \elbo \approx \frac{1}{K} \sum^K_{k=1} \Bigg[
     \frac{1}{L} \sum^L_{l=1} \sum^N_{n=1} 
     \log\probC{\targs_n} {\activ{\feats_n\T f_k^{(l)}}, \lparam}
-    + \log\gausC{\pomean_k}{\mathbf{0}, \reg\ident{D}}
-    - \frac{1}{2\reg} \trace{\dpocov_k} \\
+    + \log\gausC{\pomean_k}{\mathbf{0}, \Reg}
+    - \frac{1}{2} \trace{\Reg\inv\dpocov_k} \\
     - \log \sum_{j=1}^K \frac{1}{K}
     \gausC{\pomean_k}{\pomean_j, \dpocov_k + \dpocov_j}
     \Bigg].

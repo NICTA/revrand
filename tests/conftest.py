@@ -95,3 +95,8 @@ def make_cov():
     iSn = np.linalg.pinv(Sn)
 
     return X, S, iS, Sn, iSn
+
+
+@pytest.fixture(params=[True, False])
+def realhypers(request):
+    return request.param

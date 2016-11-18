@@ -126,7 +126,7 @@ def test_apply_grad(make_gaus_data):
     assert gs[1].shape == (d,)
 
 
-def test_bases(make_gaus_data):
+def test_bases(make_gaus_data, realhypers):
 
     X, _, _, _ = make_gaus_data
     N, d = X.shape
@@ -154,20 +154,36 @@ def test_bases(make_gaus_data):
                            lenscale_init=Parameter(np.ones(d), Positive())),
              ]
 
-    hypers = [(),
-              (),
-              (),
-              (1.,),
-              (np.ones(d),),
-              (1.,),
-              (np.ones(d),),
-              (1.,),
-              (np.ones(d),),
-              (1.,),
-              (np.ones(d),),
-              (np.ones(d), np.ones(d)),
-              (np.ones(d), np.ones(d))
-              ]
+    if realhypers:
+        hypers = [(),
+                  (),
+                  (),
+                  (1.,),
+                  (np.ones(d),),
+                  (1.,),
+                  (np.ones(d),),
+                  (1.,),
+                  (np.ones(d),),
+                  (1.,),
+                  (np.ones(d),),
+                  (np.ones(d), np.ones(d)),
+                  (np.ones(d), np.ones(d))
+                  ]
+    else:
+        hypers = [(),
+                  (),
+                  (),
+                  (None,),
+                  (None,),
+                  (None,),
+                  (None,),
+                  (None,),
+                  (None,),
+                  (None,),
+                  (None,),
+                  (None, None),
+                  (None, None),
+                  ]
 
     for b, h in zip(bases, hypers):
         P = b.transform(X, *h)

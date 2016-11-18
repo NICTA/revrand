@@ -182,7 +182,7 @@ class Parameter(object):
 
     Attributes
     ----------
-    value : scalar, ndarray, scipy.stats, optional
+    value : None, scalar, ndarray, scipy.stats, optional
         a value or distribution to associate with this parameter. This is
         typically used as an initial value for an optimizer, and if a random
         starts optimiser is used (eg. revrand.optimize.structured_minimizer) it
@@ -256,7 +256,9 @@ class Parameter(object):
     True
     """
 
-    def __init__(self, value=[], bounds=Bound(), shape=()):
+    def __init__(self, value=None, bounds=Bound(), shape=()):
+
+        value = [] if value is None else value
 
         if not hasattr(value, 'rvs'):
             if np.any(value) and not bounds.check(value):

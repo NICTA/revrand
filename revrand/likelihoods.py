@@ -277,11 +277,21 @@ class Gaussian(Bernoulli):
         an optimiser to learn the variance parameter of this object.
     """
 
-    def __init__(self, var_init=Parameter(gamma(.1, scale=1), Positive())):
+    def __init__(self, var_init=Parameter(gamma(1., scale=1), Positive())):
 
         self.params = var_init
 
-    def loglike(self, y, f, var):
+    def _check_param(self, param):
+
+        if param is None:
+            return self.params.value
+
+        if not self.params.bounds.check(param):
+            raise ValueError("Input parameter is out of bounds!")
+
+        return param
+
+    def loglike(self, y, f, var=None):
         r"""
         Gaussian log likelihood.
 
@@ -292,8 +302,9 @@ class Gaussian(Bernoulli):
         f: ndarray
             latent function from the GLM prior (:math:`\mathbf{f} =
             \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
+        var: float, ndarray, optional
+            The variance of the distribution, if not input, the initial value
+            of variance is used.
 
         Returns
         -------
@@ -302,6 +313,7 @@ class Gaussian(Bernoulli):
             likelihood.
         """
         # way faster than calling norm.logpdf
+        var = self._check_param(var)
         y, f = np.broadcast_arrays(y, f)
         ll = - 0.5 * (np.log(2 * np.pi * var) + (y - f)**2 / var)
         return ll
@@ -315,14 +327,16 @@ class Gaussian(Bernoulli):
         f: ndarray
             latent function from the GLM prior (:math:`\mathbf{f} =
             \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
+        var: float, ndarray, optional
+            The variance of the distribution, if not input, the initial value
+            of variance is used.
 
         Returns
         -------
         Ey: ndarray
             expected value of y, :math:`\mathbb{E}[\mathbf{y}|\mathbf{f}]`.
         """
+        var = self._check_param(var)
         return f
 
     def df(self, y, f, var):
@@ -336,14 +350,16 @@ class Gaussian(Bernoulli):
         f: ndarray
             latent function from the GLM prior (:math:`\mathbf{f} =
             \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
+        var: float, ndarray, optional
+            The variance of the distribution, if not input, the initial value
+            of variance is used.
 
         Returns
         -------
         df: ndarray
             the derivative :math:`\partial \log p(y|f) / \partial f`
         """
+        var = self._check_param(var)
         y, f = np.broadcast_arrays(y, f)
         return (y - f) / var
 
@@ -359,8 +375,9 @@ class Gaussian(Bernoulli):
         f: ndarray
             latent function from the GLM prior (:math:`\mathbf{f} =
             \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
+        var: float, ndarray, optional
+            The variance of the distribution, if not input, the initial value
+            of variance is used.
 
         Returns
         -------
@@ -369,6 +386,7 @@ class Gaussian(Bernoulli):
             :math:`\partial \log p(y|f, \sigma^2)/ \partial \sigma^2`
             where :math:`sigma^2` is the variance.
         """
+        var = self._check_param(var)
         y, f = np.broadcast_arrays(y, f)
         ivar = 1. / var
         return 0.5 * (((y - f) * ivar)**2 - ivar)
@@ -384,14 +402,16 @@ class Gaussian(Bernoulli):
         f: ndarray
             latent function from the GLM prior (:math:`\mathbf{f} =
             \boldsymbol\Phi \mathbf{w}`)
-        var: float, ndarray
-            The variance of the distribution
+        var: float, ndarray, optional
+            The variance of the distribution, if not input, the initial value
+            of variance is used.
 
         Returns
         -------
         cdf: ndarray
             Cumulative density function evaluated at y.
         """
+        var = self._check_param(var)
         return norm.cdf(y, loc=f, scale=np.sqrt(var))
 
 
