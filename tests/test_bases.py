@@ -27,7 +27,7 @@ def test_simple_concat(make_gaus_data):
 
     D = 200
     base += bs.RandomRBF(nbases=D, Xdim=d,
-                         lenscale_init=Parameter(np.ones(d), Positive()))
+                         lenscale=Parameter(np.ones(d), Positive()))
     P = base.transform(X, 1., np.ones(d))
 
     assert P.shape == (N, (D + d) * 2 + N)
@@ -41,7 +41,7 @@ def test_concat_params():
     base = bs.LinearBasis(onescol=True) + bs.RandomMatern52(
         nbases=D,
         Xdim=d,
-        lenscale_init=Parameter(1., Positive())
+        lenscale=Parameter(1., Positive())
     )
 
     assert np.isscalar(base.params.value)
@@ -49,7 +49,7 @@ def test_concat_params():
     base = bs.LinearBasis(onescol=True) + bs.RandomMatern52(
         nbases=D,
         Xdim=d,
-        lenscale_init=Parameter(np.ones(d), Positive())
+        lenscale=Parameter(np.ones(d), Positive())
     )
 
     assert len(base.params.value) == d
@@ -57,7 +57,7 @@ def test_concat_params():
     base += bs.RandomMatern52(
         nbases=D,
         Xdim=d,
-        lenscale_init=Parameter(1., Positive())
+        lenscale=Parameter(1., Positive())
     )
 
     assert len(base.params) == 2
@@ -80,8 +80,7 @@ def test_grad_concat(make_gaus_data):
 
     D = 200
     base += bs.RandomRBF(nbases=D, Xdim=d,
-                         lenscale_init=Parameter(gamma(1), Positive(),
-                                                 shape=(d,)))
+                         lenscale=Parameter(gamma(1), Positive(), shape=(d,)))
     G = base.grad(X, 1., np.ones(d))
     dims = [(N, N + (D + d) * 2), (N, N + (D + d) * 2, d)]
 
@@ -111,14 +110,14 @@ def test_apply_grad(make_gaus_data):
 
     D = 200
     base = bs.RandomRBF(nbases=D, Xdim=d,
-                        lenscale_init=Parameter(np.ones(d), Positive()))
+                        lenscale=Parameter(np.ones(d), Positive()))
     obj = lambda dPhi: fun(base.transform(X, np.ones(d)), dPhi)
 
     assert bs.apply_grad(obj, base.grad(X, np.ones(d))).shape == (d,)
 
     base = bs.LinearBasis(onescol=False) + bs.RadialBasis(centres=X) \
         + bs.RandomRBF(nbases=D, Xdim=d,
-                       lenscale_init=Parameter(np.ones(d), Positive()))
+                       lenscale=Parameter(np.ones(d), Positive()))
     obj = lambda dPhi: fun(base.transform(X, 1., np.ones(d)), dPhi)
 
     gs = bs.apply_grad(obj, base.grad(X, 1., np.ones(d)))
@@ -137,21 +136,20 @@ def test_bases(make_gaus_data, realhypers):
              bs.PolynomialBasis(order=2),
              bs.RadialBasis(centres=X[:nC, :]),
              bs.RadialBasis(centres=X[:nC, :],
-                            lenscale_init=Parameter(np.ones(d), Positive())),
+                            lenscale=Parameter(np.ones(d), Positive())),
              bs.SigmoidalBasis(centres=X[:nC, :]),
              bs.SigmoidalBasis(centres=X[:nC, :],
-                               lenscale_init=Parameter(np.ones(d),
-                                                       Positive())),
+                               lenscale=Parameter(np.ones(d), Positive())),
              bs.RandomRBF(Xdim=d, nbases=10),
              bs.RandomRBF(Xdim=d, nbases=10,
-                          lenscale_init=Parameter(np.ones(d), Positive())),
+                          lenscale=Parameter(np.ones(d), Positive())),
              bs.FastFoodRBF(Xdim=d, nbases=10),
              bs.FastFoodRBF(Xdim=d, nbases=10,
-                            lenscale_init=Parameter(np.ones(d), Positive())),
+                            lenscale=Parameter(np.ones(d), Positive())),
              bs.FastFoodGM(Xdim=d, nbases=10),
              bs.FastFoodGM(Xdim=d, nbases=10,
-                           mean_init=Parameter(np.zeros(d), Bound()),
-                           lenscale_init=Parameter(np.ones(d), Positive())),
+                           mean=Parameter(np.zeros(d), Bound()),
+                           lenscale=Parameter(np.ones(d), Positive())),
              ]
 
     if realhypers:
@@ -223,7 +221,7 @@ def test_slicing(make_gaus_data):
     base = bs.LinearBasis(onescol=False, apply_ind=[0]) \
         + bs.RandomRBF(Xdim=1, nbases=1, apply_ind=[1]) \
         + bs.RandomRBF(Xdim=2, nbases=3,
-                       lenscale_init=Parameter(np.ones(2), Positive()),
+                       lenscale=Parameter(np.ones(2), Positive()),
                        apply_ind=[1, 0])
 
     P = base.transform(X, 1., np.ones(d))
@@ -231,3 +229,25 @@ def test_slicing(make_gaus_data):
 
     dP = base.grad(X, 1., np.ones(d))
     assert list(dP)[0].shape == (N, 9)
+
+
+def test_regularizer(make_gaus_data):
+
+    X, _, _, _ = make_gaus_data
+    N, d = X.shape
+    nbases1, nbases2 = 10, 5
+
+    # Single basis
+    base = bs.LinearBasis(regularizer=Parameter(2, Positive()))
+    diag, slices = base.regularizer_diagonal(X)
+    assert base.regularizer.value == 2
+    assert all(diag == np.full(d, 2))
+    assert slices == slice(None)
+
+    # Basis cat
+    base += bs.RandomRBF(Xdim=d, nbases=nbases1) \
+        + bs.RandomMatern32(Xdim=d, nbases=nbases2)
+    dims = np.cumsum([0, d, 2 * nbases1, 2 * nbases2])
+    diag, slices = base.regularizer_diagonal(X)
+    for db, de, s in zip(dims[:-1], dims[1:], slices):
+        assert s == slice(db, de)

@@ -8,6 +8,7 @@ Basis Functions
 .. autosummary::
     :toctree: generated/
 
+    Basis
     BiasBasis
     LinearBasis
     PolynomialBasis

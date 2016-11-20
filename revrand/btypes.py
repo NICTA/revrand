@@ -321,6 +321,11 @@ class Parameter(object):
         """Test if this Parameter was initialised with a distribution."""
         return self.dist is not None
 
+    @property
+    def is_scalar(self):
+        """Test if the Parameter is for a scalar value."""
+        return self.has_value and self.shape == ()
+
 
 def ravel(parameter, random_state=None):
     """

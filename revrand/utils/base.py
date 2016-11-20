@@ -79,8 +79,44 @@ def atleast_list(a):
     -------
     list or generator:
         untounched if :code:`a` was a generator or list, otherwise :code:`[a]`.
+
+    Examples
+    --------
+    >>> a = 1.
+    >>> atleast_list(a)
+    [1.0]
+    >>> a = [1.]
+    >>> atleast_list(a)
+    [1.0]
     """
     return a if isinstance(a, list) or isgenerator(a) else [a]
+
+
+def atleast_tuple(a):
+    """
+    Promote an object to a tuple if not a tuple or generator.
+
+    Parameters
+    ----------
+    a: object
+        any object you want to at least be a tuple with one element
+
+    Returns
+    -------
+    tuple or generator:
+        untounched if :code:`a` was a generator or tuple, otherwise
+        :code:`(a,)`.
+
+    Examples
+    --------
+    >>> a = 1.
+    >>> atleast_tuple(a)
+    (1.0,)
+    >>> a = (1.,)
+    >>> atleast_tuple(a)
+    (1.0,)
+    """
+    return a if isinstance(a, tuple) or isgenerator(a) else (a,)
 
 
 def couple(f, g):
