@@ -22,7 +22,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
 from sklearn.utils import check_random_state
 
-from .utils import atleast_list
+from .utils import atleast_list, issequence
 from .mathfun.linalg import solve_posdef
 from .optimize import structured_minimizer, logtrick_minimizer
 from .btypes import Parameter, Positive
@@ -42,8 +42,6 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         A basis object, see the basis_functions module.
     var : Parameter, optional
         observation variance initial value.
-    regulariser : Parameter, optional
-        weight regulariser (variance) initial value.
     tol : float, optional
         optimiser function tolerance convergence criterion.
     maxiter : int, optional
@@ -59,7 +57,6 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
     def __init__(self,
                  basis,
                  var=Parameter(gamma(1.), Positive()),
-                 regulariser=Parameter(gamma(1.), Positive()),
                  tol=1e-8,
                  maxiter=1000,
                  nstarts=100,
@@ -68,7 +65,6 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         self.basis = basis
         self.var = var
-        self.regulariser = regulariser
         self.tol = tol
         self.maxiter = maxiter
         self.nstarts = nstarts
@@ -114,7 +110,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         self.obj_ = -np.inf
 
         # Make list of parameters and decorate optimiser to undestand this
-        params = [self.var, self.regulariser, self.basis.params]
+        params = [self.var, self.basis.regularizer, self.basis.params]
         nmin = structured_minimizer(logtrick_minimizer(minimize))
 
         # Close over objective and learn parameters
@@ -130,13 +126,13 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                    )
 
         # Upack learned parameters and report
-        self.var_, self.regulariser_, self.hypers_ = res.x
+        self.var_, self.regularizer_, self.hypers_ = res.x
 
         log.info("Done! ELBO = {}, var = {}, reg = {}, hypers = {}, "
                  "message = {}."
                  .format(-res['fun'],
                          self.var_,
-                         self.regulariser_,
+                         self.regularizer_,
                          self.hypers_,
                          res.message)
                  )
@@ -150,31 +146,29 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         PhiPhi = Phi.T.dot(Phi)
         N, D = Phi.shape
 
+        # Get regularizer
+        L, slices = self.basis.regularizer_diagonal(X, *atleast_list(reg))
+        iL = 1. / L
+
         # Posterior Parameters
-        iC = np.diag(np.ones(D) / reg) + PhiPhi / var
+        iC = np.diag(iL) + PhiPhi / var
         C, logdetiC = solve_posdef(iC, np.eye(D))
         logdetC = - logdetiC
         m = C.dot(Phi.T.dot(y)) / var
 
         # Common calcs
         TrPhiPhiC = (PhiPhi * C).sum()
-        TrC = np.trace(C)
         Err = y - Phi.dot(m)
         sqErr = (Err**2).sum()
-        mm = (m**2).sum()
 
         # Calculate ELBO
         ELBO = -0.5 * (N * np.log(2 * np.pi * var)
                        + sqErr / var
                        + TrPhiPhiC / var
-                       + (TrC + mm) / reg
+                       + ((m**2 + C.diagonal()) * iL).sum()
                        - logdetC
-                       + D * np.log(reg)
+                       + np.log(L).sum()
                        - D)
-
-        # NOTE: In the above, TriPhiPhiC / var = D - TrC / reg when we
-        # analytically solve for C, but we need the trace terms for gradients
-        # anyway, so we'll keep them.
 
         # Cache optimal parameters so we don't have to recompute them later
         if ELBO > self.obj_:
@@ -189,7 +183,11 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         dvar = 0.5 * (-N + (sqErr + TrPhiPhiC) / var) / var
 
         # Grad reg
-        dreg = 0.5 * ((TrC + mm) / reg - D) / reg
+        def dreg(s):
+            return - 0.5 * (((m[s]**2 + C[s, s].diagonal()) * iL[s]**2).sum()
+                            - iL[s].sum())
+
+        dL = list(map(dreg, slices)) if issequence(slices) else dreg(slices)
 
         # Get structured basis function gradients
         def dhyps(dPhi):
@@ -198,7 +196,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
 
         dhypers = apply_grad(dhyps, self.basis.grad(X, *atleast_list(hypers)))
 
-        return -ELBO, [-dvar, -dreg, dhypers]
+        return -ELBO, [-dvar, dL, dhypers]
 
     def predict(self, X):
         """
@@ -237,7 +235,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             The expected variance of y_star for the query inputs, X_star of
             shape (N_star,).
         """
-        check_is_fitted(self, ['var_', 'regulariser_', 'weights_',
+        check_is_fitted(self, ['var_', 'regularizer_', 'weights_',
                                'covariance_', 'hypers_'])
         X = check_array(X)
 

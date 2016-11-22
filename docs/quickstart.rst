@@ -23,7 +23,7 @@ Bayesian Linear Regression Example
 ----------------------------------
 
 Here is a very quick example of how to use Bayesian linear regression
-(:ref:`slm`) with optimisation of the likelihood noise, regulariser and basis
+(:ref:`slm`) with optimisation of the likelihood noise, regularizer and basis
 function parameters. The default behaviour of the algorithms in revrand is to
 randomly sample and evaluate these hyperparameters before starting optimization
 from the best random candidates. This is because the objective functions may be
@@ -52,7 +52,7 @@ Assuming we already have training noisy targets ``y``, inputs
         + RandomRBF(nbases=300, Xdim=X.shape[1], init_lenscale)
 
     # Learn regression parameters and predict (by default, this will evaluate
-    #  100 random values for the length scale, variance and regulariser before
+    #  100 random values for the length scale, variance and regularizer before
     #  starting optimisation from the best candidates)
     slm = StandardLinearModel(basis)
     slm.fit(X, y)

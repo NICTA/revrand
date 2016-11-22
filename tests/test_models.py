@@ -237,9 +237,8 @@ def test_sklearn_clone(make_gaus_data):
     for k in glm_keys:
         assert glm.get_params()[k] == glm_clone.get_params()[k]
 
-    # Manually test likelihood and regulariser objects
+    # Manually test likelihood objects
     assert glm_clone.likelihood.params.value == glm.likelihood.params.value
-    assert glm_clone.regulariser.value == glm.regulariser.value
 
     # scalar values
     slm_keys = [
@@ -250,6 +249,5 @@ def test_sklearn_clone(make_gaus_data):
     for k in slm_keys:
         assert slm.get_params()[k] == slm_clone.get_params()[k]
 
-    # Manually test variance and regulariser objects
+    # Manually test variance objects
     assert slm_clone.var.value == slm.var.value
-    assert slm_clone.regulariser.value == slm.regulariser.value

@@ -24,7 +24,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, check_X_y, check_array
 from sklearn.utils import check_random_state
 
-from .utils import atleast_list
+from .utils import atleast_list, issequence
 from .mathfun.special import logsumexp
 from .basis_functions import apply_grad
 from .optimize import sgd, structured_sgd, logtrick_sgd
@@ -38,6 +38,7 @@ log = logging.getLogger(__name__)
 # Module settings
 WGTRND = norm()  # Sampling distribution over mixture weights
 COVRND = gamma(a=2, scale=0.5)  # Sampling distribution over mixture covariance
+LOGITER = 500  # Number of SGD iterations between logging ELBO and hypers
 
 
 class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
@@ -52,8 +53,6 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         A likelihood object, see the likelihoods module.
     basis : Basis
         A basis object, see the basis_functions module.
-    regulariser : Parameter, optional
-        weight regulariser (variance) initial value/distribution.
     K : int, optional
         Number of diagonal Gaussian components to use to approximate the
         posterior distribution.
@@ -116,7 +115,6 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
     def __init__(self,
                  likelihood,
                  basis,
-                 regulariser=Parameter(gamma(1., scale=1.), Positive()),
                  K=10,
                  maxiter=3000,
                  batch_size=10,
@@ -128,7 +126,6 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
 
         self.likelihood = likelihood
         self.basis = basis
-        self.regulariser = regulariser
         self.K = K
         self.maxiter = maxiter
         self.batch_size = batch_size
@@ -169,7 +166,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         # Pack params
         params = [Parameter(WGTRND, Bound(), shape=(self.D_, self.K)),
                   Parameter(COVRND, Positive(), shape=(self.D_, self.K)),
-                  self.regulariser,
+                  self.basis.regularizer,
                   self.likelihood.params,
                   self.basis.params]
 
@@ -190,14 +187,14 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         # Unpack params
         (self.weights_,
          self.covariance_,
-         self.regulariser_,
+         self.regularizer_,
          self.like_hypers_,
          self.basis_hypers_
          ) = res.x
 
         log.info("Finished! reg = {}, likelihood_hypers = {}, "
                  "basis_hypers = {}, message: {}."
-                 .format(self.regulariser_,
+                 .format(self.regularizer_,
                          self.like_hypers_,
                          self.basis_hypers_,
                          res.message))
@@ -216,6 +213,10 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         # Basis function
         Phi = self.basis.transform(X, *atleast_list(bpars))  # M x D
 
+        # Get regularizer
+        L, slices = self.basis.regularizer_diagonal(X, *atleast_list(reg))
+        iL = 1. / L[:, np.newaxis]
+
         # Posterior entropy lower bound terms
         logNkl = _qmatrix(m, C)
         logzk = logsumexp(logNkl, axis=0)
@@ -230,7 +231,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         EdPhi = np.zeros_like(Phi)
 
         # Log status, only do this occasionally to save cpu
-        dolog = bool((self.__it % 500 == 0) or (self.__it == self.maxiter - 1))
+        dolog = (self.__it % LOGITER == 0) or (self.__it == self.maxiter - 1)
 
         # Only calculate ELBO when sampling parameters (__it < 0) or logging
         calc_ll = dolog or (self.__it < 0)
@@ -252,17 +253,21 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
             mkmj = m[:, k][:, np.newaxis] - m
             iCkCj = 1. / (C[:, k][:, np.newaxis] + C)
 
-            dm[:, k] = (self.B_ * Edmk - m[:, k] / reg
+            dm[:, k] = (self.B_ * Edmk - m[:, k] / L
                         + (iCkCj * mkmj).dot(alpha)) / K
-            dC[:, k] = (self.B_ * EdCk - 1. / reg
+            dC[:, k] = (self.B_ * EdCk - 1. / L
                         + (iCkCj - (mkmj * iCkCj)**2).dot(alpha)) / (2 * K)
 
             # Likelihood parameter gradients
             for i, Edlpar in enumerate(Edlpars):
                 dlpars[i] -= Edlpar / K
 
-        # Regulariser gradient
-        dreg = 0.5 * (((m**2).sum() + C.sum()) / (reg**2 * K) - D / reg)
+        # Regularizer gradient
+        def dreg(s):
+            dL = 0.5 * (((m[s]**2 + C[s]) * iL[s]**2).sum() / K - iL[s].sum())
+            return -dL
+
+        dL = list(map(dreg, slices)) if issequence(slices) else dreg(slices)
 
         # Basis function parameter gradients
         dtheta = lambda dPhi: -(EdPhi * dPhi).sum()
@@ -272,8 +277,9 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         ELBO = -np.inf
         if calc_ll:
             ELBO = (Ell.sum() * self.B_
-                    - 0.5 * D * K * np.log(2 * np.pi * reg)
-                    - 0.5 * ((m**2).sum() + C.sum()) / reg
+                    - 0.5 * D * K * np.log(2 * np.pi)
+                    - 0.5 * K * np.log(L).sum()
+                    - 0.5 * ((m**2 + C) * iL).sum()
                     - logzk.sum() + np.log(K)) / K
 
         if dolog:
@@ -284,7 +290,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
 
         self.__it += 1
 
-        return -ELBO, [-dm, -dC, -dreg, dlpars, dbpars]
+        return -ELBO, [-dm, -dC, dL, dlpars, dbpars]
 
     def _reparam_k(self, mk, Ck, y, Phi, largs, calc_ll=True):
         # AEVB's reparameterisation trick
@@ -590,7 +596,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
             samples for an observation, n in Ns.
         """
         check_is_fitted(self, ['weights_', 'covariance_', 'basis_hypers_',
-                               'like_hypers_', 'regulariser_'])
+                               'like_hypers_', 'regularizer_'])
         X = check_array(X)
         D, K = self.weights_.shape
 

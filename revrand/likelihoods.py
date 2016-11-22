@@ -272,14 +272,14 @@ class Gaussian(Bernoulli):
 
     Parameters
     ----------
-    var_init: Parameter, optional
+    var: Parameter, optional
         A scalar Parameter describing the initial point and bounds for
         an optimiser to learn the variance parameter of this object.
     """
 
-    def __init__(self, var_init=Parameter(gamma(1., scale=1), Positive())):
+    def __init__(self, var=Parameter(gamma(1., scale=1), Positive())):
 
-        self.params = var_init
+        self.params = var
 
     def _check_param(self, param):
 

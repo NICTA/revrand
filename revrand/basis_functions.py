@@ -224,6 +224,8 @@ class Basis(object):
         if regularizer is not None:
             if not regularizer.is_scalar:
                 raise ValueError("Regularizer parameters have to be scalar!")
+            if regularizer.bounds.lower <= 0:
+                raise ValueError("Regularizer has to be bounded below by 0!")
             self._regularizer = regularizer
 
     @slice_transform
@@ -326,7 +328,7 @@ class Basis(object):
         unless you are doing something very interesting...
         """
         reg = self.regularizer.value if regularizer is None else regularizer
-        diag = np.full(self.get_dim(X), reg)
+        diag = np.full(self.get_dim(X), reg, dtype=float)
         return diag, slice(None)
 
     def _transform_popargs(self, X, *args):
@@ -1493,7 +1495,7 @@ class BasisCat(object):
     def transform(self, X, *params):
 
         Phi = []
-        args = params
+        args = list(params)
 
         for base in self.bases:
             phi, args = base._transform_popargs(X, *args)
@@ -1543,9 +1545,9 @@ class BasisCat(object):
     def regularizer(self):
         return [b.regularizer for b in self.bases]
 
-    def regularizer_diagonal(self, X, regularizer=None):
+    def regularizer_diagonal(self, X, *regularizer):
 
-        regularizer = repeat(None) if regularizer is None else regularizer
+        regularizer = repeat(None) if regularizer is () else regularizer
         regs, _ = zip(*(b.regularizer_diagonal(X, r)
                         for b, r in zip(self.bases, regularizer)))
 
