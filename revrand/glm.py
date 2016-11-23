@@ -123,7 +123,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
                  nstarts=500,
                  random_state=None
                  ):
-
+        """See class docstring."""
         self.likelihood = likelihood
         self.basis = basis
         self.K = K
@@ -327,7 +327,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : ndarray
-            (Ns,d) array query input dataset (Ns samples, d dimensions).
+            (N*,d) array query input dataset (N* samples, d dimensions).
         nsamples : int, optional
             Number of samples for sampling the expected target values from the
             predictive distribution.
@@ -339,8 +339,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Returns
         -------
         Ey : ndarray
-            The expected value of y_star for the query inputs, X_star of shape
-            (N_star,).
+            The expected value of y* for the query inputs, X* of shape (N*,).
         """
         Ey, _ = self.predict_moments(X, nsamples, likelihood_args)
 
@@ -383,7 +382,8 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : ndarray
-            (N,d) array query input dataset (Ns samples, D dimensions).
+            (N*,d) array query input dataset (N* samples, d
+            dimensions).
         nsamples : int, optional
             Number of samples for sampling the expected moments from the
             predictive distribution.
@@ -395,10 +395,10 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Returns
         -------
         Ey : ndarray
-            The expected value of ys for the query inputs, Xs of shape (Ns,).
+            The expected value of y* for the query inputs, X* of shape (N*,).
         Vy : ndarray
-            The expected variance of ys (excluding likelihood noise terms) for
-            the query inputs, Xs of shape (Ns,).
+            The expected variance of y* (excluding likelihood noise terms) for
+            the query inputs, X* of shape (N*,).
         """
         # Get latent function samples
         N = X.shape[0]
@@ -423,21 +423,21 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : ndarray
-            (Ns,d) array query input dataset (Ns samples, D dimensions).
+            (N*,d) array query input dataset (N* samples, D dimensions).
         y : float or ndarray
-            The test observations of shape (Ns,) to evaluate under,
+            The test observations of shape (N*,) to evaluate under,
             :math:`\log p(y^* |\mathbf{x}^*, \mathbf{X}, y)`.
         nsamples : int, optional
             Number of samples for sampling the log predictive distribution.
         likelihood_args : sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
-            Ns.
+            N*.
 
         Returns
         -------
         logp : ndarray
-           The log probability of ys given Xs of shape (Ns,).
+           The log probability of y* given X* of shape (N*,).
         logp_min : ndarray
             The minimum sampled values of the predicted log probability (same
             shape as p)
@@ -471,7 +471,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : ndarray
-            (Ns,d) array query input dataset (Ns samples, D dimensions).
+            (N*,d) array query input dataset (N* samples, D dimensions).
         quantile : float
             The predictive probability, :math:`p(y^* \leq \text{quantile} |
             \mathbf{x}^*, \mathbf{X}, y)`.
@@ -480,7 +480,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         likelihood_args : sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
-            Ns.
+            N*.
         nsamples : int, optional
             The number of samples to draw from the posterior in order to
             approximate the predictive mean and variance.
@@ -488,8 +488,8 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Returns
         -------
         p : ndarray
-           The probability of ys <= quantile for the query inputs, Xs of shape
-           (Ns,).
+           The probability of y* <= quantile for the query inputs, X* of shape
+           (N*,).
         p_min : ndarray
             The minimum sampled values of the predicted probability (same shape
             as p)
@@ -522,7 +522,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : ndarray
-            (Ns,d) array query input dataset (Ns samples, D dimensions).
+            (N*,d) array query input dataset (N* samples, D dimensions).
         percentile : float
             The percentile confidence interval (e.g. 95%) to return.
         nsamples : int, optional
@@ -530,16 +530,16 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         likelihood_args : sequence, optional
             sequence of arguments to pass to the likelihood function. These are
             non-learnable parameters. They can be scalars or arrays of length
-            Ns.
+            N*.
         multiproc : bool, optional
             Use multiprocessing to paralellise this prediction computation.
 
         Returns
         -------
         ql : ndarray
-            The lower end point of the interval with shape (Ns,)
+            The lower end point of the interval with shape (N*,)
         qu : ndarray
-            The upper end point of the interval with shape (Ns,)
+            The upper end point of the interval with shape (N*,)
         """
         N = X.shape[0]
 
@@ -571,12 +571,12 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
     def _sample_func(self, X, nsamples, genaxis=1):
         """
         Generate samples from the posterior latent function mixtures of the GLM
-        for query inputs, Xs.
+        for query inputs, X*.
 
         Parameters
         ----------
         X : ndarray
-            (Ns, d) array query input dataset (Ns samples, D dimensions).
+            (N*, d) array query input dataset (N* samples, D dimensions).
         nsamples : int
             Number of samples for sampling the latent function.
         genaxis : int
@@ -584,16 +584,16 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
             - ``genaxis=1`` will give you one sample at a time of f for ALL
                 observations (so it will iterate over nsamples).
             - ``genaxis=0`` will give you all samples of f for ONE
-                observation at a time (so it will iterate through Xs, row by
+                observation at a time (so it will iterate through X*, row by
                 row)
 
         Yields
         ------
         fsamples : ndarray
-            of shape (Ns,) if ``genaxis=1`` with each call being a sample
-            from the mixture of latent functions over all Ns. Or of shape
+            of shape (N*,) if ``genaxis=1`` with each call being a sample
+            from the mixture of latent functions over all N*. Or of shape
             (nsamples,) if ``genaxis=0``, with each call being a all
-            samples for an observation, n in Ns.
+            samples for an observation, n in N*.
         """
         check_is_fitted(self, ['weights_', 'covariance_', 'basis_hypers_',
                                'like_hypers_', 'regularizer_'])
@@ -621,7 +621,6 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
 
 # For GB/AU spelling
 class GeneralisedLinearModel(GeneralizedLinearModel):
-
     pass
 
 

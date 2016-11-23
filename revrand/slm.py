@@ -62,7 +62,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
                  nstarts=100,
                  random_state=None
                  ):
-
+        """See class docstring."""
         self.basis = basis
         self.var = var
         self.tol = tol
@@ -205,13 +205,12 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : ndarray
-            (Ns,d) array query input dataset (Ns samples, d dimensions).
+            (N*,d) array query input dataset (N* samples, d dimensions).
 
         Returns
         -------
         Ey : ndarray
-            The expected value of y_star for the query inputs, X_star of shape
-            (N_star,).
+            The expected value of y* for the query inputs, X* of shape (N*,).
         """
         Ey, _ = self.predict_moments(X)
 
@@ -224,16 +223,15 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : ndarray
-            (Ns,d) array query input dataset (Ns samples, d dimensions).
+            (N*,d) array query input dataset (N* samples, d dimensions).
 
         Returns
         -------
         Ey : ndarray
-            The expected value of y_star for the query inputs, X_star of shape
-            (N_star,).
+            The expected value of y* for the query inputs, X* of shape (N*,).
         Vy : ndarray
-            The expected variance of y_star for the query inputs, X_star of
-            shape (N_star,).
+            The expected variance of y* for the query inputs, X* of shape
+            (N*,).
         """
         check_is_fitted(self, ['var_', 'regularizer_', 'weights_',
                                'covariance_', 'hypers_'])

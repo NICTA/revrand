@@ -1,3 +1,5 @@
+.. _quickstart:
+
 Quickstart Guide
 ================
 
@@ -24,16 +26,10 @@ Bayesian Linear Regression Example
 
 Here is a very quick example of how to use Bayesian linear regression
 (:ref:`slm`) with optimisation of the likelihood noise, regularizer and basis
-function parameters. The default behaviour of the algorithms in revrand is to
-randomly sample and evaluate these hyperparameters before starting optimization
-from the best random candidates. This is because the objective functions may be
-non-convex with respect to these parameters, and in this way revrand can
-achieve some robustness to bad initialisations. See :ref:`btypes` and
-:ref:`optimize` for more information on how to use these random initializers.
+function hyperparameters. 
 
-Assuming we already have training noisy targets ``y``, inputs 
-``X``, and some query inputs ``Xs`` (as well as the true noiseless function
-``f``):
+Assuming we already have training noisy targets ``y``, inputs ``X``, and some
+query inputs ``Xs`` (as well as the true noiseless function ``f``):
 
 .. code:: python
 
@@ -80,6 +76,37 @@ This script will output something like the following,
 
 .. image:: blr_demo.png
 
+The default behaviour of the algorithms in revrand is to randomly sample and
+evaluate these hyperparameters before starting optimization from the best
+random candidates. This is because the objective functions may be non-convex
+with respect to these parameters, and in this way revrand can achieve some
+robustness to bad initializations.
+
+.. note::
+
+    All of the hyperparameters in revrand are initialised using ``Parameter``
+    objects. These objects contain information on the bounds of the values of
+    these hyperparameters, as well as *how* to intialize them. For instance,
+    
+        >>> from revrand import Parameter, Bound
+        >>> hyper = Parameter(1., Bound(0.5, 100))
+
+    tells the optimizer to bound the feasible range of the hyperparameter
+    between 0.5 and 100, with an initial value of 1. Futhermore,
+
+        >>> from revrand import Parameter, Positive
+        >>> from scipy.stats import gamma
+        >>> hyper = Parameter(gamma(1., scale=10), Positive())
+
+    tells the optimizer it can use *random starts* with this hyperparameter,
+    and to draw these random starts from a gamma distribution with a shape of
+    1, and a scale of 10. If random starts are not used, then the expected
+    value (10) of this distribution is used as the initial value. Also,
+    ``Positive()`` indicates the value of the parameter must be within ``(0,
+    inf)``.
+
+See :ref:`btypes` and :ref:`optimize` for more information on how to use these
+random initializers.
 
 Bayesian Generalized Linear Model Example
 -----------------------------------------
@@ -140,12 +167,12 @@ This script will output something like the following,
 Large-scale Learning with Stochastic Gradients
 ----------------------------------------------
 
-By default the GLM uses stochastic gradients to learn all of its
-parameters/hyperparameters and does not require any matrix inversion, and so it
-can be used to learn from large datasets with lots of features (``slm.learn``
-uses L-BFGS and requires a matrix inversion). We can also use the GLM to
-approximate and scale up regular Bayesian linear regression. For instance, if
-we modify the Bayesian linear regression example from before,
+By default the GLM uses stochastic gradients to learn all of its parameters and
+hyperparameters and does not require any matrix inversion, and so it can be
+used to learn from large datasets with lots of features (``slm.learn`` uses
+L-BFGS and requires a matrix inversion). We can also use the GLM to approximate
+and scale up regular Bayesian linear regression. For instance, if we modify the
+Bayesian linear regression example from before,
 
 .. code:: python
 
@@ -156,7 +183,7 @@ we modify the Bayesian linear regression example from before,
     ...
 
     # Set up the likelihood of the GLM
-    llhood = likelihoods.Gaussian(var_init=Parameter(gamma(1.), Positive()))
+    llhood = likelihoods.Gaussian(var=Parameter(gamma(1.), Positive()))
 
     # Learn regression parameters and predict
     glm = GeneralizedLinearModel(llhood, basis)
@@ -189,7 +216,10 @@ Feature Composition Framework
 -----------------------------
 
 We have implemented an easy to use and extensible feature-building framework
-within revrand (:ref:`basis_functions`). You have already seen the basics
+within revrand (:ref:`basis_functions`) that mirrors many kernel composition
+frameworks, such as those found in `Scikit Learn
+<http://scikit-learn.org/stable/modules/gaussian_process.html>`_ and `GPflow
+<https://github.com/GPflow/GPflow>`_. You have already seen the basics
 demonstrated in the above examples, i.e. concatenation of basis functions,
 
 .. code:: python
@@ -197,8 +227,7 @@ demonstrated in the above examples, i.e. concatenation of basis functions,
     >>> X = np.random.randn(100, 5)
     >>> N, d = X.shape
     >>> base = LinearBasis(onescol=True) + RandomRBF(Xdim=d, nbases=100)
-    >>> lenscale = 1.
-    >>> Phi = base.transform(X, lenscale)
+    >>> Phi = base.transform(X)
     >>> Phi.shape
     (100, 206)
 
@@ -209,19 +238,49 @@ There are a few things at work in this example:
 - ``LinearBasis`` has pre-pended a column of ones onto ``X`` so a subsequent
   algorithm can learn a "bias" term.
 - ``RandomRBF`` is actually approximating a radial basis *kernel* function,
-  [3]_, so we can approximate how a kernel machine functions with a basis
-  function!  This also outputs ``2 * nbases`` number of basis functions.
+  [3]_! This also outputs ``2 * nbases`` number of basis functions.
 - Hence the resulting basis function has a shape of 
   ``(N, d + 1 + 2 * nbases)``.
 
-We can also use *partial application* of basis functions, e.g.
+The above basis concatenation when used with the ``StandardLinearModel`` is
+actually equivalent to the following kernel composition when used with Scikit
+Learn's ``GaussianProcessRegressor``,
 
+.. code:: python
+
+    >>> from sklearn.gaussian_process.kernels import RBF, DotProduct, \
+    ...     WhiteKernel
+    >>> kern = DotProduct() + RBF() + WhiteKernel()
+
+When learning kernels we usually want to also learn a kernel amplitude, i.e.
+again in Scikit Learn format,
+
+.. code:: python
+
+    >>> kern = 1**2 * DotProduct() + 1**2 * RBF() + WhiteKernel()
+
+Then Scikit Learn would actually learn the amplitude parameters (which are
+initialised at 1). The equivalent construction in revrand would be,
+
+.. code:: python
+    
+    >>> from revrand import Parameter, Positive
+    >>> reg1 = Parameter(1., Positive())
+    >>> reg2 = Parameter(1., Positive()))
+    >>> base = LinearBasis(onescol=True, regularizer=reg1) \
+    ...     + RandomRBF(Xdim=d, nbases=100, regularizer=reg2)
+
+This is because the *regularizer* on the weights (the variance of the weight
+prior) is equivalent to the amplitude parameters in a Gaussian process. This is
+why in revrand we allow a separate regularizers per basis object. 
+
+We can also use *partial application* of basis functions, e.g.
 
 .. code:: python
 
     >>> base = LinearBasis(onescol=True, apply_ind=slice(0, 2)) \
         + RandomRBF(Xdim=d, nbases=100, apply_ind=slice(2, 5))
-    >>> Phi = base.transform(X, lenscale)
+    >>> Phi = base.transform(X)
     >>> Phi.shape
     (100, 203)
 
@@ -229,10 +288,33 @@ Now the basis functions are applied to separate dimensions of the input, ``X``.
 That is, ``LinearBasis`` takes dimensions 0 and 1, and ``RandomRBF`` takes the
 rest, and again the results are concatenated.
 
+.. note::
+    
+    For the moment we only support basis concatenation which is analogous to
+    kernel addition. Performing `kernel multiplication` with bases is 
+    computationally complex and we have not yet implemented it.
+
 Finally, if we use these basis functions with any of the algorithms in this
-revrand, *the parameters of the basis functions are learned* as well! So
-really in the above example ``lenscale = 1.`` is just an initial value for
-the kernel function length-scale!
+revrand, *the parameters of the basis functions are learned*. 
+
+.. rubric:: A note on implementation
+
+We decided against using the kernel product notation for basis functions in
+revrand (``1**2 * Kernel()``), as they are not equivalent when a call to
+``transform`` is made. That is, applying
+
+    >>> Phi = base.transform(X)
+
+does not involve the regularizer in any way, which is why we set it in the
+constructor of the basis. It would only be involved when constructing an
+*equivalent* kernel,
+
+    >>> K = Phi.dot(L).dot(Phi.T)
+
+where ``L`` is a diagonal regularizer matrix corresponding to our bases
+``regularizer`` initializers. See [1]_ and our `report
+<https://github.com/NICTA/revrand/blob/master/docs/report/report.pdf>`_ for
+more information on this.
 
 
 References

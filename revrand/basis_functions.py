@@ -98,8 +98,8 @@ def slice_transform(func, self, X, *vargs, **kwargs):
     """
     Decorator for implementing partial application.
 
-    This must decorate the :code:`transform` and :code:`grad` methods of basis
-    objects if the :code:`slice_init` decorator was used.
+    This must decorate the ``transform`` and ``grad`` methods of basis objects
+    if the ``slice_init`` decorator was used.
     """
     X = X if self.apply_ind is None else X[:, self.apply_ind]
     return func(self, X, *vargs, **kwargs)
@@ -183,25 +183,23 @@ class Basis(object):
 
     @slice_init
     def __init__(self, regularizer=None):
-        """
+        r"""
         Construct this an instance of this class.
 
         This is also a good place to set non-learnable properties, and bounded
         Parameter types. An example Basis class with parameters may be
 
-        Example:
-
-        .. code-block:: python
-
-            def __init__(self,
-                         property,
-                         param=Parameter(1, Bound()),
-                         regularizer=Parameter(gamma(1.), Positive())
-                         ):
-
-                self.property = property
-                self._params = param_init
-                super().__init__(regularizer)
+        Example
+        -------
+        >>> def __init__(self, # doctest: +SKIP
+        ...              property,
+        ...              param=Parameter(1, Bound()),
+        ...              regularizer=Parameter(gamma(1.), Positive())
+        ...              ):
+        ...
+        ...     self.property = property
+        ...     self._params = param_init
+        ...     super().__init__(regularizer)
 
         All the ``params`` property does is inform algorithms of the intitial
         value and any bounds this basis object has, or it can be used as a
@@ -209,11 +207,11 @@ class Basis(object):
         into the ``transform`` and ``grad`` methods, where it can be used as
         the default value. All basis class objects MUST have a ``params``
         property, which is either:
-            - one Parameter object for an optimisable parameter, see btypes.py.
-              Parameter objects with ``None`` values are interpreted as having
-              no parameters.
-            - a list of ``Parameter`` objects, one for each optimisable
-              parameter.
+
+        - one Parameter object for an optimisable parameter, see btypes.py.
+          Parameter objects with ``None`` values are interpreted as having no
+          parameters.
+        - a list of ``Parameter`` objects, one for each optimisable parameter.
 
         Also, all basis classes can have a way of setting the
         ``self.regularizer`` property, since this informs the regression
@@ -271,7 +269,7 @@ class Basis(object):
             or just an ndarray if there is a single parameter. The ndarrays can
             have more than two dimensions (i.e. tensors of rank > 2), depending
             on the dimensions of the basis function parameters. If there are
-            *no* parameters, :code:`[]` is returned.
+            *no* parameters, ``[]`` is returned.
         """
         return []
 
@@ -300,25 +298,35 @@ class Basis(object):
 
     def params_values(self):
         """
-        Get a list of the parameter values if they have a value.
+        Get a list of the ``Parameter`` values if they have a value.
 
         This does not include the basis regularizer.
         """
         return [p.value for p in atleast_list(self.params) if p.has_value]
 
     def regularizer_diagonal(self, X, regularizer=None):
-        """
-        Get the slice into the regression weights for this regularizer.
+        r"""
+        Get the diagonal of the prior variance on the weights (regularizer).
+
+        This also returns a slice into the regression weights to which this
+        regularizer applies.
 
         Parameters
         ----------
         X : ndarray
             (N, d) array of observations where N is the number of samples, and
             d is the dimensionality of X.
+        regularizer : float, optional
+            use this value instead of the value passed into the constructor for
+            the regularizer.
 
         Returns
         -------
-        slice :
+        ndarray :
+            an array of shape (D,) that is the diagonal of the prior variance
+            of the weights, :math:`\boldsymbol\Lambda` in :math:`\mathbf{w}
+            \sim \mathcal{N}(\mathbf{0}, \boldsymbol\Lambda)`.
+        slice:
             the slice into the regression weights that this regularizer
             applies to.
 
@@ -361,11 +369,11 @@ class Basis(object):
         return self._regularizer
 
     def __add__(self, other):
-
+        """Concatenation."""
         return BasisCat([self, other])
 
     def __radd__(self, other):
-
+        """Concatenation."""
         return self if other == 0 else self.__add__(other)
 
 
@@ -393,7 +401,7 @@ class BiasBasis(Basis):
 
     @slice_init
     def __init__(self, offset=1., regularizer=None):
-
+        """See this class's docstring."""
         self.offset = offset
         super(BiasBasis, self).__init__(regularizer)
 
@@ -438,7 +446,7 @@ class LinearBasis(Basis):
 
     @slice_init
     def __init__(self, onescol=False, regularizer=None):
-
+        """See this class's docstring."""
         self.onescol = onescol
         super(LinearBasis, self).__init__(regularizer)
 
@@ -490,7 +498,7 @@ class PolynomialBasis(Basis):
 
     @slice_init
     def __init__(self, order, include_bias=True, regularizer=None):
-
+        """See this class's docstring."""
         if order < 0:
             raise ValueError("Polynomial order must be positive")
         self.order = order
@@ -613,7 +621,7 @@ class RadialBasis(_LengthScaleBasis):
             lenscale=Parameter(gamma(1.), Positive()),
             regularizer=None
     ):
-
+        """See this class's docstring."""
         self.M, self.d = centres.shape
         self.C = centres
         self._init_lenscale(lenscale)
@@ -703,6 +711,11 @@ class SigmoidalBasis(RadialBasis):
     lenscale: Parameter, optional
         A scalar parameter to bound and initialise the length scales for
         optimization.
+    regularizer : None, Parameter, optional
+        The (initial) value of the regularizer/prior variance to apply to the
+        regression weights of this basis function. The Parameter object must
+        have a scalar value. If it is not set, it will take on a default value
+        of ``Parameter(gamma(1.), Positive())``.
     """
 
     @slice_transform
@@ -772,7 +785,7 @@ class _RandomKernelBasis(_LengthScaleBasis):
                  regularizer=None,
                  random_state=None
                  ):
-
+        """See this class's docstring."""
         self.d = Xdim
         self.n = nbases
         self._random = check_random_state(random_state)
@@ -873,6 +886,11 @@ class RandomRBF(_RandomKernelBasis):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    regularizer : None, Parameter, optional
+        The (initial) value of the regularizer/prior variance to apply to the
+        regression weights of this basis function. The Parameter object must
+        have a scalar value. If it is not set, it will take on a default value
+        of ``Parameter(gamma(1.), Positive())``.
     random_state: None, int or RandomState, optional
         random seed
     """
@@ -909,6 +927,11 @@ class RandomLaplace(_RandomKernelBasis):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    regularizer : None, Parameter, optional
+        The (initial) value of the regularizer/prior variance to apply to the
+        regression weights of this basis function. The Parameter object must
+        have a scalar value. If it is not set, it will take on a default value
+        of ``Parameter(gamma(1.), Positive())``.
     random_state: None, int or RandomState, optional
         random seed
     """
@@ -945,6 +968,11 @@ class RandomCauchy(_RandomKernelBasis):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    regularizer : None, Parameter, optional
+        The (initial) value of the regularizer/prior variance to apply to the
+        regression weights of this basis function. The Parameter object must
+        have a scalar value. If it is not set, it will take on a default value
+        of ``Parameter(gamma(1.), Positive())``.
     random_state: None, int or RandomState, optional
         random seed
     """
@@ -1012,6 +1040,11 @@ class RandomMatern32(_RandomMatern):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    regularizer : None, Parameter, optional
+        The (initial) value of the regularizer/prior variance to apply to the
+        regression weights of this basis function. The Parameter object must
+        have a scalar value. If it is not set, it will take on a default value
+        of ``Parameter(gamma(1.), Positive())``.
     random_state: None, int or RandomState, optional
         random seed
     """
@@ -1050,6 +1083,11 @@ class RandomMatern52(_RandomMatern):
         initialise the length scales for optimization. If this is shape (d,),
         ARD length scales will be expected, otherwise an isotropic lenscale is
         learned.
+    regularizer : None, Parameter, optional
+        The (initial) value of the regularizer/prior variance to apply to the
+        regression weights of this basis function. The Parameter object must
+        have a scalar value. If it is not set, it will take on a default value
+        of ``Parameter(gamma(1.), Positive())``.
     random_state: None, int or RandomState, optional
         random seed
     """
@@ -1102,7 +1140,7 @@ class FastFoodRBF(_LengthScaleBasis):
                  regularizer=None,
                  random_state=None
                  ):
-
+        """See this class's docstring."""
         self._random = check_random_state(random_state)
         self._init_dims(nbases, Xdim)
         self._init_lenscale(lenscale)
@@ -1227,6 +1265,10 @@ class FastFoodGM(FastFoodRBF):
     Kernels". This essentially learns the form of a kernel function, and so has
     no explicit kernel representation!
 
+    To fully implement a Gaussian spectral mixture, concatenate as many of
+    these objects as desired (one per mixture component). Also remember to
+    initialize all of the bases with different means.
+
     Parameters
     ----------
     nbases: int
@@ -1263,7 +1305,7 @@ class FastFoodGM(FastFoodRBF):
                  regularizer=None,
                  random_state=None
                  ):
-
+        """See this class's docstring."""
         self._random = check_random_state(random_state)
         self._init_dims(nbases, Xdim)
         self._params = [self._init_param(mean),
@@ -1327,11 +1369,11 @@ class FastFoodGM(FastFoodRBF):
         ndarray:
             shape (n, 4*nbases) where nbases is number of random rbf bases,
             again to the nearest larger two power. This is
-            :math:`\partial \phi(\mathbf{x}) / \partial mu`
+            :math:`\partial \phi(\mathbf{x}) / \partial \boldsymbol\mu`
         ndarray:
             shape (n, 4*nbases) where nbases is number of random rbf bases,
             again to the nearest larger two power. This is
-            :math:`\partial \phi(\mathbf{x}) / \partial l`
+            :math:`\partial \phi(\mathbf{x}) / \partial \mathbf{l}`
         """
         d = X.shape[1]
         mean = self._check_dim(d, mean, paramind=0)
@@ -1381,99 +1423,21 @@ class FastFoodGM(FastFoodRBF):
 
 
 #
-# Helper Functions
-#
-
-def spectralmixture(Xdim,
-                    apply_ind=None,
-                    bases_per_component=50,
-                    ncomponents=5,
-                    means=None,
-                    lenscales=None,
-                    random_state=None
-                    ):
-    """
-    Make a Gaussian spectral mixture basis.
-
-    This is a helper function for easily creating a Gaussian spectral mixture
-    basis from multiple FasFoodGM mixture components. This implements the full
-    Gaussian spectral mixture from "A la Carte - Learning Fast Kernels".
-
-    Parameters
-    ----------
-    Xdim: int
-        the dimension (d) of the observations (or the dimension of the slices
-        if using apply_ind).
-    apply_ind: slice, optional
-        a slice or index into which columns of X to apply this basis to.
-    bases_per_component: int, optional
-        a scalar for how many (unique) random bases to create approximately per
-        mixture component. Approximately 4x this number of non-unique bases
-        will be created per component, so 50 with 5 components is approx 1000
-        bases.
-    ncomponents: int, optional
-        Number of FastFoodGM components to use in the mixture.
-    means: list of Parameter, optional
-        A list of :code:`Parameter`, :code:`len(means) == ncomponents`,
-        to pass to each of the :code:`FastFoodGM`'s :code:`mean`
-        constructor values.
-    lenscale: list of Parameter, optional
-        A list of :code:`Parameter`, :code:`len(lenscales) ==
-        ncomponents`, to pass to each of the :code:`FastFoodGM`'s
-        :code:`lenscale` constructor values.
-    random_state: None, int or RandomState, optional
-        random seed
-
-    Returns
-    -------
-    GausSpecMix: BasisCat
-        A concatenation of :code:`FastFoodGM` bases to make the full mixture.
-    """
-    random = check_random_state(random_state)
-
-    if means is None:
-        # Random values with random offset
-        if Xdim > 1:
-            means = [Parameter(random.randn(Xdim) + random.randn(1),
-                               Bound()) for _ in range(ncomponents)]
-        else:
-            means = [Parameter(random.randn(), Bound())
-                     for _ in range(ncomponents)]
-    elif len(means) != ncomponents:
-        raise ValueError("Number of mean Parameters has to be equal to "
-                         "ncomponents!")
-
-    if lenscales is None:
-        # Expected value of 1, with not too much deviation about that value
-        size = None if Xdim == 1 else (Xdim,)
-        lenscales = [
-            Parameter(random.standard_gamma(3, scale=1. / 3, size=size),
-                      Positive())
-            for _ in range(ncomponents)
-        ]
-    elif len(lenscales) != ncomponents:
-        raise ValueError("Number of length scale Parameters has to be equal "
-                         "to ncomponents!")
-
-    # Initialise all of the bases
-    mixtures = [FastFoodGM(Xdim=Xdim, nbases=bases_per_component, mean=m,
-                           lenscale=l, apply_ind=apply_ind,
-                           random_state=random_state + i)
-                for i, (m, l) in enumerate(zip(means, lenscales))]
-
-    # Concatenate and return
-    return BasisCat(mixtures)
-
-
-#
 # Other basis construction objects and functions
 #
 
 class BasisCat(object):
-    """A class that implements concatenation of bases."""
+    """
+    A class that implements concatenation of bases.
+
+    Parameters
+    ----------
+    basis_list : list
+        a list of ``Basis`` objects to concatenate
+    """
 
     def __init__(self, basis_list):
-
+        """See the class docstring for details."""
         # Concatenate BasisCat lists not objects here
         def check_BasisCat(blist, b):
             rlist = atleast_list(blist)
@@ -1493,7 +1457,26 @@ class BasisCat(object):
         self.__slices = None
 
     def transform(self, X, *params):
+        """
+        Return the basis function applied to X.
 
+        I.e. Phi(X, params), where params can also optionally be used and
+        learned.
+
+        Parameters
+        ----------
+        X : ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+        *params : optional
+            parameter aguments, these are the parameters of the concatenated
+            bases `in the order` they were concatenated.
+
+        Returns
+        -------
+        ndarray :
+            of shape (N, D) where D is the number of basis functions.
+        """
         Phi = []
         args = list(params)
 
@@ -1504,7 +1487,27 @@ class BasisCat(object):
         return np.hstack(Phi)
 
     def grad(self, X, *params):
+        """
+        Return the gradient of the basis function for each parameter.
 
+        Parameters
+        ----------
+        X : ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+        *params : optional
+            parameter aguments, these are the parameters of the concatenated
+            bases `in the order` they were concatenated.
+
+        Returns
+        -------
+        list or ndarray :
+            this will be a list of ndarrays if there are multiple parameters,
+            or just an ndarray if there is a single parameter. The ndarrays can
+            have more than two dimensions (i.e. tensors of rank > 2), depending
+            on the dimensions of the basis function parameters. If there are
+            *no* parameters, ``[]`` is returned.
+        """
         # Establish a few dimensions
         N = X.shape[0]
         D = self.get_dim(X)
@@ -1534,19 +1537,65 @@ class BasisCat(object):
                 yield make_dPhi(i, gg)
 
     def get_dim(self, X):
+        """
+        Get the output dimensionality of this basis.
 
+        This makes a cheap call to transform with the initial parameter values
+        to ascertain the dimensionality of the output features.
+
+        Parameters
+        ----------
+        X : ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+
+        Returns
+        -------
+        int :
+            The dimensionality of the basis.
+        """
         return np.sum(self.__all_dims(X))
 
     def params_values(self):
+        """
+        Get a list of the ``Parameter`` values if they have a value.
 
+        This does not include the basis regularizers.
+        """
         return [v for b in self.bases for v in b.params_values()]
 
     @property
     def regularizer(self):
+        """Return a list of concatenated bases regularizers."""
         return [b.regularizer for b in self.bases]
 
     def regularizer_diagonal(self, X, *regularizer):
+        r"""
+        Get the diagonal of the prior variance on the weights (regularizer).
 
+        This also returns a slice into the regression weights to which all of
+        the concatenated bases' regularizers applies.
+
+        Parameters
+        ----------
+        X : ndarray
+            (N, d) array of observations where N is the number of samples, and
+            d is the dimensionality of X.
+        *regularizer :
+            use these values instead of the values passed into the ``Basis``
+            constructors for each regularizer. These are applied to each basis
+            in the concatentation in the order they were concatenated.
+
+        Returns
+        -------
+        ndarray :
+            an array of shape (D,) that is the diagonal of the prior variance
+            of the weights, :math:`\boldsymbol\Lambda` in :math:`\mathbf{w}
+            \sim \mathcal{N}(\mathbf{0}, \boldsymbol\Lambda)`.
+        list of slices:
+            the slices into the regression weights that each regularizer
+            applies to.
+        """
         regularizer = repeat(None) if regularizer is () else regularizer
         regs, _ = zip(*(b.regularizer_diagonal(X, r)
                         for b, r in zip(self.bases, regularizer)))
@@ -1560,7 +1609,12 @@ class BasisCat(object):
 
     @property
     def params(self):
+        """
+        Return a list of all of the ``Parameter`` objects.
 
+        Or a just a single ``Parameter`` is there is only one, and single empty
+        ``Parameter`` if there are no parameters.
+        """
         paramlist = [b.params for b in self.bases if b.params.has_value]
 
         if len(paramlist) == 0:
@@ -1581,12 +1635,12 @@ class BasisCat(object):
         return self.__baseinds
 
     def __add__(self, other):
-
+        """Concatenation."""
         if isinstance(other, BasisCat):
             return BasisCat(self.bases + other.bases)
         else:
             return BasisCat(self.bases + [other])
 
     def __radd__(self, other):
-
+        """Concatenation."""
         return self if other == 0 else self.__add__(other)
