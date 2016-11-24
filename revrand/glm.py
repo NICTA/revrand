@@ -618,6 +618,22 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
 
         return fs
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(likelihood={}, basis={}, K={}, maxiter={}, batch_size={},"\
+            "updater={}, nsamples={}, nstarts={}, random_state={})".format(
+                self.__class.__name__,
+                self.likelihood,
+                self.basis,
+                self.K,
+                self.maxiter,
+                self.batch_size,
+                self.updater,
+                self.nsamples,
+                self.nstarts,
+                self.random_state
+            )
+
 
 # For GB/AU spelling
 class GeneralisedLinearModel(GeneralizedLinearModel):

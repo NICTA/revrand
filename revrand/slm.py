@@ -242,3 +242,16 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         Vf = (Phi.dot(self.covariance_) * Phi).sum(axis=1)
 
         return Ey, Vf + self.var_
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(basis={}, var={}, tol={}, maxiter={}, nstarts={}, "\
+            "random_state={})".format(
+                self.__class.__name__,
+                self.basis,
+                self.var,
+                self.tol,
+                self.maxiter,
+                self.nstarts,
+                self.random_state
+            )

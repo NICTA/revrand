@@ -24,7 +24,7 @@ class SGDUpdater:
     """
 
     def __init__(self, eta=0.1):
-
+        """See class docstring."""
         self.eta = eta
 
     def __call__(self, x, grad):
@@ -50,6 +50,10 @@ class SGDUpdater:
         """Reset the state of this updater for a new optimisation problem."""
         pass
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(eta={})".format(self.__class__.__name__, self.eta)
+
 
 class AdaDelta(SGDUpdater):
     """
@@ -64,7 +68,7 @@ class AdaDelta(SGDUpdater):
     """
 
     def __init__(self, rho=0.1, epsilon=1e-5):
-
+        """See class docstring."""
         if rho < 0 or rho > 1:
             raise ValueError("Decay rate 'rho' must be between 0 and 1!")
 
@@ -104,6 +108,14 @@ class AdaDelta(SGDUpdater):
         """Reset the state of this updater for a new optimisation problem."""
         self.__init__(self.rho, self.epsilon)
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(rho={}, epsilon={})".format(
+            self.__class__.__name__,
+            self.rho,
+            self.epsilon
+        )
+
 
 class AdaGrad(SGDUpdater):
     """
@@ -118,7 +130,7 @@ class AdaGrad(SGDUpdater):
     """
 
     def __init__(self, eta=1, epsilon=1e-6):
-
+        """See class docstring."""
         if eta <= 0:
             raise ValueError("Learning rate 'eta' must be > 0!")
 
@@ -153,6 +165,14 @@ class AdaGrad(SGDUpdater):
         """Reset the state of this updater for a new optimisation problem."""
         self.__init__(self.eta, self.epsilon)
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(eta={}, epsilon={})".format(
+            self.__class__.__name__,
+            self.eta,
+            self.epsilon
+        )
+
 
 class Momentum(SGDUpdater):
     """
@@ -167,7 +187,7 @@ class Momentum(SGDUpdater):
     """
 
     def __init__(self, rho=0.5, eta=0.01):
-
+        """See class docstring."""
         if eta <= 0:
             raise ValueError("Learning rate 'eta' must be > 0!")
 
@@ -203,10 +223,18 @@ class Momentum(SGDUpdater):
         """Reset the state of this updater for a new optimisation problem."""
         self.__init__(self.rho, self.eta)
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(rho={}, eta={})".format(
+            self.__class__.__name__,
+            self.rho,
+            self.eta
+        )
+
 
 class Adam(SGDUpdater):
     """
-    Adam Algorithm
+    Adam Algorithm.
 
     Parameters
     ----------
@@ -222,7 +250,7 @@ class Adam(SGDUpdater):
     """
 
     def __init__(self, alpha=0.01, beta1=0.9, beta2=0.99, epsilon=1e-8):
-
+        """See class docstring."""
         self.alpha = alpha
         self.beta1 = beta1
         self.beta2 = beta2
@@ -264,6 +292,16 @@ class Adam(SGDUpdater):
     def reset(self):
         """Reset the state of this updater for a new optimisation problem."""
         self.__init__(self.alpha, self.beta1, self.beta2, self.epsilon)
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(alpha={}, beta1={}, beta2={}, epsilon={})".format(
+            self.__class__.__name__,
+            self.alpha,
+            self.beta1,
+            self.beta2,
+            self.epsilon
+        )
 
 
 #

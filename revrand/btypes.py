@@ -125,7 +125,7 @@ class Bound(namedtuple('Bound', ['lower', 'upper']), _BoundMixin):
     """
 
     def __new__(cls, lower=None, upper=None):
-
+        """See class docstring."""
         if lower is not None and upper is not None:
             if lower > upper:
                 raise ValueError('lower bound cannot be greater than upper '
@@ -135,6 +135,14 @@ class Bound(namedtuple('Bound', ['lower', 'upper']), _BoundMixin):
     def __getnewargs__(self):
         """Required for pickling."""
         return (self.lower, self.upper)
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(lower={}, upper={})".format(
+            self.__class__.__name__,
+            self.lower,
+            self.upper
+        )
 
 
 class Positive(namedtuple('Positive', ['lower', 'upper']), _BoundMixin):
@@ -154,7 +162,7 @@ class Positive(namedtuple('Positive', ['lower', 'upper']), _BoundMixin):
     --------
     >>> b = Positive()
     >>> b
-    Positive(lower=1e-14, upper=None)
+    Positive(upper=None)
 
     Since ``tuple`` (and by extension its descendents) are immutable,
     the lower bound for all instances of ``Positive`` are guaranteed to
@@ -162,7 +170,7 @@ class Positive(namedtuple('Positive', ['lower', 'upper']), _BoundMixin):
     """
 
     def __new__(cls, upper=None):
-
+        """See class docstring."""
         lower = 1e-14
         if upper is not None:
             if lower > upper:
@@ -174,6 +182,10 @@ class Positive(namedtuple('Positive', ['lower', 'upper']), _BoundMixin):
     def __getnewargs__(self):
         """Required for pickling."""
         return (self.upper,)
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(upper={})".format(self.__class__.__name__, self.upper)
 
 
 class Parameter(object):
@@ -257,7 +269,7 @@ class Parameter(object):
     """
 
     def __init__(self, value=None, bounds=Bound(), shape=()):
-
+        """See class docstring."""
         value = [] if value is None else value
 
         if not hasattr(value, 'rvs'):
@@ -325,6 +337,15 @@ class Parameter(object):
     def is_scalar(self):
         """Test if the Parameter is for a scalar value."""
         return self.has_value and self.shape == ()
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(value={}, bounds={}, shape={})".format(
+            self.__class__.__name__,
+            self.value,
+            self.bounds,
+            self.shape
+        )
 
 
 def ravel(parameter, random_state=None):

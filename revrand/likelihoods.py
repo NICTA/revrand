@@ -33,10 +33,6 @@ class Bernoulli():
 
     _params = Parameter()
 
-    def __init__(self):
-
-        pass
-
     @property
     def params(self):
         """Get this object's Parameter types."""
@@ -109,7 +105,7 @@ class Bernoulli():
 
     def dp(self, y, f, *args):
         r"""
-        Derivative of Bernoulli log likelihood w.r.t.\  the parameters,
+        Derivative of Bernoulli log likelihood w.r.t.\ the parameters,
         :math:`\theta`.
 
         Parameters
@@ -148,6 +144,10 @@ class Bernoulli():
             Cumulative density function evaluated at y.
         """
         return bernoulli.cdf(y, expit(f))
+
+    def __repr__(self):
+        """Representation."""
+        return "{}()".format(self.__class__.__name__)
 
 
 class Binomial(Bernoulli):
@@ -253,6 +253,10 @@ class Binomial(Bernoulli):
         """
         return binom.cdf(y, n=n, p=expit(f))
 
+    def __repr__(self):
+        """Representation."""
+        return "{}()".format(self.__class__.__name__)
+
 
 class Gaussian(Bernoulli):
     r"""
@@ -278,7 +282,7 @@ class Gaussian(Bernoulli):
     """
 
     def __init__(self, var=Parameter(gamma(1., scale=1), Positive())):
-
+        """See class docstring."""
         self.params = var
 
     def _check_param(self, param):
@@ -414,6 +418,10 @@ class Gaussian(Bernoulli):
         var = self._check_param(var)
         return norm.cdf(y, loc=f, scale=np.sqrt(var))
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(var={})".format(self.__class__.__name__, self.params)
+
 
 class Poisson(Bernoulli):
     r"""
@@ -439,7 +447,7 @@ class Poisson(Bernoulli):
     """
 
     def __init__(self, tranfcn='exp'):
-
+        """See class docstring."""
         if tranfcn == 'exp' or tranfcn == 'softplus':
             self.tranfcn = tranfcn
         else:
@@ -531,3 +539,7 @@ class Poisson(Bernoulli):
         """
         mu = np.exp(f) if self.tranfcn == 'exp' else softplus(f)
         return poisson.cdf(y, mu=mu)
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(tranfcn='{}')".format(self.__class__.__name__, self.tranfcn)

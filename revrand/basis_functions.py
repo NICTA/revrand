@@ -376,6 +376,13 @@ class Basis(object):
         """Concatenation."""
         return self if other == 0 else self.__add__(other)
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(regularizer={})".format(
+            self.__class__.__name__,
+            self.regularizer
+        )
+
 
 class BiasBasis(Basis):
     r"""
@@ -424,6 +431,14 @@ class BiasBasis(Basis):
         N = len(X)
         return np.ones((N, 1)) * self.offset
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(offset={}, regularizer={})".format(
+            self.__class__.__name__,
+            self.offset,
+            self.regularizer
+        )
+
 
 class LinearBasis(Basis):
     r"""
@@ -468,6 +483,14 @@ class LinearBasis(Basis):
         """
         N, D = X.shape
         return np.hstack((np.ones((N, 1)), X)) if self.onescol else X
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(onescol={}, regularizer={})".format(
+            self.__class__.__name__,
+            self.onescol,
+            self.regularizer
+        )
 
 
 class PolynomialBasis(Basis):
@@ -542,6 +565,15 @@ class PolynomialBasis(Basis):
         # N by d*order values. May want to revisit this implementation.
 
         return Phi
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(order={}, include_bias={}, regularizer={})".format(
+            self.__class__.__name__,
+            self.order,
+            self.include_bias,
+            self.regularizer
+        )
 
 
 class _LengthScaleBasis(Basis):
@@ -686,6 +718,15 @@ class RadialBasis(_LengthScaleBasis):
 
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
 
+    def __repr__(self):
+        """Representation."""
+        return "{}(centres={}, lenscale={}, regularizer={})".format(
+            self.__class__.__name__,
+            self.C,
+            self.params,
+            self.regularizer
+        )
+
 
 class SigmoidalBasis(RadialBasis):
     r"""
@@ -788,6 +829,7 @@ class _RandomKernelBasis(_LengthScaleBasis):
         """See this class's docstring."""
         self.d = Xdim
         self.n = nbases
+        self.random_state = random_state  # for repr
         self._random = check_random_state(random_state)
         self.W = self._weightsamples()
         self._init_lenscale(lenscale)
@@ -857,6 +899,18 @@ class _RandomKernelBasis(_LengthScaleBasis):
                         np.sqrt(self.n))
 
         return np.dstack(dPhi) if len(lenscale) != 1 else dPhi[0]
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(nbases={}, Xdim={}, lenscale={}, regularizer={}," \
+            " random_state={})".format(
+                self.__class__.__name__,
+                self.n,
+                self.d,
+                self.params,
+                self.regularizer,
+                self.random_state
+            )
 
 
 class RandomRBF(_RandomKernelBasis):
@@ -1141,6 +1195,7 @@ class FastFoodRBF(_LengthScaleBasis):
                  random_state=None
                  ):
         """See this class's docstring."""
+        self.random_state = random_state  # for repr
         self._random = check_random_state(random_state)
         self._init_dims(nbases, Xdim)
         self._init_lenscale(lenscale)
@@ -1220,6 +1275,7 @@ class FastFoodRBF(_LengthScaleBasis):
         # Make sure our dimensions are powers of 2
         l = int(np.ceil(np.log2(Xdim)))
 
+        self.nbases = nbases
         self.d = Xdim
         self.d2 = pow(2, l)
         self.k = int(np.ceil(nbases / self.d2))
@@ -1255,6 +1311,18 @@ class FastFoodRBF(_LengthScaleBasis):
             VX.append(vX)
 
         return np.hstack(VX)
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(nbases={}, Xdim={}, lenscale={}, regularizer={}," \
+            " random_state={})".format(
+                self.__class__.__name__,
+                self.nbases,
+                self.d,
+                self.params,
+                self.regularizer,
+                self.random_state
+            )
 
 
 class FastFoodGM(FastFoodRBF):
@@ -1306,6 +1374,7 @@ class FastFoodGM(FastFoodRBF):
                  random_state=None
                  ):
         """See this class's docstring."""
+        self.random_state = random_state  # for repr
         self._random = check_random_state(random_state)
         self._init_dims(nbases, Xdim)
         self._params = [self._init_param(mean),
@@ -1420,6 +1489,19 @@ class FastFoodGM(FastFoodRBF):
         else:
             raise ValueError("Parameter dimension doesn't agree with X"
                              " dimensions!")
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(nbases={}, Xdim={}, mean={}, lenscale={}, regularizer={}," \
+            " random_state={})".format(
+                self.__class__.__name__,
+                self.nbases,
+                self.d,
+                self.params[0],
+                self.params[1],
+                self.regularizer,
+                self.random_state
+            )
 
 
 #
@@ -1644,3 +1726,7 @@ class BasisCat(object):
     def __radd__(self, other):
         """Concatenation."""
         return self if other == 0 else self.__add__(other)
+
+    def __repr__(self):
+        """Representation."""
+        return "{}(basis_list={})".format(self.__class__.__name__, self.bases)
