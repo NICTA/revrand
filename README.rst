@@ -65,11 +65,13 @@ or install with ``pip``:
 
    $ pip install git+https://github.com/nicta/revrand.git
 
-Now have a look at our `quickstart guide <docs/quickstart.rst>`_ to get up and
-running quickly!
+Now have a look at our `quickstart guide
+<http://nicta.github.io/revrand/quickstart.html>`_ to get up and running
+quickly!
 
-Refer to `docs/installation.rst <docs/installation.rst>`_ for advanced 
-installation instructions.
+Refer to the `documentation
+<http://nicta.github.io/revrand/installation.html>`_ for advanced installation
+instructions.
 
 
 Useful Links
