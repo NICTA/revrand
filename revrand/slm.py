@@ -1,8 +1,8 @@
 """
 The standard Bayesian linear regression model.
 
-By using the appropriate bases, this will also yield a simple implementation of
-the "A la Carte" GP [1]_.
+By using the appropriate bases, this will also yield an implementation of the
+"A la Carte" GP [1]_.
 
 .. [1] Yang, Z., Smola, A. J., Song, L., & Wilson, A. G. "A la Carte --
    Learning Fast Kernels". Proceedings of the Eighteenth International

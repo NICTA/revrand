@@ -24,9 +24,10 @@ class PyTest(TestCommand, object):
         import pytest
         exit(pytest.main(self.pytest_args))
 
+
 setup(
     name='revrand',
-    version='0.9.0',
+    version='0.9.9',
     description='A library of scalable Bayesian generalised linear models with'
                 ' fancy features',
     author='Daniel Steinberg',

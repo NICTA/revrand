@@ -243,24 +243,18 @@ There are a few things at work in this example:
   ``(N, d + 1 + 2 * nbases)``.
 
 The above basis concatenation when used with the ``StandardLinearModel`` is
-actually equivalent to the following kernel composition when used with Scikit
+actually very similar to the following kernel composition when used with Scikit
 Learn's ``GaussianProcessRegressor``,
 
 .. code:: python
 
     >>> from sklearn.gaussian_process.kernels import RBF, DotProduct, \
     ...     WhiteKernel
-    >>> kern = DotProduct() + RBF() + WhiteKernel()
-
-When learning kernels we usually want to also learn a kernel amplitude, i.e.
-again in Scikit Learn format,
-
-.. code:: python
-
     >>> kern = 1**2 * DotProduct() + 1**2 * RBF() + WhiteKernel()
 
-Then Scikit Learn would actually learn the amplitude parameters (which are
-initialised at 1). The equivalent construction in revrand would be,
+Here the Scikit Learn GP learns the kernel amplitude parameters, which are
+initialised at 1. Revrand also learns these parameters, and the same
+initialization in revrand would be,
 
 .. code:: python
     
@@ -271,8 +265,8 @@ initialised at 1). The equivalent construction in revrand would be,
     ...     + RandomRBF(Xdim=d, nbases=100, regularizer=reg2)
 
 This is because the *regularizer* on the weights (the variance of the weight
-prior) is equivalent to the amplitude parameters in a Gaussian process. This is
-why in revrand we allow a separate regularizers per basis object. 
+prior) is equivalent to the kernel amplitude parameters in a Gaussian process.
+Hence, in revrand we allow a separate regularizers per basis object. 
 
 We can also use *partial application* of basis functions, e.g.
 
@@ -311,7 +305,7 @@ constructor of the basis. It would only be involved when constructing an
 
     >>> K = Phi.dot(L).dot(Phi.T)
 
-where ``L`` is a diagonal regularizer matrix corresponding to our bases
+where ``L`` is a diagonal regularizer matrix corresponding to our bases'
 ``regularizer`` initializers. See [1]_ and our `report
 <https://github.com/NICTA/revrand/blob/master/docs/report/report.pdf>`_ for
 more information on this.
