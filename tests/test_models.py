@@ -1,3 +1,4 @@
+"""Test revrand models."""
 import numpy as np
 
 from sklearn.pipeline import Pipeline
@@ -54,17 +55,13 @@ def test_gridsearch_slm(make_gaus_data):
     X, y, Xs, ys = make_gaus_data
 
     slm = StandardLinearModel(LinearBasis(onescol=True))
-    steps = [('PCA', PCA()),
-             ('SLM', slm)]
-    pipe = Pipeline(steps=steps)
 
-    param_dict = {'SLM__var': [Parameter(v, Positive()) for v in [1.0, 2.0]],
-                  'SLM__regulariser': [Parameter(v, Positive())
-                                       for v in [1.0, 2.0]]}
-    estimator = GridSearchCV(pipe, param_dict, n_jobs=-1)
+    param_dict = {'var': [Parameter(v, Positive()) for v in [1.0, 2.0]]}
+    estimator = GridSearchCV(slm, param_dict, n_jobs=-1)
 
     estimator.fit(X, y)
-    assert np.all(estimator.cv_results_['mean_train_score'] == 1.0)
+    Ey = estimator.predict(Xs)
+    assert len(ys) == len(Ey)  # we just want to make sure this all runs
 
 
 def test_randomgridsearch_slm(make_gaus_data):
@@ -72,19 +69,15 @@ def test_randomgridsearch_slm(make_gaus_data):
     X, y, Xs, ys = make_gaus_data
 
     slm = StandardLinearModel(LinearBasis(onescol=True))
-    steps = [('PCA', PCA()),
-             ('SLM', slm)]
-    pipe = Pipeline(steps=steps)
 
-    param_dict = {'SLM__var': [Parameter(1.0/v, Positive())
-                               for v in range(1, 6)],
-                  'SLM__regulariser': [Parameter(1.0/v,
-                                                 Positive())
-                                       for v in range(1, 3)]}
-    estimator = RandomizedSearchCV(pipe, param_dict, n_jobs=-1, n_iter=2)
+    param_dict = {
+        'var': [Parameter(1.0 / v, Positive()) for v in range(1, 6)]
+    }
+    estimator = RandomizedSearchCV(slm, param_dict, n_jobs=-1, n_iter=2)
 
-    estimator.fit(Xs, ys)
-    assert np.all(estimator.cv_results_['mean_train_score'] == 1.0)
+    estimator.fit(X, y)
+    Ey = estimator.predict(Xs)
+    assert len(ys) == len(Ey)  # we just want to make sure this all runs
 
 
 def test_glm_gaussian(make_gaus_data, make_random):
@@ -175,18 +168,14 @@ def test_gridsearch_glm(make_gaus_data):
     X, y, Xs, ys = make_gaus_data
 
     glm = GeneralizedLinearModel(Gaussian(), LinearBasis(onescol=True),
-                                 random_state=1)
+                                 random_state=1, maxiter=100)
 
-    estimators = [('PCA', PCA()),
-                  ('GLM', glm)
-                  ]
-    pipe = Pipeline(estimators)
+    param_dict = {'batch_size': [10, 20]}
+    estimator = GridSearchCV(glm, param_dict, verbose=1, n_jobs=-1)
 
-    param_dict = {'GLM__batch_size': [10, 20]}
-    estimator = GridSearchCV(pipe, param_dict, verbose=1, n_jobs=-1)
-
-    estimator.fit(Xs[:10, ], ys[:10])
-    assert np.all(estimator.cv_results_['mean_train_score'] > 0.0)
+    estimator.fit(X, y)
+    Ey = estimator.predict(Xs)
+    assert len(ys) == len(Ey)  # we just want to make sure this all runs
 
 
 def test_randomgridsearch_glm(make_gaus_data):
@@ -194,19 +183,15 @@ def test_randomgridsearch_glm(make_gaus_data):
     X, y, Xs, ys = make_gaus_data
 
     glm = GeneralizedLinearModel(Gaussian(), LinearBasis(onescol=True),
-                                 random_state=1)
+                                 random_state=1, maxiter=100)
 
-    estimators = [('PCA', PCA()),
-                  ('GLM', glm)
-                  ]
-    pipe = Pipeline(estimators)
-
-    param_dict = {'GLM__batch_size': range(1, 11)}
-    estimator = RandomizedSearchCV(pipe, param_dict, verbose=1, n_jobs=-1,
+    param_dict = {'batch_size': range(1, 11)}
+    estimator = RandomizedSearchCV(glm, param_dict, verbose=1, n_jobs=-1,
                                    n_iter=2)
 
-    estimator.fit(Xs[:10, ], ys[:10])
-    assert np.all(estimator.cv_results_['mean_train_score'] > 0.0)
+    estimator.fit(X, y)
+    Ey = estimator.predict(Xs)
+    assert len(ys) == len(Ey)  # we just want to make sure this all runs
 
 
 def test_sklearn_clone(make_gaus_data):
