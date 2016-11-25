@@ -15,8 +15,9 @@ revrand.basis_functions.RandomRBF
    
       ~RandomRBF.__init__
       ~RandomRBF.get_dim
-      ~RandomRBF.get_init_params
       ~RandomRBF.grad
+      ~RandomRBF.params_values
+      ~RandomRBF.regularizer_diagonal
       ~RandomRBF.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.RandomRBF
    .. autosummary::
    
       ~RandomRBF.params
+      ~RandomRBF.regularizer
    
    

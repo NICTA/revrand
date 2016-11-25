@@ -15,8 +15,9 @@ revrand.basis_functions.FastFoodRBF
    
       ~FastFoodRBF.__init__
       ~FastFoodRBF.get_dim
-      ~FastFoodRBF.get_init_params
       ~FastFoodRBF.grad
+      ~FastFoodRBF.params_values
+      ~FastFoodRBF.regularizer_diagonal
       ~FastFoodRBF.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.FastFoodRBF
    .. autosummary::
    
       ~FastFoodRBF.params
+      ~FastFoodRBF.regularizer
    
    

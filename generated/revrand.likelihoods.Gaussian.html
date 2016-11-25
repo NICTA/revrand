@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.likelihoods.Gaussian &mdash; revrand 0.9.0 documentation</title>
+    <title>revrand.likelihoods.Gaussian &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="../index.html" />
     <link rel="up" title="Likelihood Classes" href="../likelihoods.html" />
     <link rel="next" title="revrand.likelihoods.Poisson" href="revrand.likelihoods.Poisson.html" />
     <link rel="prev" title="revrand.likelihoods.Binomial" href="revrand.likelihoods.Binomial.html" />
@@ -44,7 +44,7 @@
 <h1>revrand.likelihoods.Gaussian<a class="headerlink" href="#revrand-likelihoods-gaussian" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="revrand.likelihoods.Gaussian">
-<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>var_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>var=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>A univariate Gaussian likelihood for general regression tasks.</p>
 <p>No transformation function is needed since this is (conditionally)
 conjugate to the GLM prior.</p>
@@ -58,15 +58,16 @@ corresponding to the target and <span class="math">\(\sigma\)</span> is the obse
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar Parameter describing the initial point and bounds for
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (<em>Parameter, optional</em>) &#8211; A scalar Parameter describing the initial point and bounds for
 an optimiser to learn the variance parameter of this object.</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="revrand.likelihoods.Gaussian.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>var_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>var=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.likelihoods.Gaussian.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See class docstring.</p>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
@@ -78,8 +79,8 @@ an optimiser to learn the variance parameter of this object.</td>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">Ey</span></code>(f,&nbsp;var)</td>
 <td>Expected value of the Gaussian likelihood.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Gaussian.__init__" title="revrand.likelihoods.Gaussian.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([var_init])</td>
-<td></td>
+<tr class="row-even"><td><a class="reference internal" href="#revrand.likelihoods.Gaussian.__init__" title="revrand.likelihoods.Gaussian.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([var,&nbsp;bounds,&nbsp;shape])</td>
+<td>See class docstring.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code>(y,&nbsp;f,&nbsp;var)</td>
 <td>Cumulative density function of the likelihood.</td>
@@ -90,7 +91,7 @@ an optimiser to learn the variance parameter of this object.</td>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">dp</span></code>(y,&nbsp;f,&nbsp;var)</td>
 <td>Derivative of Gaussian log likelihood w.r.t.the variance <span class="math">\(\sigma^2\)</span>.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code>(y,&nbsp;f,&nbsp;var)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">loglike</span></code>(y,&nbsp;f[,&nbsp;var])</td>
 <td>Gaussian log likelihood.</td>
 </tr>
 </tbody>

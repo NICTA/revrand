@@ -15,8 +15,9 @@ revrand.basis_functions.FastFoodGM
    
       ~FastFoodGM.__init__
       ~FastFoodGM.get_dim
-      ~FastFoodGM.get_init_params
       ~FastFoodGM.grad
+      ~FastFoodGM.params_values
+      ~FastFoodGM.regularizer_diagonal
       ~FastFoodGM.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.FastFoodGM
    .. autosummary::
    
       ~FastFoodGM.params
+      ~FastFoodGM.regularizer
    
    

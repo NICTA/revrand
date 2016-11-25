@@ -1,6 +1,0 @@
-revrand.basis_functions.spectralmixture
-=======================================
-
-.. currentmodule:: revrand.basis_functions
-
-.. autofunction:: spectralmixture

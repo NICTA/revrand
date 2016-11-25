@@ -15,8 +15,9 @@ revrand.basis_functions.RandomLaplace
    
       ~RandomLaplace.__init__
       ~RandomLaplace.get_dim
-      ~RandomLaplace.get_init_params
       ~RandomLaplace.grad
+      ~RandomLaplace.params_values
+      ~RandomLaplace.regularizer_diagonal
       ~RandomLaplace.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.RandomLaplace
    .. autosummary::
    
       ~RandomLaplace.params
+      ~RandomLaplace.regularizer
    
    

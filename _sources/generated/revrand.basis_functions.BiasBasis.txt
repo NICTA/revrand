@@ -15,8 +15,9 @@ revrand.basis_functions.BiasBasis
    
       ~BiasBasis.__init__
       ~BiasBasis.get_dim
-      ~BiasBasis.get_init_params
       ~BiasBasis.grad
+      ~BiasBasis.params_values
+      ~BiasBasis.regularizer_diagonal
       ~BiasBasis.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.BiasBasis
    .. autosummary::
    
       ~BiasBasis.params
+      ~BiasBasis.regularizer
    
    

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.FastFoodGM &mdash; revrand 0.9.0 documentation</title>
+    <title>revrand.basis_functions.FastFoodGM &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="revrand.basis_functions.spectralmixture" href="revrand.basis_functions.spectralmixture.html" />
+    <link rel="next" title="Standard Linear Model" href="../slm.html" />
     <link rel="prev" title="revrand.basis_functions.FastFoodRBF" href="revrand.basis_functions.FastFoodRBF.html" />
    
   
@@ -44,11 +44,14 @@
 <h1>revrand.basis_functions.FastFoodGM<a class="headerlink" href="#revrand-basis-functions-fastfoodgm" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="revrand.basis_functions.FastFoodGM">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodGM</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">FastFoodGM</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean=Parameter(value=0.0</em>, <em>bounds=Bound(lower=None</em>, <em>upper=None)</em>, <em>shape=())</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM" title="Permalink to this definition">¶</a></dt>
 <dd><p>A mixture component from a Gaussian spectral mixture kernel approximation.</p>
 <p>This implements a GM basis component from &#8220;A la Carte - Learning Fast
 Kernels&#8221;. This essentially learns the form of a kernel function, and so has
 no explicit kernel representation!</p>
+<p>To fully implement a Gaussian spectral mixture, concatenate as many of
+these objects as desired (one per mixture component). Also remember to
+initialize all of the bases with different means.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -58,14 +61,18 @@ no explicit kernel representation!</p>
 this actually will be to the nearest larger two power.</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>mean_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>mean</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the component frequency means for optimization. This will
 always initialise (d,) means if a scalr bound is given, it is applied
 to all means.</li>
-<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. This will always
 initialise ARD length scales, if a scalr bound is given, it is applied
 to all length scales.</li>
+<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+regression weights of this basis function. The Parameter object must
+have a scalar value. If it is not set, it will take on a default value
+of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
 <li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
 </ul>
 </td>
@@ -74,8 +81,9 @@ to all length scales.</li>
 </table>
 <dl class="method">
 <dt id="revrand.basis_functions.FastFoodGM.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>mean=Parameter(value=0.0</em>, <em>bounds=Bound(lower=None</em>, <em>upper=None)</em>, <em>shape=())</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.FastFoodGM.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See this class&#8217;s docstring.</p>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
@@ -84,19 +92,22 @@ to all length scales.</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.FastFoodGM.__init__" title="revrand.basis_functions.FastFoodGM.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;mean_init,&nbsp;...])</td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.FastFoodGM.__init__" title="revrand.basis_functions.FastFoodGM.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;mean,&nbsp;bounds,&nbsp;...])</td>
+<td>See this class&#8217;s docstring.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_dim</span></code>(X)</td>
 <td>Get the output dimensionality of this basis.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_init_params</span></code>()</td>
-<td>Get a list of the initial parameters if they have a value.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X,&nbsp;mean,&nbsp;lenscale)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X[,&nbsp;mean,&nbsp;lenscale])</td>
 <td>Get the gradients of this basis w.r.t.the mean and length scales.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X,&nbsp;mean,&nbsp;lenscale)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">params_values</span></code>()</td>
+<td>Get a list of the <code class="docutils literal"><span class="pre">Parameter</span></code> values if they have a value.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">regularizer_diagonal</span></code>(X[,&nbsp;regularizer])</td>
+<td>Get the diagonal of the prior variance on the weights (regularizer).</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X[,&nbsp;mean,&nbsp;lenscale])</td>
 <td>Apply the spectral mixture component basis to X.</td>
 </tr>
 </tbody>
@@ -109,7 +120,10 @@ to all length scales.</li>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params</span></code></td>
-<td>Get this object&#8217;s Parameter types.</td>
+<td>Get this basis&#8217; Parameter types.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">regularizer</span></code></td>
+<td>Get the <code class="docutils literal"><span class="pre">Parameter</span></code> value of this basis&#8217; regularizer.</td>
 </tr>
 </tbody>
 </table>
@@ -166,6 +180,7 @@ to all length scales.</li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.Basis.html">revrand.basis_functions.Basis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.BiasBasis.html">revrand.basis_functions.BiasBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.LinearBasis.html">revrand.basis_functions.LinearBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.PolynomialBasis.html">revrand.basis_functions.PolynomialBasis</a></li>
@@ -178,7 +193,6 @@ to all length scales.</li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern52.html">revrand.basis_functions.RandomMatern52</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodRBF.html">revrand.basis_functions.FastFoodRBF</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.basis_functions.FastFoodGM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.spectralmixture.html">revrand.basis_functions.spectralmixture</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>
@@ -199,7 +213,7 @@ to all length scales.</li>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../basis_funcs.html">Basis Functions</a><ul>
       <li>Previous: <a href="revrand.basis_functions.FastFoodRBF.html" title="previous chapter">revrand.basis_functions.FastFoodRBF</a></li>
-      <li>Next: <a href="revrand.basis_functions.spectralmixture.html" title="next chapter">revrand.basis_functions.spectralmixture</a></li>
+      <li>Next: <a href="../slm.html" title="next chapter">Standard Linear Model</a></li>
   </ul></li>
   </ul></li>
 </ul>

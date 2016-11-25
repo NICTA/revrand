@@ -15,8 +15,9 @@ revrand.basis_functions.RadialBasis
    
       ~RadialBasis.__init__
       ~RadialBasis.get_dim
-      ~RadialBasis.get_init_params
       ~RadialBasis.grad
+      ~RadialBasis.params_values
+      ~RadialBasis.regularizer_diagonal
       ~RadialBasis.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.RadialBasis
    .. autosummary::
    
       ~RadialBasis.params
+      ~RadialBasis.regularizer
    
    

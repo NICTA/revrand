@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.SigmoidalBasis &mdash; revrand 0.9.0 documentation</title>
+    <title>revrand.basis_functions.SigmoidalBasis &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="../index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
     <link rel="next" title="revrand.basis_functions.RandomRBF" href="revrand.basis_functions.RandomRBF.html" />
     <link rel="prev" title="revrand.basis_functions.RadialBasis" href="revrand.basis_functions.RadialBasis.html" />
@@ -44,7 +44,7 @@
 <h1>revrand.basis_functions.SigmoidalBasis<a class="headerlink" href="#revrand-basis-functions-sigmoidalbasis" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="revrand.basis_functions.SigmoidalBasis">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">SigmoidalBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">SigmoidalBasis</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sigmoidal Basis.</p>
 <div class="math">
 \[\phi(\mathbf{X}) =
@@ -60,8 +60,12 @@ length scale and <span class="math">\(\sigma\)</span> is the logistic sigmoid fu
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for the bases,
 and d is the dimensionality of X.</li>
-<li><strong>lenscale_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
+<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
 optimization.</li>
+<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+regression weights of this basis function. The Parameter object must
+have a scalar value. If it is not set, it will take on a default value
+of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
 </ul>
 </td>
 </tr>
@@ -69,8 +73,9 @@ optimization.</li>
 </table>
 <dl class="method">
 <dt id="revrand.basis_functions.SigmoidalBasis.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>centres</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.SigmoidalBasis.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See this class&#8217;s docstring.</p>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
@@ -79,19 +84,22 @@ optimization.</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.SigmoidalBasis.__init__" title="revrand.basis_functions.SigmoidalBasis.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(centres[,&nbsp;lenscale_init])</td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.SigmoidalBasis.__init__" title="revrand.basis_functions.SigmoidalBasis.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(centres[,&nbsp;lenscale,&nbsp;bounds,&nbsp;shape,&nbsp;...])</td>
+<td>See this class&#8217;s docstring.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_dim</span></code>(X)</td>
 <td>Get the output dimensionality of this basis.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_init_params</span></code>()</td>
-<td>Get a list of the initial parameters if they have a value.</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X,&nbsp;lenscale)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X[,&nbsp;lenscale])</td>
 <td>Get the gradients of this basis w.r.t. the length scale.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X,&nbsp;lenscale)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">params_values</span></code>()</td>
+<td>Get a list of the <code class="docutils literal"><span class="pre">Parameter</span></code> values if they have a value.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">regularizer_diagonal</span></code>(X[,&nbsp;regularizer])</td>
+<td>Get the diagonal of the prior variance on the weights (regularizer).</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X[,&nbsp;lenscale])</td>
 <td>Apply the sigmoid basis function to X.</td>
 </tr>
 </tbody>
@@ -104,7 +112,10 @@ optimization.</li>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params</span></code></td>
-<td>Get this object&#8217;s Parameter types.</td>
+<td>Get this basis&#8217; Parameter types.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">regularizer</span></code></td>
+<td>Get the <code class="docutils literal"><span class="pre">Parameter</span></code> value of this basis&#8217; regularizer.</td>
 </tr>
 </tbody>
 </table>
@@ -161,6 +172,7 @@ optimization.</li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.Basis.html">revrand.basis_functions.Basis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.BiasBasis.html">revrand.basis_functions.BiasBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.LinearBasis.html">revrand.basis_functions.LinearBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.PolynomialBasis.html">revrand.basis_functions.PolynomialBasis</a></li>
@@ -173,7 +185,6 @@ optimization.</li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern52.html">revrand.basis_functions.RandomMatern52</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodRBF.html">revrand.basis_functions.FastFoodRBF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodGM.html">revrand.basis_functions.FastFoodGM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.spectralmixture.html">revrand.basis_functions.spectralmixture</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>

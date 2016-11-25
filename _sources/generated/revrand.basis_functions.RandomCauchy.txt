@@ -15,8 +15,9 @@ revrand.basis_functions.RandomCauchy
    
       ~RandomCauchy.__init__
       ~RandomCauchy.get_dim
-      ~RandomCauchy.get_init_params
       ~RandomCauchy.grad
+      ~RandomCauchy.params_values
+      ~RandomCauchy.regularizer_diagonal
       ~RandomCauchy.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.RandomCauchy
    .. autosummary::
    
       ~RandomCauchy.params
+      ~RandomCauchy.regularizer
    
    

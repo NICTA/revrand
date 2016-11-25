@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Bound and Parameter Types &mdash; revrand 0.9.0 documentation</title>
+    <title>Bound and Parameter Types &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
     <link rel="next" title="Validation Metrics" href="metrics.html" />
     <link rel="prev" title="revrand.likelihoods.Poisson" href="generated/revrand.likelihoods.Poisson.html" />
    
@@ -98,12 +98,12 @@
 
 <dl class="class">
 <dt id="revrand.btypes.Parameter">
-<em class="property">class </em><code class="descclassname">revrand.btypes.</code><code class="descname">Parameter</code><span class="sig-paren">(</span><em>value=[]</em>, <em>bounds=Bound(lower=None</em>, <em>upper=None)</em>, <em>shape=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.Parameter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.btypes.</code><code class="descname">Parameter</code><span class="sig-paren">(</span><em>value=None</em>, <em>bounds=Bound(lower=None</em>, <em>upper=None)</em>, <em>shape=()</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.Parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Parameter class that associates a value with a bound.</p>
 <dl class="attribute">
 <dt id="revrand.btypes.Parameter.value">
 <code class="descname">value</code><a class="headerlink" href="#revrand.btypes.Parameter.value" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>scalar, ndarray, scipy.stats, optional</em> &#8211; a value or distribution to associate with this parameter. This is
+<dd><p><em>None, scalar, ndarray, scipy.stats, optional</em> &#8211; a value or distribution to associate with this parameter. This is
 typically used as an initial value for an optimizer, and if a random
 starts optimiser is used (eg. revrand.optimize.structured_minimizer) it
 can draw randomly from the distribution.</p>
@@ -197,6 +197,12 @@ dimensions.</li>
 <dd><p>Test if this Parameter was initialised with a distribution.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="revrand.btypes.Parameter.is_scalar">
+<code class="descname">is_scalar</code><a class="headerlink" href="#revrand.btypes.Parameter.is_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the Parameter is for a scalar value.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="revrand.btypes.Parameter.rvs">
 <code class="descname">rvs</code><span class="sig-paren">(</span><em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.btypes.Parameter.rvs" title="Permalink to this definition">¶</a></dt>
@@ -243,7 +249,7 @@ the log trick).</td>
 <p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Positive</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
-<span class="go">Positive(lower=1e-14, upper=None)</span>
+<span class="go">Positive(upper=None)</span>
 </pre></div>
 </div>
 <p>Since <code class="docutils literal"><span class="pre">tuple</span></code> (and by extension its descendents) are immutable,

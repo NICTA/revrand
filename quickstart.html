@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart Guide &mdash; revrand 0.9.0 documentation</title>
+    <title>Quickstart Guide &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
     <link rel="next" title="Installation" href="installation.html" />
     <link rel="prev" title="Welcome to revrand’s documentation" href="index.html" />
    
@@ -40,7 +40,7 @@
           <div class="body" role="main">
             
   <div class="section" id="quickstart-guide">
-<h1>Quickstart Guide<a class="headerlink" href="#quickstart-guide" title="Permalink to this headline">¶</a></h1>
+<span id="quickstart"></span><h1>Quickstart Guide<a class="headerlink" href="#quickstart-guide" title="Permalink to this headline">¶</a></h1>
 <p>To install, simply run <code class="docutils literal"><span class="pre">setup.py</span></code>:</p>
 <div class="code console highlight-default"><div class="highlight"><pre><span></span>$ python setup.py install
 </pre></div>
@@ -55,16 +55,10 @@
 <div class="section" id="bayesian-linear-regression-example">
 <h2>Bayesian Linear Regression Example<a class="headerlink" href="#bayesian-linear-regression-example" title="Permalink to this headline">¶</a></h2>
 <p>Here is a very quick example of how to use Bayesian linear regression
-(<a class="reference internal" href="slm.html#slm"><span class="std std-ref">Standard Linear Model</span></a>) with optimisation of the likelihood noise, regulariser and basis
-function parameters. The default behaviour of the algorithms in revrand is to
-randomly sample and evaluate these hyperparameters before starting optimization
-from the best random candidates. This is because the objective functions may be
-non-convex with respect to these parameters, and in this way revrand can
-achieve some robustness to bad initialisations. See <a class="reference internal" href="btypes.html#btypes"><span class="std std-ref">Bound and Parameter Types</span></a> and
-<a class="reference internal" href="optimize.html#optimize"><span class="std std-ref">Optimization</span></a> for more information on how to use these random initializers.</p>
-<p>Assuming we already have training noisy targets <code class="docutils literal"><span class="pre">y</span></code>, inputs
-<code class="docutils literal"><span class="pre">X</span></code>, and some query inputs <code class="docutils literal"><span class="pre">Xs</span></code> (as well as the true noiseless function
-<code class="docutils literal"><span class="pre">f</span></code>):</p>
+(<a class="reference internal" href="slm.html#slm"><span class="std std-ref">Standard Linear Model</span></a>) with optimisation of the likelihood noise, regularizer and basis
+function hyperparameters.</p>
+<p>Assuming we already have training noisy targets <code class="docutils literal"><span class="pre">y</span></code>, inputs <code class="docutils literal"><span class="pre">X</span></code>, and some
+query inputs <code class="docutils literal"><span class="pre">Xs</span></code> (as well as the true noiseless function <code class="docutils literal"><span class="pre">f</span></code>):</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">pl</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gamma</span>
@@ -80,7 +74,7 @@ achieve some robustness to bad initialisations. See <a class="reference internal
     <span class="o">+</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">nbases</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">Xdim</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">init_lenscale</span><span class="p">)</span>
 
 <span class="c1"># Learn regression parameters and predict (by default, this will evaluate</span>
-<span class="c1">#  100 random values for the length scale, variance and regulariser before</span>
+<span class="c1">#  100 random values for the length scale, variance and regularizer before</span>
 <span class="c1">#  starting optimisation from the best candidates)</span>
 <span class="n">slm</span> <span class="o">=</span> <span class="n">StandardLinearModel</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
 <span class="n">slm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -107,6 +101,36 @@ achieve some robustness to bad initialisations. See <a class="reference internal
 </div>
 <p>This script will output something like the following,</p>
 <img alt="_images/blr_demo.png" src="_images/blr_demo.png" />
+<p>The default behaviour of the algorithms in revrand is to randomly sample and
+evaluate these hyperparameters before starting optimization from the best
+random candidates. This is because the objective functions may be non-convex
+with respect to these parameters, and in this way revrand can achieve some
+robustness to bad initializations.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>All of the hyperparameters in revrand are initialised using <code class="docutils literal"><span class="pre">Parameter</span></code>
+objects. These objects contain information on the bounds of the values of
+these hyperparameters, as well as <em>how</em> to intialize them. For instance,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Bound</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hyper</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">Bound</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>tells the optimizer to bound the feasible range of the hyperparameter
+between 0.5 and 100, with an initial value of 1. Futhermore,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Positive</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gamma</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hyper</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">Positive</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="last">tells the optimizer it can use <em>random starts</em> with this hyperparameter,
+and to draw these random starts from a gamma distribution with a shape of
+1, and a scale of 10. If random starts are not used, then the expected
+value (10) of this distribution is used as the initial value. Also,
+<code class="docutils literal"><span class="pre">Positive()</span></code> indicates the value of the parameter must be within <code class="docutils literal"><span class="pre">(0,</span>
+<span class="pre">inf)</span></code>.</p>
+</div>
+<p>See <a class="reference internal" href="btypes.html#btypes"><span class="std std-ref">Bound and Parameter Types</span></a> and <a class="reference internal" href="optimize.html#optimize"><span class="std std-ref">Optimization</span></a> for more information on how to use these
+random initializers.</p>
 </div>
 <div class="section" id="bayesian-generalized-linear-model-example">
 <h2>Bayesian Generalized Linear Model Example<a class="headerlink" href="#bayesian-generalized-linear-model-example" title="Permalink to this headline">¶</a></h2>
@@ -161,12 +185,12 @@ model (GLM, <a class="reference internal" href="glm.html#glm"><span class="std s
 </div>
 <div class="section" id="large-scale-learning-with-stochastic-gradients">
 <h2>Large-scale Learning with Stochastic Gradients<a class="headerlink" href="#large-scale-learning-with-stochastic-gradients" title="Permalink to this headline">¶</a></h2>
-<p>By default the GLM uses stochastic gradients to learn all of its
-parameters/hyperparameters and does not require any matrix inversion, and so it
-can be used to learn from large datasets with lots of features (<code class="docutils literal"><span class="pre">slm.learn</span></code>
-uses L-BFGS and requires a matrix inversion). We can also use the GLM to
-approximate and scale up regular Bayesian linear regression. For instance, if
-we modify the Bayesian linear regression example from before,</p>
+<p>By default the GLM uses stochastic gradients to learn all of its parameters and
+hyperparameters and does not require any matrix inversion, and so it can be
+used to learn from large datasets with lots of features (<code class="docutils literal"><span class="pre">slm.learn</span></code> uses
+L-BFGS and requires a matrix inversion). We can also use the GLM to approximate
+and scale up regular Bayesian linear regression. For instance, if we modify the
+Bayesian linear regression example from before,</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">...</span>
 
 <span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">likelihoods</span>
@@ -174,7 +198,7 @@ we modify the Bayesian linear regression example from before,</p>
 <span class="o">...</span>
 
 <span class="c1"># Set up the likelihood of the GLM</span>
-<span class="n">llhood</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">var_init</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span> <span class="n">Positive</span><span class="p">()))</span>
+<span class="n">llhood</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">var</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span> <span class="n">Positive</span><span class="p">()))</span>
 
 <span class="c1"># Learn regression parameters and predict</span>
 <span class="n">glm</span> <span class="o">=</span> <span class="n">GeneralizedLinearModel</span><span class="p">(</span><span class="n">llhood</span><span class="p">,</span> <span class="n">basis</span><span class="p">)</span>
@@ -204,13 +228,13 @@ posterior distributions when non-Gaussian likelihoods are required.</p>
 <div class="section" id="feature-composition-framework">
 <h2>Feature Composition Framework<a class="headerlink" href="#feature-composition-framework" title="Permalink to this headline">¶</a></h2>
 <p>We have implemented an easy to use and extensible feature-building framework
-within revrand (<a class="reference internal" href="basis_funcs.html#basis-functions"><span class="std std-ref">Basis Functions</span></a>). You have already seen the basics
+within revrand (<a class="reference internal" href="basis_funcs.html#basis-functions"><span class="std std-ref">Basis Functions</span></a>) that mirrors many kernel composition
+frameworks, such as those found in <a class="reference external" href="http://scikit-learn.org/stable/modules/gaussian_process.html">Scikit Learn</a> and <a class="reference external" href="https://github.com/GPflow/GPflow">GPflow</a>. You have already seen the basics
 demonstrated in the above examples, i.e. concatenation of basis functions,</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">N</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">Xdim</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">nbases</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">lenscale</span> <span class="o">=</span> <span class="mf">1.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">lenscale</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(100, 206)</span>
 </pre></div>
@@ -222,15 +246,35 @@ result is concatenated.</li>
 <li><code class="docutils literal"><span class="pre">LinearBasis</span></code> has pre-pended a column of ones onto <code class="docutils literal"><span class="pre">X</span></code> so a subsequent
 algorithm can learn a &#8220;bias&#8221; term.</li>
 <li><code class="docutils literal"><span class="pre">RandomRBF</span></code> is actually approximating a radial basis <em>kernel</em> function,
-<a class="footnote-reference" href="#id4" id="id1">[3]</a>, so we can approximate how a kernel machine functions with a basis
-function!  This also outputs <code class="docutils literal"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">nbases</span></code> number of basis functions.</li>
+<a class="footnote-reference" href="#id5" id="id1">[3]</a>! This also outputs <code class="docutils literal"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">nbases</span></code> number of basis functions.</li>
 <li>Hence the resulting basis function has a shape of
 <code class="docutils literal"><span class="pre">(N,</span> <span class="pre">d</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">nbases)</span></code>.</li>
 </ul>
+<p>The above basis concatenation when used with the <code class="docutils literal"><span class="pre">StandardLinearModel</span></code> is
+actually very similar to the following kernel composition when used with Scikit
+Learn&#8217;s <code class="docutils literal"><span class="pre">GaussianProcessRegressor</span></code>,</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.gaussian_process.kernels</span> <span class="k">import</span> <span class="n">RBF</span><span class="p">,</span> <span class="n">DotProduct</span><span class="p">,</span> \
+<span class="gp">... </span>    <span class="n">WhiteKernel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kern</span> <span class="o">=</span> <span class="mi">1</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">DotProduct</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">RBF</span><span class="p">()</span> <span class="o">+</span> <span class="n">WhiteKernel</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here the Scikit Learn GP learns the kernel amplitude parameters, which are
+initialised at 1. Revrand also learns these parameters, and the same
+initialization in revrand would be,</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">revrand</span> <span class="k">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Positive</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg1</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">Positive</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg2</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">Positive</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg1</span><span class="p">)</span> \
+<span class="gp">... </span>    <span class="o">+</span> <span class="n">RandomRBF</span><span class="p">(</span><span class="n">Xdim</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">nbases</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is because the <em>regularizer</em> on the weights (the variance of the weight
+prior) is equivalent to the kernel amplitude parameters in a Gaussian process.
+Hence, in revrand we allow a separate regularizers per basis object.</p>
 <p>We can also use <em>partial application</em> of basis functions, e.g.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">LinearBasis</span><span class="p">(</span><span class="n">onescol</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_ind</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> \
 <span class="go">    + RandomRBF(Xdim=d, nbases=100, apply_ind=slice(2, 5))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">lenscale</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(100, 203)</span>
 </pre></div>
@@ -238,23 +282,43 @@ function!  This also outputs <code class="docutils literal"><span class="pre">2<
 <p>Now the basis functions are applied to separate dimensions of the input, <code class="docutils literal"><span class="pre">X</span></code>.
 That is, <code class="docutils literal"><span class="pre">LinearBasis</span></code> takes dimensions 0 and 1, and <code class="docutils literal"><span class="pre">RandomRBF</span></code> takes the
 rest, and again the results are concatenated.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For the moment we only support basis concatenation which is analogous to
+kernel addition. Performing <cite>kernel multiplication</cite> with bases is
+computationally complex and we have not yet implemented it.</p>
+</div>
 <p>Finally, if we use these basis functions with any of the algorithms in this
-revrand, <em>the parameters of the basis functions are learned</em> as well! So
-really in the above example <code class="docutils literal"><span class="pre">lenscale</span> <span class="pre">=</span> <span class="pre">1.</span></code> is just an initial value for
-the kernel function length-scale!</p>
+revrand, <em>the parameters of the basis functions are learned</em>.</p>
+<p class="rubric">A note on implementation</p>
+<p>We decided against using the kernel product notation for basis functions in
+revrand (<code class="docutils literal"><span class="pre">1**2</span> <span class="pre">*</span> <span class="pre">Kernel()</span></code>), as they are not equivalent when a call to
+<code class="docutils literal"><span class="pre">transform</span></code> is made. That is, applying</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Phi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>does not involve the regularizer in any way, which is why we set it in the
+constructor of the basis. It would only be involved when constructing an
+<em>equivalent</em> kernel,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">K</span> <span class="o">=</span> <span class="n">Phi</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Phi</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">L</span></code> is a diagonal regularizer matrix corresponding to our bases&#8217;
+<code class="docutils literal"><span class="pre">regularizer</span></code> initializers. See <a class="footnote-reference" href="#id3" id="id2">[1]</a> and our <a class="reference external" href="https://github.com/NICTA/revrand/blob/master/docs/report/report.pdf">report</a> for
+more information on this.</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<table class="docutils footnote" frame="void" id="id2" rules="none">
+<table class="docutils footnote" frame="void" id="id3" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Yang, Z., Smola, A. J., Song, L., &amp; Wilson, A. G. &#8220;A la Carte &#8211;
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Yang, Z., Smola, A. J., Song, L., &amp; Wilson, A. G. &#8220;A la Carte &#8211;
 Learning Fast Kernels&#8221;. Proceedings of the Eighteenth International
 Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 2015.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id3" rules="none">
+<table class="docutils footnote" frame="void" id="id4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Le, Q., Sarlos, T., &amp; Smola, A. &#8220;Fastfood-approximating kernel
@@ -262,14 +326,14 @@ expansions in loglinear time.&#8221; Proceedings of the international conference
 on machine learning. 2013.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
+<table class="docutils footnote" frame="void" id="id5" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id1">[3]</a></td><td>Rahimi, A., &amp; Recht, B. &#8220;Random features for large-scale kernel
 machines.&#8221; Advances in neural information processing systems. 2007.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
+<table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[4]</td><td>Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
@@ -277,7 +341,7 @@ inference&#8221;. Proceedings of the international conference on machine learnin
 2012.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+<table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[5]</td><td>Kingma, D. P., &amp; Welling, M. &#8220;Auto-encoding variational Bayes&#8221;.

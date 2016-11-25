@@ -15,8 +15,9 @@ revrand.basis_functions.LinearBasis
    
       ~LinearBasis.__init__
       ~LinearBasis.get_dim
-      ~LinearBasis.get_init_params
       ~LinearBasis.grad
+      ~LinearBasis.params_values
+      ~LinearBasis.regularizer_diagonal
       ~LinearBasis.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.LinearBasis
    .. autosummary::
    
       ~LinearBasis.params
+      ~LinearBasis.regularizer
    
    

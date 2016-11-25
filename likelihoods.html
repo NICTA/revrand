@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Likelihood Classes &mdash; revrand 0.9.0 documentation</title>
+    <title>Likelihood Classes &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
     <link rel="next" title="revrand.likelihoods.Bernoulli" href="generated/revrand.likelihoods.Bernoulli.html" />
     <link rel="prev" title="Generalized Linear Model" href="glm.html" />
    
@@ -47,13 +47,13 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.likelihoods.Bernoulli.html#revrand.likelihoods.Bernoulli" title="revrand.likelihoods.Bernoulli"><code class="xref py py-obj docutils literal"><span class="pre">Bernoulli</span></code></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.likelihoods.Bernoulli.html#revrand.likelihoods.Bernoulli" title="revrand.likelihoods.Bernoulli"><code class="xref py py-obj docutils literal"><span class="pre">Bernoulli</span></code></a></td>
 <td>Bernoulli likelihood class for (binary) classification tasks.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.likelihoods.Binomial.html#revrand.likelihoods.Binomial" title="revrand.likelihoods.Binomial"><code class="xref py py-obj docutils literal"><span class="pre">Binomial</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.likelihoods.Binomial.html#revrand.likelihoods.Binomial" title="revrand.likelihoods.Binomial"><code class="xref py py-obj docutils literal"><span class="pre">Binomial</span></code></a></td>
 <td>Binomial likelihood class.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.likelihoods.Gaussian.html#revrand.likelihoods.Gaussian" title="revrand.likelihoods.Gaussian"><code class="xref py py-obj docutils literal"><span class="pre">Gaussian</span></code></a>([var_init])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.likelihoods.Gaussian.html#revrand.likelihoods.Gaussian" title="revrand.likelihoods.Gaussian"><code class="xref py py-obj docutils literal"><span class="pre">Gaussian</span></code></a>([var,&nbsp;bounds,&nbsp;shape])</td>
 <td>A univariate Gaussian likelihood for general regression tasks.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/revrand.likelihoods.Poisson.html#revrand.likelihoods.Poisson" title="revrand.likelihoods.Poisson"><code class="xref py py-obj docutils literal"><span class="pre">Poisson</span></code></a>([tranfcn])</td>
@@ -145,7 +145,7 @@ sigmoid.</p>
 <dl class="method">
 <dt>
 <code class="descname">dp</code><span class="sig-paren">(</span><em>y</em>, <em>f</em>, <em>*args</em><span class="sig-paren">)</span></dt>
-<dd><p>Derivative of Bernoulli log likelihood w.r.t. the parameters,
+<dd><p>Derivative of Bernoulli log likelihood w.r.t.the parameters,
 <span class="math">\(\theta\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -326,7 +326,7 @@ likelihood.</p>
 
 <dl class="class">
 <dt>
-<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>var_init=&lt;revrand.btypes.Parameter object&gt;</em><span class="sig-paren">)</span></dt>
+<em class="property">class </em><code class="descclassname">revrand.likelihoods.</code><code class="descname">Gaussian</code><span class="sig-paren">(</span><em>var=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em><span class="sig-paren">)</span></dt>
 <dd><p>A univariate Gaussian likelihood for general regression tasks.</p>
 <p>No transformation function is needed since this is (conditionally)
 conjugate to the GLM prior.</p>
@@ -340,7 +340,7 @@ corresponding to the target and <span class="math">\(\sigma\)</span> is the obse
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var_init</strong> (<em>Parameter, optional</em>) &#8211; A scalar Parameter describing the initial point and bounds for
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (<em>Parameter, optional</em>) &#8211; A scalar Parameter describing the initial point and bounds for
 an optimiser to learn the variance parameter of this object.</td>
 </tr>
 </tbody>
@@ -356,7 +356,8 @@ an optimiser to learn the variance parameter of this object.</td>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray</em>) &#8211; The variance of the distribution</li>
+<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+of variance is used.</li>
 </ul>
 </td>
 </tr>
@@ -382,7 +383,8 @@ an optimiser to learn the variance parameter of this object.</td>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; query quantiles, i.e. <span class="math">\(P(Y \leq y)\)</span>.</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray</em>) &#8211; The variance of the distribution</li>
+<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+of variance is used.</li>
 </ul>
 </td>
 </tr>
@@ -408,7 +410,8 @@ an optimiser to learn the variance parameter of this object.</td>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; array of 0, 1 valued integers of targets</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray</em>) &#8211; The variance of the distribution</li>
+<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+of variance is used.</li>
 </ul>
 </td>
 </tr>
@@ -435,7 +438,8 @@ an optimiser to learn the variance parameter of this object.</td>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; array of 0, 1 valued integers of targets</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray</em>) &#8211; The variance of the distribution</li>
+<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+of variance is used.</li>
 </ul>
 </td>
 </tr>
@@ -453,7 +457,7 @@ where <span class="math">\(sigma^2\)</span> is the variance.</p>
 
 <dl class="method">
 <dt>
-<code class="descname">loglike</code><span class="sig-paren">(</span><em>y</em>, <em>f</em>, <em>var</em><span class="sig-paren">)</span></dt>
+<code class="descname">loglike</code><span class="sig-paren">(</span><em>y</em>, <em>f</em>, <em>var=None</em><span class="sig-paren">)</span></dt>
 <dd><p>Gaussian log likelihood.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -463,7 +467,8 @@ where <span class="math">\(sigma^2\)</span> is the variance.</p>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; array of 0, 1 valued integers of targets</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray</em>) &#8211; The variance of the distribution</li>
+<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+of variance is used.</li>
 </ul>
 </td>
 </tr>

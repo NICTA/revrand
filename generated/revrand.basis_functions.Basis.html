@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.RandomLaplace &mdash; revrand 0.9.9 documentation</title>
+    <title>revrand.basis_functions.Basis &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="revrand 0.9.9 documentation" href="../index.html" />
     <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
-    <link rel="next" title="revrand.basis_functions.RandomCauchy" href="revrand.basis_functions.RandomCauchy.html" />
-    <link rel="prev" title="revrand.basis_functions.RandomRBF" href="revrand.basis_functions.RandomRBF.html" />
+    <link rel="next" title="revrand.basis_functions.BiasBasis" href="revrand.basis_functions.BiasBasis.html" />
+    <link rel="prev" title="Basis Functions" href="../basis_funcs.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -40,45 +40,65 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="revrand-basis-functions-randomlaplace">
-<h1>revrand.basis_functions.RandomLaplace<a class="headerlink" href="#revrand-basis-functions-randomlaplace" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="revrand-basis-functions-basis">
+<h1>revrand.basis_functions.Basis<a class="headerlink" href="#revrand-basis-functions-basis" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="revrand.basis_functions.RandomLaplace">
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">RandomLaplace</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomLaplace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Random Laplace Basis &#8211; Approximates a Laplace kernel function.</p>
-<p>This will make a linear regression model approximate a GP with an
-(optionally ARD) Laplace covariance function.</p>
-<div class="math">
-\[\phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
-    \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|}{l} \right)\]</div>
-<p>with a length scale, <span class="math">\(l\)</span> (a vector in <span class="math">\(\mathbb{R}^d\)</span> for ARD).</p>
+<dt id="revrand.basis_functions.Basis">
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">Basis</code><span class="sig-paren">(</span><em>regularizer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.Basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base Basis class.</p>
+<p>To make other basis classes, make sure they are subclasses of this class to
+enable concatenation and operation with the machine learning algorithms.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
-actually created, i.e. real and imaginary components for each base)</li>
-<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
-if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
-initialise the length scales for optimization. If this is shape (d,),
-ARD length scales will be expected, otherwise an isotropic lenscale is
-learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
-of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
-</ul>
-</td>
+of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<p>Basis concatentation works as follows if you subclass this class:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="n">MyBasis1</span><span class="p">(</span><span class="n">properties1</span><span class="p">)</span> <span class="o">+</span> <span class="n">MyBasis2</span><span class="p">(</span><span class="n">properties2</span><span class="p">)</span>  
+</pre></div>
+</div>
 <dl class="method">
-<dt id="revrand.basis_functions.RandomLaplace.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.RandomLaplace.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>See this class&#8217;s docstring.</p>
+<dt id="revrand.basis_functions.Basis.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>regularizer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.Basis.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct this an instance of this class.</p>
+<p>This is also a good place to set non-learnable properties, and bounded
+Parameter types. An example Basis class with parameters may be</p>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+<span class="gp">... </span>             <span class="nb">property</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="n">param</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Bound</span><span class="p">()),</span>
+<span class="gp">... </span>             <span class="n">regularizer</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span> <span class="n">Positive</span><span class="p">())</span>
+<span class="gp">... </span>             <span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">property</span> <span class="o">=</span> <span class="nb">property</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">param_init</span>
+<span class="gp">... </span>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All the <code class="docutils literal"><span class="pre">params</span></code> property does is inform algorithms of the intitial
+value and any bounds this basis object has, or it can be used as a
+default value. This will need to correspond to any parameters input
+into the <code class="docutils literal"><span class="pre">transform</span></code> and <code class="docutils literal"><span class="pre">grad</span></code> methods, where it can be used as
+the default value. All basis class objects MUST have a <code class="docutils literal"><span class="pre">params</span></code>
+property, which is either:</p>
+<ul class="simple">
+<li>one Parameter object for an optimisable parameter, see btypes.py.
+Parameter objects with <code class="docutils literal"><span class="pre">None</span></code> values are interpreted as having no
+parameters.</li>
+<li>a list of <code class="docutils literal"><span class="pre">Parameter</span></code> objects, one for each optimisable parameter.</li>
+</ul>
+<p>Also, all basis classes can have a way of setting the
+<code class="docutils literal"><span class="pre">self.regularizer</span></code> property, since this informs the regression
+algorithms of the (initial) values of the weights regularizer
+corresponding to this basis. If it is not set, it will take on a
+default value of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
@@ -88,14 +108,14 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.RandomLaplace.__init__" title="revrand.basis_functions.RandomLaplace.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale,&nbsp;bounds,&nbsp;...])</td>
-<td>See this class&#8217;s docstring.</td>
+<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.Basis.__init__" title="revrand.basis_functions.Basis.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([regularizer])</td>
+<td>Construct this an instance of this class.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_dim</span></code>(X)</td>
 <td>Get the output dimensionality of this basis.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X[,&nbsp;lenscale])</td>
-<td>Get the gradients of this basis w.r.t.the length scales.</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X)</td>
+<td>Return the gradient of the basis function for each parameter.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">params_values</span></code>()</td>
 <td>Get a list of the <code class="docutils literal"><span class="pre">Parameter</span></code> values if they have a value.</td>
@@ -103,8 +123,8 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">regularizer_diagonal</span></code>(X[,&nbsp;regularizer])</td>
 <td>Get the diagonal of the prior variance on the weights (regularizer).</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X[,&nbsp;lenscale])</td>
-<td>Apply the random basis to X.</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X)</td>
+<td>Return the basis function applied to X.</td>
 </tr>
 </tbody>
 </table>
@@ -176,14 +196,14 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.Basis.html">revrand.basis_functions.Basis</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.basis_functions.Basis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.BiasBasis.html">revrand.basis_functions.BiasBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.LinearBasis.html">revrand.basis_functions.LinearBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.PolynomialBasis.html">revrand.basis_functions.PolynomialBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RadialBasis.html">revrand.basis_functions.RadialBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.SigmoidalBasis.html">revrand.basis_functions.SigmoidalBasis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomRBF.html">revrand.basis_functions.RandomRBF</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.basis_functions.RandomLaplace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomLaplace.html">revrand.basis_functions.RandomLaplace</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomCauchy.html">revrand.basis_functions.RandomCauchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern32.html">revrand.basis_functions.RandomMatern32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern52.html">revrand.basis_functions.RandomMatern52</a></li>
@@ -208,8 +228,8 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../basis_funcs.html">Basis Functions</a><ul>
-      <li>Previous: <a href="revrand.basis_functions.RandomRBF.html" title="previous chapter">revrand.basis_functions.RandomRBF</a></li>
-      <li>Next: <a href="revrand.basis_functions.RandomCauchy.html" title="next chapter">revrand.basis_functions.RandomCauchy</a></li>
+      <li>Previous: <a href="../basis_funcs.html" title="previous chapter">Basis Functions</a></li>
+      <li>Next: <a href="revrand.basis_functions.BiasBasis.html" title="next chapter">revrand.basis_functions.BiasBasis</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -217,7 +237,7 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/generated/revrand.basis_functions.RandomLaplace.txt"
+      <li><a href="../_sources/generated/revrand.basis_functions.Basis.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -243,7 +263,7 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |
-      <a href="../_sources/generated/revrand.basis_functions.RandomLaplace.txt"
+      <a href="../_sources/generated/revrand.basis_functions.Basis.txt"
           rel="nofollow">Page source</a>
     </div>
 

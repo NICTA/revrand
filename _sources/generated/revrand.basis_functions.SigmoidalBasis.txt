@@ -15,8 +15,9 @@ revrand.basis_functions.SigmoidalBasis
    
       ~SigmoidalBasis.__init__
       ~SigmoidalBasis.get_dim
-      ~SigmoidalBasis.get_init_params
       ~SigmoidalBasis.grad
+      ~SigmoidalBasis.params_values
+      ~SigmoidalBasis.regularizer_diagonal
       ~SigmoidalBasis.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.SigmoidalBasis
    .. autosummary::
    
       ~SigmoidalBasis.params
+      ~SigmoidalBasis.regularizer
    
    

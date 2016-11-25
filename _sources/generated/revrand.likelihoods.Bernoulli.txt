@@ -14,7 +14,6 @@ revrand.likelihoods.Bernoulli
    .. autosummary::
    
       ~Bernoulli.Ey
-      ~Bernoulli.__init__
       ~Bernoulli.cdf
       ~Bernoulli.df
       ~Bernoulli.dp

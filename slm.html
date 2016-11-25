@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Standard Linear Model &mdash; revrand 0.9.0 documentation</title>
+    <title>Standard Linear Model &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
     <link rel="next" title="Generalized Linear Model" href="glm.html" />
-    <link rel="prev" title="revrand.basis_functions.spectralmixture" href="generated/revrand.basis_functions.spectralmixture.html" />
+    <link rel="prev" title="revrand.basis_functions.FastFoodGM" href="generated/revrand.basis_functions.FastFoodGM.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -42,8 +42,8 @@
   <div class="section" id="module-revrand.slm">
 <span id="standard-linear-model"></span><span id="slm"></span><h1>Standard Linear Model<a class="headerlink" href="#module-revrand.slm" title="Permalink to this headline">¶</a></h1>
 <p>The standard Bayesian linear regression model.</p>
-<p>By using the appropriate bases, this will also yield a simple implementation of
-the &#8220;A la Carte&#8221; GP <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
+<p>By using the appropriate bases, this will also yield an implementation of the
+&#8220;A la Carte&#8221; GP <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
 <table class="docutils footnote" frame="void" id="id2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -55,16 +55,15 @@ Conference on Artificial Intelligence and Statistics, pp. 1098-1106,
 </table>
 <dl class="class">
 <dt id="revrand.slm.StandardLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.slm.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=&lt;revrand.btypes.Parameter object&gt;</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>tol=1e-08</em>, <em>maxiter=1000</em>, <em>nstarts=100</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.slm.</code><code class="descname">StandardLinearModel</code><span class="sig-paren">(</span><em>basis</em>, <em>var=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>tol=1e-08</em>, <em>maxiter=1000</em>, <em>nstarts=100</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.slm.StandardLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bayesian Standard linear model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
+<li><strong>basis</strong> (<a class="reference internal" href="generated/revrand.basis_functions.Basis.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>var</strong> (<em>Parameter, optional</em>) &#8211; observation variance initial value.</li>
-<li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value.</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; optimiser function tolerance convergence criterion.</li>
 <li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; maximum number of iterations for the optimiser.</li>
 <li><strong>nstarts</strong> (<em>int, optional</em>) &#8211; if there are any parameters with distributions as initial values, this
@@ -122,10 +121,9 @@ view these messages have something like,</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; (N*,d) array query input dataset (N* samples, d dimensions).</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; The expected value of y_star for the query inputs, X_star of shape
-(N_star,).</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Ey</strong> &#8211; The expected value of y* for the query inputs, X* of shape (N*,).</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
 </tr>
@@ -141,13 +139,12 @@ view these messages have something like,</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>ndarray</em>) &#8211; (N*,d) array query input dataset (N* samples, d dimensions).</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y_star for the query inputs, X_star of shape
-(N_star,).</li>
-<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of y_star for the query inputs, X_star of
-shape (N_star,).</li>
+<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y* for the query inputs, X* of shape (N*,).</li>
+<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of y* for the query inputs, X* of shape
+(N*,).</li>
 </ul>
 </td>
 </tr>
@@ -224,7 +221,7 @@ shape (N_star,).</li>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="generated/revrand.basis_functions.spectralmixture.html" title="previous chapter">revrand.basis_functions.spectralmixture</a></li>
+      <li>Previous: <a href="generated/revrand.basis_functions.FastFoodGM.html" title="previous chapter">revrand.basis_functions.FastFoodGM</a></li>
       <li>Next: <a href="glm.html" title="next chapter">Generalized Linear Model</a></li>
   </ul></li>
 </ul>

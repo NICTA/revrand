@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Generalized Linear Model &mdash; revrand 0.9.0 documentation</title>
+    <title>Generalized Linear Model &mdash; revrand 0.9.9 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.0',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.0 documentation" href="index.html" />
+    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
     <link rel="next" title="Likelihood Classes" href="likelihoods.html" />
     <link rel="prev" title="Standard Linear Model" href="slm.html" />
    
@@ -63,7 +63,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 </table>
 <dl class="class">
 <dt id="revrand.glm.GeneralizedLinearModel">
-<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralizedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>regulariser=&lt;revrand.btypes.Parameter object&gt;</em>, <em>K=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em>, <em>nstarts=500</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">revrand.glm.</code><code class="descname">GeneralizedLinearModel</code><span class="sig-paren">(</span><em>likelihood</em>, <em>basis</em>, <em>K=10</em>, <em>maxiter=3000</em>, <em>batch_size=10</em>, <em>updater=None</em>, <em>nsamples=50</em>, <em>nstarts=500</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.glm.GeneralizedLinearModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bayesian Generalized linear model (GLM).</p>
 <p>This provides a scikit learn compatible interface for the glm module.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -72,8 +72,7 @@ Proceedings of the 2nd International Conference on Learning Representations
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>likelihood</strong> (<em>Object</em>) &#8211; A likelihood object, see the likelihoods module.</li>
-<li><strong>basis</strong> (<em>Basis</em>) &#8211; A basis object, see the basis_functions module.</li>
-<li><strong>regulariser</strong> (<em>Parameter, optional</em>) &#8211; weight regulariser (variance) initial value/distribution.</li>
+<li><strong>basis</strong> (<a class="reference internal" href="generated/revrand.basis_functions.Basis.html#revrand.basis_functions.Basis" title="revrand.basis_functions.Basis"><em>Basis</em></a>) &#8211; A basis object, see the basis_functions module.</li>
 <li><strong>K</strong> (<em>int, optional</em>) &#8211; Number of diagonal Gaussian components to use to approximate the
 posterior distribution.</li>
 <li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; Maximum number of iterations of stochastic gradients to run.</li>
@@ -153,7 +152,7 @@ N.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, d dimensions).</li>
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N*,d) array query input dataset (N* samples, d dimensions).</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the expected target values from the
 predictive distribution.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
@@ -162,8 +161,7 @@ N.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; The expected value of y_star for the query inputs, X_star of shape
-(N_star,).</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Ey</strong> &#8211; The expected value of y* for the query inputs, X* of shape (N*,).</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -182,21 +180,21 @@ N.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N*,d) array query input dataset (N* samples, D dimensions).</li>
 <li><strong>quantile</strong> (<em>float</em>) &#8211; The predictive probability, <span class="math">\(p(y^* \leq \text{quantile} |
 \mathbf{x}^*, \mathbf{X}, y)\)</span>.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the predictive CDF.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
-Ns.</li>
+N*.</li>
 <li><strong>nsamples</strong> &#8211; The number of samples to draw from the posterior in order to
 approximate the predictive mean and variance.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>p</strong> (<em>ndarray</em>) &#8211; The probability of ys &lt;= quantile for the query inputs, Xs of shape
-(Ns,).</li>
+<li><strong>p</strong> (<em>ndarray</em>) &#8211; The probability of y* &lt;= quantile for the query inputs, X* of shape
+(N*,).</li>
 <li><strong>p_min</strong> (<em>ndarray</em>) &#8211; The minimum sampled values of the predicted probability (same shape
 as p)</li>
 <li><strong>p_max</strong> (<em>ndarray</em>) &#8211; The maximum sampled values of the predicted probability (same shape
@@ -218,19 +216,19 @@ as p)</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N*,d) array query input dataset (N* samples, D dimensions).</li>
 <li><strong>percentile</strong> (<em>float</em>) &#8211; The percentile confidence interval (e.g. 95%) to return.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the predictive percentiles.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
-Ns.</li>
+N*.</li>
 <li><strong>multiproc</strong> (<em>bool, optional</em>) &#8211; Use multiprocessing to paralellise this prediction computation.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>ql</strong> (<em>ndarray</em>) &#8211; The lower end point of the interval with shape (Ns,)</li>
-<li><strong>qu</strong> (<em>ndarray</em>) &#8211; The upper end point of the interval with shape (Ns,)</li>
+<li><strong>ql</strong> (<em>ndarray</em>) &#8211; The lower end point of the interval with shape (N*,)</li>
+<li><strong>qu</strong> (<em>ndarray</em>) &#8211; The upper end point of the interval with shape (N*,)</li>
 </ul>
 </p>
 </td>
@@ -248,18 +246,18 @@ Ns.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>ndarray</em>) &#8211; (Ns,d) array query input dataset (Ns samples, D dimensions).</li>
-<li><strong>y</strong> (<em>float or ndarray</em>) &#8211; The test observations of shape (Ns,) to evaluate under,
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N*,d) array query input dataset (N* samples, D dimensions).</li>
+<li><strong>y</strong> (<em>float or ndarray</em>) &#8211; The test observations of shape (N*,) to evaluate under,
 <span class="math">\(\log p(y^* |\mathbf{x}^*, \mathbf{X}, y)\)</span>.</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the log predictive distribution.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
 non-learnable parameters. They can be scalars or arrays of length
-Ns.</li>
+N*.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>logp</strong> (<em>ndarray</em>) &#8211; The log probability of ys given Xs of shape (Ns,).</li>
+<li><strong>logp</strong> (<em>ndarray</em>) &#8211; The log probability of y* given X* of shape (N*,).</li>
 <li><strong>logp_min</strong> (<em>ndarray</em>) &#8211; The minimum sampled values of the predicted log probability (same
 shape as p)</li>
 <li><strong>logp_max</strong> (<em>ndarray</em>) &#8211; The maximum sampled values of the predicted log probability (same
@@ -306,7 +304,8 @@ the variance in this instance may not be so useful.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N,d) array query input dataset (Ns samples, D dimensions).</li>
+<li><strong>X</strong> (<em>ndarray</em>) &#8211; (N*,d) array query input dataset (N* samples, d
+dimensions).</li>
 <li><strong>nsamples</strong> (<em>int, optional</em>) &#8211; Number of samples for sampling the expected moments from the
 predictive distribution.</li>
 <li><strong>likelihood_args</strong> (<em>sequence, optional</em>) &#8211; sequence of arguments to pass to the likelihood function. These are
@@ -316,9 +315,9 @@ N.</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of ys for the query inputs, Xs of shape (Ns,).</li>
-<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of ys (excluding likelihood noise terms) for
-the query inputs, Xs of shape (Ns,).</li>
+<li><strong>Ey</strong> (<em>ndarray</em>) &#8211; The expected value of y* for the query inputs, X* of shape (N*,).</li>
+<li><strong>Vy</strong> (<em>ndarray</em>) &#8211; The expected variance of y* (excluding likelihood noise terms) for
+the query inputs, X* of shape (N*,).</li>
 </ul>
 </p>
 </td>

@@ -15,8 +15,9 @@ revrand.basis_functions.RandomMatern52
    
       ~RandomMatern52.__init__
       ~RandomMatern52.get_dim
-      ~RandomMatern52.get_init_params
       ~RandomMatern52.grad
+      ~RandomMatern52.params_values
+      ~RandomMatern52.regularizer_diagonal
       ~RandomMatern52.transform
    
    
@@ -28,5 +29,6 @@ revrand.basis_functions.RandomMatern52
    .. autosummary::
    
       ~RandomMatern52.params
+      ~RandomMatern52.regularizer
    
    
