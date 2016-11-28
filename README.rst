@@ -12,15 +12,26 @@ revrand
 A library of scalable Bayesian generalized linear models with *fancy* features
 ------------------------------------------------------------------------------
 
-This library implements various Bayesian linear models (Bayesian linear
-regression) and generalized linear models. A few features of this library are:
+*revrand* is a python (2 and 3) **supervised machine learning** library that
+contains implementations of various Bayesian linear and generalized linear
+models (i.e. Bayesian linear regression and Bayesian generalized linear
+regression). 
 
-- A fancy basis functions/feature composition framework for combining basis
-  functions like radial basis functions, sigmoidal basis functions, polynomial
-  basis functions etc *with basis function parameter learning*.
+*revrand* can be used for **large scale approximate Gaussian process
+regression**, like `GPflow <https://github.com/GPflow/GPflow>`_ and `GPy
+<https://github.com/SheffieldML/GPy>`_, but it uses random basis kernel
+approximations (see [1]_, [2]_, [3]_) as opposed to inducing point
+approximations.
+
+A few features of this library are:
+
 - Random Basis functions that can be used to approximate Gaussian processes
   with shift invariant covariance functions (e.g. Matern) when used with linear
   models [1]_, [2]_, [3]_.
+- A fancy basis functions/feature composition framework for combining basis
+  functions like those above and radial basis functions, sigmoidal basis
+  functions, polynomial basis functions etc *with basis function parameter
+  learning*.
 - Non-Gaussian likelihoods with Bayesian generalized linear models (GLMs). We
   infer all of the parameters in the GLMs using auto-encoding variational
   Bayes [4]_, and we approximate the posterior over the weights with a mixture
