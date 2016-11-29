@@ -622,7 +622,7 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
         """Representation."""
         return "{}(likelihood={}, basis={}, K={}, maxiter={}, batch_size={},"\
             "updater={}, nsamples={}, nstarts={}, random_state={})".format(
-                self.__class.__name__,
+                self.__class__.__name__,
                 self.likelihood,
                 self.basis,
                 self.K,

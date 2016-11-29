@@ -247,7 +247,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
         """Representation."""
         return "{}(basis={}, var={}, tol={}, maxiter={}, nstarts={}, "\
             "random_state={})".format(
-                self.__class.__name__,
+                self.__class__.__name__,
                 self.basis,
                 self.var,
                 self.tol,
