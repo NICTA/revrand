@@ -1,8 +1,8 @@
 """Bayesian Generalized Linear Model implementation.
 
 Implementation of Bayesian GLMs using a mixture of Gaussians posterior
-approximation and auto-encoding variational Bayes inference. See [1]_ for the
-posterior mixture idea, and [2]_ for the inference scheme.
+approximation with the reparameterization trick and variational inference. See
+[1]_ for the posterior mixture idea, and [2]_ for the inference scheme.
 
 .. [1] Gershman, S., Hoffman, M., & Blei, D. "Nonparametric variational
    inference". Proceedings of the international conference on machine learning.

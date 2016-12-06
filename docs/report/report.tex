@@ -25,11 +25,11 @@
 % \jmlrheading{}{}{}{}{}{}
 
 % Short headings should be running head and authors last names
-\ShortHeadings{revrand Technical Report}{Steinberg, Tiao, Reid, McCalman and
+\ShortHeadings{\revrand~Technical Report}{Steinberg, Tiao, Reid, McCalman and
     O'Callaghan}
 \firstpageno{1}
 
-\title{\emph{revrand}: Technical Report}
+\title{\revrand: Technical Report}
 \author{\name Daniel Steinberg \email daniel.steinberg@data61.csiro.au \\
         \name Louis Tiao \email louis.tiao@data61.csiro.au \\
         \name Alistair Reid \email alistair.reid@data61.csiro.au \\
@@ -48,12 +48,12 @@
 % \vspace{0.3cm}
 
 \begin{abstract}
-    This is a technical report on the \emph{revrand} software library. This
-    library implements various Bayesian linear models (Bayesian linear
-    regression), approximate Gaussian processes and generalized linear models.
-    These algorithms have been implemented such that they can be used for
-    large-scale inference by using stochastic gradients. All of the algorithms
-    in \emph{revrand} use a unified feature composition framework that allows
+    This is a technical report on the \revrand software library. This
+    library implements Bayesian linear models (Bayesian linear regression),
+    generalized linear models and approximate Gaussian processes. These
+    algorithms have been implemented such that they can be used for large-scale
+    learning by using stochastic variational inference. All of the algorithms
+    in \revrand use a unified feature composition framework that allows
     for easy concatenation and selective application of regression basis
     functions.
 \end{abstract}
@@ -62,22 +62,32 @@
 
 \section{Core Algorithms}
 
+Recent developments in stochastic gradient optimisation have simplified the
+application of machine learning to massive datasets, in particular, modern
+stochastic optimisation algorithms are far more robust to initial learning rate
+settings. Furthermore, Bayesian machine learning algorithms have a number of
+well defined methods for learning model parameters and \emph{hyperparameters}
+from training data, that do not involve cross validation. When used in
+combination, stochastically optimized Bayesian machine learning algorithms
+allow practitioners to learn probabilistic predictors from large data sets with
+minimal tuning and retraining.
+
+We make use of some of these recent developments in stochastic gradient methods
+and stochastic variational inference in \revrand for supervisd regression
+tasks. We outline the core algorithms implemented in \revrand in this section.
+
 \subsection{Stochastic Gradients and Variational Objective Functions}
 \label{sub:stochvar}
 
-Stochastic Gradients is now a ubiquitous method for optimisation when a whole
-dataset does not fit in memory, or when optimisation has to be distributed
-amongst many computational nodes.
-
-When an objective function factorises over data,
+When a machine learning objective function factorises over data,
 \begin{equation}
     \ffunc{\ins, \param}{} = \sum_{\inss \in \ins} \ffunc{\inss, \param}{},
 \end{equation}
 a regular gradient descent would perform the following iterations to minimise
-the function w.r.t.\ $\param$,
+the function w.r.t.\ the parameters $\param$,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \ins}
-    \nabla_{\param} \ffunc{\inss_n, \param}{}\!|_{\param = \param_{k-1}},
+    \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}},
 \end{equation}
 where $\lrate_k$ is the learning rate (step size) at iteration $k$. Stochastic
 gradients proposes the following update,
@@ -88,16 +98,16 @@ gradients proposes the following update,
 \end{equation}
 where $\minibatch \subset \ins$ is a mini-batch of the original dataset, where
 $|\minibatch| \ll |\ins|$.
-
-Unfortunately some objective functions to not entirely decompose over the data,
-i.e. 
+Frequently objective functions to not entirely decompose over the data, i.e.,
 \begin{equation}
     \ffunc{\ins, \param}{} = \sum_{\inss \in \ins} \ffunc{\inss, \param}{}
     + \func{g}{\param}{}.
     \label{eq:objwconst}
 \end{equation}
-Let $M = |\minibatch|$ and $N = |\ins|$, then we divide the contribution of the
-constant term amongst the mini-batches in stochastic gradients,
+However, it is trivial to make these objectives work in a stochastic gradient
+setting. Let $M = |\minibatch|$ and $N = |\ins|$, then we divide the
+contribution of the constant term amongst the mini-batches in stochastic 
+gradients,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \minibatch}
     \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}}
@@ -156,13 +166,11 @@ which takes the form of Equation~\eqref{eq:objwconst}, and so if we use
 stochastic gradients optimisation we can weight the Kullback-Leibler term like
 the constant term, $\func{g}{\cdot}{}$, from Equation~\eqref{eq:wsg}, or boost
 the expected log likelihood term like in Equation~\eqref{eq:wsg2}.
-Furthermore, if $\qrob{\param} = \probC{\param}{\hyper}$ then the lower bound
-is tight, and this will be equivalent to optimising log-marginal likelihood.
 
 
 \subsection{Bayesian Linear Regression -- \texttt{StandardLinearModel}}
 
-The first machine learning algorithm in revrand is a simple Bayesian linear
+The first machine learning algorithm in \revrand is a simple Bayesian linear
 regressor of the following form,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
@@ -210,9 +218,9 @@ It is actually easier to use the ELBO form with stochastic gradients for
 learning the parameters of this algorithm, rather than log-marginal likelihood
 recast using the Woodbury identity.  This is because it is plainly in the same
 form as Equation \eqref{eq:objwconst}, though it would give the same result as
-log-marginal likelihood, the ``approximate'' posterior is the same form as the
-true posterior, i.e.\ $\qrob{\weights} = \gausC{\weights}{\pomean, \pocov}$.
-The ELBO for this model is,
+log-marginal likelihood because the ``approximate'' posterior is the same form
+as the true posterior, i.e.\ $\qrob{\weights} = \gausC{\weights}{\pomean,
+    \pocov}$. The ELBO for this model is,
 \begin{equation}
     \elbo = \sum^N_{n=1} 
     \expec{q}{\log\gausC{\targs_n}{\feats_n\T\weights, \var}}
@@ -241,7 +249,7 @@ and $D$ problems.
 \subsection{Bayesian Generalized Linear Models --
     \texttt{GeneralizedLinearModel}}
 
-The algorithm of primary interest in \emph{revrand} is the Bayesian generalized
+The algorithm of primary interest in \revrand is the Bayesian generalized
 linear model. The general form of the model implemented by this algorithm is,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
@@ -303,17 +311,17 @@ on the entropy term also used in \citet{gershman2012, nguyen2014automated},
     \gausC{\pomean_k}{\pomean_j, \dpocov_k + \dpocov_j}.
 \end{equation}
 We can then use the reparameterisation trick in auto-encoding variational Bayes
-to sample the expected log likelihood,
+\citep{kingma2014auto} to sample the expected log likelihood,
 \begin{equation}
     \sum^N_{n=1} 
     \expec{q_k}{\log\probC{\targs_n}
         {\activ{\feats_n\T\weights}, \lparam}} \approx
     \frac{1}{L} \sum^{L}_{l=1} \sum^N_{n=1} \log\probC{\targs_n}
-    {\activ{\feats_n\T\func{f}{\pomean_k, \dpocov_k, \resamp^{(l)}}{k}},
-        \lparam}
+    {\activ{\feats_n\T\hat{\weights}_k^{\brac{l}}}, \lparam}
 \end{equation}
 where,
 \begin{equation}
+    \hat{\weights}_k^{\brac{l}} =
     \func{f}{\pomean_k, \dpocov_k, \resamp^{(l)}}{k} =
     \pomean_k + \sqrt{\dpocov_k} \odot \resamp^{(l)},
     \qquad \resamp^{(l)} \sim \gaus{\mathbf{0}, \ident{D}}.
@@ -327,7 +335,8 @@ final auto-encoding variational Bayes objective for our GLM is,
 \begin{multline}
     \elbo \approx \frac{1}{K} \sum^K_{k=1} \Bigg[
     \frac{1}{L} \sum^L_{l=1} \sum^N_{n=1} 
-    \log\probC{\targs_n} {\activ{\feats_n\T f_k^{(l)}}, \lparam}
+    \log\probC{\targs_n}
+    {\activ{\feats_n\T \hat{\weights}_k^{\brac{l}}}, \lparam}
     + \log\gausC{\pomean_k}{\mathbf{0}, \Reg}
     - \frac{1}{2} \trace{\Reg\inv\dpocov_k} \\
     - \log \sum_{j=1}^K \frac{1}{K}
@@ -391,7 +400,7 @@ the following for $\cdfAlph$,
 
 \subsection{Large Scale Gaussian Process Approximation}
 
-In \emph{revrand} we approximate Gaussian Processes \citep{Rasmussen2006} with
+In \revrand we approximate Gaussian Processes \citep{Rasmussen2006} with
 our standard and generalized linear models by using random feature functions
 such as those of \citeauthor{rahimi2007} \citeyearpar{rahimi2007,rahimi2008}
 and \cite{le2013fastfood}. They use Bochner's theorem regarding the
@@ -429,7 +438,7 @@ above approximation is,
 \end{align}
 for $i=1, \ldots, D$,  which in fact is a mapping into a $2 D$-dimensional
 feature space. See Table~\ref{tab:randommappings} for some of the random kernel
-approximations we use in \emph{revrand}.
+approximations we use in \revrand.
 
 \begin{table}[htb]
 
@@ -437,7 +446,7 @@ approximations we use in \emph{revrand}.
 
     \caption{Kernels and the corresponding Fourier weight ($\ffourier_i$)
         sampling distributions for the \citet{rahimi2007}-style random bases in
-        \emph{revrand}. Here GAL refers to a multivariate Laplace
+        \revrand. Here GAL refers to a multivariate Laplace
         distribution~\cite{kozubowski2013multivariate}.}
 
     \begin{tabular}{r|c c}
@@ -472,7 +481,7 @@ approximations we use in \emph{revrand}.
 \end{table}
 
 All of the kernel functions in Table \ref{tab:randommappings} have length scale
-hyperparameters, and in \emph{revrand} these can be isotropic or anisotropic
+hyperparameters, and in \revrand these can be isotropic or anisotropic
 length scales that are learned alongside the other hyperparameters. We have
 also implemented a few other variants of these random basis functions, namely
 the Fastfood \citep{le2013fastfood} and A la Carte \citep{yang2014} basis
@@ -484,6 +493,35 @@ they approximate.
 TODO: a few figures of the approximate kernels?
 
 TODO: Basis CONCATENATION and how regularizer act as amplitude parameters
+
+An important feature of \revrand is that we can combine these random features
+(and non-random features) to build even more expressive features. In
+particular, we support basis \emph{concatenation} while still allowing basis
+function hyperparameter learning,
+\begin{equation}
+    \func{\featsym}{\ins, \boldsymbol\param}{} = \sbrac{
+        \func{\featsym}{\ins, \param_1}{1},
+        \func{\featsym}{\ins, \param_2}{2},
+        \ldots,
+        \func{\featsym}{\ins, \param_P}{P}
+    } 
+\end{equation}
+This is in fact equivalent to kernel addition,
+\begin{equation}
+    TODO
+\end{equation}
+We also support \emph{partial application} of basis functions to certain
+dimensions of the inputs ($\ins$), while also allowing concatentation, e.g,
+\begin{equation}
+    \func{\featsym}{\ins, \boldsymbol\param}{} = \sbrac{
+        \func{\featsym}{\ins_{1:10}, \param_1}{1},
+        \func{\featsym}{\ins_{5:D}, \param_2}{2},
+        \ldots,
+        \func{\featsym}{\ins, \param_P}{P}
+    } 
+\end{equation}
+Where the subscript of $\ins$ denotes (arbitrary) column slices. See \revrand's 
+documentation for how to use this features.
 
 \section{Experiments}
 
@@ -539,6 +577,7 @@ TODO: Basis CONCATENATION and how regularizer act as amplitude parameters
         & 512 & 0.0252 & -1.8397 \\
         & 1024 & 0.0207 & -1.9341 \\
         & 2048 & 0.0171 & -2.0243 \\
+        & 8192 & 0.0152 & -1.9804 \\
         \hline
     \end{tabular}
 

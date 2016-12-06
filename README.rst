@@ -33,9 +33,9 @@ A few features of this library are:
   functions, polynomial basis functions etc *with basis function parameter
   learning*.
 - Non-Gaussian likelihoods with Bayesian generalized linear models (GLMs). We
-  infer all of the parameters in the GLMs using auto-encoding variational
-  Bayes [4]_, and we approximate the posterior over the weights with a mixture
-  of Gaussians, like [5]_.
+  infer all of the parameters in the GLMs using stochastic variational 
+  inference [4]_, and we approximate the posterior over the weights with a
+  mixture of Gaussians, like [5]_.
 - Large scale learning using stochastic gradients (Adam, AdaDelta and more).
 - Scikit Learn compatibility, i.e. usable with `pipelines
   <http://scikit-learn.org/stable/modules/pipeline.html>`_.
