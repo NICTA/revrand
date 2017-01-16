@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y \
   python3 \
   python3-dev\
   python3-pip \
-  python-numpy
-  python-scipy
-  python3-numpy
-  python3-scipy
+  python-numpy \
+  python-scipy \
+  python3-numpy \
+  python3-scipy \
   # Clean up
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
