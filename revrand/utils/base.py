@@ -449,7 +449,7 @@ def unflatten(ary, shapes, reshape=scalar_reshape):
     [7, array([4]), array([5, 8, 9]), array([[1, 4, 2], [5, 3, 4]])]
 
     >>> list(unflatten(a, [(), (1,), (5,), (2, 3)]))
-    ... # doctest: +NORMALIZE_WHITESPACE
+    ... # doctest: +NORMALIZE_WHITESPACE +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     ValueError: total size of new array must be unchanged
