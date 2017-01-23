@@ -26,8 +26,9 @@ from sklearn.utils import check_random_state
 
 from .utils import atleast_list, issequence
 from .mathfun.special import logsumexp
-from .basis_functions import apply_grad
-from .optimize import sgd, structured_sgd, logtrick_sgd
+from .basis_functions import LinearBasis, apply_grad
+from .likelihoods import Gaussian
+from .optimize import sgd, structured_sgd, logtrick_sgd, Adam
 from .btypes import Bound, Positive, Parameter
 
 
@@ -113,8 +114,8 @@ class GeneralizedLinearModel(BaseEstimator, RegressorMixin):
     """
 
     def __init__(self,
-                 likelihood,
-                 basis,
+                 likelihood=Gaussian(),
+                 basis=LinearBasis(),
                  K=10,
                  maxiter=3000,
                  batch_size=10,

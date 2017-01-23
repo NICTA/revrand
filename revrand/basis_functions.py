@@ -460,7 +460,7 @@ class LinearBasis(Basis):
     """
 
     @slice_init
-    def __init__(self, onescol=False, regularizer=None):
+    def __init__(self, onescol=True, regularizer=None):
         """See this class's docstring."""
         self.onescol = onescol
         super(LinearBasis, self).__init__(regularizer)

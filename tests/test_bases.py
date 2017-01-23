@@ -241,13 +241,13 @@ def test_regularizer(make_gaus_data):
     base = bs.LinearBasis(regularizer=Parameter(2, Positive()))
     diag, slices = base.regularizer_diagonal(X)
     assert base.regularizer.value == 2
-    assert all(diag == np.full(d, 2))
+    assert all(diag == np.full(d + 1, 2.))
     assert slices == slice(None)
 
     # Basis cat
     base += bs.RandomRBF(Xdim=d, nbases=nbases1) \
         + bs.RandomMatern32(Xdim=d, nbases=nbases2)
-    dims = np.cumsum([0, d, 2 * nbases1, 2 * nbases2])
+    dims = np.cumsum([0, d + 1, 2 * nbases1, 2 * nbases2])
     diag, slices = base.regularizer_diagonal(X)
     for db, de, s in zip(dims[:-1], dims[1:], slices):
         assert s == slice(db, de)

@@ -26,7 +26,7 @@ from .utils import atleast_list, issequence
 from .mathfun.linalg import solve_posdef
 from .optimize import structured_minimizer, logtrick_minimizer
 from .btypes import Parameter, Positive
-from .basis_functions import apply_grad
+from .basis_functions import LinearBasis, apply_grad
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
     """
 
     def __init__(self,
-                 basis,
+                 basis=LinearBasis(),
                  var=Parameter(gamma(1.), Positive()),
                  tol=1e-8,
                  maxiter=1000,
