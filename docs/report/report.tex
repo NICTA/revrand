@@ -5,6 +5,8 @@
 \usepackage{xcolor}
 \usepackage[super]{nth}
 \usepackage{mathtools, amsfonts}
+\usepackage{graphicx}
+\usepackage{subfig}
 
 % Package config
 % \sectionfont{\normalfont\sffamily\bfseries}
@@ -25,11 +27,11 @@
 % \jmlrheading{}{}{}{}{}{}
 
 % Short headings should be running head and authors last names
-\ShortHeadings{\revrand~Technical Report}{Steinberg, Tiao, Reid, McCalman and
+\ShortHeadings{\revrand{}~Technical Report}{Steinberg, Tiao, Reid, McCalman and
     O'Callaghan}
 \firstpageno{1}
 
-\title{\revrand: Technical Report}
+\title{\revrand{}: Technical Report}
 \author{\name Daniel Steinberg \email daniel.steinberg@data61.csiro.au \\
         \name Louis Tiao \email louis.tiao@data61.csiro.au \\
         \name Alistair Reid \email alistair.reid@data61.csiro.au \\
@@ -48,12 +50,12 @@
 % \vspace{0.3cm}
 
 \begin{abstract}
-    This is a technical report on the \revrand software library. This
+    This is a technical report on the \revrand{} software library. This
     library implements Bayesian linear models (Bayesian linear regression),
     generalized linear models and approximate Gaussian processes. These
     algorithms have been implemented such that they can be used for large-scale
     learning by using stochastic variational inference. All of the algorithms
-    in \revrand use a unified feature composition framework that allows
+    in \revrand{} use a unified feature composition framework that allows
     for easy concatenation and selective application of regression basis
     functions.
 \end{abstract}
@@ -73,8 +75,8 @@ allow practitioners to learn probabilistic predictors from large data sets with
 minimal tuning and retraining.
 
 We make use of some of these recent developments in stochastic gradient methods
-and stochastic variational inference in \revrand for supervisd regression
-tasks. We outline the core algorithms implemented in \revrand in this section.
+and stochastic variational inference in \revrand{} for supervisd regression
+tasks. We outline the core algorithms implemented in \revrand{} in this section.
 
 \subsection{Stochastic Gradients and Variational Objective Functions}
 \label{sub:stochvar}
@@ -170,12 +172,13 @@ the expected log likelihood term like in Equation~\eqref{eq:wsg2}.
 
 \subsection{Bayesian Linear Regression -- \texttt{StandardLinearModel}}
 
-The first machine learning algorithm in \revrand is a simple Bayesian linear
+The first machine learning algorithm in \revrand{} is a simple Bayesian linear
 regressor of the following form,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
-    \gausC{\targs_n}{\feats_n\T\weights, \var}, \\
+    \gausC{\targs_n}{\feats_n\T\weights, \var}, \label{eq:slm_like}\\
     \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \Reg},
+    \label{eq:slm_prior}
 \end{align}
 where $\feats_n := \func{\featsym}{\inss_n, \param}{}$ is a feature, or basis,
 function that maps $\featsym : \real{d} \to \real{D}$, and $\Reg \in
@@ -249,13 +252,14 @@ and $D$ problems.
 \subsection{Bayesian Generalized Linear Models --
     \texttt{GeneralizedLinearModel}}
 
-The algorithm of primary interest in \revrand is the Bayesian generalized
+The algorithm of primary interest in \revrand{} is the Bayesian generalized
 linear model. The general form of the model implemented by this algorithm is,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
         \probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}, 
-        \label{eq:glmlike} \\
+        \label{eq:glm_like} \\
     \text{prior:} \quad &\gausC{\weights}{\mathbf{0}, \Reg},
+        \label{eq:glm_prior}
 \end{align}
 for an arbitrary univariate likelihood, $\prob{\cdot}$, with an appropriate
 transformation (inverse link) function, $\activ{\cdot}$, and parameter(s),
@@ -400,7 +404,7 @@ the following for $\cdfAlph$,
 
 \subsection{Large Scale Gaussian Process Approximation}
 
-In \revrand we approximate Gaussian Processes \citep{Rasmussen2006} with
+In \revrand{} we approximate Gaussian Processes \citep{Rasmussen2006} with
 our standard and generalized linear models by using random feature functions
 such as those of \citeauthor{rahimi2007} \citeyearpar{rahimi2007,rahimi2008}
 and \cite{le2013fastfood}. They use Bochner's theorem regarding the
@@ -438,7 +442,7 @@ above approximation is,
 \end{align}
 for $i=1, \ldots, D$,  which in fact is a mapping into a $2 D$-dimensional
 feature space. See Table~\ref{tab:randommappings} for some of the random kernel
-approximations we use in \revrand.
+approximations we use in \revrand{}.
 
 \begin{table}[htb]
 
@@ -446,7 +450,7 @@ approximations we use in \revrand.
 
     \caption{Kernels and the corresponding Fourier weight ($\ffourier_i$)
         sampling distributions for the \citet{rahimi2007}-style random bases in
-        \revrand. Here GAL refers to a multivariate Laplace
+        \revrand{}. Here GAL refers to a multivariate Laplace
         distribution~\cite{kozubowski2013multivariate}.}
 
     \begin{tabular}{r|c c}
@@ -481,37 +485,77 @@ approximations we use in \revrand.
 \end{table}
 
 All of the kernel functions in Table \ref{tab:randommappings} have length scale
-hyperparameters, and in \revrand these can be isotropic or anisotropic
-length scales that are learned alongside the other hyperparameters. We have
-also implemented a few other variants of these random basis functions, namely
-the Fastfood \citep{le2013fastfood} and A la Carte \citep{yang2014} basis
-functions that improve scalability and representational flexibility
-respectively. We refer the reader to our demo notebooks for further discussion
-and experiments comparing these approximate basis functions and the kernels
-they approximate.
+hyperparameters, and in \revrand{} these can be isotropic or anisotropic length
+scales that are learned alongside the other hyperparameters. We have also
+implemented a few other variants of these random basis functions, namely the
+Fastfood \citep{le2013fastfood} and A la Carte \citep{yang2014} basis functions
+that improve scalability and representational flexibility respectively. In
+Figure \ref{fig:kerns} we compare the basis approximations with their
+corresponding kernels. We refer the reader to our demo notebooks for further
+discussion and experiments comparing these approximate basis functions and the
+kernels they approximate.
 
-TODO: a few figures of the approximate kernels?
+\begin{figure}[htb]
+    \centering
+    \subfloat[][RBF]{
+        \includegraphics[width=0.47\linewidth]{figs/rbf.png}
+        \label{fig:rbf}
+    }
+    \subfloat[][RBF Fastfood]{
+        \includegraphics[width=0.47\linewidth]{figs/rbfFF.png}
+        \label{fig:rbfFF}
+    }\\
+    \subfloat[][Laplace]{
+        \includegraphics[width=0.47\linewidth]{figs/laplace.png}
+        \label{fig:laplace}
+    }
+    \subfloat[][Cauchy]{
+        \includegraphics[width=0.47\linewidth]{figs/cauchy.png}
+        \label{fig:cauchy}
+    }\\
+    \subfloat[][Matern 3/2]{
+        \includegraphics[width=0.47\linewidth]{figs/matern32.png}
+        \label{fig:matern32}
+    }
+    \subfloat[][Matern 5/2]{
+        \includegraphics[width=0.47\linewidth]{figs/matern52.png}
+        \label{fig:matern52}
+    }\\
+    \caption{Comparison of various kernels and their basis approximations. In
+        each of these figures 1500 random bases have been used, and the inputs
+        to the kernels are 10 dimensional, $\inss \in \real{10}$.}
+    \label{fig:kerns}
+\end{figure}
 
-TODO: Basis CONCATENATION and how regularizer act as amplitude parameters
-
-An important feature of \revrand is that we can combine these random features
+An important feature of \revrand{} is that we can combine these random features
 (and non-random features) to build even more expressive features. In
 particular, we support basis \emph{concatenation} while still allowing basis
 function hyperparameter learning,
 \begin{equation}
-    \func{\featsym}{\ins, \boldsymbol\param}{} = \sbrac{
+    \feat_{\text{cat}} = \sbrac{
         \func{\featsym}{\ins, \param_1}{1},
         \func{\featsym}{\ins, \param_2}{2},
         \ldots,
         \func{\featsym}{\ins, \param_P}{P}
-    } 
+    }.
 \end{equation}
-This is in fact equivalent to kernel addition,
+In the following manner this approximates kernel addition,
 \begin{equation}
-    TODO
+    \reg_1 \kernl_1\!\brac{\ins, \ins, \param_1} +
+    \reg_2 \kernl_2\!\brac{\ins, \ins, \param_2} + \ldots +
+    \reg_P \kernl_P\!\brac{\ins, \ins, \param_P} \approx
+    \feat_{\text{cat}} \Reg \feat_{\text{cat}}\T,
 \end{equation}
+where $\Reg = \diag{\sbrac{\reg_1 \mathbf{1}, \reg_2 \mathbf{1}, \ldots, \reg_P
+        \mathbf{1}}}$ and each vector of $\mathbf{1}$ is the same dimension as
+the corresponding basis. That is, the regression regularizer, or weight prior
+variance in Equations \eqref{eq:slm_prior} and \eqref{eq:glm_prior}, acts as a
+kernel mixing/amplitude parameter.  Kernel products also have an equivalent
+representation with basis functions (outer product of bases), however we have
+not yet implemented this.
+
 We also support \emph{partial application} of basis functions to certain
-dimensions of the inputs ($\ins$), while also allowing concatentation, e.g,
+dimensions of the inputs, $\ins$, while also allowing concatentation, e.g,
 \begin{equation}
     \func{\featsym}{\ins, \boldsymbol\param}{} = \sbrac{
         \func{\featsym}{\ins_{1:10}, \param_1}{1},
@@ -520,8 +564,8 @@ dimensions of the inputs ($\ins$), while also allowing concatentation, e.g,
         \func{\featsym}{\ins, \param_P}{P}
     } 
 \end{equation}
-Where the subscript of $\ins$ denotes (arbitrary) column slices. See \revrand's 
-documentation for how to use this features.
+Where the subscript of $\ins$ denotes (arbitrary) column slices. See
+\revrand{}'s documentation on how to use this features.
 
 \section{Experiments}
 
