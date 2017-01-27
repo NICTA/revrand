@@ -15,7 +15,7 @@ from functools import reduce
 import numpy as np
 from six import wraps
 from decorator import decorator  # Preserves function signature (pyth2 compat)
-from scipy.linalg import norm
+from scipy.linalg import norm, qr
 from scipy.stats import gamma, norm as norm_dist
 from scipy.special import expit
 from scipy.spatial.distance import cdist
@@ -1148,6 +1148,64 @@ class RandomMatern52(_RandomMatern):
 
     def _weightsamples(self):
         return self._maternweight(p=2)
+
+
+class OrthogonalRBF(_RandomKernelBasis):
+    r"""
+    Orthogonal Random RBF Basis -- Approximates an RBF kernel function.
+
+    This will make a linear regression model approximate a GP with an
+    (optionally ARD) RBF covariance function,
+
+    .. math::
+
+        \phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+            \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|^2}{2 l^2} \right)
+
+    with a length scale, :math:`l` (a vector in :math:`\mathbb{R}^d` for ARD).
+
+    Parameters
+    ----------
+    nbases: int
+        how many unique random bases to create (twice this number will be
+        actually created, i.e. real and imaginary components for each base)
+    Xdim: int
+        the dimension (d) of the observations (or the dimension of the slices
+        if using apply_ind).
+    lenscale: Parameter, optional
+        A scalar or vector of shape (1,) or (d,) Parameter to bound and
+        initialise the length scales for optimization. If this is shape (d,),
+        ARD length scales will be expected, otherwise an isotropic lenscale is
+        learned.
+    regularizer : None, Parameter, optional
+        The (initial) value of the regularizer/prior variance to apply to the
+        regression weights of this basis function. The Parameter object must
+        have a scalar value. If it is not set, it will take on a default value
+        of ``Parameter(gamma(1.), Positive())``.
+    random_state: None, int or RandomState, optional
+        random seed
+
+    Note
+    ----
+    This should need fewer random bases to approximate an RBF kernel than the
+    ``RandomRBF`` basis.
+
+    See:
+    Yu, X Felix et. al. "Orthogonal Random Features", in Advances in Neural
+    Information Processing Systems", Barcelona 2016.
+    """
+
+    def _weightsamples(self):
+        reps = int(np.ceil(self.n / self.d))
+        Q = np.empty((self.d, self.d*reps))
+
+        for r in range(reps):
+            W = self._random.randn(self.d, self.d)
+            Q[:, (r * self.d):((r + 1) * self.d)] = qr(W)[0]
+
+        S = np.sqrt(self._random.chisquare(df=self.d, size=self.d))
+        weights = np.diag(S).dot(Q[:, :self.n])
+        return weights
 
 
 class FastFoodRBF(_LengthScaleBasis):

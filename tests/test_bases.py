@@ -143,6 +143,9 @@ def test_bases(make_gaus_data, realhypers):
              bs.RandomRBF(Xdim=d, nbases=10),
              bs.RandomRBF(Xdim=d, nbases=10,
                           lenscale=Parameter(np.ones(d), Positive())),
+             bs.OrthogonalRBF(Xdim=d, nbases=10),
+             bs.OrthogonalRBF(Xdim=d, nbases=10,
+                              lenscale=Parameter(np.ones(d), Positive())),
              bs.FastFoodRBF(Xdim=d, nbases=10),
              bs.FastFoodRBF(Xdim=d, nbases=10,
                             lenscale=Parameter(np.ones(d), Positive())),
@@ -164,6 +167,8 @@ def test_bases(make_gaus_data, realhypers):
                   (np.ones(d),),
                   (1.,),
                   (np.ones(d),),
+                  (1.,),
+                  (np.ones(d),),
                   (np.ones(d), np.ones(d)),
                   (np.ones(d), np.ones(d))
                   ]
@@ -171,6 +176,8 @@ def test_bases(make_gaus_data, realhypers):
         hypers = [(),
                   (),
                   (),
+                  (None,),
+                  (None,),
                   (None,),
                   (None,),
                   (None,),

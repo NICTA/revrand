@@ -488,38 +488,47 @@ All of the kernel functions in Table \ref{tab:randommappings} have length scale
 hyperparameters, and in \revrand{} these can be isotropic or anisotropic length
 scales that are learned alongside the other hyperparameters. We have also
 implemented a few other variants of these random basis functions, namely the
-Fastfood \citep{le2013fastfood} and A la Carte \citep{yang2014} basis functions
-that improve scalability and representational flexibility respectively. In
-Figure \ref{fig:kerns} we compare the basis approximations with their
-corresponding kernels. We refer the reader to our demo notebooks for further
-discussion and experiments comparing these approximate basis functions and the
-kernels they approximate.
+Fastfood \citep{le2013fastfood}, A la Carte \citep{yang2014} and orthogonal
+random features \citep{Yu2016orthogonal} basis functions that improve either
+scalability, representational flexibility respectively or both. In Figure
+\ref{fig:kerns} we compare the basis approximations with their corresponding
+kernels. We refer the reader to our demo notebooks for further discussion and
+experiments comparing these approximate basis functions and the kernels they
+approximate.
 
-\begin{figure}[htb]
+\begin{figure}[tbp]
     \centering
     \subfloat[][RBF]{
-        \includegraphics[width=0.47\linewidth]{figs/rbf.png}
+        \includegraphics[width=0.4\linewidth]{figs/rbf.png}
         \label{fig:rbf}
     }
     \subfloat[][RBF Fastfood]{
-        \includegraphics[width=0.47\linewidth]{figs/rbfFF.png}
+        \includegraphics[width=0.4\linewidth]{figs/rbfFF.png}
         \label{fig:rbfFF}
     }\\
     \subfloat[][Laplace]{
-        \includegraphics[width=0.47\linewidth]{figs/laplace.png}
+        \includegraphics[width=0.4\linewidth]{figs/laplace.png}
         \label{fig:laplace}
     }
     \subfloat[][Cauchy]{
-        \includegraphics[width=0.47\linewidth]{figs/cauchy.png}
+        \includegraphics[width=0.4\linewidth]{figs/cauchy.png}
         \label{fig:cauchy}
     }\\
     \subfloat[][Matern 3/2]{
-        \includegraphics[width=0.47\linewidth]{figs/matern32.png}
+        \includegraphics[width=0.4\linewidth]{figs/matern32.png}
         \label{fig:matern32}
     }
     \subfloat[][Matern 5/2]{
-        \includegraphics[width=0.47\linewidth]{figs/matern52.png}
+        \includegraphics[width=0.4\linewidth]{figs/matern52.png}
         \label{fig:matern52}
+    }\\
+    \subfloat[][RBF Orthogonal]{
+        \includegraphics[width=0.4\linewidth]{figs/rbforth.png}
+        \label{fig:orth}
+    }
+    \subfloat[][RBF + Laplace]{
+        \includegraphics[width=0.4\linewidth]{figs/combo.png}
+        \label{fig:combo}
     }\\
     \caption{Comparison of various kernels and their basis approximations. In
         each of these figures 1500 random bases have been used, and the inputs
@@ -567,13 +576,28 @@ dimensions of the inputs, $\ins$, while also allowing concatentation, e.g,
 Where the subscript of $\ins$ denotes (arbitrary) column slices. See
 \revrand{}'s documentation on how to use this features.
 
+
 \section{Experiments}
+
+In this section we apply \revrand{}'s standard linear model (SLM) and
+generalized linear model (GLM) to a few standard regression and classification
+datasets to ascertain how they perform relative to other standard machine
+learning algorithms for prediction tasks.
+
 
 \subsection{Boston Housing Regression}
 
-\begin{table}[htb]
+In Table \ref{tab:bostonhousing} we compare \revrand{}'s SLM and GLM on the
+Boston Housing dataset. This is a regression prediction problem, where the aim
+is to estimate house prices in suburbs in Boston based on attributes of the
+buildings, the region and the surrounding environment. There are 506 samples
+and 13 attributes in total.
+
+\begin{table}[tb]
 
     \centering
+    \caption{Regression performance on the Boston Housing dataset.}
+    \label{tab:bostonhousing}
     \begin{tabular}{r|c c}
         \textbf{Algorithm} & \textbf{R-square} & \textbf{MSLL} \\
         \hline
@@ -582,37 +606,93 @@ Where the subscript of $\ins$ denotes (arbitrary) column slices. See
         \emph{GLM} & 0.8411 (0.0491) & -0.9209 (0.1530) \\
         GP & \textbf{0.9027 (0.0137)} & \textbf{-1.1792 (0.1581)} \\
         RF & 0.8467 (0.0709) & N/A \\ 
-        SVR & 0.6295 (0.0863) & N/A \\
+        SVM & 0.6295 (0.0863) & N/A \\
         \hline
     \end{tabular}
 
 \end{table}
 
+For this experiment we use 5 fold cross validation, and use R-square and mean
+standardised log-loss (MSLL) to evaluate the predictions on the held-out folds.
+The SLM and GLM use random radial basis fourier features (RBF kernel
+approximations) with 400 components (800 bases in total) for the SLM, and 100
+components (200 bases) for the GLM, both concatenated with a linear basis. We
+found the GLM performed better with fewer iterations with fewer bases. We
+evaluate 100 random starts for the SLM, 500 for the GLM, of the length-scales
+(one for each dimension of the inputs, $\ins$), regularizer and likelihood
+variance, parameters, drawing them from Gamma distributions, and then optimize
+from the best evaluation.
+
+We compare against Scikit Learn \citep{scikit-learn} implementations of
+Gaussian processes, support vector machines (SVM), and random forests (RF).
+The GP is given the same kernel as the SLM and GLM, that is an additive RBF and
+dot-product kernel. The GP's kernel amplitudes and it's RBF length-scales are
+initialised at 1, the RF uses 40 decision trees, and the SVM uses a RBF kernel,
+where the length-scale is chosen by a grid search with cross-validation. The
+exact experiment can be replicated in the \texttt{boston\_housing.ipynb}
+jupyter notebook.
+
+As we would expect the GP yeilds the best performance, closely followed by the
+SLM. The GLM and RF perform similarly, and the SVM the worst. 
+
+
 \subsection{Handwritten Digits Classification}
 
-\begin{table}[htb]
+We next test \revrand{}'s GLM on a classification datasets. We chose the USPS
+handwritten digits binary classification task, also presented in
+\citet{Rasmussen2006}. Here the aim is to classify the digits `3' and `5' from
+$16\times16$ pixel black and white images. There are 767 training instances,
+and 773 testing instances. We use log-loss and percent error as validation
+scores.
+
+\begin{table}[bt]
 
     \centering
+    \caption{Binary classification performance on the USPS digits dataset for
+        digits `3' and `5'.} 
+    \label{tab:handwritten}.
     \begin{tabular}{r|c c}
         \textbf{Algorithm} & \textbf{Log-loss} & \textbf{Error (\%)} \\
         \hline
         \emph{GLM} & 0.1138 & \textbf{2.07} \\
         Logistic & 0.1734 & 3.62 \\
-        SVC & \textbf{0.1003} & 6.99 \\
-        GPC &  0.1405 & 2.59 \\
+        SVM & \textbf{0.1003} & 6.99 \\
+        GP &  0.1405 & 2.59 \\
         RF & 0.1368 & 2.72 \\
         \hline
     \end{tabular}
 
 \end{table}
 
+The GLM uses a Bernoulli likelihood with a logistic activation function, it
+also uses a RBF random fourier features with 800 components (1600 bases), and
+again 100 random initialisations of the length scale (isotropic) and
+regularizer with optimization proceeding from the best.
+
+We compare to a SVM, RF with 40 estimators, logistic regressor with our same
+random fourier features (un-optimized), and a GP classifier with the same
+likelihood as our GLM, and using a Laplace posterior approximation. Again, all
+of these are implementations in Scikit Learn \citep{scikit-learn}. The GP and
+SVM also use RBF kernels, and the SVM uses a grid search and cross validation
+to select the length scale. The results are summarized in Table
+\ref{tab:handwritten}.
+
+Interestingly, the SVM obtains the best log-loss, but has the worst error. The
+GLM obtains the best error rate, and the second best log-loss, with the GP and
+RF also performing well.
+
+
 \subsection{SARCOS Regression}
 
 1 million iterations
 
-\begin{table}[htb]
+\begin{table}[tb]
 
     \centering
+    \caption{Regression performance on the larger SARCOS robotic arm dataset.
+        This table (apart from the GLM) has been reproduced from
+        \citet{Rasmussen2006}.}
+    \label{tab:sarcos}
     \begin{tabular}{r|c|c c}
         \textbf{Algorithm} & \textbf{Approximation size} & \textbf{SMSE} &
         \textbf{MSLL} \\
@@ -622,6 +702,29 @@ Where the subscript of $\ins$ denotes (arbitrary) column slices. See
         & 1024 & 0.0207 & -1.9341 \\
         & 2048 & 0.0171 & -2.0243 \\
         & 8192 & 0.0152 & -1.9804 \\
+        \hline
+        \emph{SD} & 256 & 0.0813 (.0198) & -1.4291 (.0558) \\
+        & 512 & 0.0532 (.0046) & -1.5834 (.0319) \\
+        & 1024 & 0.0398 (.0036) & -1.7149 (.0293) \\
+        & 2048 & 0.0290 (.0013) & -1.8611 (.0204) \\
+        & 4096 & 0.0200 (.0008) & -2.0241 (.0151)\\
+        \hline
+        \emph{SR} & 256 & 0.0351 (.0036) & -1.6088 (.0984) \\
+        & 512 &  0.0259 (.0014) & -1.8185 (.0357) \\
+        & 1024 & 0.0193 (.0008) & -1.9728 (.0207) \\
+        & 2048 & 0.0150 (.0005) & -2.1126 (.0185) \\
+        & 4096 & 0.0110 (.0004) & -2.2474 (.0204) \\
+        \hline
+        \emph{PP} & 256 & 0.0351 (.0036) & -1.6940 (.0528) \\
+        & 512 & 0.0259 (.0014) & -1.8423 (.0286) \\
+        & 1024 & 0.0193 (.0008) & -1.9823 (.0233) \\
+        & 2048 & 0.0150 (.0005) & -2.1125 (.0202) \\
+        & 4096 & 0.0110 (.0004) & -2.2399 (.0160) \\
+        \hline
+        \emph{BCM} & 256 & 0.0314 (.0046) & -1.7066 (.0550) \\
+        & 512 & 0.0281 (.0055) & -1.7807 (.0820) \\
+        & 1024 & 0.0180 (.0010) & -2.0081 (.0321) \\
+        & 2048 & 0.0136 (.0007) & -2.1364 (.0266) \\
         \hline
     \end{tabular}
 

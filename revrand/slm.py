@@ -176,7 +176,7 @@ class StandardLinearModel(BaseEstimator, RegressorMixin):
             self.covariance_ = C
             self.obj_ = ELBO
 
-        log.info("ELBO = {}, var = {}, reg = {}, bparams = {}."
+        log.info("ELBO = {}, var = {}, reg = {}, hypers = {}."
                  .format(ELBO, var, reg, hypers))
 
         # Grad var
