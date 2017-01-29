@@ -27,15 +27,15 @@
 % \jmlrheading{}{}{}{}{}{}
 
 % Short headings should be running head and authors last names
-\ShortHeadings{\revrand{}~Technical Report}{Steinberg, Tiao, Reid, McCalman and
+\ShortHeadings{\revrand{}~Technical Report}{Steinberg, Tiao, McCalman, Reid and
     O'Callaghan}
 \firstpageno{1}
 
 \title{\revrand{}: Technical Report}
 \author{\name Daniel Steinberg \email daniel.steinberg@data61.csiro.au \\
         \name Louis Tiao \email louis.tiao@data61.csiro.au \\
-        \name Alistair Reid \email alistair.reid@data61.csiro.au \\
         \name Lachlan McCalman \email lachlan.mccalman@data61.csiro.au \\
+        \name Alistair Reid \email alistair.reid@data61.csiro.au \\
         \name Simon O'Callaghan \email simon.ocallaghan@data61.csiro.au \\
         \addr DATA61, CSIRO \\
         Sydney, Australia}
@@ -67,16 +67,19 @@
 Recent developments in stochastic gradient optimisation have simplified the
 application of machine learning to massive datasets, in particular, modern
 stochastic optimisation algorithms are far more robust to initial learning rate
-settings. Furthermore, Bayesian machine learning algorithms have a number of
-well defined methods for learning model parameters and \emph{hyperparameters}
-from training data, that do not involve cross validation. When used in
-combination, stochastically optimized Bayesian machine learning algorithms
-allow practitioners to learn probabilistic predictors from large data sets with
-minimal tuning and retraining.
+settings (see \citet{kingma2014adam} for instance). Furthermore, Bayesian
+machine learning algorithms have a number of well defined methods for learning
+model parameters and \emph{hyperparameters} from training data, that do not
+involve cross validation. When used in combination, stochastically optimized
+Bayesian machine learning algorithms allow practitioners to learn probabilistic
+predictors from large data sets with minimal tuning and retraining.
 
 We make use of some of these recent developments in stochastic gradient methods
-and stochastic variational inference in \revrand{} for supervisd regression
-tasks. We outline the core algorithms implemented in \revrand{} in this section.
+and stochastic variational inference in \revrand{} for supervised regression
+tasks. We outline the core algorithms implemented in \revrand{} in this section
+of the report, beginning with how we use stochastic optimization with
+variational objectives, then onto the two core regression algorithms in
+\revrand{}, and how to use them to appropriate Gaussian Processes (GPs).
 
 \subsection{Stochastic Gradients and Variational Objective Functions}
 \label{sub:stochvar}
@@ -85,29 +88,29 @@ When a machine learning objective function factorises over data,
 \begin{equation}
     \ffunc{\ins, \param}{} = \sum_{\inss \in \ins} \ffunc{\inss, \param}{},
 \end{equation}
-a regular gradient descent would perform the following iterations to minimise
-the function w.r.t.\ the parameters $\param$,
+a regular gradient descent algorithm would perform the following iterations to
+minimise the function w.r.t.\ the parameters $\param$,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \ins}
     \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}},
 \end{equation}
 where $\lrate_k$ is the learning rate (step size) at iteration $k$. Stochastic
-gradients proposes the following update,
+gradient algorithms use the following update,
 \begin{equation}
     \param_k := \param_{k-1} - \lrate_k \sum_{\inss \in \minibatch}
     \nabla_{\param} \ffunc{\inss, \param}{}\!|_{\param = \param_{k-1}},
     \label{eq:sg}
 \end{equation}
 where $\minibatch \subset \ins$ is a mini-batch of the original dataset, where
-$|\minibatch| \ll |\ins|$.
-Frequently objective functions to not entirely decompose over the data, i.e.,
+$|\minibatch| \ll |\ins|$. Frequently objective functions to not entirely
+decompose over the data, i.e.,
 \begin{equation}
     \ffunc{\ins, \param}{} = \sum_{\inss \in \ins} \ffunc{\inss, \param}{}
     + \func{g}{\param}{}.
     \label{eq:objwconst}
 \end{equation}
 However, it is trivial to make these objectives work in a stochastic gradient
-setting. Let $M = |\minibatch|$ and $N = |\ins|$, then we divide the
+setting. Let $M = |\minibatch|$ and $N = |\ins|$, then we can divide the
 contribution of the constant term amongst the mini-batches in stochastic 
 gradients,
 \begin{equation}
@@ -133,14 +136,16 @@ lets consider the model,
     \text{prior:} \quad &\probC{\param}{\hyper},
 \end{align}
 where we want to learn the values of the hyper-parameters, $\hyper$. Minimising
-negative log-marginal likelihood is a good objective in this instance, since we
-don't care about the value(s) of $\param$,
+negative log-marginal likelihood is a reasonable objective in this
+instance\footnote{see \citet[Chapter 3.4]{bishop2006pattern} and \citet[Chapter
+    5]{Rasmussen2006} for a discussion on this.}, since we don't care about the
+value(s) of $\param$,
 \begin{equation}
     \argmin_\hyper - \log \int \prod^N_{n=1} \probC{\targs_n}{\param}
     \probC{\param}{\hyper} d \param.
     \label{eq:lml}
 \end{equation}
-There are two problems with this objective however, (1) it may not factor over
+There are two problems with this objective however, (1) it may not in general factor over
 data and (2) the integral may be intractable, for instance, if the prior and
 likelihood are not conjugate. In variational inference we use Jensen's
 inequality to lower-bound log-marginal likelihood with a tractable objective
@@ -157,8 +162,9 @@ function called the evidence lower bound (ELBO),
             \probC{\param}{\hyper}}{\qrob{\param}}}
         d \param
 \end{align}
-where $\qrob{\param}$ is an approximation of $\probC{\param}{\hyper}$ that 
-makes inference easier. This can be re-written as,
+where $\qrob{\param}$ is an approximation of the true posterior
+$\probC{\param}{\cbrac{\targs_1, \ldots, \targs_N}, \hyper}$, chosen to make 
+inference easier. This can be re-written as,
 \begin{equation}
     \elbo = \sum^N_{n=1} \expec{q}{\log\probC{\targs_n}{\param}} -
     \KL{\qrob{\param}}{\probC{\param}{\hyper}},
@@ -253,7 +259,7 @@ and $D$ problems.
     \texttt{GeneralizedLinearModel}}
 
 The algorithm of primary interest in \revrand{} is the Bayesian generalized
-linear model. The general form of the model implemented by this algorithm is,
+linear model (GLM). The general form of the model is,
 \begin{align}
     \text{Likelihood:} \quad &\prod^N_{n=1} 
         \probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}, 
@@ -278,14 +284,14 @@ diagonal Gaussians,
     &= \frac{1}{K} \sum^K_{k=1} \gausC{\weights}{\pomean_k, \dpocov_k},
 \end{align}
 where $\dpocov_k = \diag{[\dpocovs_{k,1}, \ldots, \dpocovs_{k, D}]\T}$, which
-is inspired from similar approximations made in \citet{gershman2012,
-    nguyen2014automated}. This is a very flexible form for the approximate
-posterior, and has the nice property that our algorithm no longer has a
-\bigo{D^3} cost associated with the number of features.
+is inspired by similar approximations made in \citet{gershman2012} and 
+\citet{nguyen2014automated}. This is a very flexible form for the approximate
+posterior, and has the nice consequence that our algorithm will longer have a
+\bigo{D^3} cost associated with that of a full Gaussian covariance.
 
-Then we approximate the log marginal likelihood using auto-encoding variational
-Bayes \citep{kingma2014auto}. The exact lower bound on log marginal likelihood
-is,
+Then we approximate the log marginal likelihood using variational Bayes with
+the re-parameterisation trick \citep{kingma2014auto}. The exact lower bound on
+log marginal likelihood is,
 \begin{equation}
     \elbo = \sum^N_{n=1} 
     \expec{q}{\log\probC{\targs_n}{\activ{\feats_n\T\weights}, \lparam}}
@@ -305,17 +311,17 @@ This can be expanded,
             \gausC{\weights}{\pomean_k, \dpocov_k}},
     \label{eq:glmobj_exp}
 \end{multline}
-but unfortunately there are two intractable integrals here, the expected log
+but unfortunately there are two intractable integrals here: the expected log
 likelihood, and the entropy of the Gaussian mixture. We can use the lower bound
 on the entropy term also used in \citet{gershman2012, nguyen2014automated},
 \begin{equation}
     \entropy{\textstyle\frac{1}{K}\textstyle\sum_{k}
         \gausC{\weights}{\pomean_k, \dpocov_k}} \geq
     - \frac{1}{K} \sum_{k=1}^K \log \sum_{j=1}^K \frac{1}{K}
-    \gausC{\pomean_k}{\pomean_j, \dpocov_k + \dpocov_j}.
+    \gausC{\pomean_k}{\pomean_j, \dpocov_k + \dpocov_j},
 \end{equation}
-We can then use the reparameterisation trick in auto-encoding variational Bayes
-\citep{kingma2014auto} to sample the expected log likelihood,
+and then we use the re-parameterisation trick in \citet{kingma2014auto} to 
+obtain samples of the expected log likelihood,
 \begin{equation}
     \sum^N_{n=1} 
     \expec{q_k}{\log\probC{\targs_n}
@@ -330,9 +336,10 @@ where,
     \pomean_k + \sqrt{\dpocov_k} \odot \resamp^{(l)},
     \qquad \resamp^{(l)} \sim \gaus{\mathbf{0}, \ident{D}}.
 \end{equation}
-Here $\odot$ is the element-wise product. We can also use this trick to compute
-approximate derivatives, $\frac{\partial}{\partial \alpha}
-\expec{q(\alpha)}{\log \probC{\targs}{\alpha}} \approx \frac{1}{L} \sum^L_{l=1}
+Here $\odot$ is the element-wise product. We can also use this trick to obtain
+low variance samples of the derivatives for the GLM's parameters and
+hyperparameters, $\frac{\partial}{\partial \alpha} \expec{q(\alpha)}{\log
+    \probC{\targs}{\alpha}} \approx \frac{1}{L} \sum^L_{l=1}
 \frac{\partial}{\partial\alpha} \log \probC{\targs}{\func{f}{\alpha,
         \resamp^{(l)}}{}}$, which simplifies the implementation greatly! The
 final auto-encoding variational Bayes objective for our GLM is,
@@ -348,8 +355,8 @@ final auto-encoding variational Bayes objective for our GLM is,
     \Bigg].
     \label{eq:glmobj_exp}
 \end{multline}
-We can straight forwardly use this objective within a stochastic gradients
-setting using with the tactic in Equations \eqref{eq:wsg} or \eqref{eq:wsg2}.
+We can straight-forwardly use this objective with a stochastic optimization
+and Equation \eqref{eq:wsg} or \eqref{eq:wsg2}.
 
 The most simple and accurate method for approximating the predictive
 distribution, $\probC{\targs\test}{\targ, \ins, \inss\test}$ is to Monte-Carlo
@@ -375,12 +382,14 @@ compute (using Monte-Carlo integration) the predictive expectation,
     d \weights.
     \label{eq:glmexpec}
 \end{align}
+
 Often we find $\expece{}{\probC{\targs\test}{\activ{\feats\testT\weights},
         \lparam}} = \activ{\feats\testT\weights}$, however this is only true
-with with right choice and usage of the activation function. Furthermore, it is
-useful to compute quantiles of the predictive density in order to ascertain the
-predictive uncertainty. We start by sampling the predictive cumulative density
-function, $\Prob{\cdot}$,
+with with right choice of activation function\footnote{That is, if we choose
+    the activation function corresponding to the canonical link function.}.
+Furthermore, it is useful to compute quantiles of the predictive density in
+order to ascertain the predictive uncertainty. We start by sampling the
+predictive cumulative density function, $\Prob{\cdot}$,
 \begin{align}
     &\ProbC{\targs\test \leq \cdfAlph}{\targ, \ins, \inss\test} \nonumber\\ 
     &\qquad\approx \int 
@@ -429,9 +438,9 @@ $\specfourier(\ffourier)$ for \emph{shift invariant} kernels,
 	\singlefeatfunc{\inssprime}{i},
 	\label{eq:mcapprox}
 \end{equation}
-$\singlefeatfunc{\inss}{i}$ corresponds to the $i$th sample from the feature
-map. An example of a radial basis kernel feature vector construction using the 
-above approximation is,
+where $\singlefeatfunc{\inss}{i}$ corresponds to the $i$th sample from the
+feature map. An example of a radial basis kernel feature vector construction
+using the above approximation is,
 \begin{align}
 	\nonumber
     \sbrac{\singlefeatfunc{\inss}{i}, \singlefeatfunc{\inss}{D+i}}&= 
@@ -489,12 +498,11 @@ hyperparameters, and in \revrand{} these can be isotropic or anisotropic length
 scales that are learned alongside the other hyperparameters. We have also
 implemented a few other variants of these random basis functions, namely the
 Fastfood \citep{le2013fastfood}, A la Carte \citep{yang2014} and orthogonal
-random features \citep{Yu2016orthogonal} basis functions that improve either
-scalability, representational flexibility respectively or both. In Figure
-\ref{fig:kerns} we compare the basis approximations with their corresponding
-kernels. We refer the reader to our demo notebooks for further discussion and
-experiments comparing these approximate basis functions and the kernels they
-approximate.
+random features \citep{Yu2016orthogonal} that improve either scalability,
+representational flexibility respectively or both. In Figure \ref{fig:kerns} we
+compare the basis approximations with their corresponding kernels. We refer the
+reader to our demo notebooks for further discussion and experiments comparing
+these approximate basis functions and the kernels they approximate.
 
 \begin{figure}[tbp]
     \centering
@@ -557,7 +565,7 @@ In the following manner this approximates kernel addition,
 \end{equation}
 where $\Reg = \diag{\sbrac{\reg_1 \mathbf{1}, \reg_2 \mathbf{1}, \ldots, \reg_P
         \mathbf{1}}}$ and each vector of $\mathbf{1}$ is the same dimension as
-the corresponding basis. That is, the regression regularizer, or weight prior
+the corresponding basis. Here the regression regularizer, or weight prior
 variance in Equations \eqref{eq:slm_prior} and \eqref{eq:glm_prior}, acts as a
 kernel mixing/amplitude parameter.  Kernel products also have an equivalent
 representation with basis functions (outer product of bases), however we have
@@ -566,7 +574,7 @@ not yet implemented this.
 We also support \emph{partial application} of basis functions to certain
 dimensions of the inputs, $\ins$, while also allowing concatentation, e.g,
 \begin{equation}
-    \func{\featsym}{\ins, \boldsymbol\param}{} = \sbrac{
+    \feat_{\text{cat,partial}} = \sbrac{
         \func{\featsym}{\ins_{1:10}, \param_1}{1},
         \func{\featsym}{\ins_{5:D}, \param_2}{2},
         \ldots,
@@ -582,7 +590,7 @@ Where the subscript of $\ins$ denotes (arbitrary) column slices. See
 In this section we apply \revrand{}'s standard linear model (SLM) and
 generalized linear model (GLM) to a few standard regression and classification
 datasets to ascertain how they perform relative to other standard machine
-learning algorithms for prediction tasks.
+learning algorithms for these prediction tasks.
 
 
 \subsection{Boston Housing Regression}
@@ -684,7 +692,12 @@ RF also performing well.
 
 \subsection{SARCOS Regression}
 
-1 million iterations
+The last experiment is a large-scale regression task presented in
+\citet[Chapter 8]{Rasmussen2006}. The task is to predict the joint torque in a
+SARCOS robot arm from all of the 7 joint states (position, angular velocity and
+acceleration), 21 dimensions in all. There are 44,484 training examples, and
+4449 test points. This dataset is too large for a typical GP, and so is a good
+test for \revrand{}'s GLM using stochastic gradients.
 
 \begin{table}[tb]
 
@@ -696,6 +709,11 @@ RF also performing well.
     \begin{tabular}{r|c|c c}
         \textbf{Algorithm} & \textbf{Approximation size} & \textbf{SMSE} &
         \textbf{MSLL} \\
+        % \hline
+        % \emph{SLM (10000)} & 256 (ORF) & 0.0249 & -1.8591 \\
+        % & 256 (RRF) & 0.0262 & -1.8480 \\
+        % & 512 (ORF) & 0.0210 & -1.9590 \\
+        % & 512 (RRF) & 0.0201 & -1.9730 \\
         \hline
         \emph{GLM} & 256 & 0.0358 & -1.6644 \\
         & 512 & 0.0252 & -1.8397 \\
@@ -729,6 +747,33 @@ RF also performing well.
     \end{tabular}
 
 \end{table}
+
+We summarise the results in Table \ref{tab:sarcos}, where we have reproduced
+the results of the other algorithms from \citet{Rasmussen2006}. SD is a regular
+GP using a random subset of data, SR is the subset of regressors method, PP
+projected processes and BCM the Bayesian committee machine.
+
+We ran the GLM with 1 million iterations of stochastic gradients (with a batch
+size of 10), with 500 preliminary iterations with random values for the
+algorithm parameters and hyperparameters. A RBF with automatic relevance
+determination was used, and the inputs, $\ins$ were standardised to be
+consistent with the kernels used in the original experiment.
+
+In Table \ref{tab:sarcos} the `Approximation size' column refers the number of
+unique components (half the number of bases) for the GLM, the number of data
+points for SD, partitions for the BCM, and the number of inducing points for SR
+and PP. We have only run the GLM once for each setting of the number of
+components at this stage (because of the time required to run 1 million 
+iterations on a single machine), we will present more comprehensive results in
+the future.
+
+The preliminary results in Table \ref{tab:sarcos} show that the GLM is
+competitive with the other methods (not quite as good as SR, PP and BCM for
+large approximation sizes), and is better than SD. It is worth noting though
+that the GLM has a computational complexity of \bigo{ND} per iteration, whereas
+SD is \bigo{D^3} and SR, PP are \bigo{D^2 N} and the BCM is the same cost as
+running $D$ independent GPs (each taking a portion of N). Hence, we are able to
+use larger approximation sizes than the corresponding methods.
 
 \bibliography{report}
 
