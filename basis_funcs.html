@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Basis Functions &mdash; revrand 0.9.9 documentation</title>
+    <title>Basis Functions &#8212; revrand 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,25 +14,30 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.9',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="revrand.basis_functions.Basis" href="generated/revrand.basis_functions.Basis.html" />
     <link rel="prev" title="Installation" href="installation.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -111,10 +116,13 @@ a value of 2.</p>
 <tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.RandomMatern52.html#revrand.basis_functions.RandomMatern52" title="revrand.basis_functions.RandomMatern52"><code class="xref py py-obj docutils literal"><span class="pre">RandomMatern52</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale,&nbsp;...])</td>
 <td>Random Matern 5/2 Basis &#8211; Approximates a Matern 5/2 kernel function.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.FastFoodRBF.html#revrand.basis_functions.FastFoodRBF" title="revrand.basis_functions.FastFoodRBF"><code class="xref py py-obj docutils literal"><span class="pre">FastFoodRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.OrthogonalRBF.html#revrand.basis_functions.OrthogonalRBF" title="revrand.basis_functions.OrthogonalRBF"><code class="xref py py-obj docutils literal"><span class="pre">OrthogonalRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale,&nbsp;...])</td>
+<td>Orthogonal Random RBF Basis &#8211; Approximates an RBF kernel function.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.FastFoodRBF.html#revrand.basis_functions.FastFoodRBF" title="revrand.basis_functions.FastFoodRBF"><code class="xref py py-obj docutils literal"><span class="pre">FastFoodRBF</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale,&nbsp;...])</td>
 <td>Fast Food radial basis function.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/revrand.basis_functions.FastFoodGM.html#revrand.basis_functions.FastFoodGM" title="revrand.basis_functions.FastFoodGM"><code class="xref py py-obj docutils literal"><span class="pre">FastFoodGM</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;mean,&nbsp;bounds,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/revrand.basis_functions.FastFoodGM.html#revrand.basis_functions.FastFoodGM" title="revrand.basis_functions.FastFoodGM"><code class="xref py py-obj docutils literal"><span class="pre">FastFoodGM</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;mean,&nbsp;bounds,&nbsp;...])</td>
 <td>A mixture component from a Gaussian spectral mixture kernel approximation.</td>
 </tr>
 </tbody>
@@ -131,7 +139,7 @@ enable concatenation and operation with the machine learning algorithms.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</td>
@@ -225,7 +233,7 @@ regularizer applies.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>regularizer</strong> (<em>float, optional</em>) &#8211; use this value instead of the value passed into the constructor for
+<li><strong>regularizer</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; use this value instead of the value passed into the constructor for
 the regularizer.</li>
 </ul>
 </td>
@@ -438,8 +446,8 @@ learned by a regressor.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>offset</strong> (<em>float, optional</em>) &#8211; A scalar value to give the bias column. By default this is one.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; A scalar value to give the bias column. By default this is one.</li>
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
@@ -488,19 +496,19 @@ initialize all of the bases with different means.</p>
 this actually will be to the nearest larger two power.</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>mean</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>mean</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the component frequency means for optimization. This will
 always initialise (d,) means if a scalr bound is given, it is applied
 to all means.</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. This will always
 initialise ARD length scales, if a scalr bound is given, it is applied
 to all length scales.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -517,9 +525,9 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>x</strong> (<em>ndarray</em>) &#8211; (n, d) array of observations where n is the number of samples, and
 d is the dimensionality of x.</li>
-<li><strong>mean</strong> (<em>ndarray, optional</em>) &#8211; array of shape (d,) frequency means (one for each dimension of X).
+<li><strong>mean</strong> (<em>ndarray</em><em>, </em><em>optional</em>) &#8211; array of shape (d,) frequency means (one for each dimension of X).
 If not input, this uses the value of the initial mean.</li>
-<li><strong>lenscale</strong> (<em>ndarray, optional</em>) &#8211; array of shape (d,) length scales (one for each dimension of X). If
+<li><strong>lenscale</strong> (<em>ndarray</em><em>, </em><em>optional</em>) &#8211; array of shape (d,) length scales (one for each dimension of X). If
 not input, this uses the value of the initial length scale.</li>
 </ul>
 </td>
@@ -550,9 +558,9 @@ again to the nearest larger two power. This is
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>mean</strong> (<em>ndarray, optional</em>) &#8211; array of shape (d,) frequency means (one for each dimension of X).
+<li><strong>mean</strong> (<em>ndarray</em><em>, </em><em>optional</em>) &#8211; array of shape (d,) frequency means (one for each dimension of X).
 If not input, this uses the value of the initial mean.</li>
-<li><strong>lenscale</strong> (<em>ndarray, optional</em>) &#8211; array of shape (d,) length scales (one for each dimension of X). If
+<li><strong>lenscale</strong> (<em>ndarray</em><em>, </em><em>optional</em>) &#8211; array of shape (d,) length scales (one for each dimension of X). If
 not input, this uses the value of the initial length scale.</li>
 </ul>
 </td>
@@ -589,15 +597,15 @@ number of bases.</p>
 this actually will be to the nearest larger two power.</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -614,7 +622,7 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>x</strong> (<em>ndarray</em>) &#8211; (n, d) array of observations where n is the number of samples, and
 d is the dimensionality of x.</li>
-<li><strong>lenscale</strong> (<em>scalar or ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+<li><strong>lenscale</strong> (<em>scalar</em><em> or </em><em>ndarray</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
 of x).If not input, this uses the value of the initial length
 scale.</li>
 </ul>
@@ -643,7 +651,7 @@ again to the nearest larger two power. This is
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>scalar or ndarray, optional</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+<li><strong>lenscale</strong> (<em>scalar</em><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
 of X).If not input, this uses the value of the initial length
 scale.</li>
 </ul>
@@ -664,7 +672,7 @@ use, given in the constructor (to nearest larger two power).</p>
 
 <dl class="class">
 <dt>
-<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">LinearBasis</code><span class="sig-paren">(</span><em>onescol=False</em>, <em>regularizer=None</em><span class="sig-paren">)</span></dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">LinearBasis</code><span class="sig-paren">(</span><em>onescol=True</em>, <em>regularizer=None</em><span class="sig-paren">)</span></dt>
 <dd><p>Linear basis class, basically this just prepends a columns of ones onto X.</p>
 <div class="math">
 \[\phi(\mathbf{X}) = [\mathbf{1}, \mathbf{X}]\]</div>
@@ -673,8 +681,8 @@ use, given in the constructor (to nearest larger two power).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>onescol</strong> (<em>bool, optional</em>) &#8211; If true, prepend a column of ones onto X.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>onescol</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; If true, prepend a column of ones onto X.</li>
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
@@ -706,6 +714,49 @@ and d is the dimensionality of X.</td>
 
 <dl class="class">
 <dt>
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">OrthogonalRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em>, <em>random_state=None</em><span class="sig-paren">)</span></dt>
+<dd><p>Orthogonal Random RBF Basis &#8211; Approximates an RBF kernel function.</p>
+<p>This will make a linear regression model approximate a GP with an
+(optionally ARD) RBF covariance function,</p>
+<div class="math">
+\[\phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+    \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|^2}{2 l^2} \right)\]</div>
+<p>with a length scale, <span class="math">\(l\)</span> (a vector in <span class="math">\(\mathbb{R}^d\)</span> for ARD).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
+actually created, i.e. real and imaginary components for each base)</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+initialise the length scales for optimization. If this is shape (d,),
+ARD length scales will be expected, otherwise an isotropic lenscale is
+learned.</li>
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+regression weights of this basis function. The Parameter object must
+have a scalar value. If it is not set, it will take on a default value
+of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>This should need fewer random bases to approximate an RBF kernel than the
+<code class="docutils literal"><span class="pre">RandomRBF</span></code> basis.</p>
+<p class="last">See:
+Yu, X Felix et. al. &#8220;Orthogonal Random Features&#8221;, in Advances in Neural
+Information Processing Systems&#8221;, Barcelona 2016.</p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt>
 <em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">PolynomialBasis</code><span class="sig-paren">(</span><em>order</em>, <em>include_bias=True</em>, <em>regularizer=None</em><span class="sig-paren">)</span></dt>
 <dd><p>Polynomial basis class.</p>
 <p>This essentially creates the concatenation,</p>
@@ -718,9 +769,9 @@ and d is the dimensionality of X.</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>order</strong> (<em>int</em>) &#8211; the order of the polynomial to create.</li>
-<li><strong>include_bias</strong> (<em>bool, optional</em>) &#8211; If True (default), include the bias column (column of ones which
+<li><strong>include_bias</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; If True (default), include the bias column (column of ones which
 acts as the intercept term in a linear model)</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
@@ -767,11 +818,11 @@ length scale.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for the
 radial bases, and d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
@@ -795,7 +846,7 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>scalar or ndarray, optional</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+<li><strong>lenscale</strong> (<em>scalar</em><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
 of X). If not input, this uses the value of the initial length
 scale.</li>
 </ul>
@@ -823,7 +874,7 @@ scale.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>scalar or ndarray, optional</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
+<li><strong>lenscale</strong> (<em>scalar</em><em> or </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; scalar or array of shape (d,) length scales (one for each dimension
 of X). If not input, this uses the value of the initial length
 scale.</li>
 </ul>
@@ -860,15 +911,15 @@ scale.</li>
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -895,15 +946,15 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -932,15 +983,15 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -970,15 +1021,15 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -1005,15 +1056,15 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 actually created, i.e. real and imaginary components for each base)</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -1039,9 +1090,9 @@ length scale and <span class="math">\(\sigma\)</span> is the logistic sigmoid fu
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>centres</strong> (<em>ndarray</em>) &#8211; array of shape (Dxd) where D is the number of centres for the bases,
 and d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
+<li><strong>lenscale</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar parameter to bound and initialise the length scales for
 optimization.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
@@ -1061,7 +1112,7 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>X</strong> (<em>ndarray</em>) &#8211; (N, d) array of observations where N is the number of samples, and
 d is the dimensionality of X.</li>
-<li><strong>lenscale</strong> (<em>float, optional</em>) &#8211; the length scale (scalar) of the RBFs to apply to X. If not input,
+<li><strong>lenscale</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; the length scale (scalar) of the RBFs to apply to X. If not input,
 this uses the value of the initial length scale.</li>
 </ul>
 </td>
@@ -1132,7 +1183,7 @@ object is quite complex, eg.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>fun</strong> (<em>callable</em>) &#8211; the function too apply to the (2d) gradient.</li>
-<li><strong>grad</strong> (<em>ndarray or generator</em>) &#8211; the gradient of the basis function (output of base.grad).</li>
+<li><strong>grad</strong> (<em>ndarray</em><em> or </em><em>generator</em>) &#8211; the gradient of the basis function (output of base.grad).</li>
 </ul>
 </td>
 </tr>
@@ -1201,10 +1252,12 @@ if the <code class="docutils literal"><span class="pre">slice_init</span></code>
 
 
 
+
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large"
+<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
+
 
 
 
@@ -1214,8 +1267,8 @@ if the <code class="docutils literal"><span class="pre">slice_init</span></code>
 <p>
 <a href="https://travis-ci.org/NICTA/revrand">
     <img
-        alt="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
-        src="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
+        alt="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+        src="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
     />
 </a>
 </p>
@@ -1249,6 +1302,7 @@ if the <code class="docutils literal"><span class="pre">slice_init</span></code>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.RandomCauchy.html">revrand.basis_functions.RandomCauchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.RandomMatern32.html">revrand.basis_functions.RandomMatern32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.RandomMatern52.html">revrand.basis_functions.RandomMatern52</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.OrthogonalRBF.html">revrand.basis_functions.OrthogonalRBF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.FastFoodRBF.html">revrand.basis_functions.FastFoodRBF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/revrand.basis_functions.FastFoodGM.html">revrand.basis_functions.FastFoodGM</a></li>
 </ul>
@@ -1277,15 +1331,15 @@ if the <code class="docutils literal"><span class="pre">slice_init</span></code>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/basis_funcs.txt"
+      <li><a href="_sources/basis_funcs.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -1296,14 +1350,14 @@ if the <code class="docutils literal"><span class="pre">slice_init</span></code>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
+      &copy;2017, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/basis_funcs.txt"
+      <a href="_sources/basis_funcs.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

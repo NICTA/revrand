@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Optimization &mdash; revrand 0.9.9 documentation</title>
+    <title>Optimization &#8212; revrand 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,25 +14,30 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.9',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Utilities" href="utils.html" />
     <link rel="prev" title="Validation Metrics" href="metrics.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -270,11 +275,11 @@ distributions. For this, two additional parameters are exposed in the
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>fun</strong> (<em>callable</em>) &#8211; objective function that takes in arbitrary ndarrays, floats or nested
 sequences of these.</li>
-<li><strong>parameters</strong> (<em>(nested) sequences of Parameter objects</em>) &#8211; Initial guess of the parameters of the objective function</li>
-<li><strong>nstarts</strong> (<em>int, optional</em>) &#8211; The number random starting candidates for optimisation to evaluate.
+<li><strong>parameters</strong> (<em></em><em>(</em><em>nested</em><em>) </em><em>sequences of Parameter objects</em>) &#8211; Initial guess of the parameters of the objective function</li>
+<li><strong>nstarts</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; The number random starting candidates for optimisation to evaluate.
 This will only happen for <code class="code docutils literal"><span class="pre">nstarts</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and if at least one
 <code class="code docutils literal"><span class="pre">Parameter</span></code> object is random.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -338,8 +343,8 @@ distributions. For this, an additional parameter is exposed in the
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>fun</strong> (<em>callable</em>) &#8211; objective function that takes in arbitrary ndarrays, floats or nested
 sequences of these.</li>
-<li><strong>parameters</strong> (<em>(nested) sequences of Parameter objects</em>) &#8211; Initial guess of the parameters of the objective function</li>
-<li><strong>nstarts</strong> (<em>int, optional</em>) &#8211; The number random starting candidates for optimisation to evaluate.
+<li><strong>parameters</strong> (<em></em><em>(</em><em>nested</em><em>) </em><em>sequences of Parameter objects</em>) &#8211; Initial guess of the parameters of the objective function</li>
+<li><strong>nstarts</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; The number random starting candidates for optimisation to evaluate.
 This will only happen for <code class="code docutils literal"><span class="pre">nstarts</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and if at least one
 <code class="code docutils literal"><span class="pre">Parameter</span></code> object is random.</li>
 </ul>
@@ -413,8 +418,8 @@ sequence containing one element.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>rho</strong> (<em>float, optional</em>) &#8211; smoothing/decay rate parameter, must be [0, 1].</li>
-<li><strong>epsilon</strong> (<em>float, optional</em>) &#8211; &#8220;jitter&#8221; term to ensure continued learning (should be small).</li>
+<li><strong>rho</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; smoothing/decay rate parameter, must be [0, 1].</li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; &#8220;jitter&#8221; term to ensure continued learning (should be small).</li>
 </ul>
 </td>
 </tr>
@@ -437,8 +442,8 @@ sequence containing one element.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>eta</strong> (<em>float, optional</em>) &#8211; smoothing/decay rate parameter, must be [0, 1].</li>
-<li><strong>epsilon</strong> (<em>float, optional</em>) &#8211; small constant term to prevent divide-by-zeros</li>
+<li><strong>eta</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; smoothing/decay rate parameter, must be [0, 1].</li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; small constant term to prevent divide-by-zeros</li>
 </ul>
 </td>
 </tr>
@@ -461,11 +466,11 @@ sequence containing one element.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>alpha</strong> (<em>float, optional</em>) &#8211; stepsize to give the update.</li>
-<li><strong>beta1</strong> (<em>float, optional</em>) &#8211; smoothing/decay rate parameter for the gradient, must be [0, 1].</li>
-<li><strong>beta2</strong> (<em>float, optional</em>) &#8211; smoothing/decay rate parameter for the squared gradient, must be
+<li><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; stepsize to give the update.</li>
+<li><strong>beta1</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; smoothing/decay rate parameter for the gradient, must be [0, 1].</li>
+<li><strong>beta2</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; smoothing/decay rate parameter for the squared gradient, must be
 [0, 1].</li>
-<li><strong>epsilon</strong> (<em>float, optional</em>) &#8211; &#8220;jitter&#8221; term to ensure continued learning (should be small).</li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; &#8220;jitter&#8221; term to ensure continued learning (should be small).</li>
 </ul>
 </td>
 </tr>
@@ -488,8 +493,8 @@ sequence containing one element.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>rho</strong> (<em>float, optional</em>) &#8211; smoothing/decay rate parameter, must be [0, 1].</li>
-<li><strong>eta</strong> (<em>float, optional</em>) &#8211; weight to give to the momentum term</li>
+<li><strong>rho</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; smoothing/decay rate parameter, must be [0, 1].</li>
+<li><strong>eta</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; weight to give to the momentum term</li>
 </ul>
 </td>
 </tr>
@@ -511,7 +516,7 @@ sequence containing one element.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eta</strong> (<em>float, optional</em>) &#8211; The learning rate applied to every gradient step.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eta</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; The learning rate applied to every gradient step.</td>
 </tr>
 </tbody>
 </table>
@@ -536,10 +541,10 @@ pass.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>ndarray or sequence of ndarrays</em>) &#8211; The data, can be a matrix X, (X,y) tuples etc</li>
+<li><strong>data</strong> (<em>ndarray</em><em> or </em><em>sequence of ndarrays</em>) &#8211; The data, can be a matrix X, (X,y) tuples etc</li>
 <li><strong>batch_size</strong> (<em>int</em>) &#8211; number of data points in each batch.</li>
-<li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; The number of iterations</li>
-<li><strong>random_state</strong> (<em>int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>maxiter</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; The number of iterations</li>
+<li><strong>random_state</strong> (<em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -595,38 +600,38 @@ grad = fun(x, data, ...)`, where the <code class="docutils literal"><span class=
 <li><strong>data</strong> (<em>ndarray</em>) &#8211; a numpy array or sequence of data to input into <code class="docutils literal"><span class="pre">fun</span></code>. This will
 be split along the first axis (axis=0), and then input into
 <code class="docutils literal"><span class="pre">fun</span></code>.</li>
-<li><strong>args</strong> (<em>sequence, optional</em>) &#8211; an optional sequence of arguments to give to fun.</li>
-<li><strong>bounds</strong> (<em>sequence, optional</em>) &#8211; Bounds for variables, (min, max) pairs for each element in x, defining
+<li><strong>args</strong> (<em>sequence</em><em>, </em><em>optional</em>) &#8211; an optional sequence of arguments to give to fun.</li>
+<li><strong>bounds</strong> (<em>sequence</em><em>, </em><em>optional</em>) &#8211; Bounds for variables, (min, max) pairs for each element in x, defining
 the bounds on that parameter.  Use None for one of min or max when
 there is no bound in that direction.</li>
-<li><strong>batch_size</strong> (<em>int, optional</em>) &#8211; The number of observations in an SGD batch.</li>
-<li><strong>maxiter</strong> (<em>int, optional</em>) &#8211; Number of mini-batch iterations before optimization terminates.</li>
-<li><strong>updater</strong> (<em>SGDUpdater, optional</em>) &#8211; The type of gradient update to use, by default this is Adam.</li>
-<li><strong>eval_obj</strong> (<em>bool, optional</em>) &#8211; This indicates whether or not <code class="docutils literal"><span class="pre">fun</span></code> also evaluates and returns
+<li><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; The number of observations in an SGD batch.</li>
+<li><strong>maxiter</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; Number of mini-batch iterations before optimization terminates.</li>
+<li><strong>updater</strong> (<a class="reference internal" href="#revrand.optimize.sgd.SGDUpdater" title="revrand.optimize.sgd.SGDUpdater"><em>SGDUpdater</em></a><em>, </em><em>optional</em>) &#8211; The type of gradient update to use, by default this is Adam.</li>
+<li><strong>eval_obj</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; This indicates whether or not <code class="docutils literal"><span class="pre">fun</span></code> also evaluates and returns
 the objective function value. If this is true, <code class="docutils literal"><span class="pre">fun</span></code> must return
 <code class="docutils literal"><span class="pre">(obj,</span> <span class="pre">grad)</span></code> and then a list of objective function values is
 also returned.</li>
-<li><strong>random_state</strong> (<em>int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>res</strong> &#8211;</p>
 <dl class="docutils">
-<dt>x</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">narray</span><dd><p class="first last">the final result</p>
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">narray</span></dt>
+<dd><p class="first last">the final result</p>
 </dd>
-<dt>norms</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd><p class="first last">the list of gradient norms</p>
+<dt>norms <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">the list of gradient norms</p>
 </dd>
-<dt>message</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd><p class="first last">the convergence condition (&#8216;maxiter reached&#8217; or error)</p>
+<dt>message <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">the convergence condition (&#8216;maxiter reached&#8217; or error)</p>
 </dd>
-<dt>objs</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd><p class="first last">the list of objective function evaluations if <code class="docutils literal"><span class="pre">eval_obj</span></code>
+<dt>objs <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">the list of objective function evaluations if <code class="docutils literal"><span class="pre">eval_obj</span></code>
 is True.</p>
 </dd>
-<dt>fun</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">float</span><dd><p class="first last">the final objective function evaluation if <code class="docutils literal"><span class="pre">eval_obj</span></code> is
+<dt>fun <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">the final objective function evaluation if <code class="docutils literal"><span class="pre">eval_obj</span></code> is
 True.</p>
 </dd>
 </dl>
@@ -655,10 +660,12 @@ True.</p>
 
 
 
+
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large"
+<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
+
 
 
 
@@ -668,8 +675,8 @@ True.</p>
 <p>
 <a href="https://travis-ci.org/NICTA/revrand">
     <img
-        alt="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
-        src="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
+        alt="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+        src="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
     />
 </a>
 </p>
@@ -720,15 +727,15 @@ True.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/optimize.txt"
+      <li><a href="_sources/optimize.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -739,14 +746,14 @@ True.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
+      &copy;2017, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/optimize.txt"
+      <a href="_sources/optimize.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

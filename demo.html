@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Demos &mdash; revrand 0.9.9 documentation</title>
+    <title>Demos &#8212; revrand 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,25 +14,30 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.9',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Developer’s Guide" href="dev/index.html" />
     <link rel="prev" title="Math Utilities" href="mathfun.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -55,9 +60,24 @@ from a Gaussian process.</p>
 <p>This is similar to the previous demo, where we fit a draw from a Gaussian
 process, but now the sample is passed through a transformation function and is
 given noise from a non-Gaussian likelihood function. The noiseless transformed
-sample is then estimated using revrand&#8217;s generlised linear model (which is a
-modification of the GLM presented in <a class="footnote-reference" href="#id6" id="id1">[3]</a>).</p>
+sample is then estimated using revrand&#8217;s generalized linear model (which is a
+modification of the GLM presented in <a class="footnote-reference" href="#id8" id="id1">[4]</a>).</p>
 <p><a class="reference external" href="https://github.com/NICTA/revrand/blob/master/demos/glm_demo.ipynb">GLM notebook</a></p>
+</div>
+<div class="section" id="boston-housing-dataset">
+<h3>Boston Housing Dataset<a class="headerlink" href="#boston-housing-dataset" title="Permalink to this headline">¶</a></h3>
+<p>In this notebook we test revrand&#8217;s ARD basis functions on the Boston housing
+dataset.</p>
+<p><a class="reference external" href="https://github.com/NICTA/revrand/blob/master/demos/boston_housing.ipynb">Boston Housing notebook</a></p>
+</div>
+<div class="section" id="sarcos-dataset">
+<h3>SARCOS Dataset<a class="headerlink" href="#sarcos-dataset" title="Permalink to this headline">¶</a></h3>
+<p>In this notebook we test how the GLM in revrand performs on the inverse
+dynamics experiment conducted in Gaussian Processes for Machine Learning,
+Chapter 8, page 182. In this experiment there are 21 dimensions, and 44,484
+training examples. All GP&#8217;s are using square exponential covariance functions,
+with a separate length scales for each dimension.</p>
+<p><a class="reference external" href="https://github.com/NICTA/revrand/blob/master/demos/sarcos_demo.ipynb">SARCOS demo notebook</a></p>
 </div>
 </div>
 <div class="section" id="classification">
@@ -66,7 +86,7 @@ modification of the GLM presented in <a class="footnote-reference" href="#id6" i
 <h3>Classify <cite>3</cite> and <cite>5</cite> from the USPS digits dataset<a class="headerlink" href="#classify-3-and-5-from-the-usps-digits-dataset" title="Permalink to this headline">¶</a></h3>
 <p>In this demo the GLM with a Bernoulli likelihood is compared against a logistic
 classifier from <a class="reference external" href="http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression">scikit learn</a>
-for classifying digits <cite>3</cite> and <cite>5</cite> from the USPS handwritten digits experiment used in <a class="footnote-reference" href="#id4" id="id2">[1]</a>.</p>
+for classifying digits <cite>3</cite> and <cite>5</cite> from the USPS handwritten digits experiment used in <a class="footnote-reference" href="#id5" id="id2">[1]</a>.</p>
 <p><a class="reference external" href="https://github.com/NICTA/revrand/blob/master/demos/classification_demo.ipynb">Binary classification notebook</a></p>
 </div>
 </div>
@@ -78,31 +98,48 @@ basis function weights,</p>
 <ul class="simple">
 <li>Linear solve (analytic solution)</li>
 <li>L-BFGS</li>
-<li>Stochastic gradient (ADADELTA <a class="footnote-reference" href="#id5" id="id3">[2]</a> and more).</li>
+<li>Stochastic gradient (Adam <a class="footnote-reference" href="#id7" id="id3">[3]</a>, ADADELTA <a class="footnote-reference" href="#id6" id="id4">[2]</a> and more).</li>
 </ul>
 <p>We also plot the results of each iteration of stochasistic gradient descent.</p>
-<p><a class="reference external" href="https://github.com/NICTA/revrand/blob/master/demos/classification_demo.ipynb">Stochastic gradients notebook</a></p>
+<p><a class="reference external" href="https://github.com/NICTA/revrand/blob/master/demos/sg_demo.ipynb">Stochastic gradients notebook</a></p>
+</div>
+<div class="section" id="random-kernel-approximation">
+<h2>Random Kernel Approximation<a class="headerlink" href="#random-kernel-approximation" title="Permalink to this headline">¶</a></h2>
+<p>In this notebook we test our random basis functions against the kernel
+functions they are designed to approximate. This is a qualitative test in that
+we just plot the inner product of our bases with the kernel evaluations for an
+array of inputs, i.e., we compare the shapes of the kernels.</p>
+<p>We evaluate these kernels in D &gt; 1, since their Fourier transformation may be a
+function of D.</p>
+<p><a class="reference external" href="https://github.com/NICTA/revrand/blob/master/demos/random_kernels.ipynb">Random Kernels notebook</a></p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
+<table class="docutils footnote" frame="void" id="id5" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Carl Edward Rasmussen and Christopher KI Williams &#8220;Gaussian processes
 for machine learning.&#8221; the MIT Press 2.3 (2006): 4.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Matthew D. Zeiler, &#8220;ADADELTA: An adaptive learning rate method.&#8221; arXiv
-preprint arXiv:1212.5701 (2012).</td></tr>
-</tbody>
-</table>
 <table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[3]</a></td><td>Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>Matthew D. Zeiler, &#8220;ADADELTA: An adaptive learning rate method.&#8221; arXiv
+preprint arXiv:1212.5701 (2012).</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Diederik Kingma, Jimmy Ba. &#8220;Adam: A method for stochastic optimization&#8221;.
+arXiv preprint arXiv:1412.6980 (2014).</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[4]</a></td><td>Gershman, S., Hoffman, M., &amp; Blei, D. &#8220;Nonparametric variational
 inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 </tbody>
 </table>
@@ -121,10 +158,12 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 
 
 
+
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large"
+<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
+
 
 
 
@@ -134,8 +173,8 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 <p>
 <a href="https://travis-ci.org/NICTA/revrand">
     <img
-        alt="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
-        src="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
+        alt="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+        src="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
     />
 </a>
 </p>
@@ -170,6 +209,7 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
 <li class="toctree-l2"><a class="reference internal" href="#regression">Regression</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#classification">Classification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stochastic-gradients">Stochastic Gradients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#random-kernel-approximation">Random Kernel Approximation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
@@ -188,15 +228,15 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/demo.txt"
+      <li><a href="_sources/demo.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -207,14 +247,14 @@ inference&#8221;. arXiv preprint arXiv:1206.4665 (2012).</td></tr>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
+      &copy;2017, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/demo.txt"
+      <a href="_sources/demo.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

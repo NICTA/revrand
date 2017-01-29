@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>revrand.basis_functions.OrthogonalRBF &#8212; revrand 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="revrand.basis_functions.FastFoodRBF" href="revrand.basis_functions.FastFoodRBF.html" />
+    <link rel="prev" title="revrand.basis_functions.RandomMatern52" href="revrand.basis_functions.RandomMatern52.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="revrand-basis-functions-orthogonalrbf">
+<h1>revrand.basis_functions.OrthogonalRBF<a class="headerlink" href="#revrand-basis-functions-orthogonalrbf" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="revrand.basis_functions.OrthogonalRBF">
+<em class="property">class </em><code class="descclassname">revrand.basis_functions.</code><code class="descname">OrthogonalRBF</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.OrthogonalRBF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Orthogonal Random RBF Basis &#8211; Approximates an RBF kernel function.</p>
+<p>This will make a linear regression model approximate a GP with an
+(optionally ARD) RBF covariance function,</p>
+<div class="math">
+\[\phi(\mathbf{x})^\top \phi(\mathbf{x}') \approx
+    \exp\left( -\frac{\| \mathbf{x} - \mathbf{x}' \|^2}{2 l^2} \right)\]</div>
+<p>with a length scale, <span class="math">\(l\)</span> (a vector in <span class="math">\(\mathbb{R}^d\)</span> for ARD).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nbases</strong> (<em>int</em>) &#8211; how many unique random bases to create (twice this number will be
+actually created, i.e. real and imaginary components for each base)</li>
+<li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
+if using apply_ind).</li>
+<li><strong>lenscale</strong> (<a class="reference internal" href="../btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+initialise the length scales for optimization. If this is shape (d,),
+ARD length scales will be expected, otherwise an isotropic lenscale is
+learned.</li>
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="../btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+regression weights of this basis function. The Parameter object must
+have a scalar value. If it is not set, it will take on a default value
+of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>This should need fewer random bases to approximate an RBF kernel than the
+<code class="docutils literal"><span class="pre">RandomRBF</span></code> basis.</p>
+<p class="last">See:
+Yu, X Felix et. al. &#8220;Orthogonal Random Features&#8221;, in Advances in Neural
+Information Processing Systems&#8221;, Barcelona 2016.</p>
+</div>
+<dl class="method">
+<dt id="revrand.basis_functions.OrthogonalRBF.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nbases</em>, <em>Xdim</em>, <em>lenscale=Parameter(value=1.0</em>, <em>bounds=Positive(upper=None)</em>, <em>shape=())</em>, <em>regularizer=None</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#revrand.basis_functions.OrthogonalRBF.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See this class&#8217;s docstring.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#revrand.basis_functions.OrthogonalRBF.__init__" title="revrand.basis_functions.OrthogonalRBF.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(nbases,&nbsp;Xdim[,&nbsp;lenscale,&nbsp;bounds,&nbsp;...])</td>
+<td>See this class&#8217;s docstring.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_dim</span></code>(X)</td>
+<td>Get the output dimensionality of this basis.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">grad</span></code>(X[,&nbsp;lenscale])</td>
+<td>Get the gradients of this basis w.r.t.the length scales.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">params_values</span></code>()</td>
+<td>Get a list of the <code class="docutils literal"><span class="pre">Parameter</span></code> values if they have a value.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">regularizer_diagonal</span></code>(X[,&nbsp;regularizer])</td>
+<td>Get the diagonal of the prior variance on the weights (regularizer).</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">transform</span></code>(X[,&nbsp;lenscale])</td>
+<td>Apply the random basis to X.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">params</span></code></td>
+<td>Get this basis&#8217; Parameter types.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">regularizer</span></code></td>
+<td>Get the <code class="docutils literal"><span class="pre">Parameter</span></code> value of this basis&#8217; regularizer.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">revrand</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a href="https://travis-ci.org/NICTA/revrand">
+    <img
+        alt="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+        src="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+    />
+</a>
+</p>
+
+
+
+
+    
+
+<p>
+<a href="https://codecov.io/github/NICTA/revrand">
+    <img
+    alt="https://codecov.io/github/NICTA/revrand/coverage.svg?branch=master"
+    src="https://codecov.io/github/NICTA/revrand/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../basis_funcs.html">Basis Functions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.Basis.html">revrand.basis_functions.Basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.BiasBasis.html">revrand.basis_functions.BiasBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.LinearBasis.html">revrand.basis_functions.LinearBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.PolynomialBasis.html">revrand.basis_functions.PolynomialBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RadialBasis.html">revrand.basis_functions.RadialBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.SigmoidalBasis.html">revrand.basis_functions.SigmoidalBasis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomRBF.html">revrand.basis_functions.RandomRBF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomLaplace.html">revrand.basis_functions.RandomLaplace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomCauchy.html">revrand.basis_functions.RandomCauchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern32.html">revrand.basis_functions.RandomMatern32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern52.html">revrand.basis_functions.RandomMatern52</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.basis_functions.OrthogonalRBF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodRBF.html">revrand.basis_functions.FastFoodRBF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodGM.html">revrand.basis_functions.FastFoodGM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../slm.html">Standard Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glm.html">Generalized Linear Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../likelihoods.html">Likelihood Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../btypes.html">Bound and Parameter Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../metrics.html">Validation Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../optimize.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mathfun.html">Math Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Developer&#8217;s Guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../basis_funcs.html">Basis Functions</a><ul>
+      <li>Previous: <a href="revrand.basis_functions.RandomMatern52.html" title="previous chapter">revrand.basis_functions.RandomMatern52</a></li>
+      <li>Next: <a href="revrand.basis_functions.FastFoodRBF.html" title="next chapter">revrand.basis_functions.FastFoodRBF</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/revrand.basis_functions.OrthogonalRBF.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/generated/revrand.basis_functions.OrthogonalRBF.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/NICTA/revrand" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

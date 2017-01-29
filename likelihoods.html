@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Likelihood Classes &mdash; revrand 0.9.9 documentation</title>
+    <title>Likelihood Classes &#8212; revrand 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,25 +14,30 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.9',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="revrand.likelihoods.Bernoulli" href="generated/revrand.likelihoods.Bernoulli.html" />
     <link rel="prev" title="Generalized Linear Model" href="glm.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -340,7 +345,7 @@ corresponding to the target and <span class="math">\(\sigma\)</span> is the obse
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (<em>Parameter, optional</em>) &#8211; A scalar Parameter describing the initial point and bounds for
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (<a class="reference internal" href="btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar Parameter describing the initial point and bounds for
 an optimiser to learn the variance parameter of this object.</td>
 </tr>
 </tbody>
@@ -356,7 +361,7 @@ an optimiser to learn the variance parameter of this object.</td>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+<li><strong>var</strong> (<em>float</em><em>, </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; The variance of the distribution, if not input, the initial value
 of variance is used.</li>
 </ul>
 </td>
@@ -383,7 +388,7 @@ of variance is used.</li>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; query quantiles, i.e. <span class="math">\(P(Y \leq y)\)</span>.</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+<li><strong>var</strong> (<em>float</em><em>, </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; The variance of the distribution, if not input, the initial value
 of variance is used.</li>
 </ul>
 </td>
@@ -410,7 +415,7 @@ of variance is used.</li>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; array of 0, 1 valued integers of targets</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+<li><strong>var</strong> (<em>float</em><em>, </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; The variance of the distribution, if not input, the initial value
 of variance is used.</li>
 </ul>
 </td>
@@ -438,7 +443,7 @@ of variance is used.</li>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; array of 0, 1 valued integers of targets</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+<li><strong>var</strong> (<em>float</em><em>, </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; The variance of the distribution, if not input, the initial value
 of variance is used.</li>
 </ul>
 </td>
@@ -467,7 +472,7 @@ where <span class="math">\(sigma^2\)</span> is the variance.</p>
 <li><strong>y</strong> (<em>ndarray</em>) &#8211; array of 0, 1 valued integers of targets</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; latent function from the GLM prior (<span class="math">\(\mathbf{f} =
 \boldsymbol\Phi \mathbf{w}\)</span>)</li>
-<li><strong>var</strong> (<em>float, ndarray, optional</em>) &#8211; The variance of the distribution, if not input, the initial value
+<li><strong>var</strong> (<em>float</em><em>, </em><em>ndarray</em><em>, </em><em>optional</em>) &#8211; The variance of the distribution, if not input, the initial value
 of variance is used.</li>
 </ul>
 </td>
@@ -501,7 +506,7 @@ function (<span class="math">\(\log(1 + \exp(f_i)\)</span>).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tranfcn</strong> (<em>string, optional</em>) &#8211; this may be &#8216;exp&#8217; for an exponential transformation function,
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tranfcn</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; this may be &#8216;exp&#8217; for an exponential transformation function,
 or &#8216;softplus&#8217; for a softplut transformation function.</td>
 </tr>
 </tbody>
@@ -617,10 +622,12 @@ likelihood.</p>
 
 
 
+
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large"
+<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
+
 
 
 
@@ -630,8 +637,8 @@ likelihood.</p>
 <p>
 <a href="https://travis-ci.org/NICTA/revrand">
     <img
-        alt="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
-        src="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
+        alt="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+        src="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
     />
 </a>
 </p>
@@ -684,15 +691,15 @@ likelihood.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/likelihoods.txt"
+      <li><a href="_sources/likelihoods.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -703,14 +710,14 @@ likelihood.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
+      &copy;2017, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/likelihoods.txt"
+      <a href="_sources/likelihoods.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

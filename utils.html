@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Utilities &mdash; revrand 0.9.9 documentation</title>
+    <title>Utilities &#8212; revrand 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,25 +14,30 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.9',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.9 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Math Utilities" href="mathfun.html" />
     <link rel="prev" title="Optimization" href="optimize.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -194,11 +199,11 @@ with the latter.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>arys</strong> (<em>list of objects</em>) &#8211; One or more input arrays of possibly heterogenous shapes and
 sizes.</li>
-<li><strong>returns_shapes</strong> (<em>bool, optional</em>) &#8211; Default is <cite>True</cite>. If <cite>True</cite>, the tuple <cite>(flattened, shapes)</cite> is
+<li><strong>returns_shapes</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; Default is <cite>True</cite>. If <cite>True</cite>, the tuple <cite>(flattened, shapes)</cite> is
 returned, otherwise only <cite>flattened</cite> is returned.</li>
-<li><strong>hstack</strong> (<em>callable, optional</em>) &#8211; a function that implements horizontal stacking</li>
-<li><strong>ravel</strong> (<em>callable, optional</em>) &#8211; a function that flattens the object</li>
-<li><strong>shape</strong> (<em>callable, optional</em>) &#8211; a function that returns the shape of the object</li>
+<li><strong>hstack</strong> (<em>callable</em><em>, </em><em>optional</em>) &#8211; a function that implements horizontal stacking</li>
+<li><strong>ravel</strong> (<em>callable</em><em>, </em><em>optional</em>) &#8211; a function that flattens the object</li>
+<li><strong>shape</strong> (<em>callable</em><em>, </em><em>optional</em>) &#8211; a function that returns the shape of the object</li>
 </ul>
 </td>
 </tr>
@@ -360,7 +365,7 @@ from 1-dimensional singleton arrays.</p>
 <li><strong>fn</strong> (<em>callable</em>) &#8211; The function to apply to each element (and sub elements) in iterable</li>
 <li><strong>iterable</strong> (<em>iterable</em>) &#8211; An iterable, sequence, sequence of sequences etc. <code class="code docutils literal"><span class="pre">fn</span></code> will be
 applied to each element in each list.</li>
-<li><strong>output_type</strong> (<em>callable, optional</em>) &#8211; if None, a map with sub-maps in the same structure as <code class="code docutils literal"><span class="pre">iterable</span></code>
+<li><strong>output_type</strong> (<em>callable</em><em>, </em><em>optional</em>) &#8211; if None, a map with sub-maps in the same structure as <code class="code docutils literal"><span class="pre">iterable</span></code>
 will be returned, otherwise the callable will be applied to each
 sequence (i.e. <code class="code docutils literal"><span class="pre">list</span></code> will return lists of lists etc).</li>
 </ul>
@@ -513,7 +518,7 @@ the empty tuple, in which case we return a scalar instead of a
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>seq</strong> (<em>tuple or list</em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>seq</strong> (<em>tuple</em><em> or </em><em>list</em>) &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the product of input tuples, or the sum of products of lists of tuples,
 recursively.</td>
@@ -1031,7 +1036,7 @@ replacement, on the (N+1)th call a new permutation will be created, etc.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>N</strong> (<em>int</em>) &#8211; the length of the set</li>
-<li><strong>random_state</strong> (<em>int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -1057,10 +1062,12 @@ replacement, on the (N+1)th call a new permutation will be created, etc.</p>
 
 
 
+
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large"
+<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
+
 
 
 
@@ -1070,8 +1077,8 @@ replacement, on the (N+1)th call a new permutation will be created, etc.</p>
 <p>
 <a href="https://travis-ci.org/NICTA/revrand">
     <img
-        alt="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
-        src="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
+        alt="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+        src="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
     />
 </a>
 </p>
@@ -1124,15 +1131,15 @@ replacement, on the (N+1)th call a new permutation will be created, etc.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/utils.txt"
+      <li><a href="_sources/utils.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -1143,14 +1150,14 @@ replacement, on the (N+1)th call a new permutation will be created, etc.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
+      &copy;2017, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/utils.txt"
+      <a href="_sources/utils.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

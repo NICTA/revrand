@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>revrand.basis_functions.FastFoodRBF &mdash; revrand 0.9.9 documentation</title>
+    <title>revrand.basis_functions.FastFoodRBF &#8212; revrand 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,26 +14,30 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="revrand 0.9.9 documentation" href="../index.html" />
-    <link rel="up" title="Basis Functions" href="../basis_funcs.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="revrand.basis_functions.FastFoodGM" href="revrand.basis_functions.FastFoodGM.html" />
-    <link rel="prev" title="revrand.basis_functions.RandomMatern52" href="revrand.basis_functions.RandomMatern52.html" />
+    <link rel="prev" title="revrand.basis_functions.OrthogonalRBF" href="revrand.basis_functions.OrthogonalRBF.html" />
    
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -61,15 +65,15 @@ number of bases.</p>
 this actually will be to the nearest larger two power.</li>
 <li><strong>Xdim</strong> (<em>int</em>) &#8211; the dimension (d) of the observations (or the dimension of the slices
 if using apply_ind).</li>
-<li><strong>lenscale</strong> (<em>Parameter, optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
+<li><strong>lenscale</strong> (<a class="reference internal" href="../btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; A scalar or vector of shape (1,) or (d,) Parameter to bound and
 initialise the length scales for optimization. If this is shape (d,),
 ARD length scales will be expected, otherwise an isotropic lenscale is
 learned.</li>
-<li><strong>regularizer</strong> (<em>None, Parameter, optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
+<li><strong>regularizer</strong> (<em>None</em><em>, </em><a class="reference internal" href="../btypes.html#revrand.btypes.Parameter" title="revrand.btypes.Parameter"><em>Parameter</em></a><em>, </em><em>optional</em>) &#8211; The (initial) value of the regularizer/prior variance to apply to the
 regression weights of this basis function. The Parameter object must
 have a scalar value. If it is not set, it will take on a default value
 of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> <span class="pre">Positive())</span></code>.</li>
-<li><strong>random_state</strong> (<em>None, int or RandomState, optional</em>) &#8211; random seed</li>
+<li><strong>random_state</strong> (<em>None</em><em>, </em><em>int</em><em> or </em><em>RandomState</em><em>, </em><em>optional</em>) &#8211; random seed</li>
 </ul>
 </td>
 </tr>
@@ -139,10 +143,12 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 
 
 
+
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large"
+<iframe src="https://ghbtns.com/github-btn.html?user=NICTA&repo=revrand&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
+
 
 
 
@@ -152,8 +158,8 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <p>
 <a href="https://travis-ci.org/NICTA/revrand">
     <img
-        alt="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
-        src="https://secure.travis-ci.org/NICTA/revrand.png?branch=master"
+        alt="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
+        src="https://secure.travis-ci.org/NICTA/revrand.svg?branch=master"
     />
 </a>
 </p>
@@ -187,6 +193,7 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomCauchy.html">revrand.basis_functions.RandomCauchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern32.html">revrand.basis_functions.RandomMatern32</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.RandomMatern52.html">revrand.basis_functions.RandomMatern52</a></li>
+<li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.OrthogonalRBF.html">revrand.basis_functions.OrthogonalRBF</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">revrand.basis_functions.FastFoodRBF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revrand.basis_functions.FastFoodGM.html">revrand.basis_functions.FastFoodGM</a></li>
 </ul>
@@ -208,7 +215,7 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../basis_funcs.html">Basis Functions</a><ul>
-      <li>Previous: <a href="revrand.basis_functions.RandomMatern52.html" title="previous chapter">revrand.basis_functions.RandomMatern52</a></li>
+      <li>Previous: <a href="revrand.basis_functions.OrthogonalRBF.html" title="previous chapter">revrand.basis_functions.OrthogonalRBF</a></li>
       <li>Next: <a href="revrand.basis_functions.FastFoodGM.html" title="next chapter">revrand.basis_functions.FastFoodGM</a></li>
   </ul></li>
   </ul></li>
@@ -217,15 +224,15 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/generated/revrand.basis_functions.FastFoodRBF.txt"
+      <li><a href="../_sources/generated/revrand.basis_functions.FastFoodRBF.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -236,14 +243,14 @@ of <code class="docutils literal"><span class="pre">Parameter(gamma(1.),</span> 
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2015, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
+      &copy;2017, Daniel Steinberg, Louis Tiao, Lachlan McCalman, Alistair Reid, Simon O'Callaghan.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="../_sources/generated/revrand.basis_functions.FastFoodRBF.txt"
+      <a href="../_sources/generated/revrand.basis_functions.FastFoodRBF.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
