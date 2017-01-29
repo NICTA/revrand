@@ -64,25 +64,22 @@ these plots, and more!
 Quickstart
 ----------
 
-To install, simply run ``setup.py``:
+To install, you can use ``pip``:
+
+.. code:: console
+
+   $ pip install revrand
+
+or simply run ``setup.py`` in the location where you have cloned or
+downloaded this repository:
 
 .. code:: console
 
    $ python setup.py install
 
-or install with ``pip``:
-
-.. code:: console
-
-   $ pip install git+https://github.com/nicta/revrand.git
-
 Now have a look at our `quickstart guide
 <http://nicta.github.io/revrand/quickstart.html>`_ to get up and running
 quickly!
-
-Refer to the `documentation
-<http://nicta.github.io/revrand/installation.html>`_ for advanced installation
-instructions.
 
 
 Useful Links

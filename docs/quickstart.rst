@@ -285,8 +285,8 @@ rest, and again the results are concatenated.
 .. note::
     
     For the moment we only support basis concatenation which is analogous to
-    kernel addition. Performing `kernel multiplication` with bases is 
-    computationally complex and we have not yet implemented it.
+    kernel addition. Performing `kernel multiplication` with bases is slightly
+    more complex and we have not yet implemented it.
 
 Finally, if we use these basis functions with any of the algorithms in this
 revrand, *the parameters of the basis functions are learned*. 

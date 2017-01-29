@@ -28,10 +28,10 @@ class PyTest(TestCommand, object):
 setup(
     name='revrand',
     version='1.0.0',
-    description='A library of scalable Bayesian generalised linear models with'
+    description='A library of scalable Bayesian generalized linear models with'
                 ' fancy features',
     author='Daniel Steinberg',
-    author_email='daniel.steinberg@nicta.com.au',
+    author_email='daniel.steinberg@data61.csiro.au',
     url='http://github.com/nicta/revrand',
     packages=find_packages(),
     cmdclass={
@@ -54,7 +54,7 @@ setup(
     },
     license="Apache Software License 2.0",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Operating System :: POSIX",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",

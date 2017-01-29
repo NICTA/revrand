@@ -50,6 +50,7 @@ learning algorithms in *revrand*. It also implements basis *concatenation*
     RandomCauchy
     RandomMatern32
     RandomMatern52
+    OrthogonalRBF
     FastFoodRBF
     FastFoodGM
 

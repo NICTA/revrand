@@ -596,10 +596,10 @@ learning algorithms for these prediction tasks.
 \subsection{Boston Housing Regression}
 
 In Table \ref{tab:bostonhousing} we compare \revrand{}'s SLM and GLM on the
-Boston Housing dataset. This is a regression prediction problem, where the aim
-is to estimate house prices in suburbs in Boston based on attributes of the
-buildings, the region and the surrounding environment. There are 506 samples
-and 13 attributes in total.
+Boston Housing dataset. This is a regression problem where the aim is to
+predict house prices in suburbs in Boston based on attributes of the buildings,
+the region and the surrounding environment. There are 506 samples and 13
+attributes in total.
 
 \begin{table}[tb]
 
@@ -623,30 +623,30 @@ and 13 attributes in total.
 For this experiment we use 5 fold cross validation, and use R-square and mean
 standardised log-loss (MSLL) to evaluate the predictions on the held-out folds.
 The SLM and GLM use random radial basis fourier features (RBF kernel
-approximations) with 400 components (800 bases in total) for the SLM, and 100
-components (200 bases) for the GLM, both concatenated with a linear basis. We
-found the GLM performed better with fewer iterations with fewer bases. We
-evaluate 100 random starts for the SLM, 500 for the GLM, of the length-scales
-(one for each dimension of the inputs, $\ins$), regularizer and likelihood
-variance, parameters, drawing them from Gamma distributions, and then optimize
-from the best evaluation.
+approximations) with 400 unique components (800 bases in total) for the SLM,
+and 100 components (200 bases) for the GLM, both concatenated with a linear
+basis. We found the GLM performed better with more stochastic gradient
+iterations with fewer bases. We evaluate 100 random starts for the SLM and 500
+for the GLM of the hyperparameters and then optimize from the best evaluation.
+We use automatic relevance determination (ARD), that is, one length-scale per input
+dimension for the RBF bases.
 
 We compare against Scikit Learn \citep{scikit-learn} implementations of
 Gaussian processes, support vector machines (SVM), and random forests (RF).
-The GP is given the same kernel as the SLM and GLM, that is an additive RBF and
-dot-product kernel. The GP's kernel amplitudes and it's RBF length-scales are
-initialised at 1, the RF uses 40 decision trees, and the SVM uses a RBF kernel,
-where the length-scale is chosen by a grid search with cross-validation. The
-exact experiment can be replicated in the \texttt{boston\_housing.ipynb}
-jupyter notebook.
+The GP is given the same kernel as the SLM and GLM, that is an additive ARD-RBF
+and dot-product kernel. The GP's kernel amplitudes and it's RBF length-scales
+are initialised at 1, the RF uses 40 decision trees, and the SVM uses a RBF
+kernel, where the length-scale is chosen by a grid search with
+cross-validation. The exact experiment can be replicated in the
+\texttt{boston\_housing.ipynb} jupyter notebook.
 
-As we would expect the GP yeilds the best performance, closely followed by the
+As we would expect the GP yields the best performance, closely followed by the
 SLM. The GLM and RF perform similarly, and the SVM the worst. 
 
 
 \subsection{Handwritten Digits Classification}
 
-We next test \revrand{}'s GLM on a classification datasets. We chose the USPS
+We next test \revrand{}'s GLM on a classification dataset. We chose the USPS
 handwritten digits binary classification task, also presented in
 \citet{Rasmussen2006}. Here the aim is to classify the digits `3' and `5' from
 $16\times16$ pixel black and white images. There are 767 training instances,
@@ -673,8 +673,8 @@ scores.
 \end{table}
 
 The GLM uses a Bernoulli likelihood with a logistic activation function, it
-also uses a RBF random fourier features with 800 components (1600 bases), and
-again 100 random initialisations of the length scale (isotropic) and
+also uses RBF random fourier features with 800 components (1600 bases), and
+again 500 random initialisations of the length scale (isotropic) and
 regularizer with optimization proceeding from the best.
 
 We compare to a SVM, RF with 40 estimators, logistic regressor with our same
@@ -697,7 +697,10 @@ The last experiment is a large-scale regression task presented in
 SARCOS robot arm from all of the 7 joint states (position, angular velocity and
 acceleration), 21 dimensions in all. There are 44,484 training examples, and
 4449 test points. This dataset is too large for a typical GP, and so is a good
-test for \revrand{}'s GLM using stochastic gradients.
+test for \revrand{}'s GLM using stochastic gradients\footnote{We have not yet
+    run the SLM on this full dataset, the SLM's codebase needs to be modified
+    to create the automatic relevance determination length-scales more
+    efficiently, see issue \#130.}.
 
 \begin{table}[tb]
 
@@ -770,10 +773,11 @@ the future.
 The preliminary results in Table \ref{tab:sarcos} show that the GLM is
 competitive with the other methods (not quite as good as SR, PP and BCM for
 large approximation sizes), and is better than SD. It is worth noting though
-that the GLM has a computational complexity of \bigo{ND} per iteration, whereas
-SD is \bigo{D^3} and SR, PP are \bigo{D^2 N} and the BCM is the same cost as
-running $D$ independent GPs (each taking a portion of N). Hence, we are able to
-use larger approximation sizes than the corresponding methods.
+that the GLM has a computational complexity of \bigo{ND} per iteration and the
+SLM \bigo{ND^3}, whereas SD is \bigo{D^3} and SR, PP are \bigo{D^2 N} and the
+BCM is the same cost as running $D$ independent GPs (each taking a portion of
+N). Hence, we are able to use larger approximation sizes than the corresponding
+methods.
 
 \bibliography{report}
 
