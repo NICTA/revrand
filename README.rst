@@ -8,6 +8,13 @@ revrand
 .. image:: https://codecov.io/github/NICTA/revrand/coverage.svg?branch=master
     :target: https://codecov.io/github/NICTA/revrand?branch=master
 
+
+**Note**: we are not actively developing this library anymore, but we are still
+maintaining it. We recommend instead looking at `Aboleth 
+<https://github.com/data61/aboleth>`_, which has similar functionality and is 
+implemented on top of TensorFlow.
+
+
 ------------------------------------------------------------------------------
 A library of scalable Bayesian generalized linear models with *fancy* features
 ------------------------------------------------------------------------------
